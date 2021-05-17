@@ -11,9 +11,12 @@ namespace BasicImageFormFiller.FileFormats
             Pages = new List<TemplatePage>();
         }
 
+        public IndexFile() { Name = "Untitled"; Notes=""; Pages=new List<TemplatePage>(); }
+
+        public string? SampleFileName { get; set; }
         public string Notes { get; set; }
         public string Name { get; set; }
-        public ICollection<TemplatePage> Pages { get; set; }
+        public List<TemplatePage> Pages { get; set; }
     }
 
     public class TemplatePage

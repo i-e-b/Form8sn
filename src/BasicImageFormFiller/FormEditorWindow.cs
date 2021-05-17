@@ -9,16 +9,16 @@ namespace BasicImageFormFiller
 {
     public partial class FormEditorWindow : Form, ITagModuleScreen
     {
+        private const string IndexFileName = "Index.json";
+        private const string RefreshCommand = "about:refresh";
         private static volatile bool _midNavigation;
         private IScreenModule _currentModule;
-        private const string IndexFileName = "Index.json";
 
         public FormEditorWindow()
         {
+            Json.DefaultParameters.EnableAnonymousTypes = true;
             InitializeComponent();
             
-            Json.DefaultParameters.EnableAnonymousTypes = true;
-
             _currentModule = new WelcomeScreen();
             ShowPage(_currentModule.StartScreen());
         }
@@ -29,12 +29,7 @@ namespace BasicImageFormFiller
             Environment.Exit(0);
         }
 
-        private bool DisallowStateChange()
-        {
-            // TODO: unsaved change check, work in progress check.
-            // if user doesn't allow change-of-file or exit, or if the program is doing uninterruptible work -- then return true; 
-            return false;
-        }
+        private bool DisallowStateChange() => _currentModule.StateChangeRequest() == StateChangePermission.NotAllowed;
 
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -59,9 +54,10 @@ namespace BasicImageFormFiller
             var path = saveFileDialog1.FileName;
             var name = Path.GetFileName(path);
             var directory = Directory.CreateDirectory(path);
-            if (!directory.Exists) throw new Exception("Failed to create template path");
+            if (directory?.Exists != true) throw new Exception("Failed to create template path");
 
-            File.WriteAllText(Path.Combine(path, IndexFileName), Json.Freeze(new IndexFile(name)));
+            
+            File.WriteAllText(Path.Combine(path, IndexFileName), Json.Freeze(new IndexFile(name))!);
 
             LoadTemplateProject(path);
         }
@@ -88,10 +84,26 @@ namespace BasicImageFormFiller
 
         public void ShowFailure(string message)
         {
-            ShowPage(T.g("pre")[
-                "UNEXPECTED FAILURE:\r\n",
-                message
-            ]);
+            ShowPage(
+                T.g()[
+                    T.g("p")[
+                        T.g("a", "href",RefreshCommand)["Go back"]
+                    ],
+                    T.g("pre")[
+                        "UNEXPECTED FAILURE:\r\n",
+                        message
+                    ]
+                ]);
+    }
+
+        public bool PickAFile(out string? path)
+        {
+            path = null;
+            var result = openFileDialog1?.ShowDialog();
+            if (result != DialogResult.OK) return false;
+            
+            path = openFileDialog1!.FileName;
+            return true;
         }
 
         public void ShowNewTemplate()
@@ -136,6 +148,13 @@ namespace BasicImageFormFiller
             
             var info = e.Url?.ToString();
             if (string.IsNullOrWhiteSpace(info)) return;
+            if (info == "about:blank") return;
+            if (info == RefreshCommand)
+            {
+                ShowPage(_currentModule.StartScreen());
+                return;
+            }
+
             if (info.StartsWith("about:"))
             {
                 string command = info.Substring(6);

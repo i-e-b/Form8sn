@@ -2,9 +2,15 @@ using Tag;
 
 namespace BasicImageFormFiller
 {
-    internal interface IScreenModule
+    public interface IScreenModule
     {
         void InterpretCommand(ITagModuleScreen moduleScreen, string command);
         TagContent StartScreen();
+        StateChangePermission StateChangeRequest();
+    }
+
+    public enum StateChangePermission
+    {
+        NotAllowed, Allowed
     }
 }

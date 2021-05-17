@@ -34,5 +34,7 @@ namespace BasicImageFormFiller
                 ]
             ];
         }
+
+        public StateChangePermission StateChangeRequest() => StateChangePermission.Allowed;
     }
 }

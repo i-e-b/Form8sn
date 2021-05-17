@@ -8,5 +8,6 @@ namespace BasicImageFormFiller
         public void ShowNewTemplate();
         public void ShowLoadTemplate();
         public void ShowFailure(string message);
+        bool PickAFile(out string? path);
     }
 }
