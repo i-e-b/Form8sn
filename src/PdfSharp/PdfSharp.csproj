@@ -318,6 +318,9 @@
     <Compile Include="Pdf.Security\PdfSecurityHandler.cs" />
     <Compile Include="Pdf.Security\PdfSecuritySettings.cs" />
     <Compile Include="Pdf.Security\PdfStandardSecurityHandler.cs" />
+    <Compile Include="Pdf.StreamDecode\PdfCode.cs" />
+    <Compile Include="Pdf.StreamDecode\PdfTokenType.cs" />
+    <Compile Include="Pdf.StreamDecode\StreamDecoder.cs" />
     <Compile Include="Pdf.Structure\PdfAttributesBase.cs" />
     <Compile Include="Pdf.Structure\PdfLayoutAttributes.cs" />
     <Compile Include="Pdf.Structure\PdfObjectReference.cs" />

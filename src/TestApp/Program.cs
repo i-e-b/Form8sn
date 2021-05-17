@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -8,6 +7,7 @@ using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.IO;
+using PdfSharp.Pdf.StreamDecode;
 
 namespace TestApp
 {
@@ -51,7 +51,7 @@ namespace TestApp
                 {
                     pageNumber++;
     
-                    ExtractImages(ePage, pageNumber);
+                    ExtractImages(ePage);
                     
                     var bits = ePage!.Contents.ToList();
                     foreach (var item in bits)
@@ -62,9 +62,9 @@ namespace TestApp
                     }
                     Console.WriteLine("==================================================");
 
-                    using (var egfx = XGraphics.FromPdfPage(ePage))
+                    using (var g = XGraphics.FromPdfPage(ePage))
                     {
-                        egfx.DrawString("Hello, World!", font, XBrushes.Black,
+                        g.DrawString("Hello, World!", font, XBrushes.Black,
                             new XRect(0, 0, page.Width, page.Height),
                             XStringFormats.Center);
                     }
@@ -80,7 +80,7 @@ namespace TestApp
 
         
         private static int imageCount = 1;
-        private static void ExtractImages(PdfPage page, int pageNumber)
+        private static void ExtractImages(PdfDictionary page)
         {
             var resources = page.Elements.GetDictionary("/Resources");
             if (resources == null) return;
@@ -97,7 +97,7 @@ namespace TestApp
                 if (reference.Value is PdfDictionary xObject
                     && xObject.Elements.GetString("/Subtype") == "/Image")
                 {
-                    ExportImage(xObject, $"{pageNumber}_{key}", ref imageCount);
+                    ExportImage(xObject, $"{key}", ref imageCount);
                 }
             }
         }
@@ -174,11 +174,11 @@ namespace TestApp
             // TODO: implement this to get re-rendering
             // https://www.adobe.com/content/dam/acom/en/devnet/pdf/pdfs/pdf_reference_archives/PDFReference.pdf
             // Chapters 4, 5, 9. Start at page 134 (pdf154), table 4.1 - operator categories; 156 (table 4.7) and page 163 (table 4.9 - paths)
-            /*var instructionList = cont.Stream.RecoverInstructions();
+            var instructionList = cont.Stream.RecoverInstructions();
             foreach (var instruction in instructionList)
             {
                 Console.Write(instruction.ToString());
-            }*/
+            }
             /*
 0.1 w                                   ; line width = 0.1
 q 56.645 56.733 728.509 481.939 re      ; push state, add rectangle to current path

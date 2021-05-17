@@ -8,6 +8,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfSharp.Charting", "PdfSha
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.csproj", "{2A6CE173-0CC7-4FB1-AB1D-36A24338723D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_Info", "_Info", "{263B94BB-2B33-4F44-A1CE-105A83EA8B3B}"
+ProjectSection(SolutionItems) = preProject
+	..\.gitignore = ..\.gitignore
+	..\LICENSE = ..\LICENSE
+	..\README.md = ..\README.md
+EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicImageFormFiller", "BasicImageFormFiller\BasicImageFormFiller.csproj", "{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -80,6 +89,30 @@ Global
 		{2A6CE173-0CC7-4FB1-AB1D-36A24338723D}.Release|x64.Build.0 = Release|Any CPU
 		{2A6CE173-0CC7-4FB1-AB1D-36A24338723D}.Release|x86.ActiveCfg = Release|Any CPU
 		{2A6CE173-0CC7-4FB1-AB1D-36A24338723D}.Release|x86.Build.0 = Release|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Debug|ARM.Build.0 = Debug|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Debug|Win32.Build.0 = Debug|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Debug|x64.Build.0 = Debug|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Debug|x86.Build.0 = Debug|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Release|ARM.ActiveCfg = Release|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Release|ARM.Build.0 = Release|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Release|Win32.ActiveCfg = Release|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Release|Win32.Build.0 = Release|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Release|x64.ActiveCfg = Release|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Release|x64.Build.0 = Release|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Release|x86.ActiveCfg = Release|Any CPU
+		{994FAB89-AD5E-4F6D-B5EC-ADEB726640FA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

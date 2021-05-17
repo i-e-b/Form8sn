@@ -39,6 +39,7 @@ using PdfSharp.Pdf.IO;
 using PdfSharp.Pdf.Filters;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.Internal;
+using PdfSharp.Pdf.StreamDecode;
 
 namespace PdfSharp.Pdf
 {
@@ -1887,12 +1888,6 @@ namespace PdfSharp.Pdf
 
                 // ReSharper restore InconsistentNaming
             }
-
-            public IEnumerable<PdfCode> RecoverInstructions()
-            {
-                var bytes = this.UnfilteredValue;
-                throw new NotImplementedException();
-            }
         }
 
         /// <summary>
@@ -1914,16 +1909,5 @@ namespace PdfSharp.Pdf
 #endif
             }
         }
-    }
-
-    /// <summary>
-    /// NOTE: IEB: in progress.
-    ///
-    /// This is a class to hold decoded PDF code streams.
-    /// The idea is to be able to reconstruct drawing commands from these,
-    /// so we can fully edit or render existing PDF documents.
-    /// </summary>
-    public class PdfCode
-    {
     }
 }
