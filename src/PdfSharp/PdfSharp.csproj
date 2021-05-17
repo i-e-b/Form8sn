@@ -24,7 +24,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;CORE;CORE_WITH_GDI</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CORE_WITH_GDI;GDI;UseGdiObjects</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -35,7 +35,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;CORE;CORE_WITH_GDI</DefineConstants>
+    <DefineConstants>TRACE;CORE_WITH_GDI;GDI;UseGdiObjects</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -165,6 +165,7 @@
     <Compile Include="Drawing\XUnit.cs" />
     <Compile Include="Drawing\XVector.cs" />
     <Compile Include="Events\DocumentEvents.cs" />
+    <Compile Include="Extensions\ListExtensions.cs" />
     <Compile Include="Fonts.OpenType\enums\FontTechnology.cs" />
     <Compile Include="Fonts.OpenType\enums\TableTagNames.cs" />
     <Compile Include="Fonts.OpenType\FontDescriptor.cs" />

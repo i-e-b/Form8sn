@@ -765,9 +765,7 @@ namespace PdfSharp.Drawing
             return new RectangleF((float)_x, (float)_y, (float)_width, (float)_height);
         }
 #endif
-#endif
-
-#if GDI
+#elif GDI
         /// <summary>
         /// Converts this instance to a System.Drawing.RectangleF.
         /// </summary>

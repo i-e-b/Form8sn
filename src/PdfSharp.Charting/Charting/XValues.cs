@@ -57,10 +57,7 @@ namespace PdfSharp.Charting
         /// <summary>
         /// Gets an XSeries by its index.
         /// </summary>
-        public new XSeries this[int index]
-        {
-            get { return base[index] as XSeries; }
-        }
+        public new XSeries? this[int index] => base[index] as XSeries;
 
         /// <summary>
         /// Adds a new XSeries to the collection.

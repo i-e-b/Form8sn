@@ -30,6 +30,7 @@
 using System.Collections.Generic;
 using PdfSharp.Drawing;
 using PdfSharp.Charting.Renderers;
+using PdfSharp.Extensions;
 
 namespace PdfSharp.Charting
 {
@@ -180,13 +181,13 @@ namespace PdfSharp.Charting
         /// <summary>
         /// Returns the chart renderer appropriate for the chart.
         /// </summary>
-        private ChartRenderer GetChartRenderer(Chart chart, RendererParameters parms)
+        private ChartRenderer? GetChartRenderer(Chart chart, RendererParameters parms)
         {
             ChartType chartType = chart.Type;
             bool useCombinationRenderer = false;
-            foreach (Series series in chart._seriesCollection)
+            foreach (var series in chart._seriesCollection.CastToListOrEmpty<Series>())
             {
-                if (series._chartType != chartType)
+                if (series?._chartType != chartType)
                 {
                     useCombinationRenderer = true;
                     break;

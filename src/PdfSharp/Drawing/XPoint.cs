@@ -221,25 +221,13 @@ namespace Edf.Drawing
             return new PointF((float)_x, (float)_y);
         }
 #endif
-#endif
-
-#if GDI
+#elif GDI
         /// <summary>
         /// Converts this XPoint to a System.Drawing.Point.
         /// </summary>
         public PointF ToPointF()
         {
             return new PointF((float)_x, (float)_y);
-        }
-#endif
-
-#if WPF || NETFX_CORE
-        /// <summary>
-        /// Converts this XPoint to a System.Windows.Point.
-        /// </summary>
-        public SysPoint ToPoint()
-        {
-            return new SysPoint(_x, _y);
         }
 #endif
 

@@ -43,7 +43,7 @@ namespace PdfSharp.Charting
         /// </summary>
         internal DocumentObjectCollection()
         {
-            _elements = new List<DocumentObject>();
+            _elements = new List<DocumentObject?>();
         }
 
         /// <summary>
@@ -52,16 +52,16 @@ namespace PdfSharp.Charting
         internal DocumentObjectCollection(DocumentObject parent)
             : base(parent)
         {
-            _elements = new List<DocumentObject>();
+            _elements = new List<DocumentObject?>();
         }
 
         /// <summary>
         /// Gets the element at the specified index.
         /// </summary>
-        public virtual DocumentObject this[int index]
+        public virtual DocumentObject? this[int index]
         {
-            get { return _elements[index]; }
-            internal set { _elements[index] = value; }
+            get => _elements[index];
+            internal set => _elements[index] = value;
         }
 
         #region Methods
@@ -81,9 +81,9 @@ namespace PdfSharp.Charting
             DocumentObjectCollection coll = (DocumentObjectCollection)base.DeepCopy();
 
             int count = Count;
-            coll._elements = new List<DocumentObject>(count);
+            coll._elements = new List<DocumentObject?>(count);
             for (int index = 0; index < count; ++index)
-                coll._elements.Add((DocumentObject)this[index].Clone());
+                coll._elements.Add((DocumentObject?)this[index]?.Clone());
             return coll;
         }
 
@@ -131,10 +131,9 @@ namespace PdfSharp.Charting
         /// <summary>
         /// Adds the specified document object to the collection.
         /// </summary>
-        public virtual void Add(DocumentObject value)
+        public virtual void Add(DocumentObject? value)
         {
-            if (value != null)
-                value._parent = this;
+            if (value != null) { value._parent = this; }
             _elements.Add(value);
         }
         #endregion
@@ -151,7 +150,7 @@ namespace PdfSharp.Charting
         /// <summary>
         /// Gets the first value in the collection, if there is any, otherwise null.
         /// </summary>
-        public DocumentObject First
+        public DocumentObject? First
         {
             get
             {
@@ -164,13 +163,13 @@ namespace PdfSharp.Charting
         /// <summary>
         /// Gets the last element or null, if no such element exists.
         /// </summary>
-        public DocumentObject LastObject
+        public DocumentObject? LastObject
         {
             get
             {
                 int count = _elements.Count;
                 if (count > 0)
-                    return (DocumentObject)_elements[count - 1];
+                    return (DocumentObject?)_elements[count - 1];
                 return null;
             }
         }
@@ -187,10 +186,10 @@ namespace PdfSharp.Charting
             get { return false; }
         }
 
-        object IList.this[int index]
+        object? IList.this[int index]
         {
             get { return _elements[index]; }
-            set { _elements[index] = (DocumentObject)value; }
+            set { _elements[index] = (DocumentObject?)value; }
         }
 
         void IList.RemoveAt(int index)
@@ -234,28 +233,15 @@ namespace PdfSharp.Charting
         #endregion
 
         #region ICollection
-        bool ICollection.IsSynchronized
-        {
-            get { return false; }
-        }
-
-        object ICollection.SyncRoot
-        {
-            get { return null; }
-        }
+        bool ICollection.IsSynchronized => false;
+        object? ICollection.SyncRoot => null;
         #endregion
 
-        /// <summary>
-        /// Returns an enumerator that iterates through a collection.
-        /// </summary>
-        /// <returns>
-        /// An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the collection.
-        /// </returns>
-        public IEnumerator GetEnumerator()
+        public virtual IEnumerator GetEnumerator()
         {
             return _elements.GetEnumerator();
         }
 
-        List<DocumentObject> _elements;
+        protected List<DocumentObject?> _elements;
     }
 }

@@ -96,7 +96,7 @@ namespace PdfSharp.Charting
         {
             get { return _title ?? (_title = new AxisTitle(this)); }
         }
-        internal AxisTitle _title;
+        internal AxisTitle? _title;
 
         /// <summary>
         /// Gets or sets the minimum value of the axis.
@@ -179,7 +179,7 @@ namespace PdfSharp.Charting
         {
             get { return _tickLabels ?? (_tickLabels = new TickLabels(this)); }
         }
-        internal TickLabels _tickLabels;
+        internal TickLabels? _tickLabels;
 
         /// <summary>
         /// Gets the format of the axis line.
@@ -188,7 +188,7 @@ namespace PdfSharp.Charting
         {
             get { return _lineFormat ?? (_lineFormat = new LineFormat(this)); }
         }
-        internal LineFormat _lineFormat;
+        internal LineFormat? _lineFormat;
 
         /// <summary>
         /// Gets the primary gridline object.
@@ -197,7 +197,7 @@ namespace PdfSharp.Charting
         {
             get { return _majorGridlines ?? (_majorGridlines = new Gridlines(this)); }
         }
-        internal Gridlines _majorGridlines;
+        internal Gridlines? _majorGridlines;
 
         /// <summary>
         /// Gets the secondary gridline object.
@@ -206,7 +206,7 @@ namespace PdfSharp.Charting
         {
             get { return _minorGridlines ?? (_minorGridlines = new Gridlines(this)); }
         }
-        internal Gridlines _minorGridlines;
+        internal Gridlines? _minorGridlines;
 
         /// <summary>
         /// Gets or sets, whether the axis has a primary gridline object.

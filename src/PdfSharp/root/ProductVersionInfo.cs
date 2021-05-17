@@ -235,8 +235,11 @@ namespace PdfSharp
         /// -wrt : Windows RunTime
         /// </summary>
 #if GDI && !WPF
-        // GDI+ (System.Drawing)
+        // GDI+ (System.Drawing), or a .net core replacement of it.
         public const string Technology = "-gdi";
+#elif CORE
+        // .net classic without GDI+ and WPF
+        public const string Technology = "";  // no extension
 #endif
 #if WPF && !GDI && !SILVERLIGHT
         // Windows Presentation Foundation
@@ -265,10 +268,6 @@ namespace PdfSharp
 #if DNC10
         // .net Core
         public const string Technology = "-dnc";
-#endif
-#if CORE
-        // .net classic without GDI+ and WPF
-        public const string Technology = "";  // no extension
 #endif
     }
 }

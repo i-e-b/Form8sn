@@ -37,8 +37,7 @@ using PdfSharp.Internal;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-#endif
-#if GDI
+#elif GDI
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;

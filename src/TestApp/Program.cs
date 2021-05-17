@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Advanced;
@@ -45,22 +46,12 @@ namespace TestApp
             {
                 Console.WriteLine($"Found {existing.FullPath}: {existing.Pages.Count} pages");
                 
-                //Console.Write("Custom values: ");
-                //Console.WriteLine(string.Join("; ", existing.CustomValues.Select(kvp => kvp.Key + ":"+kvp.Value)));
-                
+                int pageNumber = 0;
                 foreach (var ePage in existing.Pages)
                 {
-                    /*var resourceElems = ePage.Resources.Elements;
-                    Console.WriteLine($"REs: {string.Join(", ",resourceElems.Select(e=>e.Key + ":" + e.Value))}");
-                    if (resourceElems.ContainsKey("/XObject"))
-                    {
-                        if (resourceElems["/XObject"] is PdfDictionary dict)
-                        {
-                            LogPdfItem(dict.Elements["/Im20"]);
-                        }
-                    }*/
+                    pageNumber++;
     
-                    ExtractImages(ePage);
+                    ExtractImages(ePage, pageNumber);
                     
                     var bits = ePage!.Contents.ToList();
                     foreach (var item in bits)
@@ -89,7 +80,7 @@ namespace TestApp
 
         
         private static int imageCount = 1;
-        private static void ExtractImages(PdfPage page)
+        private static void ExtractImages(PdfPage page, int pageNumber)
         {
             var resources = page.Elements.GetDictionary("/Resources");
             if (resources == null) return;
@@ -97,44 +88,57 @@ namespace TestApp
             var xObjects = resources.Elements.GetDictionary("/XObject");
             if (xObjects == null) return;
             
-            var items = xObjects.Elements.Values;
-            foreach (PdfItem item in items)
+            foreach (var key in xObjects.Elements.Keys)
             {
+                var item = xObjects.Elements[key];
                 var reference = item as PdfReference;
                 if (reference == null) continue;
 
                 if (reference.Value is PdfDictionary xObject
                     && xObject.Elements.GetString("/Subtype") == "/Image")
                 {
-                    ExportImage(xObject, ref imageCount);
+                    ExportImage(xObject, $"{pageNumber}_{key}", ref imageCount);
                 }
             }
         }
         
-        static void ExportImage(PdfDictionary image, ref int count)
+        static void ExportImage(PdfDictionary image, string name, ref int count)
         {
-            string filter = image.Elements.GetName("/Filter");
+            var filter = image?.Elements.GetName("/Filter");
             switch (filter)
             {
                 case "/DCTDecode":
-                    ExportJpegImage(image, ref count);
+                    ExportJpegImage(image, name, ref count);
                     break;
  
                 case "/FlateDecode":
-                    ExportAsPngImage(image, ref count);
+                    ExportAsPngImage(image, name, ref count);
                     break;
             }
         }
-        static void ExportJpegImage(PdfDictionary image, ref int count)
+        static void ExportJpegImage(PdfDictionary image, string name, ref int count)
         {
             // Fortunately JPEG has native support in PDF and exporting an image is just writing the stream to a file.
             byte[] stream = image.Stream.Value;
-            FileStream fs = new FileStream($"Image{count++}.jpeg", FileMode.Create, FileAccess.Write);
+            FileStream fs = new FileStream($"{CleanName(name)}_{count++}.jpeg", FileMode.Create, FileAccess.Write);
             BinaryWriter bw = new BinaryWriter(fs);
             bw.Write(stream);
             bw.Close();
         }
-        static void ExportAsPngImage(PdfDictionary image, ref int count)
+
+        private static string CleanName(string name)
+        {
+            var sb = new StringBuilder();
+            bool lost = false;
+            foreach (var c in name)
+            {
+                if (char.IsLetterOrDigit(c)) { sb.Append(c); lost = false; }
+                else if (!lost) { sb.Append('_'); lost = true; }
+            }
+            return sb.ToString();
+        }
+
+        static void ExportAsPngImage(PdfDictionary image, string name, ref int count)
         {
             int width = image.Elements.GetInteger(PdfImage.Keys.Width);
             int height = image.Elements.GetInteger(PdfImage.Keys.Height);

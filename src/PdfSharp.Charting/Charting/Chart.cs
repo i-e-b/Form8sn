@@ -143,7 +143,7 @@ namespace PdfSharp.Charting
         {
             get { return _font ?? (_font = new Font(this)); }
         }
-        internal Font _font;
+        internal Font? _font;
 
         /// <summary>
         /// Gets the legend of the chart.
@@ -152,7 +152,7 @@ namespace PdfSharp.Charting
         {
             get { return _legend ?? (_legend = new Legend(this)); }
         }
-        internal Legend _legend;
+        internal Legend? _legend;
 
         /// <summary>
         /// Gets the X-Axis of the Chart.
@@ -161,7 +161,7 @@ namespace PdfSharp.Charting
         {
             get { return _xAxis ?? (_xAxis = new Axis(this)); }
         }
-        internal Axis _xAxis;
+        internal Axis? _xAxis;
 
         /// <summary>
         /// Gets the Y-Axis of the Chart.
@@ -170,7 +170,7 @@ namespace PdfSharp.Charting
         {
             get { return _yAxis ?? (_yAxis = new Axis(this)); }
         }
-        internal Axis _yAxis;
+        internal Axis? _yAxis;
 
         /// <summary>
         /// Gets the Z-Axis of the Chart.
@@ -179,7 +179,7 @@ namespace PdfSharp.Charting
         {
             get { return _zAxis ?? (_zAxis = new Axis(this)); }
         }
-        internal Axis _zAxis;
+        internal Axis? _zAxis;
 
         /// <summary>
         /// Gets the collection of the data series.
@@ -188,7 +188,7 @@ namespace PdfSharp.Charting
         {
             get { return _seriesCollection ?? (_seriesCollection = new SeriesCollection(this)); }
         }
-        internal SeriesCollection _seriesCollection;
+        internal SeriesCollection? _seriesCollection;
 
         /// <summary>
         /// Gets the collection of the values written on the X-Axis.
@@ -197,7 +197,7 @@ namespace PdfSharp.Charting
         {
             get { return _xValues ?? (_xValues = new XValues(this)); }
         }
-        internal XValues _xValues;
+        internal XValues? _xValues;
 
         /// <summary>
         /// Gets the plot (drawing) area of the chart.
@@ -206,7 +206,7 @@ namespace PdfSharp.Charting
         {
             get { return _plotArea ?? (_plotArea = new PlotArea(this)); }
         }
-        internal PlotArea _plotArea;
+        internal PlotArea? _plotArea;
 
         /// <summary>
         /// Gets or sets a value defining how blanks in the data series should be shown.
@@ -225,7 +225,7 @@ namespace PdfSharp.Charting
         {
             get { return _dataLabel ?? (_dataLabel = new DataLabel(this)); }
         }
-        internal DataLabel _dataLabel;
+        internal DataLabel? _dataLabel;
 
         /// <summary>
         /// Gets or sets whether the chart has a DataLabel.

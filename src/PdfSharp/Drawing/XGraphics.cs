@@ -569,8 +569,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
             //XGraphics gfx = new XGraphics(((System.Drawing.Graphics)null, size, pageUnit, pageDirection);
             XGraphics gfx = XGraphics.FromPdfPage(page, XGraphicsPdfPageOptions.Append, pageUnit, pageDirection);
             return gfx;
-#endif
-#if GDI && !WPF
+#elif GDI && !WPF
             //XGraphics gfx = new XGraphics((System.Drawing.Graphics)null, size, pageUnit, pageDirection);
             XGraphics gfx = new XGraphics((System.Drawing.Graphics)null, size, pageUnit, pageDirection);
             return gfx;
@@ -4439,10 +4438,6 @@ namespace PdfSharp.Drawing  // #??? Clean up
                 throw new ArgumentException("The current implementation supports XGraphicsUnit.Point only.", "unit");
 
             XGraphicsContainer xContainer = null;
-#if CORE
-            if (TargetContext == XGraphicTargetContext.CORE)
-                xContainer = new XGraphicsContainer();
-#endif
 #if GDI
             // _gfx can be null if drawing applies to PDF page only.
             if (TargetContext == XGraphicTargetContext.GDI)
@@ -4454,6 +4449,9 @@ namespace PdfSharp.Drawing  // #??? Clean up
                 }
                 finally { Lock.ExitGdiPlus(); }
             }
+#elif CORE
+            if (TargetContext == XGraphicTargetContext.CORE)
+                xContainer = new XGraphicsContainer();
 #endif
 #if WPF
             if (TargetContext == XGraphicTargetContext.WPF)

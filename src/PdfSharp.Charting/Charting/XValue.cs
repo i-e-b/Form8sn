@@ -57,7 +57,7 @@ namespace PdfSharp.Charting
         /// <summary>
         /// The actual value of the XValue.
         /// </summary>
-        internal string _value;
+        internal string? _value;
 
         #region Methods
         /// <summary>

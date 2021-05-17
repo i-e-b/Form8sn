@@ -89,7 +89,7 @@ namespace PdfSharp.Charting
         {
             get { return _font ?? (_font = new Font(this)); }
         }
-        internal Font _font;
+        internal Font? _font;
 
         /// <summary>
         /// Gets or sets the orientation of the caption.
