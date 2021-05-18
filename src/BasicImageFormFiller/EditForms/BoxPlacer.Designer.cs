@@ -41,7 +41,7 @@ namespace BasicImageFormFiller.EditForms
             this.MinimizeBox = false;
             this.Name = "BoxPlacer";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Drag to pan, Ctrl-drag to place box, scroll wheel to zoom";
+            this.Text = "Drag to pan, Ctrl-drag to place box, alt-click to edit, scroll wheel to zoom";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.BoxPlacer_FormClosing);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.BoxPlacer_MouseDown);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.BoxPlacer_MouseMove);

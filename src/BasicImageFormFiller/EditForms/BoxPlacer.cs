@@ -88,25 +88,57 @@ namespace BasicImageFormFiller.EditForms
 
         private void BoxPlacer_MouseDown(object sender, MouseEventArgs e)
         {
+            if (_project == null) return;
             var pressingControlKey = (ModifierKeys & Keys.Control) != 0;
-            if (pressingControlKey) // start drawing a new box
+            var pressingAltKey = (ModifierKeys & Keys.Alt) != 0;
+            
+            if (pressingAltKey && pressingControlKey) // TODO: move / re-size an existing box
+            {
+            }
+            else if (pressingAltKey) // pop-up the edit screen for a box
+            {
+                GetMouseInDocSpace(e.X, e.Y, out var x, out var y);
+                var key = FindBoxKey(x,y);
+                if (string.IsNullOrWhiteSpace(key)) return;
+                
+                var editDialog = new BoxEdit(_project!, _pageIndex, key);
+                editDialog.ShowDialog();
+                _project.Reload();
+                Invalidate();
+            }
+            else if (pressingControlKey) // start drawing a new box
             {
                 GetMouseInDocSpace(e.X, e.Y, out _mx, out _my);
                 _drawingBox = true;
                 _validDraw = false;
-                return;
             }
-
-            if (e.Clicks > 1) // flip scale with a double-click
+            else if (e.Clicks > 1) // flip scale with a double-click
             {
                 var newScale = _scale >= NearScale ? FarScale : NearScale;
                 UpdateScaleAdjusted(e.X, e.Y, newScale);
                 Invalidate();
-                return;
             }
+            else // regular drag-to-pan
+            {
+                _mx = e.X;
+                _my = e.Y;
+                _drag = true;
+            }
+        }
 
-            _mx = e.X; _my = e.Y;
-            _drag = true;
+        private string? FindBoxKey(float docX, float docY)
+        {
+            if (_project == null) return null;
+            foreach (var (key, box) in _project.Pages[_pageIndex].Boxes)
+            {
+                if (box.Top > docY) continue;
+                if (box.Left > docX) continue;
+                if (box.Top + box.Height < docY) continue;
+                if (box.Left + box.Width < docX) continue;
+                
+                return key;
+            }
+            return null;
         }
 
         private void BoxPlacer_MouseUp(object sender, MouseEventArgs e) {

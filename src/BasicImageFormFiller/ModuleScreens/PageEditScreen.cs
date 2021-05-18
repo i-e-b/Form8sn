@@ -35,7 +35,7 @@ namespace BasicImageFormFiller.ModuleScreens
             
             var background = string.IsNullOrWhiteSpace(page.BackgroundImage)
                 ? T.g()["no background"]
-                : T.g()["Preview of ", page.BackgroundImage, T.g("br/"), T.g("img",  "src",page.GetBackgroundUrl(_project),  "width","100%")];
+                : T.g()[T.g("h3")["Preview of ", page.BackgroundImage], T.g("br/"), T.g("img",  "src",page.GetBackgroundUrl(_project),  "width","100%")];
             
             content.Add(
                 T.g("p").Repeat(
