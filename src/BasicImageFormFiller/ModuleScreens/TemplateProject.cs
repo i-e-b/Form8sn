@@ -11,6 +11,8 @@ namespace BasicImageFormFiller.ModuleScreens
     internal class TemplateProject: IScreenModule
     {
         private readonly Project _project;
+        private const string MovePageUpCommand = "/move-up";
+        private const string MovePageDownCommand = "/move-dn";
         private const string SetSampleFileCommand= "/set-sample-file";
         private const string AddPageAtEndCommand = "/add-at-end";
         private const string EditPageCommand = "/edit-page";
@@ -50,12 +52,20 @@ namespace BasicImageFormFiller.ModuleScreens
                 {
                     var templatePage = _project.Index.Pages[index];
                     
-                    var bg = (string.IsNullOrWhiteSpace(templatePage.BackgroundImage)) ? T.g()["no background"] : T.g()[templatePage.BackgroundImage, T.g("br/"), T.g("img",  "src",$"{_project.BaseUri}/{templatePage.BackgroundImage}",  "width","200")];
+                    var bg = (string.IsNullOrWhiteSpace(templatePage.BackgroundImage)) ? T.g()["no background"] : T.g()[templatePage.BackgroundImage, T.g("br/"), T.g("img",  "src",templatePage.GetBackgroundUrl(_project),  "width","200")];
                     
                     content.Add(T.g("p").Repeat(
                             T.g("a",  "href",$"{InsertPageCommand}?index={index}")["Insert new page here"],
+                            T.g("hr/"),
+                            T.g("h3")[$"Page {index+1}: ", templatePage.Name ?? "Untitled"],
+                            T.g()[
+                                T.g("a", "href", $"{EditPageCommand}?index={index}")[$"Edit page {index+1} "],
+                                " | Move ",
+                                T.g("a", "href", $"{MovePageUpCommand}?index={index}")["Up"], " ",
+                                T.g("a", "href", $"{MovePageDownCommand}?index={index}")["Down"]
+                            ],
                             bg,
-                            T.g("a", "href", $"{EditPageCommand}?index={index}")[$"Edit page {index+1}"]
+                            T.g("hr/")
                         )
                     );
                 }
@@ -64,7 +74,7 @@ namespace BasicImageFormFiller.ModuleScreens
             
             content.Add(
                 T.g("br/"),
-                T.g("a",  "href",AddPageAtEndCommand)["Add new page"]
+                T.g("a",  "href",AddPageAtEndCommand)["Insert new page here"]
                 );
 
             return content;
@@ -87,7 +97,7 @@ namespace BasicImageFormFiller.ModuleScreens
                 {
                     // TODO: add a blank page, and refresh screen
                     _project.Pages.Add(new TemplatePage{Name = "Untitled"});
-                    SaveChanges();
+                    _project.Save();
                     moduleScreen.ShowPage(StartScreen());
                     break;
                 }
@@ -103,7 +113,7 @@ namespace BasicImageFormFiller.ModuleScreens
                 {
                     var idx = GetIndexFromQuery(command);
                     _project.Pages.Insert(idx, new TemplatePage{Name = "Untitled"});
-                    SaveChanges();
+                    _project.Save();
                     moduleScreen.ShowPage(StartScreen());
                     break;
                 }
@@ -114,6 +124,30 @@ namespace BasicImageFormFiller.ModuleScreens
                     if (idx >= _project.Pages.Count) throw new Exception("Page index out of range");
                     moduleScreen.SwitchToModule(new PageEditScreen(_project, idx));
                     break;
+                }
+
+                case MovePageUpCommand:
+                {
+                    var idx = GetIndexFromQuery(command);
+                    if (idx <= 0) return; // ignore up past top
+                    var tmp = _project.Pages[idx];
+                    _project.Pages[idx] = _project.Pages[idx-1];
+                    _project.Pages[idx-1] = tmp;
+                    _project.Save();
+                    moduleScreen.ShowPage(StartScreen());
+                    return;
+                }
+
+                case MovePageDownCommand:
+                {
+                    var idx = GetIndexFromQuery(command);
+                    if (idx >= _project.Pages.Count - 1) return; // ignore down past bottom
+                    var tmp = _project.Pages[idx];
+                    _project.Pages[idx] = _project.Pages[idx+1];
+                    _project.Pages[idx+1] = tmp;
+                    _project.Save();
+                    moduleScreen.ShowPage(StartScreen());
+                    return;
                 }
 
                 default:
@@ -175,11 +209,6 @@ namespace BasicImageFormFiller.ModuleScreens
             }
             
             _project.Index.SampleFileName = Path.GetFileName(filePath);
-            SaveChanges();
-        }
-
-        private void SaveChanges()
-        {
             _project.Save();
         }
     }

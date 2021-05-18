@@ -41,6 +41,11 @@ namespace BasicImageFormFiller.FileFormats
         /// Use this for printing on pre-printed forms.
         /// </summary>
         public bool RenderBackground { get; set; } = true;
+
+        public string GetBackgroundUrl(Project project)
+        {
+            return $"{project.BaseUri}/{BackgroundImage}";
+        }
     }
 
     public class TemplateBox

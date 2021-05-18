@@ -1,3 +1,4 @@
+using System.IO;
 using BasicImageFormFiller.EditForms;
 using BasicImageFormFiller.FileFormats;
 using BasicImageFormFiller.Interfaces;
@@ -14,6 +15,7 @@ namespace BasicImageFormFiller.ModuleScreens
         private const string EditBoxesCommand = "/edit-boxes";
         private const string EditMetaDataCommand = "/edit-meta";
         private const string BackToTemplateCommand = "/back-to-template";
+        private const string EditBackgroundCommand = "/pick-background";
 
         public PageEditScreen(Project project, int pageIndex)
         {
@@ -30,11 +32,17 @@ namespace BasicImageFormFiller.ModuleScreens
                 T.g("p")[T.g("a", "href", BackToTemplateCommand)[$"Back to '{_project.Index.Name}' overview"]]
             ]; 
             
+            var background = (string.IsNullOrWhiteSpace(page.BackgroundImage))
+                ? T.g()["no background"]
+                : T.g()[page.BackgroundImage, T.g("br/"), T.g("img",  "src",page.GetBackgroundUrl(_project),  "width","100%")];
+            
             content.Add(
                 T.g("p").Repeat(
                     T.g("a", "href",EditMetaDataCommand)["Edit page info & notes"],
                     T.g("a", "href",EditBoxesCommand)["Place template boxes on background"],
-                    T.g("a", "href",EditMappingCommand)["Edit data to box mapping"]
+                    T.g("a", "href",EditMappingCommand)["Edit data to box mapping"],
+                    T.g("a", "href",EditBackgroundCommand)["Pick background image"],
+                    background
                     )
                 );
             
@@ -48,6 +56,13 @@ namespace BasicImageFormFiller.ModuleScreens
                 case BackToTemplateCommand:
                 {
                     moduleScreen.SwitchToModule(new TemplateProject(_project));
+                    break;
+                }
+
+                case EditBackgroundCommand:
+                {
+                    ChooseBackgroundFile(moduleScreen);
+                    moduleScreen.ShowPage(StartScreen());
                     break;
                 }
 
@@ -75,6 +90,28 @@ namespace BasicImageFormFiller.ModuleScreens
                     break;
                 }
             }
+        }
+
+        private void ChooseBackgroundFile(ITagModuleScreen module)
+        {
+            // If cancel, do nothing
+            // If not in the project directory, copy it in and continue with that as the new path
+            // Check that it's json
+            //  - if not, delete the file and go back to the old one (if present)
+            //  - if OK, set the sample value and save
+            
+            var ok = module.PickAFile(out var filePath);
+            if (!ok || filePath == null) return;
+
+            if (Path.GetDirectoryName(filePath) != _project.BasePath)
+            {
+                var newPath = Path.Combine(_project.BasePath, Path.GetFileName(filePath));
+                File.Copy(filePath, newPath);
+                filePath = newPath;
+            }
+
+            _project.Pages[_pageIndex].BackgroundImage = Path.GetFileName(filePath);
+            _project.Save();
         }
 
 
