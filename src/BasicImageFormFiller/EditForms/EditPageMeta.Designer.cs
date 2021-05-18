@@ -37,6 +37,8 @@ namespace BasicImageFormFiller.EditForms
             this.renderBackgroundCheckbox = new System.Windows.Forms.CheckBox();
             this.saveButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
+            this.notesTextBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // label1
@@ -53,7 +55,7 @@ namespace BasicImageFormFiller.EditForms
             this.nameTextBox.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
             this.nameTextBox.Location = new System.Drawing.Point(179, 31);
             this.nameTextBox.Name = "nameTextBox";
-            this.nameTextBox.Size = new System.Drawing.Size(219, 20);
+            this.nameTextBox.Size = new System.Drawing.Size(258, 20);
             this.nameTextBox.TabIndex = 1;
             // 
             // label2
@@ -76,7 +78,7 @@ namespace BasicImageFormFiller.EditForms
             // saveButton
             // 
             this.saveButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.saveButton.Location = new System.Drawing.Point(343, 135);
+            this.saveButton.Location = new System.Drawing.Point(382, 215);
             this.saveButton.Name = "saveButton";
             this.saveButton.Size = new System.Drawing.Size(55, 25);
             this.saveButton.TabIndex = 4;
@@ -87,7 +89,7 @@ namespace BasicImageFormFiller.EditForms
             // cancelButton
             // 
             this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.cancelButton.Location = new System.Drawing.Point(273, 135);
+            this.cancelButton.Location = new System.Drawing.Point(312, 215);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(55, 25);
             this.cancelButton.TabIndex = 5;
@@ -95,11 +97,32 @@ namespace BasicImageFormFiller.EditForms
             this.cancelButton.UseVisualStyleBackColor = true;
             this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
             // 
+            // label3
+            // 
+            this.label3.Location = new System.Drawing.Point(12, 87);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(161, 31);
+            this.label3.TabIndex = 6;
+            this.label3.Text = "Notes";
+            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // notesTextBox
+            // 
+            this.notesTextBox.AcceptsReturn = true;
+            this.notesTextBox.Anchor = ((System.Windows.Forms.AnchorStyles) ((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+            this.notesTextBox.Location = new System.Drawing.Point(179, 93);
+            this.notesTextBox.Multiline = true;
+            this.notesTextBox.Name = "notesTextBox";
+            this.notesTextBox.Size = new System.Drawing.Size(258, 116);
+            this.notesTextBox.TabIndex = 7;
+            // 
             // EditPageMeta
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(410, 172);
+            this.ClientSize = new System.Drawing.Size(449, 252);
+            this.Controls.Add(this.notesTextBox);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.saveButton);
             this.Controls.Add(this.renderBackgroundCheckbox);
@@ -115,6 +138,10 @@ namespace BasicImageFormFiller.EditForms
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.TextBox notesTextBox;
+
+        private System.Windows.Forms.Label label3;
 
         private System.Windows.Forms.TextBox nameTextBox;
         private System.Windows.Forms.Label label2;

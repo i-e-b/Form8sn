@@ -22,6 +22,7 @@ namespace BasicImageFormFiller.EditForms
             
             nameTextBox!.Text = _project.Pages[pageIndex].Name;
             renderBackgroundCheckbox!.Checked = _project.Pages[pageIndex].RenderBackground;
+            notesTextBox!.Text = _project.Pages[pageIndex].Notes;
         }
 
         private void EditPageMeta_FormClosing(object sender, FormClosingEventArgs e)
@@ -35,6 +36,7 @@ namespace BasicImageFormFiller.EditForms
             {
                 _project.Pages[_pageIndex].Name = nameTextBox!.Text;
                 _project.Pages[_pageIndex].RenderBackground = renderBackgroundCheckbox!.Checked;
+                _project.Pages[_pageIndex].Notes = notesTextBox!.Text;
                 _project.Save();
             }
             Close();

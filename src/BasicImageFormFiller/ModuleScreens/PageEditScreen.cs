@@ -29,22 +29,27 @@ namespace BasicImageFormFiller.ModuleScreens
             var page = _project.Pages[_pageIndex];
             var content = T.g()[
                 T.g("h2")[$"Page {_pageIndex+1}: '{page.Name}'"],
-                T.g("p")[T.g("a", "href", BackToTemplateCommand)[$"Back to '{_project.Index.Name}' overview"]]
+                T.g("p")[T.g("a", "href", BackToTemplateCommand)[$"Back to '{_project.Index.Name}' overview"]],
+                T.g("p")[page.Notes ?? ""]
             ]; 
             
             var background = (string.IsNullOrWhiteSpace(page.BackgroundImage))
                 ? T.g()["no background"]
-                : T.g()[page.BackgroundImage, T.g("br/"), T.g("img",  "src",page.GetBackgroundUrl(_project),  "width","100%")];
+                : T.g()["Preview of ", page.BackgroundImage, T.g("br/"), T.g("img",  "src",page.GetBackgroundUrl(_project),  "width","100%")];
             
             content.Add(
                 T.g("p").Repeat(
                     T.g("a", "href",EditMetaDataCommand)["Edit page info & notes"],
                     T.g("a", "href",EditBoxesCommand)["Place template boxes on background"],
                     T.g("a", "href",EditMappingCommand)["Edit data to box mapping"],
-                    T.g("a", "href",EditBackgroundCommand)["Pick background image"],
-                    background
+                    T.g("a", "href",EditBackgroundCommand)["Pick background image"]
                     )
                 );
+
+            content.Add(
+                T.g("hr/"),
+                background
+            );
             
             return content;
         }
@@ -55,7 +60,7 @@ namespace BasicImageFormFiller.ModuleScreens
             {
                 case BackToTemplateCommand:
                 {
-                    moduleScreen.SwitchToModule(new TemplateProject(_project));
+                    moduleScreen.SwitchToModule(new MainProjectScreen(_project));
                     break;
                 }
 

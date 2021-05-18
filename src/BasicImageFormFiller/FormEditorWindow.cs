@@ -80,7 +80,7 @@ namespace BasicImageFormFiller
                 path = Path.Combine(path, IndexFileName);
 
             if (!File.Exists(path)) ShowFailure("Index file not accessible. Check permissions?");
-            _currentModule = new TemplateProject(new Project(path));
+            _currentModule = new MainProjectScreen(new Project(path));
             ShowPage(_currentModule.StartScreen());
         }
 
@@ -183,5 +183,10 @@ namespace BasicImageFormFiller
 
         #endregion
 
+        private void toolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            // Reset the current view, in case the user gets stuck
+            ShowPage(_currentModule.StartScreen());
+        }
     }
 }

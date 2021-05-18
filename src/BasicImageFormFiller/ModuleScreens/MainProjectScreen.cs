@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using BasicImageFormFiller.EditForms;
 using BasicImageFormFiller.FileFormats;
 using BasicImageFormFiller.Interfaces;
 using SkinnyJson;
@@ -8,9 +9,12 @@ using Tag;
 
 namespace BasicImageFormFiller.ModuleScreens
 {
-    internal class TemplateProject: IScreenModule
+    internal class MainProjectScreen: IScreenModule
     {
         private readonly Project _project;
+        private StateChangePermission _stateChange = StateChangePermission.Allowed;
+        private const string EditProjectNotesCommand = "/edit-project-notes";
+        private const string SetDataFiltersCommand = "/set-data-filters";
         private const string MovePageUpCommand = "/move-up";
         private const string MovePageDownCommand = "/move-dn";
         private const string SetSampleFileCommand= "/set-sample-file";
@@ -18,7 +22,7 @@ namespace BasicImageFormFiller.ModuleScreens
         private const string EditPageCommand = "/edit-page";
         private const string InsertPageCommand = "/insert-page";
 
-        public TemplateProject(Project project)
+        public MainProjectScreen(Project project)
         {
             _project = project;
         }
@@ -26,15 +30,16 @@ namespace BasicImageFormFiller.ModuleScreens
         public TagContent StartScreen()
         {
             var content = T.g()[
-                T.g("h1")[_project.Index.Name],
                 T.g("p")[_project.BasePath],
-                T.g("p")[_project.Index.Notes]
+                T.g("h1")[_project.Index.Name],
+                T.g("p")[_project.Index.Notes],
+                T.g("a", "href",EditProjectNotesCommand)["Edit project name & notes"]
             ];
 
             if (string.IsNullOrWhiteSpace(_project.Index.SampleFileName))
             {
                 content.Add(T.g("p")[
-                    "No sample file loaded.",
+                    "No sample file loaded. ",
                     T.g("a", "href",SetSampleFileCommand)["Add a sample file"]
                 ]);
             }
@@ -45,6 +50,9 @@ namespace BasicImageFormFiller.ModuleScreens
                     T.g("a", "href",SetSampleFileCommand)["Replace sample file"]
                 ]);
             }
+            content.Add(T.g("p")[
+                T.g("a", "href",SetDataFiltersCommand)["Setup data filters and splits"]
+            ]);
 
             if (_project.Index.Pages.Count > 0)
             {
@@ -80,12 +88,9 @@ namespace BasicImageFormFiller.ModuleScreens
             return content;
         }
 
-        public StateChangePermission StateChangeRequest()
-        {
-            return StateChangePermission.Allowed;
-        }
+        public StateChangePermission StateChangeRequest() => _stateChange;
 
-        public void Activate() { }
+        public void Activate() { _stateChange = StateChangePermission.Allowed; }
 
         public void InterpretCommand(ITagModuleScreen moduleScreen, string command)
         {
@@ -95,9 +100,18 @@ namespace BasicImageFormFiller.ModuleScreens
             {
                 case AddPageAtEndCommand:
                 {
-                    // TODO: add a blank page, and refresh screen
                     _project.Pages.Add(new TemplatePage{Name = "Untitled"});
                     _project.Save();
+                    moduleScreen.ShowPage(StartScreen());
+                    break;
+                }
+
+                case EditProjectNotesCommand:
+                {
+                    // show a mini-edit screen for name and notes
+                    _stateChange = StateChangePermission.NotAllowed;
+                    var screen = new EditProjectNotes(this, _project);
+                    screen.ShowDialog();
                     moduleScreen.ShowPage(StartScreen());
                     break;
                 }
