@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 
 namespace BasicImageFormFiller.FileFormats
 {
@@ -38,6 +39,11 @@ namespace BasicImageFormFiller.FileFormats
         public string GetBackgroundUrl(Project project)
         {
             return $"{project.BaseUri}/{BackgroundImage}";
+        }
+
+        public string GetBackgroundPath(Project project)
+        {
+            return Path.Combine(project.BasePath, BackgroundImage ?? "");
         }
     }
 }

@@ -33,7 +33,7 @@ namespace BasicImageFormFiller.ModuleScreens
                 T.g("p")[page.Notes ?? ""]
             ]; 
             
-            var background = (string.IsNullOrWhiteSpace(page.BackgroundImage))
+            var background = string.IsNullOrWhiteSpace(page.BackgroundImage)
                 ? T.g()["no background"]
                 : T.g()["Preview of ", page.BackgroundImage, T.g("br/"), T.g("img",  "src",page.GetBackgroundUrl(_project),  "width","100%")];
             
@@ -83,7 +83,9 @@ namespace BasicImageFormFiller.ModuleScreens
                 case EditBoxesCommand:
                 {
                     _stateChange = StateChangePermission.NotAllowed;
-                    // TODO: show edit screen, with link back to self for unlock
+                    var screen = new BoxPlacer(this, _project, _pageIndex);
+                    screen.ShowDialog();
+                    moduleScreen.ShowPage(StartScreen());
                     break;
                 }
 

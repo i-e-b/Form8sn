@@ -25,6 +25,9 @@
       <Compile Update="EditForms\EditProjectNotes.cs">
         <SubType>Form</SubType>
       </Compile>
+      <Compile Update="EditForms\BoxPlacer.cs">
+        <SubType>Form</SubType>
+      </Compile>
     </ItemGroup>
 
 </Project>
