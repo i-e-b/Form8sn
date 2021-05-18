@@ -68,10 +68,55 @@ namespace BasicImageFormFiller.EditForms
                 rect.Offset((int)_x,(int)_y);
                 g.FillRectangle(Brushes.Aqua!, rect);
                 g.DrawRectangle(Pens.Black!, rect);
-                g.DrawString(name, Font, Brushes.Black!, rect.Left, rect.Top); // TODO: align based on setting
+                
+                AlignTextToRect(g, name, rect, box, out var top, out var left);
+                g.DrawString(name, Font, Brushes.Black!, left, top);
             }
 
             g.Transform?.Reset();
+        }
+
+        private void AlignTextToRect(Graphics g, string name, Rectangle rect, TemplateBox box, out float top, out float left)
+        {
+            var size = g.MeasureString(name, Font);
+            left = rect.Left;
+            top = rect.Top;
+            var halfWidth = rect.Width / 2.0f;
+            var halfHeight = rect.Height / 2.0f;
+            var textWidth = size.Width;
+            var textHeight = size.Height;
+            switch (box.Alignment)
+            {
+                case TextAlignment.TopLeft: break;
+                case TextAlignment.TopCentre:
+                    left += halfWidth - textWidth / 2.0f;
+                    break;
+                case TextAlignment.TopRight:
+                    left += rect.Width - textWidth;
+                    break;
+                case TextAlignment.MidlineLeft:
+                    top += halfHeight - textHeight / 2.0f;
+                    break;
+                case TextAlignment.MidlineCentre:
+                    left += halfWidth - textWidth / 2.0f;
+                    top += halfHeight - textHeight / 2.0f;
+                    break;
+                case TextAlignment.MidlineRight:
+                    top += halfHeight - textHeight / 2.0f;
+                    left += rect.Width - textWidth;
+                    break;
+                case TextAlignment.BottomLeft:
+                    top += rect.Height - textHeight;
+                    break;
+                case TextAlignment.BottomCentre:
+                    top += rect.Height - textHeight;
+                    left += halfWidth - textWidth / 2.0f;
+                    break;
+                case TextAlignment.BottomRight:
+                    top += rect.Height - textHeight;
+                    left += rect.Width - textWidth;
+                    break;
+            }
         }
 
         private static Bitmap? LoadFromFile(string filePath)
