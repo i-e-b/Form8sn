@@ -239,6 +239,7 @@ namespace BasicImageFormFiller.EditForms
             this.Controls.Add(this.shrinkToFitCheckbox);
             this.Controls.Add(this.wrapTextCheckbox);
             this.Name = "BoxEdit";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "BoxEdit";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.BoxEdit_FormClosing);
             this.ResumeLayout(false);

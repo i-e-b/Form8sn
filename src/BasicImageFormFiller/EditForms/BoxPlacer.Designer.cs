@@ -35,9 +35,11 @@ namespace BasicImageFormFiller.EditForms
             // 
             // BoxPlacer
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(14F, 33F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(726, 532);
+            this.Font = new System.Drawing.Font("Calibri", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte) (0)));
+            this.Margin = new System.Windows.Forms.Padding(7, 8, 7, 8);
             this.MinimizeBox = false;
             this.Name = "BoxPlacer";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
