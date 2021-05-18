@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using BasicImageFormFiller.FileFormats;
 using SkinnyJson;
@@ -8,59 +9,64 @@ namespace BasicImageFormFiller
 {
     internal class TemplateProject: IScreenModule
     {
+        private readonly Project _project;
         private const string SetSampleFileCommand= "/set-sample-file";
         private const string AddPageAtEndCommand = "/add-at-end";
-        private readonly string _indexPath;
-        private readonly string _basePath;
-        private readonly IndexFile _index;
+        private const string EditPageCommand = "/edit-page";
+        private const string InsertPageCommand = "/insert-page";
 
-        public TemplateProject(string indexPath)
+        public TemplateProject(Project project)
         {
-            _indexPath = indexPath;
-            _basePath = Path.GetDirectoryName(indexPath)!;
-            _index = Json.Defrost<IndexFile>(File.ReadAllText(indexPath)!)!;
+            _project = project;
         }
 
         public TagContent StartScreen()
         {
-            var page = T.g()[
-                T.g("h1")[_index.Name],
-                T.g("p")[_indexPath],
-                T.g("p")[_index.Notes]
+            var content = T.g()[
+                T.g("h1")[_project.Index.Name],
+                T.g("p")[_project.BasePath],
+                T.g("p")[_project.Index.Notes]
             ];
 
-            if (string.IsNullOrWhiteSpace(_index.SampleFileName))
+            if (string.IsNullOrWhiteSpace(_project.Index.SampleFileName))
             {
-                page.Add(T.g("p")[
+                content.Add(T.g("p")[
                     "No sample file loaded.",
                     T.g("a", "href",SetSampleFileCommand)["Add a sample file"]
                 ]);
             }
             else
             {
-                page.Add(T.g("p")[
-                    $"Sample file '{_index.SampleFileName}'. ",
+                content.Add(T.g("p")[
+                    $"Sample file '{_project.Index.SampleFileName}'. ",
                     T.g("a", "href",SetSampleFileCommand)["Replace sample file"]
                 ]);
             }
 
-            if (_index.Pages.Count > 0)
+            if (_project.Index.Pages.Count > 0)
             {
-                foreach (var templatePage in _index.Pages)
+                for (var index = 0; index < _project.Index.Pages.Count; index++)
                 {
-                    page.Add(
-                        T.g("p")[templatePage.BackgroundImage ?? "no background"] // TODO: list pages with thumbnails
-                        );
+                    var templatePage = _project.Index.Pages[index];
+                    
+                    var bg = (string.IsNullOrWhiteSpace(templatePage.BackgroundImage)) ? T.g()["no background"] : T.g()[templatePage.BackgroundImage, T.g("br/"), T.g("img",  "src",$"{_project.BaseUri}/{templatePage.BackgroundImage}",  "width","200")];
+                    
+                    content.Add(T.g("p").Repeat(
+                            T.g("a",  "href",$"{InsertPageCommand}?index={index}")["Insert new page here"],
+                            bg,
+                            T.g("a", "href", $"{EditPageCommand}?index={index}")[$"Edit page {index+1}"]
+                        )
+                    );
                 }
             }
-            else { page.Add(T.g("p",  "style","font-style:italic;")["Project is empty"]); }
+            else { content.Add(T.g("p",  "style","font-style:italic;")["Project is empty"]); }
             
-            page.Add(
+            content.Add(
                 T.g("br/"),
                 T.g("a",  "href",AddPageAtEndCommand)["Add new page"]
                 );
 
-            return page;
+            return content;
         }
 
         public StateChangePermission StateChangeRequest()
@@ -70,12 +76,14 @@ namespace BasicImageFormFiller
 
         public void InterpretCommand(ITagModuleScreen moduleScreen, string command)
         {
-            switch (command)
+            var prefix = command.Contains('?') ? command[..command.IndexOf('?')] :command;
+            
+            switch (prefix)
             {
                 case AddPageAtEndCommand:
                 {
                     // TODO: add a blank page, and refresh screen
-                    _index.Pages.Add(new TemplatePage());
+                    _project.Pages.Add(new TemplatePage{Name = "Untitled"});
                     SaveChanges();
                     moduleScreen.ShowPage(StartScreen());
                     break;
@@ -88,9 +96,49 @@ namespace BasicImageFormFiller
                     break;
                 }
 
+                case InsertPageCommand:
+                {
+                    var idx = GetIndexFromQuery(command);
+                    _project.Pages.Insert(idx, new TemplatePage{Name = "Untitled"});
+                    SaveChanges();
+                    moduleScreen.ShowPage(StartScreen());
+                    break;
+                }
+
+                case EditPageCommand:
+                {
+                    var idx = GetIndexFromQuery(command);
+                    if (idx >= _project.Pages.Count) throw new Exception("Page index out of range");
+                    moduleScreen.SwitchToModule(new PageEditScreen(_project, idx));
+                    break;
+                }
+
                 default:
                     throw new Exception($"Unexpected command: {command}");
             }
+        }
+
+        private static int GetIndexFromQuery(string command)
+        {
+            if (!GetQueryBits(command).TryGetValue("index", out var idxStr)) idxStr = "0";
+            if (!int.TryParse(idxStr, out var idx)) idx = 0;
+            return idx;
+        }
+
+        private static Dictionary<string,string> GetQueryBits(string command)
+        {
+            var result = new Dictionary<string,string>();
+            var idx = command.IndexOf('?')+1;
+            if (idx < 0) return result;
+            var pairs = command[idx..]?.Split('&');
+            if (pairs == null) return result;
+            foreach (var pair in pairs)
+            {
+                var kvp = pair.Split("=", 2);
+                if (result.ContainsKey(kvp[0])) continue;
+                result.Add(kvp[0], kvp[1]);
+            }
+            return result;
         }
 
         private void ChooseSampleFile(ITagModuleScreen module)
@@ -106,9 +154,9 @@ namespace BasicImageFormFiller
             if (!ok || filePath == null) return;
             string? newPath = null;
 
-            if (Path.GetDirectoryName(filePath) != _basePath)
+            if (Path.GetDirectoryName(filePath) != _project.BasePath)
             {
-                newPath = Path.Combine(_basePath, Path.GetFileName(filePath));
+                newPath = Path.Combine(_project.BasePath, Path.GetFileName(filePath));
                 File.Copy(filePath, newPath);
                 filePath = newPath;
             }
@@ -124,15 +172,13 @@ namespace BasicImageFormFiller
                 throw new Exception($"Could not read sample data: {ex.Message}", ex);
             }
             
-            _index.SampleFileName = Path.GetFileName(filePath);
+            _project.Index.SampleFileName = Path.GetFileName(filePath);
             SaveChanges();
         }
 
         private void SaveChanges()
         {
-            var json = Json.Freeze(_index);
-            if (string.IsNullOrWhiteSpace(json)) throw new Exception("Json serialiser returned an invalid result");
-            File.WriteAllText(_indexPath, json);
+            _project.Save();
         }
     }
 }

@@ -9,5 +9,6 @@ namespace BasicImageFormFiller
         public void ShowLoadTemplate();
         public void ShowFailure(string message);
         bool PickAFile(out string? path);
+        void SwitchToModule(IScreenModule nextModule);
     }
 }

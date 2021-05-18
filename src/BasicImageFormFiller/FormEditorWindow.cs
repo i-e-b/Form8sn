@@ -78,7 +78,7 @@ namespace BasicImageFormFiller
                 path = Path.Combine(path, IndexFileName);
 
             if (!File.Exists(path)) ShowFailure("Index file not accessible. Check permissions?");
-            _currentModule = new TemplateProject(path);
+            _currentModule = new TemplateProject(new Project(path));
             ShowPage(_currentModule.StartScreen());
         }
 
@@ -104,6 +104,12 @@ namespace BasicImageFormFiller
             
             path = openFileDialog1!.FileName;
             return true;
+        }
+
+        public void SwitchToModule(IScreenModule nextModule)
+        {
+            _currentModule = nextModule;
+            ShowPage(_currentModule.StartScreen());
         }
 
         public void ShowNewTemplate()

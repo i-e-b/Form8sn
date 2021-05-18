@@ -21,6 +21,11 @@ namespace BasicImageFormFiller.FileFormats
 
     public class TemplatePage
     {
+        /// <summary>
+        /// Name is just for the user's use
+        /// </summary>
+        public string? Name { get; set; }
+        
         public string? BackgroundImage { get; set; }
         
         /// <summary>
