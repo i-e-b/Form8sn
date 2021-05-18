@@ -1,7 +1,9 @@
-using System;
+using BasicImageFormFiller.EditForms;
+using BasicImageFormFiller.FileFormats;
+using BasicImageFormFiller.Interfaces;
 using Tag;
 
-namespace BasicImageFormFiller
+namespace BasicImageFormFiller.ModuleScreens
 {
     internal class PageEditScreen : IScreenModule
     {
@@ -49,6 +51,15 @@ namespace BasicImageFormFiller
                     break;
                 }
 
+                case EditMetaDataCommand:
+                {
+                    _stateChange = StateChangePermission.NotAllowed;
+                    var screen = new EditPageMeta(this, _project, _pageIndex);
+                    screen.ShowDialog();
+                    moduleScreen.ShowPage(StartScreen());
+                    break;
+                }
+
                 case EditBoxesCommand:
                 {
                     _stateChange = StateChangePermission.NotAllowed;
@@ -68,5 +79,10 @@ namespace BasicImageFormFiller
 
 
         public StateChangePermission StateChangeRequest() => _stateChange;
+        public void Activate()
+        {
+            _stateChange = StateChangePermission.Allowed;
+            _project.Reload();
+        }
     }
 }

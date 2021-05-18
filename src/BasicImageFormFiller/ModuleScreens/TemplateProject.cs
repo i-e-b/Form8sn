@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using BasicImageFormFiller.FileFormats;
+using BasicImageFormFiller.Interfaces;
 using SkinnyJson;
 using Tag;
 
-namespace BasicImageFormFiller
+namespace BasicImageFormFiller.ModuleScreens
 {
     internal class TemplateProject: IScreenModule
     {
@@ -73,6 +74,8 @@ namespace BasicImageFormFiller
         {
             return StateChangePermission.Allowed;
         }
+
+        public void Activate() { }
 
         public void InterpretCommand(ITagModuleScreen moduleScreen, string command)
         {
@@ -143,7 +146,6 @@ namespace BasicImageFormFiller
 
         private void ChooseSampleFile(ITagModuleScreen module)
         {
-            // TODO: Pick a file
             // If cancel, do nothing
             // If not in the project directory, copy it in and continue with that as the new path
             // Check that it's json

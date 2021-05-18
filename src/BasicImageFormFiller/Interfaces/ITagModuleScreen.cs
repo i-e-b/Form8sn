@@ -1,6 +1,6 @@
 using Tag;
 
-namespace BasicImageFormFiller
+namespace BasicImageFormFiller.Interfaces
 {
     public interface ITagModuleScreen
     {

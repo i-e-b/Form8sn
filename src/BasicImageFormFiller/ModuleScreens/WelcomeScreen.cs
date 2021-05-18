@@ -1,6 +1,7 @@
+using BasicImageFormFiller.Interfaces;
 using Tag;
 
-namespace BasicImageFormFiller
+namespace BasicImageFormFiller.ModuleScreens
 {
     public class WelcomeScreen : IScreenModule
     {
@@ -36,5 +37,6 @@ namespace BasicImageFormFiller
         }
 
         public StateChangePermission StateChangeRequest() => StateChangePermission.Allowed;
+        public void Activate() { }
     }
 }
