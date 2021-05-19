@@ -8,6 +8,7 @@ namespace BasicImageFormFiller.FileFormats
         public TemplatePage()
         {
             Boxes = new Dictionary<string, TemplateBox>();
+            RepeatMode = new RepeatMode();
         }
         
         /// <summary>
@@ -21,6 +22,11 @@ namespace BasicImageFormFiller.FileFormats
         public string? Notes { get; set; }
         
         public string? BackgroundImage { get; set; }
+
+        /// <summary>
+        /// Is this a single page, or do we repeat over data sets?
+        /// </summary>
+        public RepeatMode RepeatMode { get; set; }
         
         /// <summary>
         /// Unique (on page) box name -> box definition
@@ -45,5 +51,20 @@ namespace BasicImageFormFiller.FileFormats
         {
             return Path.Combine(project.BasePath, BackgroundImage ?? "");
         }
+    }
+
+    public class RepeatMode
+    {
+        /// <summary>
+        /// If true, the data path must be set.
+        /// </summary>
+        public bool Repeats { get; set; }
+
+        /// <summary>
+        /// Path into data, or name of filter.
+        /// If the path points to a single item or object, you will get only one page.
+        /// If the path doesn't exist in the data set, this page will be skipped.
+        /// </summary>
+        public string? DataPath { get; set; }
     }
 }

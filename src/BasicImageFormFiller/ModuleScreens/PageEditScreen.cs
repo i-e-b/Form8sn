@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using BasicImageFormFiller.EditForms;
 using BasicImageFormFiller.FileFormats;
@@ -11,6 +12,7 @@ namespace BasicImageFormFiller.ModuleScreens
         private readonly Project _project;
         private readonly int _pageIndex;
         private StateChangePermission _stateChange;
+        private const string ChangePageRepeatCommand = "/change-repeat";
         private const string EditMappingCommand = "/edit-mapping";
         private const string EditBoxesCommand = "/edit-boxes";
         private const string EditMetaDataCommand = "/edit-meta";
@@ -30,21 +32,30 @@ namespace BasicImageFormFiller.ModuleScreens
             var content = T.g()[
                 T.g("h2")[$"Page {_pageIndex+1}: '{page.Name}'"],
                 T.g("p")[T.g("a", "href", BackToTemplateCommand)[$"Back to '{_project.Index.Name}' overview"]],
-                T.g("p")[page.Notes ?? ""]
-            ]; 
+                T.g("p")[page.Notes ?? ""],
+                T.g("hr/")
+            ];
+
+            var changeRpt = T.g("a", "href",ChangePageRepeatCommand)["Change repeat mode"];
+            var repeats = page.RepeatMode.Repeats
+                ? T.g("p")[$"Page repeats over '{page.RepeatMode.DataPath ?? "<invalid reference>"}' ", changeRpt]
+                : T.g("p")["Single page ", changeRpt];
+            content.Add(repeats);
             
+
             var background = string.IsNullOrWhiteSpace(page.BackgroundImage)
                 ? T.g()["no background"]
                 : T.g()[T.g("h3")["Preview of ", page.BackgroundImage], T.g("br/"), T.g("img",  "src",page.GetBackgroundUrl(_project),  "width","100%")];
             
             content.Add(
-                T.g("p").Repeat(
+                T.g("ul")[
+                T.g("li").Repeat(
                     T.g("a", "href",EditMetaDataCommand)["Edit page info & notes"],
                     T.g("a", "href",EditBoxesCommand)["Place template boxes on background"],
                     T.g("a", "href",EditMappingCommand)["Edit data to box mapping"],
                     T.g("a", "href",EditBackgroundCommand)["Pick background image"]
                     )
-                );
+                ]);
 
             content.Add(
                 T.g("hr/"),
@@ -53,7 +64,7 @@ namespace BasicImageFormFiller.ModuleScreens
             
             return content;
         }
-        
+
         public void InterpretCommand(ITagModuleScreen moduleScreen, string command)
         {
             switch (command)
@@ -92,10 +103,14 @@ namespace BasicImageFormFiller.ModuleScreens
                 case EditMappingCommand:
                 {
                     
-                    _stateChange = StateChangePermission.NotAllowed;
+                    //_stateChange = StateChangePermission.NotAllowed;
                     // TODO: show edit screen, with link back to self for unlock
+                    throw new Exception("Not yet implemented");
                     break;
                 }
+                
+                default:
+                    throw new Exception($"Unhandled command: {command}");
             }
         }
 

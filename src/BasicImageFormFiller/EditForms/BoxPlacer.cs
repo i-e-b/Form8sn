@@ -56,7 +56,11 @@ namespace BasicImageFormFiller.EditForms
 
             if (_drawingBox && _validDraw)
             {
-                g.DrawRectangle(Pens.Orchid!, _mx+_x, _my+_y, _mxe - _mx, _mye - _my);
+                var width = Math.Abs(_mxe - _mx);
+                var height = Math.Abs(_mye - _my);
+                var left = Math.Min(_mxe, _mx);
+                var top = Math.Min(_mye, _my);
+                g.DrawRectangle(Pens.Orchid!, _x + left, _y + top, width, height);
             }
 
             foreach (var entry in _project.Pages[_pageIndex].Boxes)
