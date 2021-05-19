@@ -89,6 +89,6 @@ namespace BasicImageFormFiller.FileFormats
         /// If the path points to a single item or object, you will get only one page.
         /// If the path doesn't exist in the data set, this page will be skipped.
         /// </summary>
-        public string? DataPath { get; set; }
+        public string[]? DataPath { get; set; }
     }
 }

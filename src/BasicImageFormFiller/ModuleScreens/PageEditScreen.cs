@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Windows.Forms;
 using BasicImageFormFiller.EditForms;
 using BasicImageFormFiller.FileFormats;
 using BasicImageFormFiller.Interfaces;
@@ -38,7 +39,7 @@ namespace BasicImageFormFiller.ModuleScreens
 
             var changeRpt = T.g("a", "href",ChangePageRepeatCommand)["Change repeat mode"];
             var repeats = page.RepeatMode.Repeats
-                ? T.g("p")[$"Page repeats over '{page.RepeatMode.DataPath ?? "<invalid reference>"}' ", changeRpt]
+                ? T.g("p")[$"Page repeats over '{RepeatPath(page)}' ", changeRpt]
                 : T.g("p")["Single page ", changeRpt];
             content.Add(repeats);
             
@@ -63,6 +64,12 @@ namespace BasicImageFormFiller.ModuleScreens
             );
             
             return content;
+        }
+
+        private static string RepeatPath(TemplatePage page)
+        {
+            if (page.RepeatMode.DataPath == null) return "<invalid reference>";
+            return string.Join(".", page.RepeatMode.DataPath);
         }
 
         public void InterpretCommand(ITagModuleScreen moduleScreen, string command)
@@ -94,8 +101,7 @@ namespace BasicImageFormFiller.ModuleScreens
                 case EditBoxesCommand:
                 {
                     _stateChange = StateChangePermission.NotAllowed;
-                    var screen = new BoxPlacer(this, _project, _pageIndex);
-                    screen.ShowDialog();
+                    new BoxPlacer(this, _project, _pageIndex).ShowDialog();
                     moduleScreen.ShowPage(StartScreen());
                     break;
                 }
@@ -111,11 +117,17 @@ namespace BasicImageFormFiller.ModuleScreens
 
                 case ChangePageRepeatCommand:
                 {
-                    // TODO: show screen to edit
-                    
-                    // This is just the data picker:
-                    //var pds = new PickDataSource(_project);
-                    //pds.ShowDialog();
+                    if (string.IsNullOrWhiteSpace(_project.Index.SampleFileName))
+                    {
+                        MessageBox.Show("Please add a sample file before setting repeat mappings");
+                        moduleScreen.ShowPage(StartScreen());
+                        return;
+                    }
+
+                    _stateChange = StateChangePermission.NotAllowed;
+                    new RepeatModePicker(this, _project, _pageIndex).ShowDialog();
+                    _project.Reload();
+                    moduleScreen.ShowPage(StartScreen());
                     break;
                 }
 
