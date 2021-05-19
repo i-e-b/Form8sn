@@ -29,6 +29,8 @@ namespace BasicImageFormFiller.ModuleScreens
 
         public TagContent StartScreen()
         {
+            var clearLine = T.g("hr/", "style","clear:both");
+            
             var content = T.g()[
                 T.g("p")[_project.BasePath],
                 T.g("h1")[_project.Index.Name],
@@ -60,21 +62,28 @@ namespace BasicImageFormFiller.ModuleScreens
                 {
                     var templatePage = _project.Index.Pages[index];
                     
-                    var bg = (string.IsNullOrWhiteSpace(templatePage.BackgroundImage)) ? T.g()["no background"] : T.g()[templatePage.BackgroundImage, T.g("br/"), T.g("img",  "src",templatePage.GetBackgroundUrl(_project),  "width","200")];
+                    var bg = string.IsNullOrWhiteSpace(templatePage.BackgroundImage)
+                        ? T.g("div",  "style","float:left;width:60%")["no background"]
+                        : T.g("div",  "style","float:left;width:60%;height:50%;overflow-y:scroll")[
+                            templatePage.BackgroundImage,
+                            T.g("br/"),
+                            T.g("img",  "src",templatePage.GetBackgroundUrl(_project),  "width","100%")
+                        ];
                     
-                    content.Add(T.g("p").Repeat(
-                            T.g("a",  "href",$"{InsertPageCommand}?index={index}")["Insert new page here"],
-                            T.g("hr/"),
-                            T.g("h3")[$"Page {index+1}: ", templatePage.Name ?? "Untitled"],
+                    content.Add(
+                        T.g("a", "href", $"{InsertPageCommand}?index={index}")["Insert new page here"],
+                        clearLine,
+                        T.g("div", "style", "float:left;width:30%")[
+                            T.g("h3")[$"Page {index + 1}: ", templatePage.Name ?? "Untitled"],
                             T.g()[
-                                T.g("a", "href", $"{EditPageCommand}?index={index}")[$"Edit page {index+1} "],
+                                T.g("a", "href", $"{EditPageCommand}?index={index}")[$"Edit page {index + 1} "],
                                 " | Move ",
                                 T.g("a", "href", $"{MovePageUpCommand}?index={index}")["Up"], " ",
                                 T.g("a", "href", $"{MovePageDownCommand}?index={index}")["Down"]
-                            ],
-                            bg,
-                            T.g("hr/")
-                        )
+                            ]
+                        ],
+                        bg,
+                        clearLine
                     );
                 }
             }

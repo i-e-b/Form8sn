@@ -108,7 +108,17 @@ namespace BasicImageFormFiller.ModuleScreens
                     throw new Exception("Not yet implemented");
                     break;
                 }
-                
+
+                case ChangePageRepeatCommand:
+                {
+                    // TODO: show screen to edit
+                    
+                    // This is just the data picker:
+                    var pds = new PickDataSource(_project);
+                    pds.ShowDialog();
+                    break;
+                }
+
                 default:
                     throw new Exception($"Unhandled command: {command}");
             }

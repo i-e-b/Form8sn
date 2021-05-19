@@ -34,5 +34,14 @@ namespace BasicImageFormFiller.FileFormats
         {
             Index = Json.Defrost<IndexFile>(File.ReadAllText(_indexPath)!)!;
         }
+
+        public object? LoadSampleData()
+        {
+            if (string.IsNullOrWhiteSpace(Index.SampleFileName)) return null;
+            var path = Path.Combine(BasePath, Index.SampleFileName);
+            if (! File.Exists(path)) return null;
+            
+            return Json.Defrost(File.ReadAllText(path)!);
+        }
     }
 }
