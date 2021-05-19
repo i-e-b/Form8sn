@@ -51,6 +51,30 @@ namespace BasicImageFormFiller.FileFormats
         {
             return Path.Combine(project.BasePath, BackgroundImage ?? "");
         }
+
+        /// <summary>
+        /// If a 'boxes' preview has been written, return a URL to that.
+        /// Otherwise if there is a background, return the URL to that.
+        /// Otherwise, return empty string.
+        /// </summary>
+        public string GetBackgroundPreviewUrl(Project project)
+        {
+            if (BackgroundImage == null) return "";
+            
+            var preview = Path.Combine(project.BasePath, "Form8sn_preview_"+BackgroundImage);
+            if (File.Exists(preview)) return $"{project.BaseUri}/Form8sn_preview_{BackgroundImage}";
+            return $"{project.BaseUri}/{BackgroundImage}";
+        }
+
+        /// <summary>
+        /// Get the expected path to read or write page previews
+        /// </summary>
+        public string? GetPreviewPath(Project project)
+        {
+            return BackgroundImage == null
+                ? null
+                : Path.Combine(project.BasePath, "Form8sn_preview_"+BackgroundImage);
+        }
     }
 
     public class RepeatMode

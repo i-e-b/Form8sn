@@ -45,7 +45,7 @@ namespace BasicImageFormFiller.ModuleScreens
 
             var background = string.IsNullOrWhiteSpace(page.BackgroundImage)
                 ? T.g()["no background"]
-                : T.g()[T.g("h3")["Preview of ", page.BackgroundImage], T.g("br/"), T.g("img",  "src",page.GetBackgroundUrl(_project),  "width","100%")];
+                : T.g()[T.g("h3")["Preview of ", page.BackgroundImage], T.g("br/"), T.g("img",  "src",page.GetBackgroundPreviewUrl(_project),  "width","100%")];
             
             content.Add(
                 T.g("ul")[
@@ -114,8 +114,8 @@ namespace BasicImageFormFiller.ModuleScreens
                     // TODO: show screen to edit
                     
                     // This is just the data picker:
-                    var pds = new PickDataSource(_project);
-                    pds.ShowDialog();
+                    //var pds = new PickDataSource(_project);
+                    //pds.ShowDialog();
                     break;
                 }
 

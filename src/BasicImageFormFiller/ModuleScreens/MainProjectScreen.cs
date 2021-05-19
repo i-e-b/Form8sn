@@ -29,62 +29,18 @@ namespace BasicImageFormFiller.ModuleScreens
 
         public TagContent StartScreen()
         {
-            var clearLine = T.g("hr/", "style","clear:both");
             
-            var content = T.g()[
-                T.g("p")[_project.BasePath],
-                T.g("h1")[_project.Index.Name],
-                T.g("p")[_project.Index.Notes],
-                T.g("a", "href",EditProjectNotesCommand)["Edit project name & notes"]
-            ];
-
-            if (string.IsNullOrWhiteSpace(_project.Index.SampleFileName))
-            {
-                content.Add(T.g("p")[
-                    "No sample file loaded. ",
-                    T.g("a", "href",SetSampleFileCommand)["Add a sample file"]
-                ]);
-            }
-            else
-            {
-                content.Add(T.g("p")[
-                    $"Sample file '{_project.Index.SampleFileName}'. ",
-                    T.g("a", "href",SetSampleFileCommand)["Replace sample file"]
-                ]);
-            }
-            content.Add(T.g("p")[
-                T.g("a", "href",SetDataFiltersCommand)["Setup data filters and splits"]
-            ]);
+            var content = T.g();
+            
+            RenderProjectHeader(content);
+            RenderSampleDataSection(content);
 
             if (_project.Index.Pages.Count > 0)
             {
                 for (var index = 0; index < _project.Index.Pages.Count; index++)
                 {
                     var templatePage = _project.Index.Pages[index];
-                    
-                    var bg = string.IsNullOrWhiteSpace(templatePage.BackgroundImage)
-                        ? T.g("div",  "style","float:left;width:60%")["no background"]
-                        : T.g("div",  "style","float:left;width:60%;height:50%;overflow-y:scroll")[
-                            templatePage.BackgroundImage,
-                            T.g("br/"),
-                            T.g("img",  "src",templatePage.GetBackgroundUrl(_project),  "width","100%")
-                        ];
-                    
-                    content.Add(
-                        T.g("a", "href", $"{InsertPageCommand}?index={index}")["Insert new page here"],
-                        clearLine,
-                        T.g("div", "style", "float:left;width:30%")[
-                            T.g("h3")[$"Page {index + 1}: ", templatePage.Name ?? "Untitled"],
-                            T.g()[
-                                T.g("a", "href", $"{EditPageCommand}?index={index}")[$"Edit page {index + 1} "],
-                                " | Move ",
-                                T.g("a", "href", $"{MovePageUpCommand}?index={index}")["Up"], " ",
-                                T.g("a", "href", $"{MovePageDownCommand}?index={index}")["Down"]
-                            ]
-                        ],
-                        bg,
-                        clearLine
-                    );
+                    RenderPageInfo(templatePage, content, index);
                 }
             }
             else { content.Add(T.g("p",  "style","font-style:italic;")["Project is empty"]); }
@@ -95,6 +51,67 @@ namespace BasicImageFormFiller.ModuleScreens
                 );
 
             return content;
+        }
+
+        private void RenderSampleDataSection(TagContent content)
+        {
+            if (string.IsNullOrWhiteSpace(_project.Index.SampleFileName))
+            {
+                content.Add(T.g("p")[
+                    "No sample file loaded. ",
+                    T.g("a", "href", SetSampleFileCommand)["Add a sample file"]
+                ]);
+            }
+            else
+            {
+                content.Add(T.g("p")[
+                    $"Sample file '{_project.Index.SampleFileName}'. ",
+                    T.g("a", "href", SetSampleFileCommand)["Replace sample file"]
+                ]);
+            }
+
+            content.Add(T.g("p")[
+                T.g("a", "href", SetDataFiltersCommand)["Setup data filters and splits"]
+            ]);
+        }
+
+        private void RenderProjectHeader(TagContent content)
+        {
+            content.Add(
+                T.g("p")[_project.BasePath],
+                T.g("h1")[_project.Index.Name],
+                T.g("p")[_project.Index.Notes],
+                T.g("a", "href", EditProjectNotesCommand)["Edit project name & notes"]
+            );
+        }
+
+        private void RenderPageInfo(TemplatePage templatePage, TagContent content, int index)
+        {
+            var clearLine = T.g("hr/", "style","clear:both");
+            var bg = string.IsNullOrWhiteSpace(templatePage.BackgroundImage)
+                ? T.g("div", "style", "float:left;width:60%")["no background"]
+                : T.g("div", "style", "float:left;width:60%;height:50%;overflow-y:scroll")[
+                    templatePage.BackgroundImage,
+                    T.g("br/"),
+                    T.g("img", "src", templatePage.GetBackgroundPreviewUrl(_project), "width", "100%")
+                ];
+
+            content.Add(
+                T.g("a", "href", $"{InsertPageCommand}?index={index}")["Insert new page here"],
+                clearLine,
+                T.g("div", "style", "float:left;width:30%")[
+                    T.g("h3")[$"Page {index + 1}: ", templatePage.Name ?? "Untitled"],
+                    T.g()[
+                        T.g("a", "href", $"{EditPageCommand}?index={index}")[$"Edit page {index + 1} "],
+                        " | Move ",
+                        T.g("a", "href", $"{MovePageUpCommand}?index={index}")["Up"], " ",
+                        T.g("a", "href", $"{MovePageDownCommand}?index={index}")["Down"]
+                    ],
+                    T.g("p",  "style","font-style:italic;")[templatePage.Notes??""]
+                ],
+                bg,
+                clearLine
+            );
         }
 
         public StateChangePermission StateChangeRequest() => _stateChange;

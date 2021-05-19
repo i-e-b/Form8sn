@@ -88,6 +88,7 @@ namespace BasicImageFormFiller.EditForms
             this.Controls.Add(this.pickButton);
             this.Controls.Add(this.treeView);
             this.Name = "PickDataSource";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "PickDataSource";
             this.ResumeLayout(false);
         }

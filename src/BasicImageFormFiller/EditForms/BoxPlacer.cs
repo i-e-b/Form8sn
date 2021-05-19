@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using BasicImageFormFiller.FileFormats;
 using BasicImageFormFiller.Interfaces;
@@ -15,6 +17,7 @@ namespace BasicImageFormFiller.EditForms
         private readonly int _pageIndex;
         private readonly Bitmap? _imageCache;
         
+        private const int PreviewImageSize = 1024;
         private const float FarScale = 0.5f;
         private const float NearScale = 1.0f;
         
@@ -49,11 +52,11 @@ namespace BasicImageFormFiller.EditForms
             if (_imageCache == null || _project == null) return;
             
             g.CompositingQuality = CompositingQuality.HighSpeed;
+            g.SmoothingMode = SmoothingMode.HighSpeed;
             g.InterpolationMode = InterpolationMode.NearestNeighbor;
             
-            g.ScaleTransform(_scale,_scale);
-            g.DrawImage(_imageCache, new PointF(_x,_y));
-
+            DrawAtScaleAndOffset(g, _scale, _x, _y);
+            
             if (_drawingBox && _validDraw)
             {
                 var width = Math.Abs(_mxe - _mx);
@@ -62,22 +65,29 @@ namespace BasicImageFormFiller.EditForms
                 var top = Math.Min(_mye, _my);
                 g.DrawRectangle(Pens.Orchid!, _x + left, _y + top, width, height);
             }
+        }
+
+        private void DrawAtScaleAndOffset(Graphics g, float scale, float dx, float dy)
+        {
+            if (_imageCache == null || _project == null) return;
+            
+            g.Transform?.Reset();
+            g.ScaleTransform(scale, scale);
+            g.DrawImage(_imageCache, new PointF(dx, dy));
 
             foreach (var entry in _project.Pages[_pageIndex].Boxes)
             {
                 var name = entry.Key;
                 var box = entry.Value;
-                
-                var rect = new Rectangle((int)box.Left, (int)box.Top, (int)box.Width, (int)box.Height);
-                rect.Offset((int)_x,(int)_y);
+
+                var rect = new Rectangle((int) box.Left, (int) box.Top, (int) box.Width, (int) box.Height);
+                rect.Offset((int) dx, (int) dy);
                 g.FillRectangle(Brushes.Aqua!, rect);
                 g.DrawRectangle(Pens.Black!, rect);
-                
+
                 AlignTextToRect(g, name, rect, box, out var top, out var left);
                 g.DrawString(name, Font, Brushes.Black!, left, top);
             }
-
-            g.Transform?.Reset();
         }
 
         private void AlignTextToRect(Graphics g, string name, Rectangle rect, TemplateBox box, out float top, out float left)
@@ -279,7 +289,54 @@ namespace BasicImageFormFiller.EditForms
 
         private void BoxPlacer_FormClosing(object sender, FormClosingEventArgs e)
         {
+            // Write a 'preview' of boxes-over-background
+            WritePreview();
+            
+            // Unlock parent
             _returnModule?.Activate();
+        }
+
+        private void WritePreview()
+        {
+            if (_imageCache == null || _project == null) return;
+            var path = _project.Pages[_pageIndex].GetPreviewPath(_project);
+            if (string.IsNullOrWhiteSpace(path)) return;
+            
+            var maxDim = Math.Max(_imageCache.Width, _imageCache.Height);
+            var scale = (maxDim > PreviewImageSize) ? (float)PreviewImageSize / maxDim : 1.0f;
+            
+            var pWidth = (int)(_imageCache.Width * scale);
+            var pHeight = (int)(_imageCache.Height * scale);
+            
+            using var bmp = new Bitmap(pWidth, pHeight);
+            using var g = Graphics.FromImage(bmp);
+            if (g == null) return;
+            
+            g.CompositingQuality = CompositingQuality.HighQuality;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode = SmoothingMode.HighQuality;
+            DrawAtScaleAndOffset(g, scale, 0.0f, 0.0f);
+            SaveJpeg(bmp, path);
+        }
+
+        private static void SaveJpeg(Bitmap src, string filePath, int quality = 95)
+        {
+            using var fs = new FileStream(filePath, FileMode.Create);
+            JpegStream(src, fs, quality);
+            fs.Flush(false);
+            fs.Close();
+        }
+
+        private static void JpegStream(Bitmap src, Stream outputStream, int quality = 95)
+        {
+            var encoder = ImageCodecInfo.GetImageEncoders()?.First(c => c.FormatID == ImageFormat.Jpeg!.Guid);
+            if (encoder == null) return;
+            // ReSharper disable once UseObjectOrCollectionInitializer
+            var parameters = new EncoderParameters(1);
+            parameters.Param![0] = new EncoderParameter(Encoder.Quality!, quality);
+
+            src.Save(outputStream, encoder, parameters);
+            outputStream.Flush();
         }
 
         private void GetMouseInDocSpace(float mouseX, float mouseY, out float docX, out float docY)
