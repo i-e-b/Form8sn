@@ -6,7 +6,6 @@ using System.Windows.Forms;
 using BasicImageFormFiller.FileFormats;
 using BasicImageFormFiller.Helpers;
 using BasicImageFormFiller.Interfaces;
-using SkinnyJson;
 
 namespace BasicImageFormFiller.EditForms
 {
@@ -33,8 +32,16 @@ namespace BasicImageFormFiller.EditForms
             var filter = _project.Index.DataFilters[_filterName];
 
             filterNameTextbox!.Text = _filterName;
+            
+            _selectedPath = filter.DataPath;
             dataPathLabel!.Text = string.Join(".", filter.DataPath ?? new string[0]);
+            
             FillWithEnum(filterTypeComboBox!.Items, typeof(MappingType));
+            filterTypeComboBox.SelectedItem = filter.MappingType.ToString();
+            
+            var propObj = CreateTypedContainerForParams(filter.MappingType.ToString());
+            MapDictionaryToProperties(filter.MappingParameters, propObj);
+            filterPropertyGrid!.SelectedObject = propObj;
         }
 
         private void FillWithEnum(IList items, Type type)
@@ -70,7 +77,7 @@ namespace BasicImageFormFiller.EditForms
             var filterName = filterTypeComboBox?.SelectedItem?.ToString() ?? "None";
             filter.MappingType = Enum.Parse<MappingType>(filterName);
             
-            MapProperties(filter.MappingParameters, filterPropertyGrid!.SelectedObject);
+            MapPropertiesToDictionary(filter.MappingParameters, filterPropertyGrid!.SelectedObject);
             
             // If key has changed, try updating
             var newKey = filterNameTextbox!.Text;
@@ -87,12 +94,34 @@ namespace BasicImageFormFiller.EditForms
             Close();
         }
 
-        private void MapProperties(Dictionary<string,string> dict, object obj)
+        private void MapPropertiesToDictionary(Dictionary<string,string> dict, object? obj)
         {
+            if (obj == null) return;
+            
             var props = obj.GetType().GetProperties().Where(p=>p.CanRead);
             foreach (var prop in props)
             {
-                dict.Add(prop.Name, prop.GetValue(obj)?.ToString() ?? "");
+                if (dict.ContainsKey(prop.Name))
+                {
+                    dict[prop.Name] = prop.GetValue(obj)?.ToString() ?? "";
+                }
+                else
+                {
+                    dict.Add(prop.Name, prop.GetValue(obj)?.ToString() ?? "");
+                }
+            }
+        }
+        
+        private void MapDictionaryToProperties(Dictionary<string,string> dict, object? obj)
+        {
+            if (obj == null) return;
+            
+            var props = obj.GetType().GetProperties().Where(p=>p.CanWrite);
+            foreach (var prop in props)
+            {
+                if (!dict.ContainsKey(prop.Name)) continue;
+                if (prop.PropertyType == typeof(int)) prop.SetValue(obj, int.Parse(dict[prop.Name]));
+                else prop.SetValue(obj, dict[prop.Name]);
             }
         }
 
@@ -112,18 +141,20 @@ namespace BasicImageFormFiller.EditForms
             dataPathLabel!.Text = string.Join(".", rm.SelectedPath);
         }
 
-        private void filterTypeComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        private object? CreateTypedContainerForParams(string? selectedName)
         {
-            filterPropertyGrid!.SelectedObject = new {};
-            
-            var selectedName = filterTypeComboBox!.SelectedItem?.ToString();
             var typeInfo = typeof(MappingType).GetFields().SingleOrDefault(f=> f.Name.Equals(selectedName, StringComparison.OrdinalIgnoreCase));
-            if (typeInfo == null) return;
+            if (typeInfo == null) return null;
             
             var attr = typeInfo.GetCustomAttributes(true).SingleOrDefault(a=>a is UsesTypeAttribute) as UsesTypeAttribute;
-            if (attr == null) return;
+            if (attr == null) return null;
             
-            filterPropertyGrid!.SelectedObject = Activator.CreateInstance(attr.Type);
+            return Activator.CreateInstance(attr.Type);
+        }
+
+        private void filterTypeComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            filterPropertyGrid!.SelectedObject = CreateTypedContainerForParams(filterTypeComboBox!.SelectedItem?.ToString()) ?? new {};
         }
     }
 }

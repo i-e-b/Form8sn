@@ -10,6 +10,7 @@ namespace BasicImageFormFiller.EditForms
     public partial class PickDataSource : Form
     {
         private const char Separator = '\x1F';
+        private const string FilterMarker = "#";
 
         public string[]? SelectedPath { get; set; }
         public string? SelectedTag { get; set; }
@@ -24,7 +25,17 @@ namespace BasicImageFormFiller.EditForms
             if (data == null) return;
             
             treeView!.Nodes.AddRange( ReadObjectRecursive(data, "", "Data").ToArray() );
-            treeView.Nodes.Add(new TreeNode("Filters (not yet implemented)"));
+            
+            var filters = new TreeNode{Text = "Filters", Tag = FilterMarker, ForeColor = Color.DimGray};
+            foreach (var filterName in project.Index.DataFilters.Keys)
+            {
+                filters.Nodes.Add(new TreeNode{
+                    Text = filterName,
+                    Tag = FilterMarker + Separator + filterName,
+                    ForeColor = Color.Blue
+                });
+            }
+            treeView.Nodes.Add(filters);
         }
 
         private static List<TreeNode> ReadObjectRecursive(object o, string path, string node)
@@ -39,7 +50,7 @@ namespace BasicImageFormFiller.EditForms
                 }
                 outp.Add(new TreeNode(node, collection.ToArray()){
                     Tag = path,
-                    ForeColor = Color.DarkGray,
+                    ForeColor = Color.DimGray,
                 });
             }
             else if (o is ArrayList array)

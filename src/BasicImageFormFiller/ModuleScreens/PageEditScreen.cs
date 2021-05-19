@@ -51,9 +51,9 @@ namespace BasicImageFormFiller.ModuleScreens
             content.Add(
                 T.g("ul")[
                 T.g("li").Repeat(
+                    T.g("a", "href",EditBoxesCommand)["PLACE - Layout template boxes on background"],
+                    T.g("a", "href",EditMappingCommand)["MAP - Edit source data to box mapping"],
                     T.g("a", "href",EditMetaDataCommand)["Edit page info & notes"],
-                    T.g("a", "href",EditBoxesCommand)["Place template boxes on background"],
-                    T.g("a", "href",EditMappingCommand)["Edit data to box mapping"],
                     T.g("a", "href",EditBackgroundCommand)["Pick background image"]
                     )
                 ]);
