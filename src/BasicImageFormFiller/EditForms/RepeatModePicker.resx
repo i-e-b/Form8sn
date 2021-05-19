@@ -121,7 +121,8 @@
     <value>If a page does not repeat, it will be placed in the output exactly once.
 
 If a page repeats, a copy will be added to the output for each item in the data item you pick.
+If the data item is empty, or does not exist, a repeating page will not be output.
 
-If the data item is empty, or does not exist, a repeating page will not be output.</value>
+List items are marked with "(multiple)" in the data picker.</value>
   </data>
 </root>

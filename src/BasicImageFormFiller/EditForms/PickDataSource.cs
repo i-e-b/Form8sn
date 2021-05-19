@@ -27,7 +27,7 @@ namespace BasicImageFormFiller.EditForms
             treeView.Nodes.Add(new TreeNode("Filters (not yet implemented)"));
         }
 
-        private List<TreeNode> ReadObjectRecursive(object o, string path, string node)
+        private static List<TreeNode> ReadObjectRecursive(object o, string path, string node)
         {
             var outp = new List<TreeNode>();
             if (o is Dictionary<string, object> dict)
@@ -41,7 +41,8 @@ namespace BasicImageFormFiller.EditForms
                     Tag = path,
                     ForeColor = Color.DarkGray,
                 });
-            } else if (o is ArrayList array)
+            }
+            else if (o is ArrayList array)
             {
                 var collection = new List<TreeNode>();
                 for (var index = 0; index < array.Count; index++)
@@ -58,7 +59,7 @@ namespace BasicImageFormFiller.EditForms
                     });
                 }
 
-                outp.Add(new TreeNode(node, collection.ToArray()){
+                outp.Add(new TreeNode(node + " (multiple)", collection.ToArray()){
                     Tag = path,
                     ForeColor = Color.Purple,
                 });
