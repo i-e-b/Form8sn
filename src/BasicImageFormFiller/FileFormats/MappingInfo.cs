@@ -4,9 +4,10 @@ namespace BasicImageFormFiller.FileFormats
 {
     public class MappingInfo
     {
-        public MappingInfo()
+        public MappingInfo() { MappingParameters = new Dictionary<string, string>(); }
+        public MappingInfo(MappingType mappingType)
         {
-            DataPath = "";
+            MappingType = mappingType;
             MappingParameters = new Dictionary<string, string>();
         }
         
@@ -14,7 +15,7 @@ namespace BasicImageFormFiller.FileFormats
         /// Path to the original data (like `root.parent.child`).
         /// This can also be the name of another mapping (no loops please)
         /// </summary>
-        public string DataPath { get; set; }
+        public string[]? DataPath { get; set; }
 
         /// <summary>
         /// The (pre-programmed) mapping to use

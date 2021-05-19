@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using BasicImageFormFiller.EditForms;
 using BasicImageFormFiller.FileFormats;
@@ -120,7 +119,7 @@ namespace BasicImageFormFiller.ModuleScreens
 
         public void InterpretCommand(ITagModuleScreen moduleScreen, string command)
         {
-            var prefix = command.Contains('?') ? command[..command.IndexOf('?')] :command;
+            var prefix = Url.Prefix(command);
             
             switch (prefix)
             {
@@ -149,9 +148,15 @@ namespace BasicImageFormFiller.ModuleScreens
                     break;
                 }
 
+                case SetDataFiltersCommand:
+                {
+                    moduleScreen.SwitchToModule(new FiltersScreen(_project));
+                    break;
+                }
+
                 case InsertPageCommand:
                 {
-                    var idx = GetIndexFromQuery(command);
+                    var idx = Url.GetIndexFromQuery(command);
                     _project.Pages.Insert(idx, new TemplatePage{Name = "Untitled"});
                     _project.Save();
                     moduleScreen.ShowPage(StartScreen());
@@ -160,7 +165,7 @@ namespace BasicImageFormFiller.ModuleScreens
 
                 case EditPageCommand:
                 {
-                    var idx = GetIndexFromQuery(command);
+                    var idx = Url.GetIndexFromQuery(command);
                     if (idx >= _project.Pages.Count) throw new Exception("Page index out of range");
                     moduleScreen.SwitchToModule(new PageEditScreen(_project, idx));
                     break;
@@ -168,7 +173,7 @@ namespace BasicImageFormFiller.ModuleScreens
 
                 case MovePageUpCommand:
                 {
-                    var idx = GetIndexFromQuery(command);
+                    var idx = Url.GetIndexFromQuery(command);
                     if (idx <= 0) return; // ignore up past top
                     var tmp = _project.Pages[idx];
                     _project.Pages[idx] = _project.Pages[idx-1];
@@ -180,7 +185,7 @@ namespace BasicImageFormFiller.ModuleScreens
 
                 case MovePageDownCommand:
                 {
-                    var idx = GetIndexFromQuery(command);
+                    var idx = Url.GetIndexFromQuery(command);
                     if (idx >= _project.Pages.Count - 1) return; // ignore down past bottom
                     var tmp = _project.Pages[idx];
                     _project.Pages[idx] = _project.Pages[idx+1];
@@ -195,28 +200,6 @@ namespace BasicImageFormFiller.ModuleScreens
             }
         }
 
-        private static int GetIndexFromQuery(string command)
-        {
-            if (!GetQueryBits(command).TryGetValue("index", out var idxStr)) idxStr = "0";
-            if (!int.TryParse(idxStr, out var idx)) idx = 0;
-            return idx;
-        }
-
-        private static Dictionary<string,string> GetQueryBits(string command)
-        {
-            var result = new Dictionary<string,string>();
-            var idx = command.IndexOf('?')+1;
-            if (idx < 0) return result;
-            var pairs = command[idx..]?.Split('&');
-            if (pairs == null) return result;
-            foreach (var pair in pairs)
-            {
-                var kvp = pair.Split("=", 2);
-                if (result.ContainsKey(kvp[0])) continue;
-                result.Add(kvp[0], kvp[1]);
-            }
-            return result;
-        }
 
         private void ChooseSampleFile(ITagModuleScreen module)
         {

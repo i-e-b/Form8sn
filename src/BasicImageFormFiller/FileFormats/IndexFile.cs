@@ -9,20 +9,20 @@ namespace BasicImageFormFiller.FileFormats
             Name = name;
             Notes = "";
             Pages = new List<TemplatePage>();
-            SpecialMappings = new Dictionary<string, MappingInfo>();
+            DataFilters = new Dictionary<string, MappingInfo>();
         }
 
         public IndexFile() {
             Name = "Untitled";
             Notes = "";
             Pages = new List<TemplatePage>();
-            SpecialMappings = new Dictionary<string, MappingInfo>();
+            DataFilters = new Dictionary<string, MappingInfo>();
         }
 
         public string? SampleFileName { get; set; }
         public string Notes { get; set; }
         public string Name { get; set; }
         public List<TemplatePage> Pages { get; set; }
-        public Dictionary<string, MappingInfo> SpecialMappings { get; set; }
+        public Dictionary<string, MappingInfo> DataFilters { get; set; }
     }
 }
