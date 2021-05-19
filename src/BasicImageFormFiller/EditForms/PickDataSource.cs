@@ -16,9 +16,10 @@ namespace BasicImageFormFiller.EditForms
         public string? SelectedTag { get; set; }
         
         public PickDataSource() { InitializeComponent(); }
-        public PickDataSource(Project project)
+        public PickDataSource(Project project, string prompt)
         {
             InitializeComponent();
+            Text = prompt;
             
             // load tree from sample data
             var data = project.LoadSampleData();
@@ -36,6 +37,12 @@ namespace BasicImageFormFiller.EditForms
                 });
             }
             treeView.Nodes.Add(filters);
+        }
+
+        public sealed override string Text
+        {
+            get { return base.Text; }
+            set { base.Text = value; }
         }
 
         private static List<TreeNode> ReadObjectRecursive(object o, string path, string node)

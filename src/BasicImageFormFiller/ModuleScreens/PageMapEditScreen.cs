@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using BasicImageFormFiller.EditForms;
 using BasicImageFormFiller.FileFormats;
 using BasicImageFormFiller.Helpers;
 using BasicImageFormFiller.Interfaces;
@@ -51,8 +52,8 @@ namespace BasicImageFormFiller.ModuleScreens
             list.Add(T.g("dt")[key]);
 
             var info = T.g("dd");
-            if (path == null || path.Length < 1) info.Add(T.g("span", "style", "color:#777")["&lt;unmapped&gt;"]);
-            else info.Add(string.Join(".", path));
+            if (path == null || path.Length < 1) info.Add(T.g("span", "style", "color:#f77")["&lt;unmapped&gt;"]);
+            else info.Add(T.g("span", "style", "color:#070")[string.Join(".", path)]);
 
             info.Add(
                 " | ",
@@ -76,7 +77,16 @@ namespace BasicImageFormFiller.ModuleScreens
 
                 case MapKeyCommand:
                 {
-                    var x = Url.GetValueFromQuery(command, QueryKey);
+                    var key = Url.GetValueFromQuery(command, QueryKey);
+                    var pick = new PickDataSource(_project, $"Map source for '{key}'");
+                    pick.ShowDialog();
+                    if (pick.SelectedPath != null)
+                    {
+                        _project.Pages[_pageIndex].Boxes[key].MappingPath = pick.SelectedPath;
+                        _project.Save();
+                    }
+                    
+                    moduleScreen.ShowPage(StartScreen());
                     break;
                 }
 
