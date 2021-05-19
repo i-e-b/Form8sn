@@ -37,6 +37,9 @@
       <Compile Update="EditForms\RepeatModePicker.cs">
         <SubType>Form</SubType>
       </Compile>
+      <Compile Update="EditForms\FilterEditor.cs">
+        <SubType>Form</SubType>
+      </Compile>
     </ItemGroup>
 
 </Project>

@@ -98,10 +98,7 @@ namespace BasicImageFormFiller.EditForms
         private System.Windows.Forms.Button pickButton;
         private System.Windows.Forms.Button cancelButton;
 
-        private System.Windows.Forms.Button button2;
-
         private System.Windows.Forms.TreeView treeView;
-        private System.Windows.Forms.Button button1;
 
         #endregion
     }

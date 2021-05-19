@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using BasicImageFormFiller.EditForms;
 using BasicImageFormFiller.FileFormats;
 using BasicImageFormFiller.Interfaces;
 using Tag;
@@ -75,6 +76,20 @@ namespace BasicImageFormFiller.ModuleScreens
                 {
                     var name = Url.GetValueFromQuery(command, "filter");
                     DeleteFilter(name);
+                    moduleScreen.ShowPage(StartScreen());
+                    break;
+                }
+
+                case EditFilterCommand:
+                {
+                    var name = Url.GetValueFromQuery(command, "filter");
+                    if (string.IsNullOrWhiteSpace(name)) return;
+                    
+                    _stateChange = StateChangePermission.NotAllowed;
+                    var ed = new FilterEditor(this, _project, name);
+                    ed.ShowDialog();
+                    
+                    _project.Reload();
                     moduleScreen.ShowPage(StartScreen());
                     break;
                 }

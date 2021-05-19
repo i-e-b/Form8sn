@@ -112,7 +112,6 @@ namespace BasicImageFormFiller.ModuleScreens
                     //_stateChange = StateChangePermission.NotAllowed;
                     // TODO: show edit screen, with link back to self for unlock
                     throw new Exception("Not yet implemented");
-                    break;
                 }
 
                 case ChangePageRepeatCommand:
