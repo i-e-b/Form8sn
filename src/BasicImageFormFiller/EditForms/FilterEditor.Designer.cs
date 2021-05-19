@@ -119,6 +119,7 @@ namespace BasicImageFormFiller.EditForms
             this.filterTypeComboBox.Name = "filterTypeComboBox";
             this.filterTypeComboBox.Size = new System.Drawing.Size(239, 21);
             this.filterTypeComboBox.TabIndex = 8;
+            this.filterTypeComboBox.SelectedIndexChanged += new System.EventHandler(this.filterTypeComboBox_SelectedIndexChanged);
             // 
             // label3
             // 

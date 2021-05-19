@@ -75,5 +75,19 @@ namespace BasicImageFormFiller.EditForms
             _selectedPath = rm.SelectedPath;
             dataPathLabel!.Text = string.Join(".", rm.SelectedPath);
         }
+
+        private void filterTypeComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            filterPropertyGrid!.SelectedObject = new {};
+            
+            var selectedName = filterTypeComboBox!.SelectedItem?.ToString();
+            var typeInfo = typeof(MappingType).GetFields().SingleOrDefault(f=> f.Name.Equals(selectedName, StringComparison.OrdinalIgnoreCase));
+            if (typeInfo == null) return;
+            
+            var attr = typeInfo.GetCustomAttributes(true).SingleOrDefault(a=>a is UsesTypeAttribute) as UsesTypeAttribute;
+            if (attr == null) return;
+            
+            filterPropertyGrid!.SelectedObject = Activator.CreateInstance(attr.Type);
+        }
     }
 }
