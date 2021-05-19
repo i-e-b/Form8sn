@@ -1,6 +1,6 @@
 using System;
 
-namespace BasicImageFormFiller.FileFormats
+namespace BasicImageFormFiller.Helpers
 {
     public class UsesTypeAttribute : Attribute
     {

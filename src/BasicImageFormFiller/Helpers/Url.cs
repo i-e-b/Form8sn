@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace BasicImageFormFiller.FileFormats
+namespace BasicImageFormFiller.Helpers
 {
     public static class Url
     {

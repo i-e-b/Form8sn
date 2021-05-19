@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using BasicImageFormFiller.EditForms;
 using BasicImageFormFiller.FileFormats;
+using BasicImageFormFiller.Helpers;
 using BasicImageFormFiller.Interfaces;
 using SkinnyJson;
 using Tag;

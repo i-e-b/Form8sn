@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using BasicImageFormFiller.FileFormats;
+using BasicImageFormFiller.Helpers;
 using BasicImageFormFiller.Interfaces;
+using SkinnyJson;
 
 namespace BasicImageFormFiller.EditForms
 {
@@ -55,9 +58,42 @@ namespace BasicImageFormFiller.EditForms
 
         private void saveButton_Click(object sender, EventArgs e)
         {
+            if (_project == null || _filterName == null) return;
             // TODO: save values, change key name if required.
 
+            var container = _project.Index.DataFilters;
+            
+            var filter = container[_filterName];
+            
+            filter.DataPath = _selectedPath;
+            
+            var filterName = filterTypeComboBox?.SelectedItem?.ToString() ?? "None";
+            filter.MappingType = Enum.Parse<MappingType>(filterName);
+            
+            MapProperties(filter.MappingParameters, filterPropertyGrid!.SelectedObject);
+            
+            // If key has changed, try updating
+            var newKey = filterNameTextbox!.Text;
+            // if key has changed and it's not already in use:
+            if (newKey != _filterName && !string.IsNullOrWhiteSpace(newKey) && !container.ContainsKey(newKey)) 
+            {
+                var tmp = container[_filterName];
+                container.Remove(_filterName);
+                container.Add(newKey, tmp);
+            }
+            
+            _project.Save();
+            
             Close();
+        }
+
+        private void MapProperties(Dictionary<string,string> dict, object obj)
+        {
+            var props = obj.GetType().GetProperties().Where(p=>p.CanRead);
+            foreach (var prop in props)
+            {
+                dict.Add(prop.Name, prop.GetValue(obj)?.ToString() ?? "");
+            }
         }
 
         private void cancelButton_Click(object sender, EventArgs e)

@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Windows.Forms;
 using BasicImageFormFiller.EditForms;
 using BasicImageFormFiller.FileFormats;
+using BasicImageFormFiller.Helpers;
 using BasicImageFormFiller.Interfaces;
 using Tag;
 
@@ -34,17 +36,37 @@ namespace BasicImageFormFiller.ModuleScreens
                 T.g("p")[T.g("a", "href", AddNewFilterCommand)["Add a filter"]]
             ];
 
+            var list = T.g("dl");
             foreach (var filter in _project.Index.DataFilters)
             {
-                content.Add(T.g("p")[
-                    filter.Key, " - ", filter.Value.MappingType.ToString(), " over ", DisplayPath(filter), "; ",
-                    T.g("a", "href",$"{DeleteFilterCommand}?filter={filter.Key}")["Delete"], " ",
-                    T.g("a", "href",$"{EditFilterCommand}?filter={filter.Key}")["Edit"], " "
-                ]);
+                list.Add(
+                    T.g("dt")[filter.Key],
+                    T.g("dd")[
+                        filter.Value.MappingType.ToString(), DisplayParams(filter.Value), " over ", DisplayPath(filter), " | ",
+                        T.g("a", "href", $"{DeleteFilterCommand}?filter={filter.Key}")["Delete"], " ",
+                        T.g("a", "href", $"{EditFilterCommand}?filter={filter.Key}")["Edit"], " ",
+                        T.g("br/"), T.g()["&nbsp;"]
+                    ]
+                );
             }
+            content.Add(list);
 
 
             return content;
+        }
+
+        private string DisplayParams(MappingInfo map)
+        {
+            if (map.MappingParameters.Count < 1) return "";
+            var sb = new StringBuilder(" (");
+            foreach (var kvp in map.MappingParameters)
+            {
+                sb.Append(kvp.Key);
+                sb.Append("=");
+                sb.Append(kvp.Value);
+            }
+            sb.Append(") ");
+            return sb.ToString();
         }
 
         private static string DisplayPath(KeyValuePair<string, MappingInfo> filter)

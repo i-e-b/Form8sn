@@ -1,38 +1,46 @@
 using System.ComponentModel;
+using BasicImageFormFiller.Helpers;
 
 namespace BasicImageFormFiller.FileFormats
 {
     public enum MappingType
     {
-        /// <summary> Pass data directly along </summary>
+        [Description("Pass data directly along")]
         [UsesType(typeof(EmptyMappingParams))]
         None,
         
-        /// <summary>
-        /// Split a list into a list of sub-lists, each up to `N` long.
-        /// <para>"Count":int -- max length of sub-lists</para>
-        /// </summary>
-        [UsesType(typeof(SplitIntoNMappingParams))]
+        [Description("Split a list into a list of sub-lists, each up to 'count' long")]
+        [UsesType(typeof(MaxCountMappingParams))]
         SplitIntoN,
         
-        /// <summary>
-        /// Sum up all numeric values on the path
-        /// </summary>
-        [UsesType(typeof(TotalMappingParams))]
+        [Description("Return the first 'count' words, discarding others")]
+        [UsesType(typeof(TakeMappingParams))]
+        TakeWords,
+        
+        [Description("Discard the first 'count' words, returning others")]
+        [UsesType(typeof(SkipMappingParams))]
+        SkipWords,
+        
+        [Description("Sum up all numeric values on the path")]
+        [UsesType(typeof(EmptyMappingParams))]
         Total,
         
-        /// <summary>
-        /// Sum up numeric values on the path that have been used so far
-        /// </summary>
-        [UsesType(typeof(RunningTotalMappingParams))]
+        [Description("Sum up numeric values on the path that have been used so far")]
+        [UsesType(typeof(EmptyMappingParams))]
         RunningTotal,
     }
 
-    public class RunningTotalMappingParams { }
+    public class TakeMappingParams {
+        [Description("Number of items to use before discarding the rest")]
+        public int Count { get; set; }
+    }
+    public class SkipMappingParams {
+        [Description("Number of items to skip before using the rest")]
+        public int Count { get; set; }
+    }
 
-    public class TotalMappingParams { }
 
-    public class SplitIntoNMappingParams {
+    public class MaxCountMappingParams {
         [Description("The largest number of items in each set.")]
         public int MaxCount { get; set; }
     }
