@@ -13,12 +13,13 @@ namespace BasicImageFormFiller.ModuleScreens
         private readonly Project _project;
         private readonly int _pageIndex;
         private StateChangePermission _stateChange;
+        private const string BackToTemplateCommand = "/back-to-template";
         private const string ChangePageRepeatCommand = "/change-repeat";
         private const string EditMappingCommand = "/edit-mapping";
         private const string EditBoxesCommand = "/edit-boxes";
         private const string EditMetaDataCommand = "/edit-meta";
-        private const string BackToTemplateCommand = "/back-to-template";
         private const string EditBackgroundCommand = "/pick-background";
+        private const string DeletePageCommand = "/delete-this-page";
 
         public PageEditScreen(Project project, int pageIndex)
         {
@@ -57,6 +58,10 @@ namespace BasicImageFormFiller.ModuleScreens
                     T.g("a", "href",EditBackgroundCommand)["Pick background image"]
                     )
                 ]);
+            
+            content.Add(
+                T.g("a", "href",DeletePageCommand,  "style","color:#f00")["Delete this page"]
+                );
 
             content.Add(
                 T.g("hr/"),
@@ -79,6 +84,20 @@ namespace BasicImageFormFiller.ModuleScreens
                 case BackToTemplateCommand:
                 {
                     moduleScreen.SwitchToModule(new MainProjectScreen(_project));
+                    break;
+                }
+
+                case DeletePageCommand:
+                {
+                    var result = MessageBox.Show("Are you sure", "Delete", MessageBoxButtons.YesNo);
+                    if (result == DialogResult.Yes)
+                    {
+                        _project.Index.Pages.RemoveAt(_pageIndex);
+                        _project.Save();
+                        moduleScreen.SwitchToModule(new MainProjectScreen(_project));
+                        return;
+                    }
+                    moduleScreen.ShowPage(StartScreen());
                     break;
                 }
 
@@ -108,10 +127,8 @@ namespace BasicImageFormFiller.ModuleScreens
 
                 case EditMappingCommand:
                 {
-                    
-                    //_stateChange = StateChangePermission.NotAllowed;
-                    // TODO: show edit screen, with link back to self for unlock
-                    throw new Exception("Not yet implemented");
+                    moduleScreen.SwitchToModule(new PageMapEditScreen(_project, _pageIndex));
+                    break;
                 }
 
                 case ChangePageRepeatCommand:
