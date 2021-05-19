@@ -9,6 +9,10 @@ namespace BasicImageFormFiller.FileFormats
         [UsesType(typeof(EmptyMappingParams))]
         None,
         
+        [Description("Supply an unchanging value")]
+        [UsesType(typeof(TextMappingParams))]
+        FixedValue,
+        
         [Description("Split a list into a list of sub-lists, each up to 'count' long")]
         [UsesType(typeof(MaxCountMappingParams))]
         SplitIntoN,
@@ -39,6 +43,10 @@ namespace BasicImageFormFiller.FileFormats
         public int Count { get; set; }
     }
 
+    public class TextMappingParams {
+        [Description("Text to supply as data")]
+        public string Text { get; set; } = "";
+    }
 
     public class MaxCountMappingParams {
         [Description("The largest number of items in each set.")]
