@@ -79,10 +79,13 @@ namespace BasicImageFormFiller.EditForms
             {
                 var name = entry.Key;
                 var box = entry.Value;
+                var hasMap = box.MappingPath != null && box.MappingPath.Length > 0;
+
+                var boxColor = hasMap ? Brushes.Turquoise! : Brushes.Pink!;
 
                 var rect = new Rectangle((int) box.Left, (int) box.Top, (int) box.Width, (int) box.Height);
                 rect.Offset((int) dx, (int) dy);
-                g.FillRectangle(Brushes.Aqua!, rect);
+                g.FillRectangle(boxColor, rect);
                 g.DrawRectangle(Pens.Black!, rect);
 
                 AlignTextToRect(g, name, rect, box, out var top, out var left);
