@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Form8snCore;
 
 namespace BasicImageFormFiller.FileFormats
 {

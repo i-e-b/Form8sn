@@ -6,6 +6,7 @@ using BasicImageFormFiller.EditForms;
 using BasicImageFormFiller.FileFormats;
 using BasicImageFormFiller.Helpers;
 using BasicImageFormFiller.Interfaces;
+using Form8snCore;
 using Tag;
 
 namespace BasicImageFormFiller.ModuleScreens

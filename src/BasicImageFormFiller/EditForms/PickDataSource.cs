@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using BasicImageFormFiller.FileFormats;
+using Form8snCore;
 
 namespace BasicImageFormFiller.EditForms
 {
@@ -26,24 +27,30 @@ namespace BasicImageFormFiller.EditForms
             if (data == null) return;
             
             treeView!.Nodes.AddRange( ReadObjectRecursive(data, "", "Data").ToArray() );
-            
-            var filters = new TreeNode{Text = "Filters", Tag = FilterMarker, ForeColor = Color.DimGray};
-            foreach (var filterName in project.Index.DataFilters.Keys)
-            {
-                filters.Nodes.Add(new TreeNode{
-                    Text = filterName,
-                    Tag = FilterMarker + Separator + filterName,
-                    ForeColor = Color.Blue
-                });
-            }
-            treeView.Nodes.Add(filters);
+            AddDataFilters(project);
         }
 
-        public sealed override string Text
+        private void AddDataFilters(Project project)
         {
-            get { return base.Text; }
-            set { base.Text = value; }
+            var filters = new TreeNode {Text = "Filters", Tag = FilterMarker, ForeColor = Color.DimGray};
+            var data = project.LoadSampleDataDynamic();
+            foreach (var filter in project.Index.DataFilters)
+            {
+                var node = new TreeNode { Text = filter.Key, Tag = FilterMarker + Separator + filter.Key, ForeColor = Color.Blue };
+                
+                var sample = FilterData.ApplyFilter(filter.Value.MappingType, filter.Value.MappingParameters, filter.Value.DataPath, data);
+                if (sample != null)
+                {
+                    node.Nodes.AddRange(ReadObjectRecursive(sample, "", "-sample-").ToArray());
+                }
+
+                filters.Nodes.Add(node);
+            }
+
+            treeView!.Nodes.Add(filters);
         }
+
+        public sealed override string Text { get => base.Text ?? ""; set => base.Text = value; }
 
         private static List<TreeNode> ReadObjectRecursive(object o, string path, string node)
         {

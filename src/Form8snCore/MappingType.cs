@@ -1,7 +1,6 @@
 using System.ComponentModel;
-using BasicImageFormFiller.Helpers;
 
-namespace BasicImageFormFiller.FileFormats
+namespace Form8snCore
 {
     public enum MappingType
     {

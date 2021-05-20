@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using BasicImageFormFiller.FileFormats;
 using BasicImageFormFiller.Helpers;
 using BasicImageFormFiller.Interfaces;
+using Form8snCore;
 
 namespace BasicImageFormFiller.EditForms
 {

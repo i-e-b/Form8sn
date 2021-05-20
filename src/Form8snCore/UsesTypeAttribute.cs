@@ -1,6 +1,6 @@
 using System;
 
-namespace BasicImageFormFiller.Helpers
+namespace Form8snCore
 {
     public class UsesTypeAttribute : Attribute
     {
