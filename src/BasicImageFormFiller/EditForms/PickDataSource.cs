@@ -17,7 +17,7 @@ namespace BasicImageFormFiller.EditForms
         public string? SelectedTag { get; set; }
         
         public PickDataSource() { InitializeComponent(); }
-        public PickDataSource(Project project, string prompt)
+        public PickDataSource(Project project, string prompt, string[]? previous)
         {
             InitializeComponent();
             Text = prompt;
@@ -26,13 +26,41 @@ namespace BasicImageFormFiller.EditForms
             var data = project.LoadSampleData();
             if (data == null) return;
             
-            treeView!.Nodes.AddRange( ReadObjectRecursive(data, "", "Data").ToArray() );
+            AddSampleData(data);
             AddDataFilters(project, data);
+            
+            // pick previous source if it exists
+            if (previous != null && previous.Length > 0)
+            {
+                var node = FindByTag(treeView!.Nodes, previous[0]);
+                for (int i = 1; i < previous.Length; i++)
+                {
+                    node = FindByTag(node?.Nodes, previous[i]);
+                }
+                if (node != null) treeView.SelectedNode = node;
+            }
+        }
+
+        private TreeNode? FindByTag(TreeNodeCollection? nodes, string tag)
+        {
+            if (nodes == null) return null;
+            foreach (TreeNode? node in nodes)
+            {
+                if (node != null && node.Name == tag) return node;
+            }
+            return null;
+        }
+
+        private void AddSampleData(object data)
+        {
+            var nodes = ReadObjectRecursive(data, "", "Data");
+            if (nodes.Count > 0) nodes[0].Expand(); // expand first node by default
+            treeView!.Nodes.AddRange(nodes.ToArray());
         }
 
         private void AddDataFilters(Project project, object data)
         {
-            var filters = new TreeNode {Text = "Filters", Tag = FilterMarker, ForeColor = Color.DimGray};
+            var filters = new TreeNode {Text = "Filters", Name = "#", Tag = FilterMarker, ForeColor = Color.DimGray};
             foreach (var filter in project.Index.DataFilters)
             {
                 var path = FilterMarker + Separator + filter.Key;
@@ -58,6 +86,7 @@ namespace BasicImageFormFiller.EditForms
 
         private static List<TreeNode> ReadObjectRecursive(object o, string path, string node)
         {
+            var name = string.IsNullOrWhiteSpace(path) ? "" : node;
             var outp = new List<TreeNode>();
             if (o is Dictionary<string, object> dict)
             {
@@ -68,6 +97,7 @@ namespace BasicImageFormFiller.EditForms
                 }
                 outp.Add(new TreeNode(node, collection.ToArray()){
                     Tag = path,
+                    Name = name,
                     ForeColor = Color.DimGray,
                 });
             }
@@ -84,12 +114,14 @@ namespace BasicImageFormFiller.EditForms
                     } else collection.Add(new TreeNode{
                         Text = idxStr + " = <null>",
                         Tag = path + Separator + idxStr,
+                        Name = name,
                         ForeColor = Color.Purple,
                     });
                 }
 
                 outp.Add(new TreeNode(node + " (multiple)", collection.ToArray()){
                     Tag = path,
+                    Name = name,
                     ForeColor = Color.Purple,
                 });
             }
@@ -97,6 +129,7 @@ namespace BasicImageFormFiller.EditForms
             {
                 outp.Add(new TreeNode{
                     Tag = path,
+                    Name = name,
                     Text = node + " = " + o,
                     ForeColor = Color.Green
                 });

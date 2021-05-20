@@ -134,7 +134,7 @@ namespace BasicImageFormFiller.EditForms
         private void dataButton_Click(object sender, EventArgs e)
         {
             if (_project == null) return;
-            var rm = new PickDataSource(_project, "Pick filter data source");
+            var rm = new PickDataSource(_project, "Pick filter data source", _selectedPath);
             rm.ShowDialog();
             if (rm.SelectedPath == null) return;
 

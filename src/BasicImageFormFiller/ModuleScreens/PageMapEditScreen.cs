@@ -78,7 +78,7 @@ namespace BasicImageFormFiller.ModuleScreens
                 case MapKeyCommand:
                 {
                     var key = Url.GetValueFromQuery(command, QueryKey);
-                    var pick = new PickDataSource(_project, $"Map source for '{key}'");
+                    var pick = new PickDataSource(_project, $"Map source for '{key}'", _project.Pages[_pageIndex].Boxes[key].MappingPath);
                     pick.ShowDialog();
                     if (pick.SelectedPath != null)
                     {

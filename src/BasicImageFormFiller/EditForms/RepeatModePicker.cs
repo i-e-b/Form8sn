@@ -35,7 +35,8 @@ namespace BasicImageFormFiller.EditForms
         private void pickDataButton_Click(object sender, EventArgs e)
         {
             if (_project == null) return;
-            var rm = new PickDataSource(_project, "Pick repeat source");
+            
+            var rm = new PickDataSource(_project, "Pick repeat source", _project.Pages[_pageIndex].RepeatMode.DataPath);
             rm.ShowDialog();
             if (rm.SelectedPath == null) return;
             

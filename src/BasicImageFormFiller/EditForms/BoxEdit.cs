@@ -102,12 +102,13 @@ namespace BasicImageFormFiller.EditForms
         private void setMappingButton_Click(object sender, EventArgs e)
         {
             if (_project == null) return;
-            var mapEdit = new PickDataSource(_project, "Pick source for box"); // TODO: pre-existing path
+            var box = _project!.Pages[_pageIndex].Boxes[_boxKey];
+            
+            var mapEdit = new PickDataSource(_project, "Pick source for box", box.MappingPath);
             mapEdit.ShowDialog();
 
             if (mapEdit.SelectedPath != null && mapEdit.SelectedPath.Length > 0)
             {
-                var box = _project!.Pages[_pageIndex].Boxes[_boxKey];
                 box.MappingPath = mapEdit.SelectedPath;
                 dataPathLabel!.Text = string.Join(".", box.MappingPath);
                 _project.Save();
