@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
 using BasicImageFormFiller.EditForms;
-using BasicImageFormFiller.FileFormats;
 using BasicImageFormFiller.Helpers;
 using BasicImageFormFiller.Interfaces;
 using Form8snCore;
+using Form8snCore.FileFormats;
 using Tag;
 
 namespace BasicImageFormFiller.ModuleScreens

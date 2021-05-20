@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Forms;
-using BasicImageFormFiller.FileFormats;
 using BasicImageFormFiller.Interfaces;
 using BasicImageFormFiller.ModuleScreens;
+using Form8snCore.FileFormats;
 using SkinnyJson;
 using Tag;
 

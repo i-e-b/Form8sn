@@ -2,8 +2,8 @@ using System;
 using System.IO;
 using System.Windows.Forms;
 using BasicImageFormFiller.EditForms;
-using BasicImageFormFiller.FileFormats;
 using BasicImageFormFiller.Interfaces;
+using Form8snCore.FileFormats;
 using Tag;
 
 namespace BasicImageFormFiller.ModuleScreens

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace BasicImageFormFiller.FileFormats
+namespace Form8snCore.FileFormats
 {
     public class TemplatePage
     {

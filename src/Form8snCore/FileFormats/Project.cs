@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using SkinnyJson;
 
-namespace BasicImageFormFiller.FileFormats
+namespace Form8snCore.FileFormats
 {
     public class Project
     {

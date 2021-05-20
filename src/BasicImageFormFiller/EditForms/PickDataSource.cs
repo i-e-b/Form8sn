@@ -3,8 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using BasicImageFormFiller.FileFormats;
 using Form8snCore;
+using Form8snCore.FileFormats;
 
 namespace BasicImageFormFiller.EditForms
 {
@@ -17,7 +17,7 @@ namespace BasicImageFormFiller.EditForms
         public string? SelectedTag { get; set; }
         
         public PickDataSource() { InitializeComponent(); }
-        public PickDataSource(Project project, string prompt, string[]? previous)
+        public PickDataSource(Project project, string prompt, string[]? previous, string[]? repeaterPath)
         {
             InitializeComponent();
             Text = prompt;
@@ -28,6 +28,7 @@ namespace BasicImageFormFiller.EditForms
             
             AddSampleData(data);
             AddDataFilters(project, data);
+            if (repeaterPath != null) AddRepeaterPath(project, data, repeaterPath);
             
             // pick previous source if it exists
             if (previous != null && previous.Length > 0)
@@ -39,6 +40,18 @@ namespace BasicImageFormFiller.EditForms
                 }
                 if (node != null) treeView.SelectedNode = node;
             }
+        }
+
+        private void AddRepeaterPath(Project project, object sampleData, string[] repeaterPath)
+        {
+            // TODO: Get a "sample" from the data.
+            // If it's an ArrayList, take the first item and make nodes from it.
+            // If it's not an ArrayList, just make nodes from it
+            // Either way, add under "Page Repeat Data" tagged:'D'
+            var pageNode = new TreeNode();
+            
+            
+            treeView!.Nodes.Add(pageNode);
         }
 
         private TreeNode? FindByTag(TreeNodeCollection? nodes, string tag)
@@ -64,7 +77,13 @@ namespace BasicImageFormFiller.EditForms
             foreach (var filter in project.Index.DataFilters)
             {
                 var path = FilterMarker + Separator + filter.Key;
-                var sample = FilterData.ApplyFilter(filter.Value.MappingType, filter.Value.MappingParameters, filter.Value.DataPath, data);
+                var sample = FilterData.ApplyFilter(
+                    filter.Value.MappingType,
+                    filter.Value.MappingParameters,
+                    filter.Value.DataPath,
+                    project.Index.DataFilters,
+                    data
+                    );
 
                 if (sample == null)
                 {

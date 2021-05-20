@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using BasicImageFormFiller.EditForms;
-using BasicImageFormFiller.FileFormats;
 using BasicImageFormFiller.Helpers;
 using BasicImageFormFiller.Interfaces;
+using Form8snCore.FileFormats;
 using Tag;
 
 namespace BasicImageFormFiller.ModuleScreens
@@ -78,7 +78,7 @@ namespace BasicImageFormFiller.ModuleScreens
                 case MapKeyCommand:
                 {
                     var key = Url.GetValueFromQuery(command, QueryKey);
-                    var pick = new PickDataSource(_project, $"Map source for '{key}'", _project.Pages[_pageIndex].Boxes[key].MappingPath);
+                    var pick = new PickDataSource(_project, $"Map source for '{key}'", _project.Pages[_pageIndex].Boxes[key].MappingPath, null);
                     pick.ShowDialog();
                     if (pick.SelectedPath != null)
                     {

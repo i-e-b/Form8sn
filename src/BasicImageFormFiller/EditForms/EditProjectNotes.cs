@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
-using BasicImageFormFiller.FileFormats;
 using BasicImageFormFiller.Interfaces;
+using Form8snCore.FileFormats;
 
 namespace BasicImageFormFiller.EditForms
 {

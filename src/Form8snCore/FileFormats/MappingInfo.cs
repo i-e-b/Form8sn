@@ -1,7 +1,6 @@
 using System.Collections.Generic;
-using Form8snCore;
 
-namespace BasicImageFormFiller.FileFormats
+namespace Form8snCore.FileFormats
 {
     public class MappingInfo
     {

@@ -3,10 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using BasicImageFormFiller.FileFormats;
 using BasicImageFormFiller.Helpers;
 using BasicImageFormFiller.Interfaces;
 using Form8snCore;
+using Form8snCore.FileFormats;
 
 namespace BasicImageFormFiller.EditForms
 {
@@ -134,7 +134,7 @@ namespace BasicImageFormFiller.EditForms
         private void dataButton_Click(object sender, EventArgs e)
         {
             if (_project == null) return;
-            var rm = new PickDataSource(_project, "Pick filter data source", _selectedPath);
+            var rm = new PickDataSource(_project, "Pick filter data source", _selectedPath, null);
             rm.ShowDialog();
             if (rm.SelectedPath == null) return;
 

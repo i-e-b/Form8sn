@@ -1,6 +1,6 @@
 using System;
 
-namespace Form8snCore
+namespace Form8snCore.FileFormats
 {
     public class UsesTypeAttribute : Attribute
     {

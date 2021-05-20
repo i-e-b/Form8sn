@@ -1,4 +1,4 @@
-namespace BasicImageFormFiller.FileFormats
+namespace Form8snCore.FileFormats
 {
     public class TemplateBox
     {

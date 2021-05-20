@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace BasicImageFormFiller.FileFormats
+namespace Form8snCore.FileFormats
 {
     public class IndexFile
     {

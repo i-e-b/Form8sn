@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
-using BasicImageFormFiller.FileFormats;
 using BasicImageFormFiller.Interfaces;
+using Form8snCore.FileFormats;
 
 namespace BasicImageFormFiller.EditForms
 {
@@ -36,7 +36,7 @@ namespace BasicImageFormFiller.EditForms
         {
             if (_project == null) return;
             
-            var rm = new PickDataSource(_project, "Pick repeat source", _project.Pages[_pageIndex].RepeatMode.DataPath);
+            var rm = new PickDataSource(_project, "Pick repeat source", _project.Pages[_pageIndex].RepeatMode.DataPath, null);
             rm.ShowDialog();
             if (rm.SelectedPath == null) return;
             

@@ -284,8 +284,6 @@ namespace BasicImageFormFiller.EditForms
 
         private System.Windows.Forms.Label dataPathLabel;
 
-        private System.Windows.Forms.Label label4;
-
         private System.Windows.Forms.Label label3;
 
         private System.Windows.Forms.Button setMappingButton;

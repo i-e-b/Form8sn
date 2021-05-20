@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
-using BasicImageFormFiller.FileFormats;
+using Form8snCore.FileFormats;
 
 namespace BasicImageFormFiller.EditForms
 {
@@ -104,7 +104,8 @@ namespace BasicImageFormFiller.EditForms
             if (_project == null) return;
             var box = _project!.Pages[_pageIndex].Boxes[_boxKey];
             
-            var mapEdit = new PickDataSource(_project, "Pick source for box", box.MappingPath);
+            var pageRepeat = _project!.Pages[_pageIndex].RepeatMode.DataPath;
+            var mapEdit = new PickDataSource(_project, "Pick source for box", box.MappingPath, pageRepeat);
             mapEdit.ShowDialog();
 
             if (mapEdit.SelectedPath != null && mapEdit.SelectedPath.Length > 0)
