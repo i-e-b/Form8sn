@@ -55,6 +55,9 @@ namespace Form8snCore
 
                 case MappingType.Total:
                     return SumOfAllOnPath(pkg);
+                
+                case MappingType.Concatenate:
+                    return ConcatenateList(pkg);
 
                 case MappingType.RunningTotal:
                     // TODO...
@@ -66,6 +69,43 @@ namespace Form8snCore
             return null;
         }
 
+        private static object? ConcatenateList(FilterPackage pkg)
+        {
+            if (pkg.Data == null || pkg.SourcePath == null || pkg.SourcePath.Length < 1) return null;
+
+            var target = FindDataAtPath(pkg);
+            if (target == null) return null;
+            
+            var preKey = nameof(JoinMappingParams.Prefix);
+            var prefix = pkg.Params.ContainsKey(preKey) ? pkg.Params[preKey] : "";
+            var inKey = nameof(JoinMappingParams.Infix);
+            var infix = pkg.Params.ContainsKey(inKey) ? pkg.Params[inKey] : "";
+            var postKey = nameof(JoinMappingParams.Postfix);
+            var postfix = pkg.Params.ContainsKey(postKey) ? pkg.Params[postKey] : "";
+
+            if (target is string str) return $"{prefix}{str}{postfix}";
+
+            if (target is ArrayList list) return JoinAsString(list, prefix, infix, postfix);
+
+            return null;
+        }
+
+        private static string JoinAsString(ArrayList list, string prefix, string infix, string postfix)
+        {
+            var sb = new StringBuilder(prefix);
+
+            var first = true;
+            foreach (var item in list)
+            {
+                if (first) first = false;
+                else sb.Append(infix);
+                sb.Append(item);
+            }
+            
+            sb.Append(postfix);
+            return sb.ToString();
+        }
+
 
         /// <summary>
         /// If target is string, split on white space and do an array take, then join on 'space'
@@ -75,7 +115,8 @@ namespace Form8snCore
         private static object? TakeWords(FilterPackage pkg)
         {
             if (pkg.Data == null || pkg.SourcePath == null || pkg.SourcePath.Length < 1) return null;
-            var mcs = pkg.Params.ContainsKey("Count") ? pkg.Params["Count"] : null;
+            var countKey = nameof(TakeMappingParams.Count);
+            var mcs = pkg.Params.ContainsKey(countKey) ? pkg.Params[countKey] : null;
             if (!int.TryParse(mcs, out var count)) return $"Invalid parameter: Count should be an integer, but is {mcs}";
 
 
@@ -98,7 +139,8 @@ namespace Form8snCore
         private static object? SkipWords(FilterPackage pkg)
         {
             if (pkg.Data == null || pkg.SourcePath == null || pkg.SourcePath.Length < 1) return null;
-            var mcs = pkg.Params.ContainsKey("Count") ? pkg.Params["Count"] : null;
+            var countKey = nameof(SkipMappingParams.Count);
+            var mcs = pkg.Params.ContainsKey(countKey) ? pkg.Params[countKey] : null;
             if (!int.TryParse(mcs, out var count)) return $"Invalid parameter: Count should be an integer, but is {mcs}";
 
 
@@ -122,7 +164,8 @@ namespace Form8snCore
         private static object? SplitIntoMaxCount(FilterPackage pkg)
         {
             if (pkg.Data == null || pkg.SourcePath == null || pkg.SourcePath.Length < 1) return null;
-            var mcs = pkg.Params.ContainsKey("MaxCount") ? pkg.Params["MaxCount"] : null;
+            var countKey = nameof(MaxCountMappingParams.MaxCount);
+            var mcs = pkg.Params.ContainsKey(countKey) ? pkg.Params[countKey] : null;
             if (!int.TryParse(mcs, out var count)) return $"Invalid parameter: MaxCount should be an integer, but is {mcs}";
 
             var target = FindDataAtPath(pkg);
@@ -236,6 +279,7 @@ namespace Form8snCore
             return SumPathRecursive(pkg.SourcePath.Skip(pathSkip), data);
         }
         
+        // TODO: generalise this and remove the version in SumOfAllOnPath
         private static object? FindDataAtPath(FilterPackage pkg)
         {
             var path = pkg.SourcePath;
@@ -254,9 +298,11 @@ namespace Form8snCore
                 if (data == null) return null;
                 pathSkip = 2; // root and filter name
             }
-            
-            if (path[0] == "#") throw new Exception("Filters as data sources is not yet implemented"); // TODO: write filter values back to data and cycle with change-count.
-            if (path[0] != "") throw new Exception($"Unexpected root marker: {path[0]}");
+            else if (root == "D")
+            {
+                throw new Exception("Page Repeater Data not yet implemented");
+            }
+            else if (path[0] != "") throw new Exception($"Unexpected root marker: {path[0]}");
 
             var sb = new StringBuilder();
             var target = data;
@@ -340,7 +386,8 @@ namespace Form8snCore
 
         private static object? GetFixedValue(FilterPackage pkg)
         {
-            return pkg.Params.ContainsKey("Text") ? pkg.Params["Text"] : null;
+            var key = nameof(TextMappingParams.Text);
+            return pkg.Params.ContainsKey(key) ? pkg.Params[key] : null;
         }
     }
 

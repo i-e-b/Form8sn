@@ -31,6 +31,19 @@ namespace Form8snCore.FileFormats
         [Description("Sum up numeric values on the path that have been used so far")]
         [UsesType(typeof(EmptyMappingParams))]
         RunningTotal,
+        
+        [Description("Join all elements of a list (treating them as strings)")]
+        [UsesType(typeof(JoinMappingParams))]
+        Concatenate
+    }
+
+    public class JoinMappingParams {
+        [Description("Text to place at the start of the list")]
+        public string Prefix { get; set; } = "";
+        [Description("Text to place between each item")]
+        public string Infix { get; set; } = "";
+        [Description("Text to place at the end of the list")]
+        public string Postfix { get; set; } = "";
     }
 
     public class TakeMappingParams {
