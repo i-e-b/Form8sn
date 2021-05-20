@@ -43,14 +43,5 @@ namespace BasicImageFormFiller.FileFormats
             
             return Json.Defrost(File.ReadAllText(path)!);
         }
-
-        public dynamic? LoadSampleDataDynamic()
-        {
-            if (string.IsNullOrWhiteSpace(Index.SampleFileName)) return null;
-            var path = Path.Combine(BasePath, Index.SampleFileName);
-            if (! File.Exists(path)) return null;
-            
-            return Json.DefrostDynamic(File.ReadAllText(path)!);
-        }
     }
 }

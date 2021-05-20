@@ -9,7 +9,11 @@ namespace BasicImageFormFiller.FileFormats
         {
             Boxes = new Dictionary<string, TemplateBox>();
             RepeatMode = new RepeatMode();
+            
         }
+
+        public double WidthMillimetres { get; set; }
+        public double HeightMillimetres { get; set; }
         
         /// <summary>
         /// Name for the page (not used in PDF)

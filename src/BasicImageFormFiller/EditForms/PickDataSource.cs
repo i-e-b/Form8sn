@@ -27,21 +27,24 @@ namespace BasicImageFormFiller.EditForms
             if (data == null) return;
             
             treeView!.Nodes.AddRange( ReadObjectRecursive(data, "", "Data").ToArray() );
-            AddDataFilters(project);
+            AddDataFilters(project, data);
         }
 
-        private void AddDataFilters(Project project)
+        private void AddDataFilters(Project project, object data)
         {
             var filters = new TreeNode {Text = "Filters", Tag = FilterMarker, ForeColor = Color.DimGray};
-            var data = project.LoadSampleDataDynamic();
             foreach (var filter in project.Index.DataFilters)
             {
-                var node = new TreeNode { Text = filter.Key, Tag = FilterMarker + Separator + filter.Key, ForeColor = Color.Blue };
+                var path = FilterMarker + Separator + filter.Key;
+                var node = new TreeNode { Text = filter.Key, Tag = path, ForeColor = Color.Blue };
                 
                 var sample = FilterData.ApplyFilter(filter.Value.MappingType, filter.Value.MappingParameters, filter.Value.DataPath, data);
-                if (sample != null)
+                
+                if (sample == null) node.Nodes.Add(new TreeNode {Text = "No result", ForeColor = Color.Red, BackColor = Color.Pink});
+                else
                 {
-                    node.Nodes.AddRange(ReadObjectRecursive(sample, "", "-sample-").ToArray());
+                    var sampleNodes = ReadObjectRecursive(sample, path, "[sample]").ToArray();
+                    node.Nodes.AddRange(sampleNodes);
                 }
 
                 filters.Nodes.Add(node);
