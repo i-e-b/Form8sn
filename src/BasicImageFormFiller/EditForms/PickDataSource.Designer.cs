@@ -35,6 +35,7 @@ namespace BasicImageFormFiller.EditForms
             this.pickButton = new System.Windows.Forms.Button();
             this.cancelButton = new System.Windows.Forms.Button();
             this.pathPreview = new System.Windows.Forms.Label();
+            this.tweakPathButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // treeView
@@ -72,17 +73,31 @@ namespace BasicImageFormFiller.EditForms
             // pathPreview
             // 
             this.pathPreview.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
-            this.pathPreview.Location = new System.Drawing.Point(12, 376);
+            this.pathPreview.Location = new System.Drawing.Point(93, 376);
             this.pathPreview.Name = "pathPreview";
-            this.pathPreview.Size = new System.Drawing.Size(433, 23);
+            this.pathPreview.Size = new System.Drawing.Size(352, 23);
             this.pathPreview.TabIndex = 3;
             this.pathPreview.Text = "Select a node";
+            this.pathPreview.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // tweakPathButton
+            // 
+            this.tweakPathButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.tweakPathButton.Enabled = false;
+            this.tweakPathButton.Location = new System.Drawing.Point(12, 376);
+            this.tweakPathButton.Name = "tweakPathButton";
+            this.tweakPathButton.Size = new System.Drawing.Size(75, 23);
+            this.tweakPathButton.TabIndex = 4;
+            this.tweakPathButton.Text = "Adjust Path";
+            this.tweakPathButton.UseVisualStyleBackColor = true;
+            this.tweakPathButton.Click += new System.EventHandler(this.tweakPathButton_Click);
             // 
             // PickDataSource
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(619, 411);
+            this.Controls.Add(this.tweakPathButton);
             this.Controls.Add(this.pathPreview);
             this.Controls.Add(this.cancelButton);
             this.Controls.Add(this.pickButton);
@@ -92,6 +107,8 @@ namespace BasicImageFormFiller.EditForms
             this.Text = "PickDataSource";
             this.ResumeLayout(false);
         }
+
+        private System.Windows.Forms.Button tweakPathButton;
 
         private System.Windows.Forms.Label pathPreview;
 

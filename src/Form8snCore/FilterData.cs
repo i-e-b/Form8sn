@@ -34,6 +34,7 @@ namespace Form8snCore
                 
                 case MappingType.RunningTotal:
                     // TODO...
+                    // This should go through a 'Repeat Source'
                     break;
                 default: return "Not yet implemented";
             }

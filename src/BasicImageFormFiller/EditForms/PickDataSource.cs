@@ -36,18 +36,19 @@ namespace BasicImageFormFiller.EditForms
             foreach (var filter in project.Index.DataFilters)
             {
                 var path = FilterMarker + Separator + filter.Key;
-                var node = new TreeNode { Text = filter.Key, Tag = path, ForeColor = Color.Blue };
-                
                 var sample = FilterData.ApplyFilter(filter.Value.MappingType, filter.Value.MappingParameters, filter.Value.DataPath, data);
-                
-                if (sample == null) node.Nodes.Add(new TreeNode {Text = "No result", ForeColor = Color.Red, BackColor = Color.Pink});
+
+                if (sample == null)
+                {
+                    var node = new TreeNode { Text = filter.Key, Tag = path, ForeColor = Color.Blue };
+                    node.Nodes.Add(new TreeNode {Text = "No result", ForeColor = Color.Red, BackColor = Color.Pink});
+                    filters.Nodes.Add(node);
+                }
                 else
                 {
-                    var sampleNodes = ReadObjectRecursive(sample, path, "[sample]").ToArray();
-                    node.Nodes.AddRange(sampleNodes);
+                    var sampleNodes = ReadObjectRecursive(sample, path, filter.Key).ToArray();
+                    filters.Nodes.AddRange(sampleNodes);
                 }
-
-                filters.Nodes.Add(node);
             }
 
             treeView!.Nodes.Add(filters);
@@ -108,6 +109,7 @@ namespace BasicImageFormFiller.EditForms
         {
             SelectedTag = e.Node?.Tag?.ToString();
             pickButton!.Enabled = !string.IsNullOrWhiteSpace(SelectedTag);
+            tweakPathButton!.Enabled = !string.IsNullOrWhiteSpace(SelectedTag);
             pathPreview!.Text = SelectedTag?.Replace(Separator, '.') ?? "< invalid path >";
         }
 
@@ -120,6 +122,19 @@ namespace BasicImageFormFiller.EditForms
         {
             SelectedPath = SelectedTag?.Split(Separator);
             Close();
+        }
+
+        private void tweakPathButton_Click(object sender, EventArgs e)
+        {
+            // Allow the user to adjust the path. This is needed if we
+            // expect inputs longer than the sample data provides
+            if (SelectedTag == null) return;
+            var pe = new EditPathForm(null, SelectedTag!.Split(Separator));
+            pe.ShowDialog();
+            if (pe.EditedPath == null) return; // cancelled or closed
+
+            SelectedTag = string.Join(Separator, pe.EditedPath);
+            pathPreview!.Text = SelectedTag?.Replace(Separator, '.') ?? "< invalid path >";
         }
     }
 }

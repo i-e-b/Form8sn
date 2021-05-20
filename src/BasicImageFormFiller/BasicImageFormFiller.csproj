@@ -40,6 +40,9 @@
       <Compile Update="EditForms\FilterEditor.cs">
         <SubType>Form</SubType>
       </Compile>
+      <Compile Update="EditForms\EditPathForm.cs">
+        <SubType>Form</SubType>
+      </Compile>
     </ItemGroup>
 
     <ItemGroup>
