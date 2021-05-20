@@ -30,38 +30,65 @@ namespace BasicImageFormFiller.EditForms
             AddDataFilters(project, data);
             if (repeaterPath != null) AddRepeaterPath(project, data, repeaterPath);
             
-            // pick previous source if it exists
-            if (previous != null && previous.Length > 0)
-            {
-                var node = FindByTag(treeView!.Nodes, previous[0]);
-                for (int i = 1; i < previous.Length; i++)
-                {
-                    node = FindByTag(node?.Nodes, previous[i]);
-                }
-                if (node != null) treeView.SelectedNode = node;
-            }
+            SelectPath(previous); // pick previous source if it exists
         }
 
         private void AddRepeaterPath(Project project, object sampleData, string[] repeaterPath)
         {
-            // TODO: Get a "sample" from the data.
+            // Get a "sample" from the data.
             // If it's an ArrayList, take the first item and make nodes from it.
             // If it's not an ArrayList, just make nodes from it
             // Either way, add under "Page Repeat Data" tagged:'D'
-            var pageNode = new TreeNode();
+            var pageNode = new TreeNode{
+                Name = "D",
+                Text = "Page Repeat Data",
+                Tag = "D",
+                BackColor = Color.Linen,
+                ForeColor = Color.Brown
+            };
             
+            var sample = FilterData.ApplyFilter(
+                MappingType.None,
+                new Dictionary<string, string>(),
+                repeaterPath,
+                project.Index.DataFilters,
+                sampleData
+            );
             
-            treeView!.Nodes.Add(pageNode);
-        }
-
-        private TreeNode? FindByTag(TreeNodeCollection? nodes, string tag)
-        {
-            if (nodes == null) return null;
-            foreach (TreeNode? node in nodes)
+            // sample should be an ArrayList.
+            if (sample is ArrayList list)
             {
-                if (node != null && node.Name == tag) return node;
+                var page1 = list[0] as ArrayList;
+
+                if (page1 == null)
+                {
+                    pageNode.Nodes.Add(new TreeNode {Text = "Invalid result", ForeColor = Color.Red, BackColor = Color.Pink});
+                }
+                else
+                {
+                    var sampleNodes = ReadObjectRecursive(page1, "D", "XXX").ToArray();
+                    if (sampleNodes.Length < 1)
+                    {
+                        pageNode.Nodes.Add(new TreeNode {Text = "Sample data insufficient?", ForeColor = Color.Red, BackColor = Color.Pink});
+                    }
+                    else
+                    {
+                        // Should be one node, with possible multiple children
+                        foreach (TreeNode? node in sampleNodes[0].Nodes)
+                        {
+                            if (node != null) pageNode.Nodes.Add(node);
+                        }
+                        pageNode.Expand(); // expand first node by default
+                    }
+                }
             }
-            return null;
+            else
+            {
+                pageNode.Nodes.Add(new TreeNode {Text = "No result", ForeColor = Color.Red, BackColor = Color.Pink});
+            }
+
+
+            treeView!.Nodes.Add(pageNode);
         }
 
         private void AddSampleData(object data)
@@ -99,6 +126,30 @@ namespace BasicImageFormFiller.EditForms
             }
 
             treeView!.Nodes.Add(filters);
+        }
+        
+        private void SelectPath(string[]? previous)
+        {
+            if (previous == null || previous.Length < 1) return;
+            
+            var node = FindByTag(treeView!.Nodes, previous[0]);
+            for (int i = 1; i < previous.Length; i++)
+            {
+                node = FindByTag(node?.Nodes, previous[i]);
+                if (node == null) return;
+            }
+
+            if (node != null) treeView.SelectedNode = node;
+        }
+
+        private TreeNode? FindByTag(TreeNodeCollection? nodes, string tag)
+        {
+            if (nodes == null) return null;
+            foreach (TreeNode? node in nodes)
+            {
+                if (node != null && node.Name == tag) return node;
+            }
+            return null;
         }
 
         public sealed override string Text { get => base.Text ?? ""; set => base.Text = value; }

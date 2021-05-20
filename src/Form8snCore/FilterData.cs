@@ -41,8 +41,11 @@ namespace Form8snCore
         {
             switch (pkg.Type)
             {
-                case MappingType.None: return null;
-                case MappingType.FixedValue: return GetFixedValue(pkg);
+                case MappingType.None:
+                    return FindDataAtPath(pkg);
+                
+                case MappingType.FixedValue:
+                    return GetFixedValue(pkg);
 
                 case MappingType.SplitIntoN:
                     return SplitIntoMaxCount(pkg);
