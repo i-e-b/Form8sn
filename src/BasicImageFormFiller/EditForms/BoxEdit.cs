@@ -24,6 +24,11 @@ namespace BasicImageFormFiller.EditForms
             _boxKey = boxKey;
             
             var box = project.Pages[pageIndex].Boxes[boxKey];
+
+            dataPathLabel!.Text = box.MappingPath == null
+                ? ""
+                : string.Join(".", box.MappingPath);
+            
             wrapTextCheckbox!.Checked = box.WrapText;
             shrinkToFitCheckbox!.Checked = box.ShrinkToFit;
             boxKeyTextbox!.Text = boxKey;
@@ -92,6 +97,21 @@ namespace BasicImageFormFiller.EditForms
             _project!.Pages[_pageIndex].Boxes.Remove(_boxKey);
             _project?.Save();
             Close();
+        }
+
+        private void setMappingButton_Click(object sender, EventArgs e)
+        {
+            if (_project == null) return;
+            var mapEdit = new PickDataSource(_project, "Pick source for box"); // TODO: pre-existing path
+            mapEdit.ShowDialog();
+
+            if (mapEdit.SelectedPath != null && mapEdit.SelectedPath.Length > 0)
+            {
+                var box = _project!.Pages[_pageIndex].Boxes[_boxKey];
+                box.MappingPath = mapEdit.SelectedPath;
+                dataPathLabel!.Text = string.Join(".", box.MappingPath);
+                _project.Save();
+            }
         }
     }
 }

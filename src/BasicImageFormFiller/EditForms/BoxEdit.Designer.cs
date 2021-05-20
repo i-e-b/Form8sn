@@ -48,22 +48,25 @@ namespace BasicImageFormFiller.EditForms
             this.bottomCentre = new System.Windows.Forms.RadioButton();
             this.bottomLeft = new System.Windows.Forms.RadioButton();
             this.deleteButton = new System.Windows.Forms.Button();
+            this.setMappingButton = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
+            this.dataPathLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // wrapTextCheckbox
             // 
-            this.wrapTextCheckbox.Location = new System.Drawing.Point(151, 58);
+            this.wrapTextCheckbox.Location = new System.Drawing.Point(151, 88);
             this.wrapTextCheckbox.Name = "wrapTextCheckbox";
-            this.wrapTextCheckbox.Size = new System.Drawing.Size(139, 33);
+            this.wrapTextCheckbox.Size = new System.Drawing.Size(139, 25);
             this.wrapTextCheckbox.TabIndex = 0;
             this.wrapTextCheckbox.Text = "Wrap Text";
             this.wrapTextCheckbox.UseVisualStyleBackColor = true;
             // 
             // shrinkToFitCheckbox
             // 
-            this.shrinkToFitCheckbox.Location = new System.Drawing.Point(151, 97);
+            this.shrinkToFitCheckbox.Location = new System.Drawing.Point(151, 119);
             this.shrinkToFitCheckbox.Name = "shrinkToFitCheckbox";
-            this.shrinkToFitCheckbox.Size = new System.Drawing.Size(139, 44);
+            this.shrinkToFitCheckbox.Size = new System.Drawing.Size(139, 29);
             this.shrinkToFitCheckbox.TabIndex = 1;
             this.shrinkToFitCheckbox.Text = "Shrink to Fit";
             this.shrinkToFitCheckbox.UseVisualStyleBackColor = true;
@@ -217,11 +220,43 @@ namespace BasicImageFormFiller.EditForms
             this.deleteButton.UseVisualStyleBackColor = false;
             this.deleteButton.Click += new System.EventHandler(this.deleteButton_Click);
             // 
+            // setMappingButton
+            // 
+            this.setMappingButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.setMappingButton.Location = new System.Drawing.Point(441, 47);
+            this.setMappingButton.Name = "setMappingButton";
+            this.setMappingButton.Size = new System.Drawing.Size(52, 23);
+            this.setMappingButton.TabIndex = 17;
+            this.setMappingButton.Text = "Edit";
+            this.setMappingButton.UseVisualStyleBackColor = true;
+            this.setMappingButton.Click += new System.EventHandler(this.setMappingButton_Click);
+            // 
+            // label3
+            // 
+            this.label3.Location = new System.Drawing.Point(45, 47);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(100, 23);
+            this.label3.TabIndex = 18;
+            this.label3.Text = "Data Map";
+            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // dataPathLabel
+            // 
+            this.dataPathLabel.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
+            this.dataPathLabel.Location = new System.Drawing.Point(151, 47);
+            this.dataPathLabel.Name = "dataPathLabel";
+            this.dataPathLabel.Size = new System.Drawing.Size(284, 23);
+            this.dataPathLabel.TabIndex = 19;
+            this.dataPathLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
             // BoxEdit
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(505, 317);
+            this.Controls.Add(this.dataPathLabel);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.setMappingButton);
             this.Controls.Add(this.deleteButton);
             this.Controls.Add(this.bottomRight);
             this.Controls.Add(this.bottomCentre);
@@ -246,6 +281,14 @@ namespace BasicImageFormFiller.EditForms
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.Label dataPathLabel;
+
+        private System.Windows.Forms.Label label4;
+
+        private System.Windows.Forms.Label label3;
+
+        private System.Windows.Forms.Button setMappingButton;
 
         private System.Windows.Forms.Button deleteButton;
 
