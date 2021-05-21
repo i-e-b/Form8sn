@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -16,48 +17,90 @@ namespace Form8snCore
     {
         private const string BaseFontFamily = "Courier New";
         private const XFontStyle BaseFontStyle = XFontStyle.Bold;
+        private static readonly Stopwatch _layoutTimer = new Stopwatch();
+        private static readonly Stopwatch _loadingTimer = new Stopwatch();
+        private static readonly Stopwatch _filterTimer = new Stopwatch();
+        private static readonly Stopwatch _renderTimer = new Stopwatch();
+        private static readonly Stopwatch _totalTimer = new Stopwatch();
 
-        public static bool ToFile(string outputFilePath, string dataFilePath, Project project)
+        public static RenderResultInfo ToFile(string outputFilePath, string dataFilePath, Project project)
         {
-            if (!File.Exists(dataFilePath)) return false;
+            _layoutTimer.Reset();
+            _loadingTimer.Reset();
+            _filterTimer.Reset();
+            _renderTimer.Reset();
+            _totalTimer.Restart();
             
+            _loadingTimer.Start();
+            var result = new RenderResultInfo{Success = false};
+            if (!File.Exists(dataFilePath))
+            {
+                result.ErrorMessage = "Could not find input data file";
+                return result;
+            }
+
             var data = Json.Defrost(File.ReadAllText(dataFilePath)!);
+            _loadingTimer.Stop();
             
             var mapper = new DataMapper(project, data);
+            _renderTimer.Start();
             var document = new PdfDocument();
             document.Info.Author = "Generated from data by Form8sn";
             document.Info.Title = project.Index.Name;
             document.Info.CreationDate = DateTime.UtcNow;
-
+            _renderTimer.Stop();
+            
+            _loadingTimer.Start();
             var font = new XFont(BaseFontFamily, 16, BaseFontStyle);
+            _loadingTimer.Stop();
 
             for (var pageIndex = 0; pageIndex < project.Index.Pages.Count; pageIndex++)
             {
+                _loadingTimer.Start();
                 var pageDef = project.Index.Pages[pageIndex];
+                using var image = XImage.FromFile(pageDef.GetBackgroundPath(project));
+                _loadingTimer.Stop();
+                
                 if (pageDef.RepeatMode.Repeats)
                 {
+                    _filterTimer.Start();
                     var dataSets = mapper.GetRepeatData(pageDef.RepeatMode.DataPath);
+                    _filterTimer.Stop();
                     for (int repeatIndex = 0; repeatIndex < dataSets.Count; repeatIndex++)
                     {
                         var repeatData = dataSets[repeatIndex];
                         mapper.SetRepeater(repeatData);
-                        OutputStandardPage(project, document, pageDef, mapper, pageIndex, font);
+                        OutputStandardPage(document, pageDef, mapper, pageIndex, font, image);
                         mapper.ClearRepeater();
                     }
                 }
                 else
                 {
-                    OutputStandardPage(project, document, pageDef, mapper, pageIndex, font);
+                    OutputStandardPage(document, pageDef, mapper, pageIndex, font, image);
                 }
             }
 
+            _renderTimer.Start();
             document.Save(outputFilePath);
-            return true;
+            _renderTimer.Stop();
+            _totalTimer.Stop();
+            
+            result.Success = true;
+
+            result.OverallTime = _totalTimer.Elapsed;
+            result.LayoutTime = _layoutTimer.Elapsed;
+            result.LoadingTime = _loadingTimer.Elapsed;
+            result.FilterApplicationTime = _filterTimer.Elapsed;
+            result.FinalRenderTime = _renderTimer.Elapsed;
+            
+            return result;
         }
 
-        private static void OutputStandardPage(Project project, PdfDocument document, TemplatePage pageDef, DataMapper mapper, int pageIndex, XFont font)
+        private static void OutputStandardPage(PdfDocument document, TemplatePage pageDef, DataMapper mapper, int pageIndex, XFont font, XImage image)
         {
+            _renderTimer.Start();
             var page = document.AddPage();
+            _renderTimer.Stop();
             // If dimensions are silly, reset to A4
             if (pageDef.WidthMillimetres < 10 || pageDef.WidthMillimetres > 1000) pageDef.WidthMillimetres = 210;
             if (pageDef.HeightMillimetres < 10 || pageDef.HeightMillimetres > 1000) pageDef.HeightMillimetres = 297;
@@ -67,12 +110,15 @@ namespace Form8snCore
             page.Width = XUnit.FromMillimeter(pageDef.WidthMillimetres); // TODO: deal with invalid page sizes
             page.Height = XUnit.FromMillimeter(pageDef.HeightMillimetres);
 
+            _renderTimer.Start();
             using var gfx = XGraphics.FromPdfPage(page);
+            _renderTimer.Stop();
             
             // Draw background at full page size
-            using var image = XImage.FromFile(pageDef.GetBackgroundPath(project));
+            _loadingTimer.Start();
             var destRect = new RectangleF(0, 0, (float) page.Width.Point, (float) page.Height.Point);
             gfx.DrawImage(image, destRect);
+            _loadingTimer.Stop();
 
             // Work out the bitmap -> page adjustment fraction
             var fx = page.Width.Point / image.PixelWidth;
@@ -89,9 +135,12 @@ namespace Form8snCore
         {
             var box = boxDef.Value;
 
+            _filterTimer.Start();
             var str = mapper.FindBoxData(box, pageIndex);
+            _filterTimer.Stop();
             if (str == null) return;
 
+            _layoutTimer.Start();
             // boxes are defined in terms of the background image pixels, so we need to convert
             var boxWidth = box.Width * fx;
             var boxHeight = box.Height * fy;
@@ -99,6 +148,7 @@ namespace Form8snCore
             var align = MapAlignments(box);
 
             RenderTextInBox(font, gfx, box, fx, fy, str, space, align);
+            _layoutTimer.Stop();
         }
 
         private static void RenderTextInBox(XFont font, XGraphics gfx, TemplateBox box, double fx, double fy, string str, XRect space, XStringFormat align)
@@ -321,6 +371,18 @@ namespace Form8snCore
                 default: return XStringFormats.Default;
             }
         }
+    }
+
+    public class RenderResultInfo
+    {
+        public bool Success { get; set; }
+        public string? ErrorMessage { get; set; }
+
+        public TimeSpan LoadingTime { get; set; }
+        public TimeSpan LayoutTime { get; set; }
+        public TimeSpan FilterApplicationTime { get; set; }
+        public TimeSpan FinalRenderTime { get; set; }
+        public TimeSpan OverallTime { get; set; }
     }
 
     internal class MeasuredLine

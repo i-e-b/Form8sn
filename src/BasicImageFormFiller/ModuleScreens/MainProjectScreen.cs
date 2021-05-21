@@ -163,8 +163,17 @@ namespace BasicImageFormFiller.ModuleScreens
                     var file = moduleScreen.PickNewFile();
                     if (!string.IsNullOrWhiteSpace(file))
                     {
-                        var ok = RenderProject.ToFile(file, Path.Combine(_project.BasePath, _project.Index.SampleFileName), _project);
-                        MessageBox.Show(ok ? "Render complete" : "Render failed");
+                        var result = RenderProject.ToFile(file, Path.Combine(_project.BasePath, _project.Index.SampleFileName), _project);
+                        if (result.Success)
+                        {
+                            MessageBox.Show($"Render complete\r\n\r\nlayout time: {result.LayoutTime}\r\nloading images: {result.LoadingTime}\r\n" +
+                                            $"applying filters: {result.FilterApplicationTime}\r\nrendering PDF to file: {result.FinalRenderTime}\r\n" +
+                                            $"total time: {result.OverallTime}");
+                        }
+                        else
+                        {
+                            MessageBox.Show($"Render failed: {result.ErrorMessage ?? "<unknown>"}");
+                        }
                     }
 
                     moduleScreen.ShowPage(StartScreen());
