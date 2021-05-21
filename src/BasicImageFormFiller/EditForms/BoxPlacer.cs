@@ -310,7 +310,7 @@ namespace BasicImageFormFiller.EditForms
                 Width = width,
                 Left = left,
                 Top = top,
-                FontScale = 1.0,
+                DisplayFormat = null,
                 WrapText = false,
                 ShrinkToFit = true
             });
