@@ -39,6 +39,14 @@ namespace BasicImageFormFiller.EditForms
             this.cancelButton = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.notesTextBox = new System.Windows.Forms.TextBox();
+            this.widthTextBox = new System.Windows.Forms.TextBox();
+            this.heightTextBox = new System.Windows.Forms.TextBox();
+            this.guessSizeButton = new System.Windows.Forms.Button();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
@@ -55,7 +63,7 @@ namespace BasicImageFormFiller.EditForms
             this.nameTextBox.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
             this.nameTextBox.Location = new System.Drawing.Point(179, 31);
             this.nameTextBox.Name = "nameTextBox";
-            this.nameTextBox.Size = new System.Drawing.Size(258, 20);
+            this.nameTextBox.Size = new System.Drawing.Size(256, 20);
             this.nameTextBox.TabIndex = 1;
             // 
             // label2
@@ -78,7 +86,7 @@ namespace BasicImageFormFiller.EditForms
             // saveButton
             // 
             this.saveButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.saveButton.Location = new System.Drawing.Point(382, 215);
+            this.saveButton.Location = new System.Drawing.Point(380, 317);
             this.saveButton.Name = "saveButton";
             this.saveButton.Size = new System.Drawing.Size(55, 25);
             this.saveButton.TabIndex = 4;
@@ -89,7 +97,7 @@ namespace BasicImageFormFiller.EditForms
             // cancelButton
             // 
             this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.cancelButton.Location = new System.Drawing.Point(312, 215);
+            this.cancelButton.Location = new System.Drawing.Point(310, 317);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(55, 25);
             this.cancelButton.TabIndex = 5;
@@ -99,7 +107,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // label3
             // 
-            this.label3.Location = new System.Drawing.Point(12, 87);
+            this.label3.Location = new System.Drawing.Point(12, 141);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(161, 31);
             this.label3.TabIndex = 6;
@@ -110,17 +118,95 @@ namespace BasicImageFormFiller.EditForms
             // 
             this.notesTextBox.AcceptsReturn = true;
             this.notesTextBox.Anchor = ((System.Windows.Forms.AnchorStyles) ((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
-            this.notesTextBox.Location = new System.Drawing.Point(179, 93);
+            this.notesTextBox.Location = new System.Drawing.Point(179, 141);
             this.notesTextBox.Multiline = true;
             this.notesTextBox.Name = "notesTextBox";
-            this.notesTextBox.Size = new System.Drawing.Size(258, 116);
+            this.notesTextBox.Size = new System.Drawing.Size(256, 170);
             this.notesTextBox.TabIndex = 7;
+            // 
+            // widthTextBox
+            // 
+            this.widthTextBox.Location = new System.Drawing.Point(208, 89);
+            this.widthTextBox.Name = "widthTextBox";
+            this.widthTextBox.Size = new System.Drawing.Size(44, 20);
+            this.widthTextBox.TabIndex = 8;
+            this.widthTextBox.Text = "210";
+            // 
+            // heightTextBox
+            // 
+            this.heightTextBox.Location = new System.Drawing.Point(311, 89);
+            this.heightTextBox.Name = "heightTextBox";
+            this.heightTextBox.Size = new System.Drawing.Size(44, 20);
+            this.heightTextBox.TabIndex = 9;
+            this.heightTextBox.Text = "297";
+            // 
+            // guessSizeButton
+            // 
+            this.guessSizeButton.Location = new System.Drawing.Point(392, 87);
+            this.guessSizeButton.Name = "guessSizeButton";
+            this.guessSizeButton.Size = new System.Drawing.Size(45, 23);
+            this.guessSizeButton.TabIndex = 10;
+            this.guessSizeButton.Text = "Guess";
+            this.guessSizeButton.UseVisualStyleBackColor = true;
+            this.guessSizeButton.Click += new System.EventHandler(this.guessSizeButton_Click);
+            // 
+            // label4
+            // 
+            this.label4.Location = new System.Drawing.Point(73, 87);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(100, 23);
+            this.label4.TabIndex = 11;
+            this.label4.Text = "Page Size";
+            this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // label5
+            // 
+            this.label5.Location = new System.Drawing.Point(179, 92);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(23, 23);
+            this.label5.TabIndex = 12;
+            this.label5.Text = "W:";
+            this.label5.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            // 
+            // label6
+            // 
+            this.label6.Location = new System.Drawing.Point(258, 92);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(47, 23);
+            this.label6.TabIndex = 13;
+            this.label6.Text = "mm  H:";
+            this.label6.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
+            // label7
+            // 
+            this.label7.Location = new System.Drawing.Point(358, 92);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(28, 23);
+            this.label7.TabIndex = 14;
+            this.label7.Text = "mm";
+            // 
+            // label8
+            // 
+            this.label8.Location = new System.Drawing.Point(12, 115);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(425, 23);
+            this.label8.TabIndex = 15;
+            this.label8.Text = "Portrait: A4=210x297  US letter=216x279  US legal=216x356";
+            this.label8.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // EditPageMeta
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(449, 252);
+            this.ClientSize = new System.Drawing.Size(447, 354);
+            this.Controls.Add(this.label8);
+            this.Controls.Add(this.label7);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.guessSizeButton);
+            this.Controls.Add(this.heightTextBox);
+            this.Controls.Add(this.widthTextBox);
             this.Controls.Add(this.notesTextBox);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.cancelButton);
@@ -131,6 +217,7 @@ namespace BasicImageFormFiller.EditForms
             this.Controls.Add(this.label1);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(463, 279);
             this.Name = "EditPageMeta";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Edit page information";
@@ -138,6 +225,19 @@ namespace BasicImageFormFiller.EditForms
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.Label label8;
+
+        private System.Windows.Forms.Label label7;
+
+        private System.Windows.Forms.Label label6;
+
+        private System.Windows.Forms.TextBox widthTextBox;
+        private System.Windows.Forms.TextBox heightTextBox;
+        private System.Windows.Forms.Label label5;
+
+        private System.Windows.Forms.Button guessSizeButton;
+        private System.Windows.Forms.Label label4;
 
         private System.Windows.Forms.TextBox notesTextBox;
 
