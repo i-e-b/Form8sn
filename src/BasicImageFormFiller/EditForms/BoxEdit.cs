@@ -115,5 +115,10 @@ namespace BasicImageFormFiller.EditForms
                 _project.Save();
             }
         }
+
+        private void setDataFormatButton_Click(object sender, EventArgs e)
+        {
+            // A display format edit form, like the filter editor
+        }
     }
 }
