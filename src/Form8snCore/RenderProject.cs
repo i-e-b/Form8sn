@@ -107,7 +107,7 @@ namespace Form8snCore
             
             
             // Set the PDF page size (in points under the hood)
-            page.Width = XUnit.FromMillimeter(pageDef.WidthMillimetres); // TODO: deal with invalid page sizes
+            page.Width = XUnit.FromMillimeter(pageDef.WidthMillimetres);
             page.Height = XUnit.FromMillimeter(pageDef.HeightMillimetres);
 
             _renderTimer.Start();
@@ -168,7 +168,7 @@ namespace Form8snCore
             }
             else if (box.WrapText && size.Width > boxWidth)
             {
-                WrapStringToFit(SplitByNonLetter(str), boxWidth, gfx, font, out var lines);
+                WrapStringToFit(SplitByWhitespace(str), boxWidth, gfx, font, out var lines);
 
                 RenderWrappedLines(font, gfx, box, fy, align, lines, boxLeft, boxWidth);
             }
@@ -227,9 +227,7 @@ namespace Form8snCore
         private static void WrapStringToFit(List<string> words, double boxWidth, XGraphics gfx, XFont font, out List<MeasuredLine> lines)
         {
             lines = new List<MeasuredLine>();
-            var spaceWidth = gfx.MeasureString(" ", font).Width;
             var widthRemains = boxWidth;
-            var firstOnLine = true;
             var lineHeight = 0.0;
                 
             // Keep adding chunks until one doesn't fit, then break line
@@ -239,15 +237,11 @@ namespace Form8snCore
                 var bitSize = gfx.MeasureString(words[i], font);
                 lineHeight = Math.Max(lineHeight, bitSize.Height);
                 var wordWidth = bitSize.Width;
-                
-                if (!firstOnLine) wordWidth += spaceWidth;
 
                 if (wordWidth <= widthRemains) // next word fits on the line
                 {
-                    if (!firstOnLine) sb.Append(' ');
                     sb.Append(words[i]);
                     widthRemains -= wordWidth;
-                    firstOnLine = false;
                     continue;
                 }
 
@@ -258,7 +252,6 @@ namespace Form8snCore
                 sb.Append(words[i]);
                 lineHeight = bitSize.Height;
                 widthRemains = boxWidth - bitSize.Width;
-                firstOnLine = false;
             }
             
             if (sb.Length > 0) // last line
@@ -267,7 +260,7 @@ namespace Form8snCore
 
         private static XFont ShrinkFontAndWrapStringToFit(string str, double boxWidth, double boxHeight, XGraphics gfx, XFont font, out List<MeasuredLine> lines)
         {
-            var bits = SplitByNonLetter(str);
+            var bits = SplitByWhitespace(str);
             // Not going to bother with justification, just go ragged edge. Let the normal alignment do its thing.
             
             var baseSize = font.Size;
@@ -277,10 +270,8 @@ namespace Form8snCore
                 baseSize -= baseSize / 10;
                 altFont = new XFont(BaseFontFamily, baseSize, BaseFontStyle);
                 
-                var spaceWidth = gfx.MeasureString(" ", altFont).Width;
                 var widthRemains = boxWidth;
                 var heightAccumulated = 0.0;
-                var firstOnLine = true;
                 var lineMaxHeight = 0.0;
                 var sizeIsAcceptable = true;
                 
@@ -290,8 +281,6 @@ namespace Form8snCore
                     var bitSize = gfx.MeasureString(bits[i], altFont);
                     lineMaxHeight = Math.Max(bitSize.Height, lineMaxHeight);
                     var wordWidth = bitSize.Width;
-                    if (firstOnLine) firstOnLine = false;
-                    else wordWidth += spaceWidth;
 
                     if (wordWidth <= widthRemains)
                     {
@@ -303,7 +292,6 @@ namespace Form8snCore
                     widthRemains = boxWidth - bitSize.Width;
                     heightAccumulated += lineMaxHeight;
                     lineMaxHeight = 0.0;
-                    firstOnLine = true;
 
                     if (heightAccumulated <= boxHeight) continue; // not run out of vertical space
                     
@@ -324,16 +312,25 @@ namespace Form8snCore
             return altFont;
         }
 
-        private static List<string> SplitByNonLetter(string str)
+        private static List<string> SplitByWhitespace(string str)
         {
             var outp = new List<string>();
             var sb = new StringBuilder();
+            var firstWhitespace = true;
+            
             foreach (var c in str)
             {
-                if (!char.IsWhiteSpace(c)) sb.Append(c); // TODO: reduce to single whitespace, and handle in wrapping
-                if (char.IsLetterOrDigit(c)) continue;
+                if (!char.IsWhiteSpace(c))
+                {
+                    sb.Append(c);
+                    firstWhitespace = true;
+                    continue;
+                }
 
-                outp.Add(sb.ToString()); // we specifically leave the first non-letter char attached (like ["hello," "world!"]). This simplifies common wrapping cases
+                if (firstWhitespace) sb.Append(' ');
+                firstWhitespace = false;
+
+                outp.Add(sb.ToString());
                 sb.Clear();
             }
 
