@@ -259,7 +259,7 @@ namespace BasicImageFormFiller.EditForms
             this.label4.Size = new System.Drawing.Size(100, 23);
             this.label4.TabIndex = 20;
             this.label4.Text = "Display Format";
-            this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.label4.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // setDataFormatButton
             // 
@@ -277,9 +277,8 @@ namespace BasicImageFormFiller.EditForms
             this.displayFormatInfo.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
             this.displayFormatInfo.Location = new System.Drawing.Point(151, 134);
             this.displayFormatInfo.Name = "displayFormatInfo";
-            this.displayFormatInfo.Size = new System.Drawing.Size(261, 23);
+            this.displayFormatInfo.Size = new System.Drawing.Size(261, 63);
             this.displayFormatInfo.TabIndex = 22;
-            this.displayFormatInfo.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // BoxEdit
             // 

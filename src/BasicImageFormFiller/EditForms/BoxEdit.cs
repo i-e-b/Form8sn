@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Windows.Forms;
 using Form8snCore.FileFormats;
 
@@ -28,6 +29,8 @@ namespace BasicImageFormFiller.EditForms
             dataPathLabel!.Text = box.MappingPath == null
                 ? ""
                 : string.Join(".", box.MappingPath);
+            
+            UpdateDisplayFormatInfo();
             
             wrapTextCheckbox!.Checked = box.WrapText;
             shrinkToFitCheckbox!.Checked = box.ShrinkToFit;
@@ -118,7 +121,29 @@ namespace BasicImageFormFiller.EditForms
 
         private void setDataFormatButton_Click(object sender, EventArgs e)
         {
+            if (_project == null) return;
             // A display format edit form, like the filter editor
+            var dfe = new DisplayFormatEditor(_project, _pageIndex, _boxKey);
+            dfe.ShowDialog();
+            UpdateDisplayFormatInfo();
+        }
+
+        private void UpdateDisplayFormatInfo()
+        {
+            var format = _project?.Pages[_pageIndex].Boxes[_boxKey].DisplayFormat;
+            if (format == null)
+            {
+                displayFormatInfo!.Text = "None";
+                return;
+            }
+            
+            var paramText = string.Join(", ",
+                format.FormatParameters
+                    .Where(kvp=> !string.IsNullOrEmpty(kvp.Value))
+                    .Select(kvp => $"{kvp.Key} = '{kvp.Value}'")
+            );
+            var split = paramText.Length > 0 ? ":\r\n" : "";
+            displayFormatInfo!.Text = $"{format.Type}{split}{paramText}";
         }
     }
 }

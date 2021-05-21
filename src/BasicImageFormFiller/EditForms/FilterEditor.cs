@@ -3,9 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using BasicImageFormFiller.Helpers;
 using BasicImageFormFiller.Interfaces;
-using Form8snCore;
 using Form8snCore.FileFormats;
 
 namespace BasicImageFormFiller.EditForms
@@ -67,7 +65,6 @@ namespace BasicImageFormFiller.EditForms
         private void saveButton_Click(object sender, EventArgs e)
         {
             if (_project == null || _filterName == null) return;
-            // TODO: save values, change key name if required.
 
             var container = _project.Index.DataFilters;
             
