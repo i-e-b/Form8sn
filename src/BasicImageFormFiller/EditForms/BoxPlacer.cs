@@ -27,6 +27,9 @@ namespace BasicImageFormFiller.EditForms
         private bool _drawingBox, _validDraw; // is the user drawing a new box? Did they drag before moving the mouse?
         private float _my, _mx; // drag start
         private float _mye, _mxe; // drag end
+        private string? _boxToAdjust;
+        private bool _movingBox;
+        private bool _resizingBox;
 
         public BoxPlacer() { InitializeComponent(); }
         
@@ -153,9 +156,23 @@ namespace BasicImageFormFiller.EditForms
             if (_project == null) return;
             var pressingControlKey = (ModifierKeys & Keys.Control) != 0;
             var pressingAltKey = (ModifierKeys & Keys.Alt) != 0;
+            var pressingShiftKey = (ModifierKeys & Keys.Shift) != 0;
             
-            if (pressingAltKey && pressingControlKey) // TODO: move / re-size an existing box
+            if (pressingAltKey && pressingControlKey) // move an existing box
             {
+                GetMouseInDocSpace(e.X, e.Y, out var x, out var y);
+                _boxToAdjust = FindBoxKey(x,y);
+                _mx = e.X;
+                _my = e.Y;
+                _movingBox = true;
+            }
+            else if (pressingShiftKey && pressingControlKey) // re-size an existing box
+            {
+                GetMouseInDocSpace(e.X, e.Y, out var x, out var y);
+                _boxToAdjust = FindBoxKey(x,y);
+                _mx = e.X;
+                _my = e.Y;
+                _resizingBox = true;
             }
             else if (pressingAltKey) // pop-up the edit screen for a box
             {
@@ -188,6 +205,62 @@ namespace BasicImageFormFiller.EditForms
             }
         }
 
+        private void BoxPlacer_MouseUp(object sender, MouseEventArgs e) {
+            if (_drawingBox && _validDraw)
+            {
+                AddBox();
+            }
+            if (_resizingBox || _movingBox) _project?.Save();
+
+            _drag = false;
+            _drawingBox = false;
+            _movingBox = false;
+            _resizingBox = false;
+        }
+
+        private void BoxPlacer_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_drawingBox)
+            {
+                GetMouseInDocSpace(e.X, e.Y, out _mxe, out _mye);
+                _validDraw = true;
+                Invalidate();
+            }
+
+            if (_resizingBox && _boxToAdjust != null)
+            {
+                _project!.Pages[_pageIndex].Boxes[_boxToAdjust].Width += (e.X - _mx) / _scale;
+                _project!.Pages[_pageIndex].Boxes[_boxToAdjust].Height  += (e.Y - _my) / _scale;
+                
+                _mx = e.X;
+                _my = e.Y;
+                
+                Invalidate();
+            }
+
+            if (_movingBox && _boxToAdjust != null)
+            {
+                _project!.Pages[_pageIndex].Boxes[_boxToAdjust].Left += (e.X - _mx) / _scale;
+                _project!.Pages[_pageIndex].Boxes[_boxToAdjust].Top  += (e.Y - _my) / _scale;
+                
+                _mx = e.X;
+                _my = e.Y;
+                
+                Invalidate();
+            }
+
+            if (_drag)
+            {
+                _x += (e.X - _mx) / _scale;
+                _y += (e.Y - _my) / _scale;
+                _mx = e.X;
+                _my = e.Y;
+
+                PinScrollToScreen();
+                Invalidate();
+            }
+        }
+        
         private string? FindBoxKey(float docX, float docY)
         {
             if (_project == null) return null;
@@ -201,16 +274,6 @@ namespace BasicImageFormFiller.EditForms
                 return key;
             }
             return null;
-        }
-
-        private void BoxPlacer_MouseUp(object sender, MouseEventArgs e) {
-            if (_drawingBox && _validDraw)
-            {
-                AddBox();
-            }
-
-            _drag = false;
-            _drawingBox = false;
         }
 
         private void AddBox()
@@ -253,27 +316,6 @@ namespace BasicImageFormFiller.EditForms
             });
             _project.Save();
             Invalidate();
-        }
-
-        private void BoxPlacer_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (_drawingBox)
-            {
-                GetMouseInDocSpace(e.X, e.Y, out _mxe, out _mye);
-                _validDraw = true;
-                Invalidate();
-            }
-
-            if (_drag)
-            {
-                _x += (e.X - _mx) / _scale;
-                _y += (e.Y - _my) / _scale;
-                _mx = e.X;
-                _my = e.Y;
-
-                PinScrollToScreen();
-                Invalidate();
-            }
         }
 
         private void PinScrollToScreen()

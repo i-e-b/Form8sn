@@ -336,7 +336,9 @@ namespace Form8snCore
                 outp.Add(sb.ToString()); // we specifically leave the first non-letter char attached (like ["hello," "world!"]). This simplifies common wrapping cases
                 sb.Clear();
             }
-            
+
+            if (sb.Length > 0) outp.Add(sb.ToString());
+
             return outp;
         }
 

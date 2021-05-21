@@ -148,14 +148,13 @@ namespace Form8snCore.DataExtraction
             var mcs = pkg.Params.ContainsKey(countKey) ? pkg.Params[countKey] : null;
             if (!int.TryParse(mcs, out var count)) return $"Invalid parameter: Count should be an integer, but is {mcs}";
 
-
             var target = FindDataAtPath(pkg);
 
             if (target == null) return null;
 
-            if (target is string str) return SkipTakeFromString(str, count, str.Length);
+            if (target is string str) return SkipTakeFromString(str, count, int.MaxValue);
 
-            if (target is ArrayList list) return SkipTakeFromArray(list, count, list.Count);
+            if (target is ArrayList list) return SkipTakeFromArray(list, count, int.MaxValue);
 
             return null;
         }
@@ -212,6 +211,8 @@ namespace Form8snCore.DataExtraction
                 }
                 else sb.Append(c);
             }
+
+            if (sb.Length > 0) outp.Add(sb.ToString());
 
             return outp;
         }
