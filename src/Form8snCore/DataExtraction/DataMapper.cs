@@ -6,7 +6,6 @@ namespace Form8snCore.DataExtraction
 {
     public class DataMapper
     {
-        // TODO: add caching here?
         private readonly Project _project;
         private readonly object _data;
         private readonly Dictionary<string,string> _emptyParams;

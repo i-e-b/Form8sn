@@ -5,6 +5,8 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Containers;
+using Containers.Types;
 using Form8snCore.DataExtraction;
 using Form8snCore.FileFormats;
 using PdfSharp.Drawing;
@@ -30,9 +32,9 @@ namespace Form8snCore
             _filterTimer.Reset();
             _renderTimer.Reset();
             _totalTimer.Restart();
-            
+
             _loadingTimer.Start();
-            var result = new RenderResultInfo{Success = false};
+            var result = new RenderResultInfo {Success = false};
             if (!File.Exists(dataFilePath))
             {
                 result.ErrorMessage = "Could not find input data file";
@@ -41,7 +43,7 @@ namespace Form8snCore
 
             var data = Json.Defrost(File.ReadAllText(dataFilePath)!);
             _loadingTimer.Stop();
-            
+
             var mapper = new DataMapper(project, data);
             _renderTimer.Start();
             var document = new PdfDocument();
@@ -49,7 +51,7 @@ namespace Form8snCore
             document.Info.Title = project.Index.Name;
             document.Info.CreationDate = DateTime.UtcNow;
             _renderTimer.Stop();
-            
+
             _loadingTimer.Start();
             var font = new XFont(BaseFontFamily, 16, BaseFontStyle);
             _loadingTimer.Stop();
@@ -60,7 +62,7 @@ namespace Form8snCore
                 var pageDef = project.Index.Pages[pageIndex];
                 using var image = XImage.FromFile(pageDef.GetBackgroundPath(project));
                 _loadingTimer.Stop();
-                
+
                 if (pageDef.RepeatMode.Repeats)
                 {
                     _filterTimer.Start();
@@ -70,13 +72,24 @@ namespace Form8snCore
                     {
                         var repeatData = dataSets[repeatIndex];
                         mapper.SetRepeater(repeatData);
-                        OutputStandardPage(document, pageDef, mapper, pageIndex, font, image);
+                        var pageResult = OutputStandardPage(document, pageDef, mapper, pageIndex, font, image);
+                        if (pageResult.IsFailure)
+                        {
+                            result.ErrorMessage = pageResult.FailureMessage;
+                            return result;
+                        }
+
                         mapper.ClearRepeater();
                     }
                 }
                 else
                 {
-                    OutputStandardPage(document, pageDef, mapper, pageIndex, font, image);
+                    var pageResult = OutputStandardPage(document, pageDef, mapper, pageIndex, font, image);
+                    if (pageResult.IsFailure)
+                    {
+                        result.ErrorMessage = pageResult.FailureMessage;
+                        return result;
+                    }
                 }
             }
 
@@ -84,7 +97,7 @@ namespace Form8snCore
             document.Save(outputFilePath);
             _renderTimer.Stop();
             _totalTimer.Stop();
-            
+
             result.Success = true;
 
             result.OverallTime = _totalTimer.Elapsed;
@@ -92,11 +105,11 @@ namespace Form8snCore
             result.LoadingTime = _loadingTimer.Elapsed;
             result.FilterApplicationTime = _filterTimer.Elapsed;
             result.FinalRenderTime = _renderTimer.Elapsed;
-            
+
             return result;
         }
 
-        private static void OutputStandardPage(PdfDocument document, TemplatePage pageDef, DataMapper mapper, int pageIndex, XFont font, XImage image)
+        private static Result<Nothing> OutputStandardPage(PdfDocument document, TemplatePage pageDef, DataMapper mapper, int pageIndex, XFont font, XImage image)
         {
             _renderTimer.Start();
             var page = document.AddPage();
@@ -104,8 +117,8 @@ namespace Form8snCore
             // If dimensions are silly, reset to A4
             if (pageDef.WidthMillimetres < 10 || pageDef.WidthMillimetres > 1000) pageDef.WidthMillimetres = 210;
             if (pageDef.HeightMillimetres < 10 || pageDef.HeightMillimetres > 1000) pageDef.HeightMillimetres = 297;
-            
-            
+
+
             // Set the PDF page size (in points under the hood)
             page.Width = XUnit.FromMillimeter(pageDef.WidthMillimetres);
             page.Height = XUnit.FromMillimeter(pageDef.HeightMillimetres);
@@ -113,7 +126,7 @@ namespace Form8snCore
             _renderTimer.Start();
             using var gfx = XGraphics.FromPdfPage(page);
             _renderTimer.Stop();
-            
+
             // Draw background at full page size
             _loadingTimer.Start();
             var destRect = new RectangleF(0, 0, (float) page.Width.Point, (float) page.Height.Point);
@@ -127,18 +140,30 @@ namespace Form8snCore
             // Draw each box
             foreach (var boxDef in pageDef.Boxes)
             {
-                RenderBox(mapper, pageIndex, font, boxDef, fx, fy, gfx);
+                if (boxDef.Value.MappingPath == null) continue; // ignore unmapped boxes
+                var result = RenderBox(mapper, pageIndex, font, boxDef, fx, fy, gfx);
+                if (result.IsFailure) return result;
             }
+
+            return Result.Success();
         }
 
-        private static void RenderBox(DataMapper mapper, int pageIndex, XFont font, KeyValuePair<string, TemplateBox> boxDef, double fx, double fy, XGraphics gfx)
+        private static Result<Nothing> RenderBox(DataMapper mapper, int pageIndex, XFont font, KeyValuePair<string, TemplateBox> boxDef, double fx, double fy, XGraphics gfx)
         {
             var box = boxDef.Value;
 
+            // Read data, apply filters, apply display formatting
             _filterTimer.Start();
             var str = mapper.FindBoxData(box, pageIndex);
+            if (str == null) return Result.Success(); // empty data is considered OK
+
+            if (box.DisplayFormat != null)
+            {
+                str = DisplayFormatter.ApplyFormat(box, str);
+                if (str == null) return Result.Failure($"Formatter failed: {box.DisplayFormat.Type} applied on {string.Join(".", box.MappingPath!)}");
+            }
+
             _filterTimer.Stop();
-            if (str == null) return;
 
             _layoutTimer.Start();
             // boxes are defined in terms of the background image pixels, so we need to convert
@@ -149,16 +174,17 @@ namespace Form8snCore
 
             RenderTextInBox(font, gfx, box, fx, fy, str, space, align);
             _layoutTimer.Stop();
+            return Result.Success();
         }
 
         private static void RenderTextInBox(XFont font, XGraphics gfx, TemplateBox box, double fx, double fy, string str, XRect space, XStringFormat align)
         {
             var boxLeft = box.Left * fx;
             var boxWidth = box.Width * fx;
-            
+
             var boxHeight = box.Height * fy;
-            
-            
+
+
             var size = gfx.MeasureString(str, font);
             if (box.ShrinkToFit && box.WrapText && (size.Width > boxWidth || size.Height > boxHeight)) // try to change the string to match box aspect
             {
@@ -197,10 +223,10 @@ namespace Form8snCore
 
         private static double CalculateTop(TemplateBox box, double fy, List<MeasuredLine> lines)
         {
-            var textHeight = lines.Sum(l=>l.Height);
+            var textHeight = lines.Sum(l => l.Height);
             var top = box.Top * fy;
-            var bottom = top + (box.Height*fy);
-            var middle = top + (box.Height*fy*0.5);
+            var bottom = top + (box.Height * fy);
+            var middle = top + (box.Height * fy * 0.5);
 
             switch (box.Alignment)
             {
@@ -208,17 +234,17 @@ namespace Form8snCore
                 case TextAlignment.TopCentre:
                 case TextAlignment.TopRight:
                     return top;
-                
+
                 case TextAlignment.MidlineLeft:
                 case TextAlignment.MidlineCentre:
                 case TextAlignment.MidlineRight:
                     return middle - (textHeight * 0.5);
-                    
+
                 case TextAlignment.BottomLeft:
                 case TextAlignment.BottomCentre:
                 case TextAlignment.BottomRight:
                     return bottom - textHeight;
-                    
+
                 default:
                     return top;
             }
@@ -229,7 +255,7 @@ namespace Form8snCore
             lines = new List<MeasuredLine>();
             var widthRemains = boxWidth;
             var lineHeight = 0.0;
-                
+
             // Keep adding chunks until one doesn't fit, then break line
             var sb = new StringBuilder();
             for (int i = 0; i < words.Count; i++)
@@ -253,7 +279,7 @@ namespace Form8snCore
                 lineHeight = bitSize.Height;
                 widthRemains = boxWidth - bitSize.Width;
             }
-            
+
             if (sb.Length > 0) // last line
                 lines.Add(new MeasuredLine(sb.ToString(), lineHeight));
         }
@@ -262,19 +288,19 @@ namespace Form8snCore
         {
             var bits = SplitByWhitespace(str);
             // Not going to bother with justification, just go ragged edge. Let the normal alignment do its thing.
-            
+
             var baseSize = font.Size;
             XFont altFont;
             while (true)
             {
                 baseSize -= baseSize / 10;
                 altFont = new XFont(BaseFontFamily, baseSize, BaseFontStyle);
-                
+
                 var widthRemains = boxWidth;
                 var heightAccumulated = 0.0;
                 var lineMaxHeight = 0.0;
                 var sizeIsAcceptable = true;
-                
+
                 // Keep adding chunks until one doesn't fit, then break line
                 for (int i = 0; i < bits.Count; i++)
                 {
@@ -294,7 +320,7 @@ namespace Form8snCore
                     lineMaxHeight = 0.0;
 
                     if (heightAccumulated <= boxHeight) continue; // not run out of vertical space
-                    
+
                     sizeIsAcceptable = false;
                     break; // out of the for(...bits...)
                 }
@@ -305,7 +331,7 @@ namespace Form8snCore
                 if (sizeIsAcceptable) break; // out of while(true)
                 if (baseSize < 4) break; // font size is getting too small. Abandon.
             }
-            
+
             // Now do the real wrapping with the font size we found...
             WrapStringToFit(bits, boxWidth, gfx, altFont, out lines);
 
@@ -317,7 +343,7 @@ namespace Form8snCore
             var outp = new List<string>();
             var sb = new StringBuilder();
             var firstWhitespace = true;
-            
+
             foreach (var c in str)
             {
                 if (!char.IsWhiteSpace(c))
@@ -358,15 +384,15 @@ namespace Form8snCore
         {
             switch (box.Alignment)
             {
-                case TextAlignment.TopLeft      : return XStringFormats.TopLeft;
-                case TextAlignment.TopCentre    : return XStringFormats.TopCenter;
-                case TextAlignment.TopRight     : return XStringFormats.TopRight;
-                case TextAlignment.MidlineLeft  : return XStringFormats.CenterLeft;
+                case TextAlignment.TopLeft: return XStringFormats.TopLeft;
+                case TextAlignment.TopCentre: return XStringFormats.TopCenter;
+                case TextAlignment.TopRight: return XStringFormats.TopRight;
+                case TextAlignment.MidlineLeft: return XStringFormats.CenterLeft;
                 case TextAlignment.MidlineCentre: return XStringFormats.Center;
-                case TextAlignment.MidlineRight : return XStringFormats.CenterRight;
-                case TextAlignment.BottomLeft   : return XStringFormats.BottomLeft;
-                case TextAlignment.BottomCentre : return XStringFormats.BottomCenter;
-                case TextAlignment.BottomRight  : return XStringFormats.BottomRight;
+                case TextAlignment.MidlineRight: return XStringFormats.CenterRight;
+                case TextAlignment.BottomLeft: return XStringFormats.BottomLeft;
+                case TextAlignment.BottomCentre: return XStringFormats.BottomCenter;
+                case TextAlignment.BottomRight: return XStringFormats.BottomRight;
                 default: return XStringFormats.Default;
             }
         }
@@ -391,6 +417,7 @@ namespace Form8snCore
             Text = text;
             Height = height;
         }
+
         public string Text { get; }
         public double Height { get; }
     }

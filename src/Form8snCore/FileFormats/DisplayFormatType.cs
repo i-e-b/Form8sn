@@ -18,6 +18,9 @@ namespace Form8snCore.FileFormats
     }
     
     public class NumberDisplayParams {
+        [Description("Decimal places")]
+        public int DecimalPlaces { get; set; } = 2;
+        
         [Description("Thousands separator (blank for none)")]
         public string ThousandsSeparator { get; set; } = "";
         

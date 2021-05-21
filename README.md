@@ -35,6 +35,15 @@ Components
 ==========
 
 * **PDFSharp** - A modified version of the main project (so I can add or specialise bits)
-* **BasicImageFormFiller** - Experimental app to take scanned paper forms (in JPEG) and fill them in from data
+* **BasicImageFormFiller** - GUI app to take scanned paper forms (in JPEG) and
+  fill them in from arbitrary data, based on examples.
 * **TestApp** - Console app scratch space
 * **PdfSharp.Charting** - Currently unused.
+* **Form8snCore** - File formats and filtering to produce PDFs from project files
+
+To-do:
+------
+
+* [ ] Apply display format to output
+* [ ] Per-page filter for repeat data
+* [ ] Implement running total over repeating pages

@@ -1,0 +1,170 @@
+using System;
+using System.Globalization;
+using System.Text;
+using Form8snCore.FileFormats;
+
+namespace Form8snCore.DataExtraction
+{
+    public class DisplayFormatter
+    {
+        public static string? ApplyFormat(TemplateBox box, string str)
+        {
+            var type = box.DisplayFormat?.Type;
+
+            switch (type)
+            {
+                case null:
+                case DisplayFormatType.None:
+                    return str;
+
+                case DisplayFormatType.DateFormat:
+                    return ReformatDate(box, str);
+
+                case DisplayFormatType.NumberFormat:
+                    return ReformatNumber(box, str);
+
+                default:
+                    return null;
+            }
+        }
+
+        private static string? ReformatNumber(TemplateBox box, string str)
+        {
+            var param = box.DisplayFormat!.FormatParameters;
+
+            if (!double.TryParse(str, out var value)) return null;
+
+            var dpKey = nameof(NumberDisplayParams.DecimalPlaces);
+            var dpStr = param.ContainsKey(dpKey) ? param[dpKey] : "2";
+            if (!int.TryParse(dpStr, out var decimalPlaces)) decimalPlaces = 2;
+            if (decimalPlaces < 0 || decimalPlaces > 20) decimalPlaces = 2;
+
+            var tsKey = nameof(NumberDisplayParams.ThousandsSeparator);
+            var thousands = param.ContainsKey(tsKey) ? param[tsKey] : "";
+
+            var dcKey = nameof(NumberDisplayParams.DecimalSeparator);
+            var decimalSeparator = param.ContainsKey(dcKey) ? param[dcKey] : ".";
+            if (string.IsNullOrEmpty(decimalSeparator)) decimalSeparator = ".";
+
+            var preKey = nameof(NumberDisplayParams.Prefix);
+            var prefix = param.ContainsKey(preKey) ? param[preKey] : "";
+
+            var postKey = nameof(NumberDisplayParams.Postfix);
+            var postfix = param.ContainsKey(postKey) ? param[postKey] : "";
+
+
+            var result = FloatToString(value, decimalPlaces, decimalPlaces, decimalSeparator, thousands);
+
+
+            return str + "->" + prefix + result + postfix;
+        }
+
+        // TODO: fix string building with sb
+        private static string FloatToString(double floatValue, int minDecimalPlaces, int maxDecimalPlaces, string decimalPlace, string thousandsPlace)
+        {
+            var result = "";
+            var dotted = false;
+            var uvalue = floatValue;
+
+            // sign if required
+            if (uvalue < 0)
+            {
+                result += '-';
+                uvalue = -uvalue;
+            }
+
+            var scale = Math.Pow(10, maxDecimalPlaces);
+            var rounded = Math.Round(uvalue * scale) / scale;
+
+            var intpart = Math.Truncate(rounded);
+            var fracpart = rounded - intpart;
+
+            // integral part
+            result += intpart;
+            if (!string.IsNullOrEmpty(thousandsPlace)) result = InjectThousands(result, thousandsPlace);
+            if (maxDecimalPlaces < 1) return result;
+
+            // do fractional part
+            var tail = minDecimalPlaces;
+            var head = maxDecimalPlaces;
+
+            while (head > 0 // we haven't hit max dp
+                   && fracpart > 0 // there is still value in the fraction
+            )
+            {
+                fracpart *= 10; // shift
+                var digit = Math.Truncate(fracpart); // truncate
+                if (head == 1) digit = Math.Round(fracpart);
+                fracpart -= digit;
+
+                head--;
+                tail--;
+
+                if (!dotted)
+                {
+                    result += decimalPlace;
+                    dotted = true;
+                }
+
+                result += digit;
+            }
+
+            while (tail > 0)
+            {
+                if (!dotted)
+                {
+                    result += decimalPlace;
+                    dotted = true;
+                }
+
+                result += "0";
+                tail--;
+            }
+
+            return result;
+        }
+
+        private static string InjectThousands(string str, string sep)
+        {
+            var sb = new StringBuilder();
+            var i = str.Length % 3;
+            foreach (var c in str)
+            {
+                if (i-- <= 0)
+                {
+                    sb.Append(sep);
+                    i = 2;
+                }
+
+                sb.Append(c);
+            }
+
+            return sb.ToString();
+        }
+
+        private static string? ReformatDate(TemplateBox box, string str)
+        {
+            var param = box.DisplayFormat!.FormatParameters;
+
+            var key = nameof(DateDisplayParams.FormatString);
+            var fmt = param.ContainsKey(key) ? param[key] : null;
+
+            try
+            {
+                // first, try the exact format that *should* be used
+                if (DateTime.TryParseExact(str, "yyyy-MM-dd", null, DateTimeStyles.AssumeUniversal | DateTimeStyles.AllowWhiteSpaces, out var dt))
+                    return dt.ToString(fmt);
+
+                // try a more general search
+                if (DateTime.TryParse(str, out dt)) return dt.ToString(fmt);
+
+                // abandon
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+    }
+}
