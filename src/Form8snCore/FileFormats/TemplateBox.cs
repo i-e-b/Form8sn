@@ -2,7 +2,7 @@ namespace Form8snCore.FileFormats
 {
     public class TemplateBox
     {
-        public bool WrapText { get; set; } = false;
+        public bool WrapText { get; set; } = true;
         public bool ShrinkToFit { get; set; } = true;
 
         public double FontScale { get; set; } = 1.0;

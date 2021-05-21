@@ -10,6 +10,8 @@ namespace Form8snCore
 {
     public class RenderProject
     {
+        private const string FontFamily = "Courier New";
+        
         public static bool ToFile(string outputFilePath, string dataFilePath, Project project)
         {
             if (!File.Exists(dataFilePath)) return false;
@@ -21,7 +23,7 @@ namespace Form8snCore
             document.Info.Author = "Generated from data by Form8sn";
             document.Info.Title = project.Index.Name;
 
-            var font = new XFont("Courier New", 16, XFontStyle.Bold);
+            var font = new XFont(FontFamily, 16, XFontStyle.Bold);
 
             for (var pageIndex = 0; pageIndex < project.Index.Pages.Count; pageIndex++)
             {
@@ -74,8 +76,35 @@ namespace Form8snCore
                 // boxes are defined in terms of the background image pixels, so we need to convert
                 var space = new XRect(box.Left * fx, box.Top * fy, box.Width * fx, box.Height * fy);
                 var align = MapAlignments(box);
-                gfx.DrawString(str, font, XBrushes.Black, space, align);
+                
+                var boxWidth = box.Width * fx;
+                var size = gfx.MeasureString(str, font);
+                if (box.ShrinkToFit && size.Width > boxWidth)
+                {
+                    var altFont = ShrinkFontToFit(font, size, boxWidth, gfx, str);
+
+                    gfx.DrawString(str, altFont, XBrushes.Black, space, align);
+                }
+                else
+                {
+                    gfx.DrawString(str, font, XBrushes.Black, space, align);
+                }
             }
+        }
+
+        private static XFont ShrinkFontToFit(XFont font, XSize size, double boxWidth, XGraphics gfx, string str)
+        {
+            var baseSize = font.Size;
+            var altFont = new XFont(FontFamily, baseSize, XFontStyle.Bold);
+            while (size.Width > boxWidth)
+            {
+                baseSize -= baseSize / 10;
+                altFont = new XFont(FontFamily, baseSize, XFontStyle.Bold);
+                size = gfx.MeasureString(str, altFont);
+                if (baseSize < 4) break;
+            }
+
+            return altFont;
         }
 
         private static XStringFormat MapAlignments(TemplateBox box)

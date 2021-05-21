@@ -248,8 +248,8 @@ namespace BasicImageFormFiller.EditForms
                 Left = left,
                 Top = top,
                 FontScale = 1.0,
-                WrapText = false,
-                ShrinkToFit = false
+                WrapText = true,
+                ShrinkToFit = true
             });
             _project.Save();
             Invalidate();
