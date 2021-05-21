@@ -248,7 +248,7 @@ namespace BasicImageFormFiller.EditForms
                 Left = left,
                 Top = top,
                 FontScale = 1.0,
-                WrapText = true,
+                WrapText = false,
                 ShrinkToFit = true
             });
             _project.Save();
@@ -313,7 +313,6 @@ namespace BasicImageFormFiller.EditForms
             
             using var bmp = new Bitmap(pWidth, pHeight);
             using var g = Graphics.FromImage(bmp);
-            if (g == null) return;
             
             g.CompositingQuality = CompositingQuality.HighQuality;
             g.InterpolationMode = InterpolationMode.HighQualityBicubic;
