@@ -95,7 +95,7 @@ namespace PdfSharp.Drawing
         }
 
         /// <summary>
-        /// Gets or sets the value in point.
+        /// Gets or sets the value in points (this is the standard page unit)
         /// </summary>
         public double Point
         {

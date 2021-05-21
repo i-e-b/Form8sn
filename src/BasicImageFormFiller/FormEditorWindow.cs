@@ -21,7 +21,7 @@ namespace BasicImageFormFiller
             Json.DefaultParameters.EnableAnonymousTypes = true;
             InitializeComponent();
             
-            _currentModule = new WelcomeScreen();
+            _currentModule = new NoProjectLoadedScreen();
             ShowPage(_currentModule.StartScreen());
         }
 
@@ -106,6 +106,14 @@ namespace BasicImageFormFiller
             
             path = openFileDialog1!.FileName;
             return true;
+        }
+
+        public string? PickNewFile()
+        {
+            var result = saveFileDialog1?.ShowDialog();
+            if (result != DialogResult.OK) return null;
+            
+            return saveFileDialog1!.FileName;
         }
 
         public void SwitchToModule(IScreenModule nextModule)

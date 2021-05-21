@@ -714,7 +714,7 @@ namespace PdfSharp.Drawing.Pdf
                 if (cx != 0 && cy != 0)
                 {
                     XPdfForm xForm = image as XPdfForm;
-                    // Reset colors in this graphics state. Usualy PDF imagages should set them, but in rare cases they don't which may result in changed colors inside the image.
+                    // Reset colors in this graphics state. Usually PDF images should set them, but in rare cases they don't which may result in changed colors inside the image.
                     var resetColor = xForm != null ? "\n0 g\n0 G\n" : " ";
 
                     if (_gfx.PageDirection == XPageDirection.Downwards)

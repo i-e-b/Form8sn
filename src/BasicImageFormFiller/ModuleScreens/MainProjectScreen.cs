@@ -1,8 +1,10 @@
 using System;
 using System.IO;
+using System.Windows.Forms;
 using BasicImageFormFiller.EditForms;
 using BasicImageFormFiller.Helpers;
 using BasicImageFormFiller.Interfaces;
+using Form8snCore;
 using Form8snCore.FileFormats;
 using SkinnyJson;
 using Tag;
@@ -17,7 +19,8 @@ namespace BasicImageFormFiller.ModuleScreens
         private const string SetDataFiltersCommand = "/set-data-filters";
         private const string MovePageUpCommand = "/move-up";
         private const string MovePageDownCommand = "/move-dn";
-        private const string SetSampleFileCommand= "/set-sample-file";
+        private const string SetSampleFileCommand = "/set-sample-file";
+        private const string RenderSampleCommand = "/render-sample";
         private const string AddPageAtEndCommand = "/add-at-end";
         private const string EditPageCommand = "/edit-page";
         private const string InsertPageCommand = "/insert-page";
@@ -72,6 +75,10 @@ namespace BasicImageFormFiller.ModuleScreens
 
             content.Add(T.g("p")[
                 T.g("a", "href", SetDataFiltersCommand)["Setup data filters and splits"]
+            ]);
+            
+            content.Add(T.g("p")[
+                T.g("a", "href", RenderSampleCommand)["Render PDF from sample data"]
             ]);
         }
 
@@ -149,6 +156,21 @@ namespace BasicImageFormFiller.ModuleScreens
                     break;
                 }
 
+                case RenderSampleCommand:
+                {
+                    if (string.IsNullOrWhiteSpace(_project.Index.SampleFileName)) { moduleScreen.ShowPage(StartScreen()); return; }
+
+                    var file = moduleScreen.PickNewFile();
+                    if (!string.IsNullOrWhiteSpace(file))
+                    {
+                        var ok = RenderProject.ToFile(file, Path.Combine(_project.BasePath, _project.Index.SampleFileName), _project);
+                        MessageBox.Show(ok ? "Render complete" : "Render failed");
+                    }
+
+                    moduleScreen.ShowPage(StartScreen());
+                    break;
+                }
+
                 case SetDataFiltersCommand:
                 {
                     moduleScreen.SwitchToModule(new FiltersScreen(_project));
@@ -200,7 +222,6 @@ namespace BasicImageFormFiller.ModuleScreens
                     throw new Exception($"Unexpected command: {command}");
             }
         }
-
 
         private void ChooseSampleFile(ITagModuleScreen module)
         {

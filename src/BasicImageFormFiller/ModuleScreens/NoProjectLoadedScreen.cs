@@ -3,7 +3,7 @@ using Tag;
 
 namespace BasicImageFormFiller.ModuleScreens
 {
-    public class WelcomeScreen : IScreenModule
+    public class NoProjectLoadedScreen : IScreenModule
     {
         public const string NewTemplate = "/template-new";
         public const string LoadTemplate = "/template-load";
