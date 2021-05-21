@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using Form8snCore;
+using Form8snCore.DataExtraction;
 using Form8snCore.FileFormats;
 
 namespace BasicImageFormFiller.EditForms
@@ -52,7 +53,8 @@ namespace BasicImageFormFiller.EditForms
                 new Dictionary<string, string>(),
                 repeaterPath,
                 project.Index.DataFilters,
-                sampleData
+                sampleData,
+                null
             );
             
             // sample should be an ArrayList.
@@ -109,7 +111,8 @@ namespace BasicImageFormFiller.EditForms
                     filter.Value.MappingParameters,
                     filter.Value.DataPath,
                     project.Index.DataFilters,
-                    data
+                    data,
+                    null
                     );
 
                 if (sample == null)

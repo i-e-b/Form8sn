@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.IO;
+using Form8snCore.DataExtraction;
 using Form8snCore.FileFormats;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
@@ -27,16 +28,13 @@ namespace Form8snCore
                 var pageDef = project.Index.Pages[pageIndex];
                 if (pageDef.RepeatMode.Repeats)
                 {
-                    // TODO: pull the repeat source
-
-                    var page = document.AddPage();
-                    page.Width = XUnit.FromMillimeter(pageDef.WidthMillimetres); // TODO: deal with invalid page sizes
-                    page.Height = XUnit.FromMillimeter(pageDef.HeightMillimetres);
-                    using (var gfx = XGraphics.FromPdfPage(page))
+                    var dataSets = mapper.GetRepeatData(pageDef.RepeatMode.DataPath);
+                    for (int repeatIndex = 0; repeatIndex < dataSets.Count; repeatIndex++)
                     {
-                        gfx.DrawString($"This is page {pageDef.Name}, which is a repeater", font, XBrushes.Black,
-                            new XRect(0, 0, page.Width, page.Height),
-                            XStringFormats.Center);
+                        var repeatData = dataSets[repeatIndex];
+                        mapper.SetRepeater(repeatData);
+                        OutputStandardPage(project, document, pageDef, mapper, pageIndex, font);
+                        mapper.ClearRepeater();
                     }
                 }
                 else
@@ -70,7 +68,7 @@ namespace Form8snCore
             {
                 var box = boxDef.Value;
 
-                var str = mapper.FindBoxData(box, pageIndex, 0);
+                var str = mapper.FindBoxData(box, pageIndex);
                 if (str == null) continue;
 
                 // boxes are defined in terms of the background image pixels, so we need to convert

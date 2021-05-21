@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using Form8snCore.FileFormats;
 
-namespace Form8snCore
+namespace Form8snCore.DataExtraction
 {
     public static class FilterData
     {
@@ -17,12 +17,13 @@ namespace Form8snCore
         /// <param name="sourcePath">path the filter is pointing to</param>
         /// <param name="otherFilters">Other filters in the project that can be used as sources</param>
         /// <param name="sourceData">complete data set for the template</param>
-        /// <returns></returns>
+        /// <param name="repeaterData">if we are mapping data for a repeating page, put the page specific data here</param>
         public static object? ApplyFilter(MappingType type,
             Dictionary<string, string> parameters,
             string[]? sourcePath,
             Dictionary<string, MappingInfo> otherFilters,
-            object? sourceData)
+            object? sourceData,
+            object? repeaterData)
         {
             var redirects = new HashSet<string>(); // for detecting loops in filter-over-filter
             var filterPackage = new FilterPackage
@@ -32,6 +33,7 @@ namespace Form8snCore
                 SourcePath = sourcePath,
                 FilterSet = otherFilters,
                 Data = sourceData,
+                RepeaterData = repeaterData,
                 Redirects = redirects
             };
             return ApplyFilterRecursive(filterPackage);
@@ -303,7 +305,10 @@ namespace Form8snCore
             }
             else if (root == "D")
             {
-                throw new Exception("Page Repeater Data not yet implemented");
+                if (pkg.RepeaterData == null) throw new Exception($"Was asked for repeat page data, but none was supplied");
+                if (path.Length < 2) return null;
+                data = pkg.RepeaterData;
+                pathSkip = 1; // root 'D'
             }
             else if (path[0] != "") throw new Exception($"Unexpected root marker: {path[0]}");
 
@@ -391,39 +396,6 @@ namespace Form8snCore
         {
             var key = nameof(TextMappingParams.Text);
             return pkg.Params.ContainsKey(key) ? pkg.Params[key] : null;
-        }
-    }
-
-    internal class FilterPackage
-    {
-        public FilterPackage() { Params = new Dictionary<string, string>(); FilterSet = new Dictionary<string, MappingInfo>(); Redirects = new HashSet<string>(); }
-        
-        public MappingType Type { get; set; }
-        public Dictionary<string, string> Params { get; set; }
-        public string[]? SourcePath { get; set; }
-        public Dictionary<string, MappingInfo> FilterSet { get; set; }
-        public object? Data { get; set; }
-        public HashSet<string> Redirects { get; set; }
-        
-        public FilterPackage? RedirectFilter(string name)
-        {
-            if (!FilterSet.ContainsKey(name)) return null;
-            // TODO: result cache?
-            
-            if (Redirects.Contains(name)) return null; // Recursion in filters!
-            Redirects.Add(name);
-            
-            var newFilterDef = FilterSet[name];
-            
-            return new FilterPackage{
-                Type = newFilterDef.MappingType,
-                SourcePath = newFilterDef.DataPath,
-                Params = newFilterDef.MappingParameters,
-                
-                Data = Data,
-                FilterSet = FilterSet,
-                Redirects = Redirects
-            };
         }
     }
 }
