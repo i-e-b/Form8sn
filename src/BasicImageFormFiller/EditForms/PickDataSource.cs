@@ -57,12 +57,14 @@ namespace BasicImageFormFiller.EditForms
                 ForeColor = Color.Brown
             };
             
-            var sample = FilterData.ApplyFilter(
+            var sample = MappingActions.ApplyFilter(
                 MappingType.None,
                 new Dictionary<string, string>(),
                 repeaterPath,
+                null,
                 project.Index.DataFilters,
                 sampleData,
+                null,
                 null
             );
             
@@ -111,12 +113,14 @@ namespace BasicImageFormFiller.EditForms
 
         private void AddPageDataFilters(Project project, object data, int pageIndex)
         {
-            var repeatData = FilterData.ApplyFilter(
+            var repeatData = MappingActions.ApplyFilter(
                 MappingType.None,
                 new Dictionary<string, string>(),
                 project.Pages[pageIndex].RepeatMode.DataPath,
+                null,
                 project.Index.DataFilters,
                 data,
+                null,
                 null
             );
             if (repeatData is ArrayList list) repeatData = list[0];
@@ -125,13 +129,15 @@ namespace BasicImageFormFiller.EditForms
             foreach (var filter in project.Pages[pageIndex].PageDataFilters)
             {
                 var path = FilterMarker + Separator + filter.Key;
-                var sample = FilterData.ApplyFilter(
+                var sample = MappingActions.ApplyFilter(
                     filter.Value.MappingType,
                     filter.Value.MappingParameters,
                     filter.Value.DataPath,
+                    null,
                     project.Index.DataFilters,
                     data,
-                    repeatData
+                    repeatData,
+                    null
                 );
 
                 if (sample == null)
@@ -156,12 +162,14 @@ namespace BasicImageFormFiller.EditForms
             foreach (var filter in project.Index.DataFilters)
             {
                 var path = FilterMarker + Separator + filter.Key;
-                var sample = FilterData.ApplyFilter(
+                var sample = MappingActions.ApplyFilter(
                     filter.Value.MappingType,
                     filter.Value.MappingParameters,
                     filter.Value.DataPath,
+                    null,
                     project.Index.DataFilters,
                     data,
+                    null,
                     null
                     );
 

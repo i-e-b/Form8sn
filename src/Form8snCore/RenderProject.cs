@@ -55,7 +55,10 @@ namespace Form8snCore
             _loadingTimer.Start();
             var font = new XFont(BaseFontFamily, 16, BaseFontStyle);
             _loadingTimer.Stop();
+            
+            var runningTotals = new Dictionary<string, decimal>(); // path -> total
 
+            // TODO: if we have any 'page total count' filters, we will need to count pages. Either before, or go back and edit afterwards
             for (var pageIndex = 0; pageIndex < project.Index.Pages.Count; pageIndex++)
             {
                 _loadingTimer.Start();
@@ -71,8 +74,8 @@ namespace Form8snCore
                     for (int repeatIndex = 0; repeatIndex < dataSets.Count; repeatIndex++)
                     {
                         var repeatData = dataSets[repeatIndex];
-                        mapper.SetRepeater(repeatData);
-                        var pageResult = OutputStandardPage(document, pageDef, mapper, pageIndex, font, image);
+                        mapper.SetRepeater(repeatData, pageDef.RepeatMode.DataPath);
+                        var pageResult = OutputStandardPage(document, pageDef, mapper, pageIndex, font, image, runningTotals);
                         if (pageResult.IsFailure)
                         {
                             result.ErrorMessage = pageResult.FailureMessage;
@@ -84,7 +87,7 @@ namespace Form8snCore
                 }
                 else
                 {
-                    var pageResult = OutputStandardPage(document, pageDef, mapper, pageIndex, font, image);
+                    var pageResult = OutputStandardPage(document, pageDef, mapper, pageIndex, font, image, runningTotals);
                     if (pageResult.IsFailure)
                     {
                         result.ErrorMessage = pageResult.FailureMessage;
@@ -109,7 +112,8 @@ namespace Form8snCore
             return result;
         }
 
-        private static Result<Nothing> OutputStandardPage(PdfDocument document, TemplatePage pageDef, DataMapper mapper, int pageIndex, XFont font, XImage image)
+        private static Result<Nothing> OutputStandardPage(PdfDocument document, TemplatePage pageDef, DataMapper mapper,
+            int pageIndex, XFont font, XImage image, Dictionary<string, decimal> runningTotals)
         {
             _renderTimer.Start();
             var page = document.AddPage();
@@ -140,24 +144,49 @@ namespace Form8snCore
             var fx = page.Width.Point / image.PixelWidth;
             var fy = page.Height.Point / image.PixelHeight;
 
-            // Draw each box
-            foreach (var boxDef in pageDef.Boxes)
+            // Draw each box. We sort the boxes (currently by filter type) so running totals can work as expected
+            foreach (var boxDef in pageDef.Boxes.Where(HasAValue).OrderBy(OrderBoxes))
             {
-                if (boxDef.Value.MappingPath == null) continue; // ignore unmapped boxes
-                var result = RenderBox(mapper, pageIndex, font, boxDef, fx, fy, gfx);
+                var result = RenderBox(mapper, pageIndex, font, boxDef, fx, fy, gfx, runningTotals);
                 if (result.IsFailure) return result;
             }
 
             return Result.Success();
         }
 
-        private static Result<Nothing> RenderBox(DataMapper mapper, int pageIndex, XFont font, KeyValuePair<string, TemplateBox> boxDef, double fx, double fy, XGraphics gfx)
+        private static bool HasAValue(KeyValuePair<string, TemplateBox> boxDef)
+        {
+            return boxDef.Value.MappingPath != null;
+        }
+
+        private static int OrderBoxes(KeyValuePair<string, TemplateBox> boxDef)
+        {
+            const int explicitOrderGap = 10000;
+            
+            // if we have an explicit order, use that (explicits always go first)
+            if (boxDef.Value.BoxOrder != null) return boxDef.Value.BoxOrder.Value;
+            
+            // otherwise, apply a default ordering.
+            var path = boxDef.Value.MappingPath;
+            if (path == null || path.Length < 1) return explicitOrderGap - 3; // unmapped first (they will get ignored anyway)
+            if (path[0] == "") return explicitOrderGap - 2; // raw data paths next
+            if (path[0] == "D") return explicitOrderGap - 1; // next, page data
+            if (path[0] == "#") // finally filters
+            {
+                if (!Enum.TryParse<MappingType>(path[1], out var mappingType)) return explicitOrderGap; // unknown filters
+                return explicitOrderGap + (int)mappingType;
+            }
+            return explicitOrderGap; // shouldn't be hit
+        }
+
+        private static Result<Nothing> RenderBox(DataMapper mapper, int pageIndex, XFont font, KeyValuePair<string, TemplateBox> boxDef,
+            double fx, double fy, XGraphics gfx, Dictionary<string, decimal> runningTotals)
         {
             var box = boxDef.Value;
 
             // Read data, apply filters, apply display formatting
             _filterTimer.Start();
-            var str = mapper.FindBoxData(box, pageIndex);
+            var str = mapper.FindBoxData(box, pageIndex, runningTotals);
             if (str == null) return Result.Success(); // empty data is considered OK
 
             if (box.DisplayFormat != null)

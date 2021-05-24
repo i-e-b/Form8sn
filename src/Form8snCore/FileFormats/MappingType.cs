@@ -2,39 +2,45 @@ using System.ComponentModel;
 
 namespace Form8snCore.FileFormats
 {
+    /// <summary>
+    /// How do we map from data path to a displayable value.
+    /// This is either none (just use the data), or the output of a filter.
+    /// <para></para>
+    /// These have an explicit order that we will process the boxes in. This is overriden if a box has an explicit order
+    /// </summary>
     public enum MappingType
     {
         [Description("Pass data directly along")]
         [UsesType(typeof(EmptyMappingParams))]
-        None,
+        None = 0, 
         
         [Description("Supply an unchanging value")]
         [UsesType(typeof(TextMappingParams))]
-        FixedValue,
+        FixedValue = 2,
         
         [Description("Split a list into a list of sub-lists, each up to 'count' long")]
         [UsesType(typeof(MaxCountMappingParams))]
-        SplitIntoN,
+        SplitIntoN = 3,
         
         [Description("Return the first 'count' words, discarding others")]
         [UsesType(typeof(TakeMappingParams))]
-        TakeWords,
+        TakeWords = 4,
         
         [Description("Discard the first 'count' words, returning others")]
         [UsesType(typeof(SkipMappingParams))]
-        SkipWords,
-        
-        [Description("Sum up all numeric values on the path")]
-        [UsesType(typeof(EmptyMappingParams))]
-        Total,
-        
-        [Description("Sum up numeric values on the path that have been used so far")]
-        [UsesType(typeof(EmptyMappingParams))]
-        RunningTotal,
+        SkipWords = 5,
         
         [Description("Join all elements of a list (treating them as strings)")]
         [UsesType(typeof(JoinMappingParams))]
-        Concatenate
+        Concatenate = 6,
+        
+        [Description("Sum up all numeric values on the path")]
+        [UsesType(typeof(EmptyMappingParams))]
+        Total = 1000,
+        
+        [Description("Sum up numeric values on the path that have been used so far")]
+        [UsesType(typeof(EmptyMappingParams))]
+        RunningTotal = 1001
     }
 
     public class JoinMappingParams {

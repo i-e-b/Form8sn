@@ -7,7 +7,7 @@ using Form8snCore.FileFormats;
 
 namespace Form8snCore.DataExtraction
 {
-    public static class FilterData
+    public static class MappingActions
     {
         /// <summary>
         /// returns one of ArrayList, string, int, Dictionary&lt;string,object>; For the dict, 'object' must also be one of these.
@@ -15,31 +15,53 @@ namespace Form8snCore.DataExtraction
         /// <param name="type">Filter to apply</param>
         /// <param name="parameters">parameters for this filter</param>
         /// <param name="sourcePath">path the filter is pointing to</param>
+        /// <param name="originalPath">if filter is being applied over repeater data, this should be the original data source</param>
         /// <param name="otherFilters">Other filters in the project that can be used as sources</param>
         /// <param name="sourceData">complete data set for the template</param>
         /// <param name="repeaterData">if we are mapping data for a repeating page, put the page specific data here</param>
+        /// <param name="runningTotals"></param>
         public static object? ApplyFilter(MappingType type,
             Dictionary<string, string> parameters,
             string[]? sourcePath,
+            string[]? originalPath,
             Dictionary<string, MappingInfo> otherFilters,
             object? sourceData,
-            object? repeaterData)
+            object? repeaterData,
+            Dictionary<string, decimal>? runningTotals)
         {
             var redirects = new HashSet<string>(); // for detecting loops in filter-over-filter
-            var filterPackage = new FilterPackage
+            var filterPackage = new FilterState
             {
                 Type = type,
                 Params = parameters,
                 SourcePath = sourcePath,
+                OriginalPath = originalPath,
                 FilterSet = otherFilters,
                 Data = sourceData,
                 RepeaterData = repeaterData,
-                Redirects = redirects
+                Redirects = redirects,
+                RunningTotals = runningTotals ?? new Dictionary<string, decimal>()
             };
-            return ApplyFilterRecursive(filterPackage);
+            var value = ApplyFilterRecursive(filterPackage);
+
+            if (runningTotals != null)
+            {
+                if ((value is decimal d) ||
+                    (value != null && decimal.TryParse(value.ToString(), out d)))
+                {
+                    // Both the literal path, and the original (in case we are repeating a page)
+                    AddRunningTotal(runningTotals, sourcePath, originalPath, d);
+                }
+            }
+
+            return value;
         }
 
-        private static object? ApplyFilterRecursive(FilterPackage pkg)
+
+        /// <summary>
+        /// This is the core of filtering. It can be called by other filters to allow sub-filtering
+        /// </summary>
+        private static object? ApplyFilterRecursive(FilterState pkg)
         {
             switch (pkg.Type)
             {
@@ -65,16 +87,23 @@ namespace Form8snCore.DataExtraction
                     return ConcatenateList(pkg);
 
                 case MappingType.RunningTotal:
-                    // TODO...
-                    // This should go through a 'Repeat Source'
-                    break;
+                    return RunningTotal(pkg);
+                
                 default: return "Not yet implemented";
             }
-
-            return null;
         }
 
-        private static object? ConcatenateList(FilterPackage pkg)
+        private static object? RunningTotal(FilterState pkg)
+        {
+            if (pkg.SourcePath == null) return null;
+            
+            var pathKey = JoinPathWithoutArrayIndexes(pkg.SourcePath);
+            if (pkg.RunningTotals.ContainsKey(pathKey)) return pkg.RunningTotals[pathKey];
+            
+            return 0.0m;
+        }
+
+        private static object? ConcatenateList(FilterState pkg)
         {
             if (pkg.Data == null || pkg.SourcePath == null || pkg.SourcePath.Length < 1) return null;
 
@@ -111,13 +140,12 @@ namespace Form8snCore.DataExtraction
             return sb.ToString();
         }
 
-
         /// <summary>
         /// If target is string, split on white space and do an array take, then join on 'space'
         /// If target is an array, do an array take and return resulting array
         /// Otherwise return null 
         /// </summary>
-        private static object? TakeWords(FilterPackage pkg)
+        private static object? TakeWords(FilterState pkg)
         {
             if (pkg.Data == null || pkg.SourcePath == null || pkg.SourcePath.Length < 1) return null;
             var countKey = nameof(TakeMappingParams.Count);
@@ -141,7 +169,7 @@ namespace Form8snCore.DataExtraction
         /// If target is an array, do an array take and return resulting array
         /// Otherwise return null 
         /// </summary>
-        private static object? SkipWords(FilterPackage pkg)
+        private static object? SkipWords(FilterState pkg)
         {
             if (pkg.Data == null || pkg.SourcePath == null || pkg.SourcePath.Length < 1) return null;
             var countKey = nameof(SkipMappingParams.Count);
@@ -165,7 +193,7 @@ namespace Form8snCore.DataExtraction
         /// If target is a number, stringify and split as a string
         /// Otherwise return null
         /// </summary>
-        private static object? SplitIntoMaxCount(FilterPackage pkg)
+        private static object? SplitIntoMaxCount(FilterState pkg)
         {
             if (pkg.Data == null || pkg.SourcePath == null || pkg.SourcePath.Length < 1) return null;
             var countKey = nameof(MaxCountMappingParams.MaxCount);
@@ -258,7 +286,7 @@ namespace Form8snCore.DataExtraction
             return outp;
         }
 
-        private static object? SumOfAllOnPath(FilterPackage pkg)
+        private static object? SumOfAllOnPath(FilterState pkg)
         {
             if (pkg.Data == null || pkg.SourcePath == null || pkg.SourcePath.Length < 1) return null;
 
@@ -289,7 +317,7 @@ namespace Form8snCore.DataExtraction
         }
         
         // TODO: generalise this and remove the version in SumOfAllOnPath
-        private static object? FindDataAtPath(FilterPackage pkg)
+        private static object? FindDataAtPath(FilterState pkg)
         {
             var path = pkg.SourcePath;
             var data = pkg.Data;
@@ -396,10 +424,36 @@ namespace Form8snCore.DataExtraction
             return sum;
         }
 
-        private static object? GetFixedValue(FilterPackage pkg)
+        private static object? GetFixedValue(FilterState pkg)
         {
             var key = nameof(TextMappingParams.Text);
             return pkg.Params.ContainsKey(key) ? pkg.Params[key] : null;
+        }
+        
+        private static void AddRunningTotal(Dictionary<string,decimal> runningTotals, string[]? sourcePath, string[]? prefixPath, decimal value)
+        {
+            if (sourcePath == null || sourcePath.Length < 1) return;
+            
+            var pathStr = JoinPathWithoutArrayIndexes(sourcePath);
+            if (runningTotals.ContainsKey(pathStr)) runningTotals[pathStr] += value; 
+            else runningTotals.Add(pathStr, value);
+
+            if (prefixPath != null)
+            {
+                pathStr = JoinPathWithoutArrayIndexes(prefixPath) + pathStr.Substring(1); // clip off the 'D'
+                if (runningTotals.ContainsKey(pathStr)) runningTotals[pathStr] += value; 
+                else runningTotals.Add(pathStr, value);
+            }
+        }
+
+        private static string JoinPathWithoutArrayIndexes(string[] sourcePath)
+        {
+            return string.Join(".", sourcePath.Where(s=> !s.StartsWith('[') && !s.EndsWith(']')));
+        }
+
+        public static string[]? FindSourcePath(string filterName, Dictionary<string,MappingInfo> indexDataFilters)
+        {
+            return indexDataFilters.ContainsKey(filterName) ? indexDataFilters[filterName].DataPath : null;
         }
     }
 }
