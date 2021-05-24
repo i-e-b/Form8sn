@@ -44,6 +44,6 @@ Components
 To-do:
 ------
 
-* [ ] Apply display format to output
+* [x] Apply display format to output
 * [ ] Per-page filter for repeat data
-* [ ] Implement running total over repeating pages
+* [ ] Implement running total over repeating pages (add at end of page render)

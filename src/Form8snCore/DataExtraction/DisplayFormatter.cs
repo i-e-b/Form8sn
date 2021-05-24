@@ -32,7 +32,7 @@ namespace Form8snCore.DataExtraction
         {
             var param = box.DisplayFormat!.FormatParameters;
 
-            if (!double.TryParse(str, out var value)) return null;
+            if (!decimal.TryParse(str, out var value)) return null;
 
             var dpKey = nameof(NumberDisplayParams.DecimalPlaces);
             var dpStr = param.ContainsKey(dpKey) ? param[dpKey] : "2";
@@ -56,72 +56,71 @@ namespace Form8snCore.DataExtraction
             var result = FloatToString(value, decimalPlaces, decimalPlaces, decimalSeparator, thousands);
 
 
-            return str + "->" + prefix + result + postfix;
+            return prefix + result + postfix;
         }
 
-        // TODO: fix string building with sb
-        private static string FloatToString(double floatValue, int minDecimalPlaces, int maxDecimalPlaces, string decimalPlace, string thousandsPlace)
+        private static string FloatToString(decimal floatValue, int minDecimalPlaces, int maxDecimalPlaces, string decimalPlace, string thousandsPlace)
         {
-            var result = "";
+            var result = new StringBuilder();
             var dotted = false;
-            var uvalue = floatValue;
+            var unsignedValue = floatValue;
 
             // sign if required
-            if (uvalue < 0)
+            if (unsignedValue < 0)
             {
-                result += '-';
-                uvalue = -uvalue;
+                result.Append('-');
+                unsignedValue = -unsignedValue;
             }
 
-            var scale = Math.Pow(10, maxDecimalPlaces);
-            var rounded = Math.Round(uvalue * scale) / scale;
+            var scale = (decimal)Math.Pow(10.0, maxDecimalPlaces);
+            var rounded = Math.Round(unsignedValue * scale, MidpointRounding.AwayFromZero) / scale;
 
-            var intpart = Math.Truncate(rounded);
-            var fracpart = rounded - intpart;
+            var intPart = Math.Truncate(rounded);
+            var fracPart = rounded - intPart;
 
             // integral part
-            result += intpart;
-            if (!string.IsNullOrEmpty(thousandsPlace)) result = InjectThousands(result, thousandsPlace);
-            if (maxDecimalPlaces < 1) return result;
+            result.Append(intPart.ToString(CultureInfo.InvariantCulture));
+            if (!string.IsNullOrEmpty(thousandsPlace)) result = new StringBuilder(InjectThousands(result.ToString(), thousandsPlace));
+            if (maxDecimalPlaces < 1) return result.ToString();
 
             // do fractional part
             var tail = minDecimalPlaces;
             var head = maxDecimalPlaces;
 
             while (head > 0 // we haven't hit max dp
-                   && fracpart > 0 // there is still value in the fraction
+                   && fracPart > 0 // there is still value in the fraction
             )
             {
-                fracpart *= 10; // shift
-                var digit = Math.Truncate(fracpart); // truncate
-                if (head == 1) digit = Math.Round(fracpart);
-                fracpart -= digit;
+                fracPart *= 10; // shift
+                var digit = Math.Truncate(fracPart); // truncate
+                if (head == 1) digit = Math.Round(fracPart);
+                fracPart -= digit;
 
                 head--;
                 tail--;
 
                 if (!dotted)
                 {
-                    result += decimalPlace;
+                    result.Append(decimalPlace);
                     dotted = true;
                 }
 
-                result += digit;
+                result.Append(digit);
             }
 
             while (tail > 0)
             {
                 if (!dotted)
                 {
-                    result += decimalPlace;
+                    result.Append(decimalPlace);
                     dotted = true;
                 }
 
-                result += "0";
+                result.Append("0");
                 tail--;
             }
 
-            return result;
+            return result.ToString();
         }
 
         private static string InjectThousands(string str, string sep)
