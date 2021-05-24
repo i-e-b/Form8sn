@@ -73,7 +73,7 @@ namespace BasicImageFormFiller.EditForms
             if (path == null || !File.Exists(path)) return;
             
             using var img = Image.FromFile(path);
-            if (img == null || img.Height < 1) return;
+            if (img.Height < 1) return;
             
             var aspect = img.Width / (double)img.Height;
 

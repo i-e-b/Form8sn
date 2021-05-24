@@ -15,14 +15,6 @@ namespace TestApp
     {
         static void Main()
         {
-            Console.WriteLine("Numbers test");
-            Console.WriteLine((123_456.000_1).ToString("0,000.000"));
-            Console.WriteLine((123_456.000_1).ToString("0,000.#"));
-            Console.WriteLine((123_456.000_1).ToString("0,000."));
-            Console.WriteLine((123_456.000_1).ToString("#,##0.000"));
-            Console.WriteLine((789_123_456.000_1).ToString("#,##0.000"));
-            
-            return;
             Console.WriteLine("Creating a PDF from scratch...");
             var document = new PdfDocument();
 

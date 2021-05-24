@@ -7,14 +7,14 @@ using Tag;
 
 namespace BasicImageFormFiller.ModuleScreens
 {
-    internal class PageMapEditScreen : IScreenModule
+    internal class PageMapReviewScreen : IScreenModule
     {
         private const string BackToPageCommand = "/back-to-page";
     
         private readonly Project _project;
         private readonly int _pageIndex;
 
-        public PageMapEditScreen(Project project, int pageIndex)
+        public PageMapReviewScreen(Project project, int pageIndex)
         {
             _project = project;
             _pageIndex = pageIndex;

@@ -182,7 +182,7 @@ namespace BasicImageFormFiller.ModuleScreens
 
                 case SetDataFiltersCommand:
                 {
-                    moduleScreen.SwitchToModule(new FiltersScreen(_project));
+                    moduleScreen.SwitchToModule(new ProjectFiltersScreen(_project));
                     break;
                 }
 

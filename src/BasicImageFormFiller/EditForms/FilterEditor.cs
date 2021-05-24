@@ -13,6 +13,7 @@ namespace BasicImageFormFiller.EditForms
         private readonly IScreenModule? _returnModule;
         private readonly Project? _project;
         private readonly string? _filterName;
+        private readonly int? _pageIndex;
 
         private string[]? _selectedPath;
 
@@ -20,15 +21,18 @@ namespace BasicImageFormFiller.EditForms
         {
             InitializeComponent();
         }
-
-        public FilterEditor(IScreenModule returnModule, Project project, string filterName)
+        
+        public FilterEditor(IScreenModule returnModule, Project project, string filterName, int? pageIndex)
         {
             _returnModule = returnModule;
             _project = project;
             _filterName = filterName;
+            _pageIndex = pageIndex;
             InitializeComponent();
 
-            var filter = _project.Index.DataFilters[_filterName];
+            var filter = _pageIndex == null
+                ? _project.Index.DataFilters[_filterName]
+                : _project.Pages[_pageIndex.Value].PageDataFilters[_filterName];
 
             filterNameTextbox!.Text = _filterName;
             
@@ -66,7 +70,9 @@ namespace BasicImageFormFiller.EditForms
         {
             if (_project == null || _filterName == null) return;
 
-            var container = _project.Index.DataFilters;
+            var container = _pageIndex == null
+                ? _project.Index.DataFilters
+                : _project.Pages[_pageIndex.Value].PageDataFilters;
             
             var filter = container[_filterName];
             
@@ -131,7 +137,11 @@ namespace BasicImageFormFiller.EditForms
         private void dataButton_Click(object sender, EventArgs e)
         {
             if (_project == null) return;
-            var rm = new PickDataSource(_project, "Pick filter data source", _selectedPath, null);
+            
+            string[]? repeatPath = null;
+            if (_pageIndex != null) repeatPath = _project.Pages[_pageIndex.Value].RepeatMode.DataPath;
+            
+            var rm = new PickDataSource(_project, "Pick filter data source", _selectedPath, repeatPath);
             rm.ShowDialog();
             if (rm.SelectedPath == null) return;
 

@@ -8,7 +8,7 @@ namespace Form8snCore.FileFormats
         public TemplatePage()
         {
             Boxes = new Dictionary<string, TemplateBox>();
-            RepeatMode = new RepeatMode();
+            RepeatMode = new RepeatMode{Repeats = false};
             PageDataFilters = new Dictionary<string, MappingInfo>();
         }
 

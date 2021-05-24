@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using Form8snCore;
 using Form8snCore.DataExtraction;
 using Form8snCore.FileFormats;
 

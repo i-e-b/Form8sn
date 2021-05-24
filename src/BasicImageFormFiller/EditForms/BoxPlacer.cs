@@ -74,7 +74,7 @@ namespace BasicImageFormFiller.EditForms
         {
             if (_imageCache == null || _project == null) return;
             
-            g.Transform?.Reset();
+            g.Transform.Reset();
             g.ScaleTransform(scale, scale);
             g.DrawImage(_imageCache, new PointF(dx, dy));
 
@@ -146,7 +146,6 @@ namespace BasicImageFormFiller.EditForms
 
             using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
             using var bmp = Image.FromStream(fs);
-            if (bmp == null) return null;
             
             return new Bitmap(bmp);
         }
@@ -373,7 +372,7 @@ namespace BasicImageFormFiller.EditForms
 
         private static void JpegStream(Bitmap src, Stream outputStream, int quality = 95)
         {
-            var encoder = ImageCodecInfo.GetImageEncoders()?.First(c => c.FormatID == ImageFormat.Jpeg!.Guid);
+            var encoder = ImageCodecInfo.GetImageEncoders().First(c => c.FormatID == ImageFormat.Jpeg!.Guid);
             if (encoder == null) return;
             // ReSharper disable once UseObjectOrCollectionInitializer
             var parameters = new EncoderParameters(1);

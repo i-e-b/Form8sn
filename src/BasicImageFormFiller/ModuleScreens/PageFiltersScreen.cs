@@ -5,40 +5,41 @@ using System.Windows.Forms;
 using BasicImageFormFiller.EditForms;
 using BasicImageFormFiller.Helpers;
 using BasicImageFormFiller.Interfaces;
-using Form8snCore;
 using Form8snCore.FileFormats;
 using Tag;
 
 namespace BasicImageFormFiller.ModuleScreens
 {
-    internal class FiltersScreen : IScreenModule
+    internal class PageFiltersScreen : IScreenModule
     {
-        private const string BackToTemplateCommand = "/back-to-template";
+        private const string BackToPageCommand = "/back-to-page";
         private const string AddNewFilterCommand = "/add-filter";
         private const string DeleteFilterCommand = "/delete-filter";
         private const string EditFilterCommand = "/edit-filter";
         
         private readonly Project _project;
+        private readonly int _pageIndex;
         private StateChangePermission _stateChange;
 
-        public FiltersScreen(Project project)
+        public PageFiltersScreen(Project project, int pageIndex)
         {
             _project = project;
+            _pageIndex = pageIndex;
             _stateChange = StateChangePermission.Allowed;
         }
 
         public TagContent StartScreen()
         {
             var content = T.g()[
-                T.g("h2")["Filters"],
-                T.g("p")[T.g("a", "href", BackToTemplateCommand)[$"Back to '{_project.Index.Name}' overview"]],
+                T.g("h2")["Page Specific Filters"],
+                T.g("p")[T.g("a", "href", BackToPageCommand)["Back to page overview"]],
                 T.g("p")["Filters allow you to split, join, and transform the supplied data before writing it to forms."],
                 T.g("hr/"),
                 T.g("p")[T.g("a", "href", AddNewFilterCommand)["Add a filter"]]
             ];
 
             var list = T.g("dl");
-            foreach (var filter in _project.Index.DataFilters)
+            foreach (var filter in _project.Pages[_pageIndex].PageDataFilters)
             {
                 list.Add(
                     T.g("dt")[filter.Key],
@@ -82,9 +83,9 @@ namespace BasicImageFormFiller.ModuleScreens
             var prefix = Url.Prefix(command);
             switch (prefix)
             {
-                case BackToTemplateCommand:
+                case BackToPageCommand:
                 {
-                    moduleScreen.SwitchToModule(new MainProjectScreen(_project));
+                    moduleScreen.SwitchToModule(new PageEditScreen(_project, _pageIndex));
                     break;
                 }
 
@@ -109,7 +110,7 @@ namespace BasicImageFormFiller.ModuleScreens
                     if (string.IsNullOrWhiteSpace(name)) return;
                     
                     _stateChange = StateChangePermission.NotAllowed;
-                    var ed = new FilterEditor(this, _project, name);
+                    var ed = new FilterEditor(this, _project, name, _pageIndex);
                     ed.ShowDialog();
                     
                     _project.Reload();
@@ -125,13 +126,13 @@ namespace BasicImageFormFiller.ModuleScreens
         private void DeleteFilter(string name)
         {
             if (string.IsNullOrWhiteSpace(name)) return;
-            _project.Index.DataFilters.Remove(name);
+            _project.Pages[_pageIndex].PageDataFilters.Remove(name);
             _project.Save();
         }
 
         private void AddNewFilter()
         {
-            var filters = _project.Index.DataFilters;
+            var filters = _project.Pages[_pageIndex].PageDataFilters;
             for (int index = 0; index < 256; index++)
             {
                 var key = $"Untitled {index+1}";

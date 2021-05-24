@@ -13,13 +13,14 @@ namespace BasicImageFormFiller.ModuleScreens
         private readonly Project _project;
         private readonly int _pageIndex;
         private StateChangePermission _stateChange;
-        private const string BackToTemplateCommand = "/back-to-template";
+        private const string BackToTemplateCommand   = "/back-to-template";
         private const string ChangePageRepeatCommand = "/change-repeat";
-        private const string EditMappingCommand = "/edit-mapping";
-        private const string EditBoxesCommand = "/edit-boxes";
-        private const string EditMetaDataCommand = "/edit-meta";
-        private const string EditBackgroundCommand = "/pick-background";
-        private const string DeletePageCommand = "/delete-this-page";
+        private const string ReviewMappingCommand    = "/review-mapping";
+        private const string EditPageFiltersCommand  = "/edit-filters";
+        private const string EditBoxesCommand        = "/edit-boxes";
+        private const string EditMetaDataCommand     = "/edit-meta";
+        private const string EditBackgroundCommand   = "/pick-background";
+        private const string DeletePageCommand       = "/delete-this-page";
 
         public PageEditScreen(Project project, int pageIndex)
         {
@@ -51,14 +52,18 @@ namespace BasicImageFormFiller.ModuleScreens
             
             content.Add(
                 T.g("ul")[
-                T.g("li").Repeat(
-                    T.g()[
-                        T.g("a", "href",EditBoxesCommand)["Edit page layout and map"],
-                        "<br/>&nbsp;"
-                    ],
-                    T.g("a", "href",EditBackgroundCommand)["Pick background image"],
-                    T.g("a", "href",EditMetaDataCommand)["Edit page info & notes"],
-                    T.g("a", "href",EditMappingCommand)["Review source data to box mapping"]
+                    T.g("li").Repeat(
+                        T.g()[
+                            T.g("a", "href", EditBoxesCommand)["Edit page layout and map"],
+                            "<br/>&nbsp;"
+                        ],
+                        T.g("a", "href", EditBackgroundCommand)["Pick background image"],
+                        T.g()[
+                            T.g("a", "href", EditMetaDataCommand)["Edit page info & notes"],
+                            "<br/>&nbsp;"
+                        ],
+                        T.g("a", "href", ReviewMappingCommand)["Review source data to box mapping"],
+                        T.g("a", "href", EditPageFiltersCommand)["Edit page specific filters"]
                     )
                 ]);
             
@@ -128,9 +133,15 @@ namespace BasicImageFormFiller.ModuleScreens
                     break;
                 }
 
-                case EditMappingCommand:
+                case ReviewMappingCommand:
                 {
-                    moduleScreen.SwitchToModule(new PageMapEditScreen(_project, _pageIndex));
+                    moduleScreen.SwitchToModule(new PageMapReviewScreen(_project, _pageIndex));
+                    break;
+                }
+
+                case EditPageFiltersCommand:
+                {
+                    moduleScreen.SwitchToModule(new PageFiltersScreen(_project, _pageIndex));
                     break;
                 }
 
