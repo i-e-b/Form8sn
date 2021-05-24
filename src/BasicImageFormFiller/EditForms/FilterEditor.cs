@@ -141,7 +141,7 @@ namespace BasicImageFormFiller.EditForms
             string[]? repeatPath = null;
             if (_pageIndex != null) repeatPath = _project.Pages[_pageIndex.Value].RepeatMode.DataPath;
             
-            var rm = new PickDataSource(_project, "Pick filter data source", _selectedPath, repeatPath);
+            var rm = new PickDataSource(_project, "Pick filter data source", _selectedPath, repeatPath, _pageIndex);
             rm.ShowDialog();
             if (rm.SelectedPath == null) return;
 

@@ -277,7 +277,10 @@ namespace Form8snCore.DataExtraction
             }
             else if (root == "D")
             {
-                throw new Exception("Page Repeater Data not yet implemented");
+                if (pkg.SourcePath.Length < 1) return null;
+                data = pkg.RepeaterData;
+                if (data == null) throw new Exception("Found a repeater filter on a page with no repeater data");
+                pathSkip = 1; // root
             }
             else if (root != "") throw new Exception($"Unexpected root marker: {root}");
 
@@ -306,7 +309,7 @@ namespace Form8snCore.DataExtraction
             }
             else if (root == "D")
             {
-                if (pkg.RepeaterData == null) throw new Exception($"Was asked for repeat page data, but none was supplied");
+                if (pkg.RepeaterData == null) throw new Exception("Was asked for repeat page data, but none was supplied");
                 if (path.Length < 2) return null;
                 data = pkg.RepeaterData;
                 pathSkip = 1; // root 'D'
@@ -346,9 +349,9 @@ namespace Form8snCore.DataExtraction
             return target;
         }
 
-        private static double? SumPathRecursive(IEnumerable<string> path, object sourceData)
+        private static decimal? SumPathRecursive(IEnumerable<string> path, object sourceData)
         {
-            var sum = 0.0;
+            var sum = 0.0m;
             var target = sourceData;
             var remainingPath = new Stack<string>(path.Reverse());
             while (remainingPath.Count > 0)
@@ -381,10 +384,10 @@ namespace Form8snCore.DataExtraction
                 }
 
                 // We have a single value. Try to get a number from it
-                if (target is double d) return d;
+                if (target is double d) return (decimal)d;
                 if (target is int i) return i;
                 var lastChance = target.ToString();
-                if (double.TryParse(lastChance, out var d2)) return d2;
+                if (decimal.TryParse(lastChance, out var d2)) return d2;
 
                 // Not a number-like value:
                 return null;

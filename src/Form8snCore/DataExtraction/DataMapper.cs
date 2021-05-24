@@ -28,9 +28,27 @@ namespace Form8snCore.DataExtraction
         {
             if (box.MappingPath == null) return null;
             
-            var obj = FilterData.ApplyFilter(MappingType.None, _emptyParams, box.MappingPath, _project.Index.DataFilters, _data, _repeatData);
+            var filters = JoinProjectAndPageFilters(pageIndex);
+
+            var obj = FilterData.ApplyFilter(MappingType.None, _emptyParams, box.MappingPath, filters, _data, _repeatData);
 
             return obj?.ToString();
+        }
+
+        private Dictionary<string, MappingInfo> JoinProjectAndPageFilters(int pageIndex)
+        {
+            var filters = _project.Index.DataFilters;
+            if (_project.Pages[pageIndex].PageDataFilters.Count <= 0) return filters;
+            
+            var pageFilters = _project.Pages[pageIndex].PageDataFilters;
+            filters = new Dictionary<string, MappingInfo>(filters);
+            foreach (var filter in pageFilters)
+            {
+                if (filters.ContainsKey(filter.Key)) filters[filter.Key] = filter.Value; // page specific over-rides general
+                else filters.Add(filter.Key, filter.Value);
+            }
+
+            return filters;
         }
 
         /// <summary>

@@ -16,8 +16,18 @@ namespace BasicImageFormFiller.EditForms
         public string[]? SelectedPath { get; set; }
         public string? SelectedTag { get; set; }
         
+        /// <summary> Don't use this one </summary>
         public PickDataSource() { InitializeComponent(); }
-        public PickDataSource(Project project, string prompt, string[]? previous, string[]? repeaterPath)
+        
+        /// <summary>
+        /// Create a form to pick a data source item or group
+        /// </summary>
+        /// <param name="project">Project holding sample data and filters</param>
+        /// <param name="prompt">Text to show user</param>
+        /// <param name="previous">Optional: The path that was previously selected. This will be shown as expanded and selected if it's still valid</param>
+        /// <param name="repeaterPath">Optional: Page-specific repeater data path. This will show the data for page 1, but the path selection will be correct for all pages</param>
+        /// <param name="pageIndex">Optional: If given, page-specific filters will be shown</param>
+        public PickDataSource(Project project, string prompt, string[]? previous, string[]? repeaterPath, int? pageIndex)
         {
             InitializeComponent();
             Text = prompt;
@@ -29,7 +39,7 @@ namespace BasicImageFormFiller.EditForms
             AddSampleData(data);
             AddDataFilters(project, data);
             if (repeaterPath != null) AddRepeaterPath(project, data, repeaterPath);
-            
+            if (pageIndex != null) AddPageDataFilters(project, data, pageIndex!.Value);
             SelectPath(previous); // pick previous source if it exists
         }
 
@@ -97,6 +107,47 @@ namespace BasicImageFormFiller.EditForms
             var nodes = ReadObjectRecursive(data, "", "Data");
             if (nodes.Count > 0) nodes[0].Expand(); // expand first node by default
             treeView!.Nodes.AddRange(nodes.ToArray());
+        }
+
+        private void AddPageDataFilters(Project project, object data, int pageIndex)
+        {
+            var repeatData = FilterData.ApplyFilter(
+                MappingType.None,
+                new Dictionary<string, string>(),
+                project.Pages[pageIndex].RepeatMode.DataPath,
+                project.Index.DataFilters,
+                data,
+                null
+            );
+            if (repeatData is ArrayList list) repeatData = list[0];
+            
+            var filters = new TreeNode {Text = "Page Filters", Name = "P", Tag = FilterMarker, ForeColor = Color.DimGray};
+            foreach (var filter in project.Pages[pageIndex].PageDataFilters)
+            {
+                var path = FilterMarker + Separator + filter.Key;
+                var sample = FilterData.ApplyFilter(
+                    filter.Value.MappingType,
+                    filter.Value.MappingParameters,
+                    filter.Value.DataPath,
+                    project.Index.DataFilters,
+                    data,
+                    repeatData
+                );
+
+                if (sample == null)
+                {
+                    var node = new TreeNode { Text = filter.Key, Tag = path, ForeColor = Color.Blue };
+                    node.Nodes.Add(new TreeNode {Text = "No result", ForeColor = Color.Red, BackColor = Color.Pink});
+                    filters.Nodes.Add(node);
+                }
+                else
+                {
+                    var sampleNodes = ReadObjectRecursive(sample, path, filter.Key).ToArray();
+                    filters.Nodes.AddRange(sampleNodes);
+                }
+            }
+
+            treeView!.Nodes.Add(filters);
         }
 
         private void AddDataFilters(Project project, object data)

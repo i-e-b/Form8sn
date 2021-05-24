@@ -108,7 +108,7 @@ namespace BasicImageFormFiller.EditForms
             var box = _project!.Pages[_pageIndex].Boxes[_boxKey];
             
             var pageRepeat = _project!.Pages[_pageIndex].RepeatMode.DataPath;
-            var mapEdit = new PickDataSource(_project, "Pick source for box", box.MappingPath, pageRepeat);
+            var mapEdit = new PickDataSource(_project, "Pick source for box", box.MappingPath, pageRepeat, _pageIndex);
             mapEdit.ShowDialog();
 
             if (mapEdit.SelectedPath != null && mapEdit.SelectedPath.Length > 0)

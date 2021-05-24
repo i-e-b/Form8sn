@@ -29,6 +29,7 @@ namespace Form8snCore.DataExtraction
                 SourcePath = newFilterDef.DataPath,
                 Params = newFilterDef.MappingParameters,
                 
+                RepeaterData = RepeaterData,
                 Data = Data,
                 FilterSet = FilterSet,
                 Redirects = Redirects
