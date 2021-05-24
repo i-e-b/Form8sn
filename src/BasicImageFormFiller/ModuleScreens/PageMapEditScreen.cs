@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using BasicImageFormFiller.EditForms;
 using BasicImageFormFiller.Helpers;
 using BasicImageFormFiller.Interfaces;
 using Form8snCore.FileFormats;
@@ -11,10 +10,6 @@ namespace BasicImageFormFiller.ModuleScreens
     internal class PageMapEditScreen : IScreenModule
     {
         private const string BackToPageCommand = "/back-to-page";
-        private const string MapKeyCommand = "/map-key";
-        private const string UnmapKeyCommand = "/unmap-key";
-        
-        private const string QueryKey = "key";
     
         private readonly Project _project;
         private readonly int _pageIndex;
@@ -56,9 +51,6 @@ namespace BasicImageFormFiller.ModuleScreens
             else info.Add(T.g("span", "style", "color:#070")[string.Join(".", path)]);
 
             info.Add(
-                " | ",
-                T.g("a", "href", $"{MapKeyCommand}?{QueryKey}={key}")["Map to..."], " | ",
-                T.g("a", "href", $"{UnmapKeyCommand}?{QueryKey}={key}")["Unmap"],
                 T.g("br/"), "&nbsp;"
             );
             return info;
@@ -74,43 +66,13 @@ namespace BasicImageFormFiller.ModuleScreens
                     moduleScreen.SwitchToModule(new PageEditScreen(_project, _pageIndex));
                     break;
                 }
-
-                case MapKeyCommand:
-                {
-                    var key = Url.GetValueFromQuery(command, QueryKey);
-                    var pick = new PickDataSource(_project, $"Map source for '{key}'", _project.Pages[_pageIndex].Boxes[key].MappingPath, null);
-                    pick.ShowDialog();
-                    if (pick.SelectedPath != null)
-                    {
-                        _project.Pages[_pageIndex].Boxes[key].MappingPath = pick.SelectedPath;
-                        _project.Save();
-                    }
-                    
-                    moduleScreen.ShowPage(StartScreen());
-                    break;
-                }
-
-                case UnmapKeyCommand:
-                {
-                    var key = Url.GetValueFromQuery(command, QueryKey);
-                    _project.Pages[_pageIndex].Boxes[key].MappingPath = null;
-                    _project.Save();
-                    moduleScreen.ShowPage(StartScreen());
-                    break;
-                }
                 
                 default: throw new Exception($"Unknown command: '{command}'");
             }
         }
 
-        public StateChangePermission StateChangeRequest()
-        {
-            throw new NotImplementedException();
-        }
+        public StateChangePermission StateChangeRequest() => StateChangePermission.Allowed;
 
-        public void Activate()
-        {
-            throw new NotImplementedException();
-        }
+        public void Activate() { }
     }
 }

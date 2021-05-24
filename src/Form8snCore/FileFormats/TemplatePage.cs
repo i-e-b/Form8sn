@@ -9,7 +9,7 @@ namespace Form8snCore.FileFormats
         {
             Boxes = new Dictionary<string, TemplateBox>();
             RepeatMode = new RepeatMode();
-            DataFilters = new Dictionary<string, MappingInfo>();
+            PageDataFilters = new Dictionary<string, MappingInfo>();
         }
 
         public double WidthMillimetres { get; set; }
@@ -41,7 +41,7 @@ namespace Form8snCore.FileFormats
         /// Filters specifically for this page.
         /// These will have access to the data-repeater paths
         /// </summary>
-        public Dictionary<string, MappingInfo> DataFilters { get; set; }
+        public Dictionary<string, MappingInfo> PageDataFilters { get; set; }
         
         /// <summary>
         /// If true: background is drawn when setting up the template, AND when creating PDFs.
