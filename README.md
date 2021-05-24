@@ -45,5 +45,7 @@ To-do:
 ------
 
 * [x] Apply display format to output
+* [x] Render background switch
 * [ ] Per-page filter for repeat data
+* [ ] Page total and page number filters
 * [ ] Implement running total over repeating pages (add at end of page render)

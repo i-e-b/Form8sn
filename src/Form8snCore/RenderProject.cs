@@ -129,8 +129,11 @@ namespace Form8snCore
 
             // Draw background at full page size
             _loadingTimer.Start();
-            var destRect = new RectangleF(0, 0, (float) page.Width.Point, (float) page.Height.Point);
-            gfx.DrawImage(image, destRect);
+            if (pageDef.RenderBackground)
+            {
+                var destRect = new RectangleF(0, 0, (float) page.Width.Point, (float) page.Height.Point);
+                gfx.DrawImage(image, destRect);
+            }
             _loadingTimer.Stop();
 
             // Work out the bitmap -> page adjustment fraction
