@@ -100,9 +100,9 @@ namespace BasicImageFormFiller.EditForms
             }
 
             if (explicitlyOrdered.Count < 2) return;
-            //Create a new pen to draw the arrow with
-            using var b = new SolidBrush(Color.FromArgb(127, 0, 0, 0));
-            using Pen p = new Pen(Brushes.Black, 1.5f) {CustomEndCap = new AdjustableArrowCap(5,5,true)};
+            // Create a new pen to draw the arrow
+            using var b = new SolidBrush(Color.FromArgb(100, 0, 0, 0));
+            using Pen p = new Pen(b, 2.1f) {CustomEndCap = new AdjustableArrowCap(5,5,true)};
             int prevX = -1;
             int prevY = -1;
             foreach (var box in explicitlyOrdered.OrderBy(b => b.BoxOrder))
