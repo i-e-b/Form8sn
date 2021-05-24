@@ -54,6 +54,8 @@ namespace BasicImageFormFiller.EditForms
             this.label4 = new System.Windows.Forms.Label();
             this.setDataFormatButton = new System.Windows.Forms.Button();
             this.displayFormatInfo = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.processOrderTextBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // wrapTextCheckbox
@@ -115,7 +117,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // topLeft
             // 
-            this.topLeft.Location = new System.Drawing.Point(151, 200);
+            this.topLeft.Location = new System.Drawing.Point(151, 236);
             this.topLeft.Name = "topLeft";
             this.topLeft.Size = new System.Drawing.Size(104, 24);
             this.topLeft.TabIndex = 6;
@@ -125,7 +127,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // label2
             // 
-            this.label2.Location = new System.Drawing.Point(19, 191);
+            this.label2.Location = new System.Drawing.Point(19, 227);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(126, 42);
             this.label2.TabIndex = 7;
@@ -134,7 +136,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // topCentre
             // 
-            this.topCentre.Location = new System.Drawing.Point(261, 200);
+            this.topCentre.Location = new System.Drawing.Point(261, 236);
             this.topCentre.Name = "topCentre";
             this.topCentre.Size = new System.Drawing.Size(104, 24);
             this.topCentre.TabIndex = 8;
@@ -144,7 +146,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // topRight
             // 
-            this.topRight.Location = new System.Drawing.Point(371, 200);
+            this.topRight.Location = new System.Drawing.Point(371, 236);
             this.topRight.Name = "topRight";
             this.topRight.Size = new System.Drawing.Size(104, 24);
             this.topRight.TabIndex = 9;
@@ -154,7 +156,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // midRight
             // 
-            this.midRight.Location = new System.Drawing.Point(371, 230);
+            this.midRight.Location = new System.Drawing.Point(371, 266);
             this.midRight.Name = "midRight";
             this.midRight.Size = new System.Drawing.Size(104, 24);
             this.midRight.TabIndex = 12;
@@ -164,7 +166,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // midCentre
             // 
-            this.midCentre.Location = new System.Drawing.Point(261, 230);
+            this.midCentre.Location = new System.Drawing.Point(261, 266);
             this.midCentre.Name = "midCentre";
             this.midCentre.Size = new System.Drawing.Size(104, 24);
             this.midCentre.TabIndex = 11;
@@ -174,7 +176,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // midLeft
             // 
-            this.midLeft.Location = new System.Drawing.Point(151, 230);
+            this.midLeft.Location = new System.Drawing.Point(151, 266);
             this.midLeft.Name = "midLeft";
             this.midLeft.Size = new System.Drawing.Size(104, 24);
             this.midLeft.TabIndex = 10;
@@ -184,7 +186,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // bottomRight
             // 
-            this.bottomRight.Location = new System.Drawing.Point(371, 260);
+            this.bottomRight.Location = new System.Drawing.Point(371, 296);
             this.bottomRight.Name = "bottomRight";
             this.bottomRight.Size = new System.Drawing.Size(104, 24);
             this.bottomRight.TabIndex = 15;
@@ -194,7 +196,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // bottomCentre
             // 
-            this.bottomCentre.Location = new System.Drawing.Point(261, 260);
+            this.bottomCentre.Location = new System.Drawing.Point(261, 296);
             this.bottomCentre.Name = "bottomCentre";
             this.bottomCentre.Size = new System.Drawing.Size(104, 24);
             this.bottomCentre.TabIndex = 14;
@@ -204,7 +206,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // bottomLeft
             // 
-            this.bottomLeft.Location = new System.Drawing.Point(151, 260);
+            this.bottomLeft.Location = new System.Drawing.Point(151, 296);
             this.bottomLeft.Name = "bottomLeft";
             this.bottomLeft.Size = new System.Drawing.Size(104, 24);
             this.bottomLeft.TabIndex = 13;
@@ -256,9 +258,9 @@ namespace BasicImageFormFiller.EditForms
             // 
             this.label4.Location = new System.Drawing.Point(45, 134);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(100, 23);
+            this.label4.Size = new System.Drawing.Size(100, 31);
             this.label4.TabIndex = 20;
-            this.label4.Text = "Display Format";
+            this.label4.Text = "Display Format\r\n(optional)";
             this.label4.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // setDataFormatButton
@@ -277,14 +279,32 @@ namespace BasicImageFormFiller.EditForms
             this.displayFormatInfo.Anchor = ((System.Windows.Forms.AnchorStyles) (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
             this.displayFormatInfo.Location = new System.Drawing.Point(151, 134);
             this.displayFormatInfo.Name = "displayFormatInfo";
-            this.displayFormatInfo.Size = new System.Drawing.Size(261, 63);
+            this.displayFormatInfo.Size = new System.Drawing.Size(261, 58);
             this.displayFormatInfo.TabIndex = 22;
+            // 
+            // label5
+            // 
+            this.label5.Location = new System.Drawing.Point(45, 193);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(100, 34);
+            this.label5.TabIndex = 23;
+            this.label5.Text = "Processing Order\r\n(optional)";
+            this.label5.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            // 
+            // processOrderTextBox
+            // 
+            this.processOrderTextBox.Location = new System.Drawing.Point(155, 190);
+            this.processOrderTextBox.Name = "processOrderTextBox";
+            this.processOrderTextBox.Size = new System.Drawing.Size(100, 20);
+            this.processOrderTextBox.TabIndex = 24;
             // 
             // BoxEdit
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(505, 381);
+            this.Controls.Add(this.processOrderTextBox);
+            this.Controls.Add(this.label5);
             this.Controls.Add(this.displayFormatInfo);
             this.Controls.Add(this.setDataFormatButton);
             this.Controls.Add(this.label4);
@@ -308,6 +328,7 @@ namespace BasicImageFormFiller.EditForms
             this.Controls.Add(this.label1);
             this.Controls.Add(this.shrinkToFitCheckbox);
             this.Controls.Add(this.wrapTextCheckbox);
+            this.MinimumSize = new System.Drawing.Size(521, 420);
             this.Name = "BoxEdit";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "BoxEdit";
@@ -315,6 +336,10 @@ namespace BasicImageFormFiller.EditForms
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.TextBox processOrderTextBox;
+
+        private System.Windows.Forms.Label label5;
 
         private System.Windows.Forms.Label displayFormatInfo;
 

@@ -32,6 +32,8 @@ namespace BasicImageFormFiller.EditForms
             
             UpdateDisplayFormatInfo();
             
+            processOrderTextBox!.Text = box.BoxOrder?.ToString() ?? "";
+            
             wrapTextCheckbox!.Checked = box.WrapText;
             shrinkToFitCheckbox!.Checked = box.ShrinkToFit;
             boxKeyTextbox!.Text = boxKey;
@@ -66,6 +68,10 @@ namespace BasicImageFormFiller.EditForms
             var box = _project!.Pages[_pageIndex].Boxes[_boxKey];
             box.WrapText = wrapTextCheckbox!.Checked;
             box.ShrinkToFit = shrinkToFitCheckbox!.Checked;
+
+            if (string.IsNullOrWhiteSpace(processOrderTextBox!.Text)) box.BoxOrder = null;
+            else if (int.TryParse(processOrderTextBox!.Text, out var order)) box.BoxOrder = order;
+            else box.BoxOrder = null;
 
             if (topLeft!.Checked) box.Alignment = TextAlignment.TopLeft;
             else if (topCentre!.Checked) box.Alignment = TextAlignment.TopCentre;

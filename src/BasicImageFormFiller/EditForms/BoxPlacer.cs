@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -77,6 +78,8 @@ namespace BasicImageFormFiller.EditForms
             g.Transform.Reset();
             g.ScaleTransform(scale, scale);
             g.DrawImage(_imageCache, new PointF(dx, dy));
+            
+            var explicitlyOrdered = new List<TemplateBox>();
 
             foreach (var entry in _project.Pages[_pageIndex].Boxes)
             {
@@ -85,6 +88,7 @@ namespace BasicImageFormFiller.EditForms
                 var hasMap = box.MappingPath != null && box.MappingPath.Length > 0;
 
                 var boxColor = hasMap ? Brushes.Turquoise! : Brushes.Pink!;
+                if (box.BoxOrder != null) explicitlyOrdered.Add(box);
 
                 var rect = new Rectangle((int) box.Left, (int) box.Top, (int) box.Width, (int) box.Height);
                 rect.Offset((int) dx, (int) dy);
@@ -93,6 +97,27 @@ namespace BasicImageFormFiller.EditForms
 
                 AlignTextToRect(g, name, rect, box, out var top, out var left);
                 g.DrawString(name, Font, Brushes.Black!, left, top);
+            }
+
+            if (explicitlyOrdered.Count < 2) return;
+            //Create a new pen to draw the arrow with
+            using var b = new SolidBrush(Color.FromArgb(127, 0, 0, 0));
+            using Pen p = new Pen(Brushes.Black, 1.5f) {CustomEndCap = new AdjustableArrowCap(5,5,true)};
+            int prevX = -1;
+            int prevY = -1;
+            foreach (var box in explicitlyOrdered.OrderBy(b => b.BoxOrder))
+            {
+                int nextX = (int)(box.Left + (box.Width / 2));
+                int nextY = (int)(box.Top + (box.Height / 2));
+
+                if (prevX >= 0 || prevY >= 0)
+                {
+                    // Draw an arrow
+                    g.DrawLine(p, dx + prevX, dy + prevY, dx + nextX, dy + nextY);
+                }
+                
+                prevX = nextX;
+                prevY = nextY;
             }
         }
 
