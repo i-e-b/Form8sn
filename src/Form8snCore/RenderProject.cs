@@ -76,6 +76,7 @@ namespace Form8snCore
                         var repeatData = dataSets[repeatIndex];
                         mapper.SetRepeater(repeatData, pageDef.RepeatMode.DataPath);
                         var pageResult = OutputStandardPage(document, pageDef, mapper, pageIndex, font, image, runningTotals);
+                        ClearPageTotals(runningTotals);
                         if (pageResult.IsFailure)
                         {
                             result.ErrorMessage = pageResult.FailureMessage;
@@ -88,6 +89,7 @@ namespace Form8snCore
                 else
                 {
                     var pageResult = OutputStandardPage(document, pageDef, mapper, pageIndex, font, image, runningTotals);
+                    ClearPageTotals(runningTotals);
                     if (pageResult.IsFailure)
                     {
                         result.ErrorMessage = pageResult.FailureMessage;
@@ -110,6 +112,15 @@ namespace Form8snCore
             result.FinalRenderTime = _renderTimer.Elapsed;
 
             return result;
+        }
+
+        private static void ClearPageTotals(Dictionary<string,decimal> runningTotals)
+        {
+            var keys = runningTotals.Keys.Where(key => key.StartsWith("D.")).ToArray();
+            foreach (var key in keys)
+            {
+                runningTotals[key] = 0.0m;
+            }
         }
 
         private static Result<Nothing> OutputStandardPage(PdfDocument document, TemplatePage pageDef, DataMapper mapper,
