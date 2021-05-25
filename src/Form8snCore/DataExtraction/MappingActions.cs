@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using Form8snCore.FileFormats;
@@ -66,7 +67,7 @@ namespace Form8snCore.DataExtraction
             switch (pkg.Type)
             {
                 case MappingType.None:
-                    return FindDataAtPath(pkg);
+                    return GetDataAtPath(pkg);
                 
                 case MappingType.FixedValue:
                     return GetFixedValue(pkg);
@@ -83,14 +84,96 @@ namespace Form8snCore.DataExtraction
                 case MappingType.Total:
                     return SumOfAllOnPath(pkg);
                 
+                case MappingType.Distinct:
+                    return ListOfDistinctValues(pkg);
+                
+                case MappingType.TakeAllValues:
+                    return ListOfAllValues(pkg);
+                
                 case MappingType.Concatenate:
                     return ConcatenateList(pkg);
+                
+                case MappingType.FormatAllAsDate:
+                    return FormatAllValuesAsDates(pkg);
+                
+                case MappingType.FormatAllAsNumber:
+                    return FormatAllValuesAsNumberStrings(pkg);
 
                 case MappingType.RunningTotal:
                     return RunningTotal(pkg);
                 
                 default: return "Not yet implemented";
             }
+        }
+
+        private static object? FormatAllValuesAsNumberStrings(FilterState pkg)
+        {
+            var allValues = FindAllOnPath(pkg);
+            var outp = new ArrayList();
+            
+            var param = pkg.Params;
+
+            var dpKey = nameof(NumberMappingParams.DecimalPlaces);
+            var dpStr = param.ContainsKey(dpKey) ? param[dpKey] : "2";
+            if (!int.TryParse(dpStr, out var decimalPlaces)) decimalPlaces = 2;
+            if (decimalPlaces < 0 || decimalPlaces > 20) decimalPlaces = 2;
+
+            var tsKey = nameof(NumberMappingParams.ThousandsSeparator);
+            var thousands = param.ContainsKey(tsKey) ? param[tsKey] : "";
+
+            var dcKey = nameof(NumberMappingParams.DecimalSeparator);
+            var decimalSeparator = param.ContainsKey(dcKey) ? param[dcKey] : ".";
+            if (string.IsNullOrEmpty(decimalSeparator)) decimalSeparator = ".";
+
+            var preKey = nameof(NumberMappingParams.Prefix);
+            var prefix = param.ContainsKey(preKey) ? param[preKey] : "";
+
+            var postKey = nameof(NumberMappingParams.Postfix);
+            var postfix = param.ContainsKey(postKey) ? param[postKey] : "";
+            
+            
+            foreach (var value in allValues)
+            {
+                var dec = Decimalise(value);
+                if (dec == null) continue;
+                
+                outp.Add(prefix + DisplayFormatter.FloatToString(dec.Value, decimalPlaces, decimalPlaces, decimalSeparator, thousands) + postfix);
+            }
+            return outp.Count < 1 ? null : outp;
+        }
+
+        private static decimal? Decimalise(object? o)
+        {
+            if (o == null) return null;
+            if (o is decimal dec) return dec;
+            if (decimal.TryParse(o.ToString(), out dec)) return dec;
+            return null;
+        }
+
+        private static object? FormatAllValuesAsDates(FilterState pkg)
+        {
+            var allValues = FindAllOnPath(pkg);
+            var outp = new ArrayList();
+            var param = pkg.Params;
+
+            var key = nameof(DateDisplayParams.FormatString);
+            var fmt = param.ContainsKey(key) ? param[key] : null;
+
+            foreach (var value in allValues)
+            {
+                try
+                {
+                    var str = value.ToString();
+                    
+                    // first, try the exact format that *should* be used
+                    if (DateTime.TryParseExact(str, "yyyy-MM-dd", null, DateTimeStyles.AssumeUniversal | DateTimeStyles.AllowWhiteSpaces, out var dt)) outp.Add(dt.ToString(fmt));
+
+                    // try a more general search
+                    else if (DateTime.TryParse(str, out dt)) outp.Add(dt.ToString(fmt));
+                }
+                catch { /*ignore*/ }
+            }
+            return outp.Count < 1 ? null : outp;
         }
 
         private static object? RunningTotal(FilterState pkg)
@@ -107,7 +190,7 @@ namespace Form8snCore.DataExtraction
         {
             if (pkg.Data == null || pkg.SourcePath == null || pkg.SourcePath.Length < 1) return null;
 
-            var target = FindDataAtPath(pkg);
+            var target = GetDataAtPath(pkg);
             if (target == null) return null;
             
             var preKey = nameof(JoinMappingParams.Prefix);
@@ -153,7 +236,7 @@ namespace Form8snCore.DataExtraction
             if (!int.TryParse(mcs, out var count)) return $"Invalid parameter: Count should be an integer, but is {mcs}";
 
 
-            var target = FindDataAtPath(pkg);
+            var target = GetDataAtPath(pkg);
 
             if (target == null) return null;
 
@@ -176,7 +259,7 @@ namespace Form8snCore.DataExtraction
             var mcs = pkg.Params.ContainsKey(countKey) ? pkg.Params[countKey] : null;
             if (!int.TryParse(mcs, out var count)) return $"Invalid parameter: Count should be an integer, but is {mcs}";
 
-            var target = FindDataAtPath(pkg);
+            var target = GetDataAtPath(pkg);
 
             if (target == null) return null;
 
@@ -200,7 +283,7 @@ namespace Form8snCore.DataExtraction
             var mcs = pkg.Params.ContainsKey(countKey) ? pkg.Params[countKey] : null;
             if (!int.TryParse(mcs, out var count)) return $"Invalid parameter: MaxCount should be an integer, but is {mcs}";
 
-            var target = FindDataAtPath(pkg);
+            var target = GetDataAtPath(pkg);
 
             if (target == null) return null;
 
@@ -285,39 +368,8 @@ namespace Form8snCore.DataExtraction
 
             return outp;
         }
-
-        private static object? SumOfAllOnPath(FilterState pkg)
-        {
-            if (pkg.Data == null || pkg.SourcePath == null || pkg.SourcePath.Length < 1) return null;
-
-            var root = pkg.SourcePath[0];
-            var data = pkg.Data;
-            var pathSkip = 1;
-
-            if (root == "#")
-            {
-                if (pkg.SourcePath.Length < 2) return null;
-                var newFilter = pkg.RedirectFilter(pkg.SourcePath[1]);
-                if (newFilter == null) return null;
-                data = ApplyFilterRecursive(newFilter);
-                if (data == null) return null;
-                pathSkip = 2; // root and filter name
-            }
-            else if (root == "D")
-            {
-                if (pkg.SourcePath.Length < 1) return null;
-                data = pkg.RepeaterData;
-                if (data == null) throw new Exception("Found a repeater filter on a page with no repeater data");
-                pathSkip = 1; // root
-            }
-            else if (root != "") throw new Exception($"Unexpected root marker: {root}");
-
-            // Walk the path. Each time we hit an array, recurse down the path
-            return SumPathRecursive(pkg.SourcePath.Skip(pathSkip), data);
-        }
         
-        // TODO: generalise this and remove the version in SumOfAllOnPath
-        private static object? FindDataAtPath(FilterState pkg)
+        private static object? GetDataAtPath(FilterState pkg)
         {
             var path = pkg.SourcePath;
             var data = pkg.Data;
@@ -377,51 +429,121 @@ namespace Form8snCore.DataExtraction
             return target;
         }
 
-        private static decimal? SumPathRecursive(IEnumerable<string> path, object sourceData)
+        private static object? ListOfDistinctValues(FilterState pkg)
         {
+            var basic = FindAllOnPath(pkg).ToArray();
+            var value = basic.Distinct().ToArray();
+            if (value.Length < 1) return null;
+            return new ArrayList(value);
+        }
+        
+        private static object? ListOfAllValues(FilterState pkg)
+        {
+            var value = FindAllOnPath(pkg).ToArray();
+            if (value.Length < 1) return null;
+            return new ArrayList(value);
+        }
+
+        private static object? SumOfAllOnPath(FilterState pkg)
+        {
+            var found = FindAllOnPath(pkg).ToList();
+            if (found.Count < 1) return null;
+            
             var sum = 0.0m;
+            foreach (object value in found)
+            {
+                if (value is double d) sum += (decimal) d;
+                else if (value is int i) sum += i;
+                else if (decimal.TryParse(value.ToString(), out var dec)) sum += dec;
+            }
+            return sum;
+        }
+
+        private static IEnumerable<object> FindAllOnPath(FilterState pkg)
+        {
+            if (pkg.Data == null || pkg.SourcePath == null || pkg.SourcePath.Length < 1) yield break;
+
+            var root = pkg.SourcePath[0];
+            var data = pkg.Data;
+            var pathSkip = 1;
+
+            if (root == "#")
+            {
+                if (pkg.SourcePath.Length < 2) yield break;
+                var newFilter = pkg.RedirectFilter(pkg.SourcePath[1]);
+                if (newFilter == null) yield break;
+                data = ApplyFilterRecursive(newFilter);
+                if (data == null) yield break;
+                pathSkip = 2; // root and filter name
+            }
+            else if (root == "D")
+            {
+                if (pkg.SourcePath.Length < 1)  yield break;
+                data = pkg.RepeaterData;
+                if (data == null) throw new Exception("Found a repeater filter on a page with no repeater data");
+                pathSkip = 1; // root
+            }
+            else if (root != "") throw new Exception($"Unexpected root marker: {root}");
+
+            // Walk the path. Each time we hit an array, recurse down the path
+            var walk = FindPathRecursive(pkg.SourcePath.Skip(pathSkip), data);
+            foreach (var value in walk)
+            {
+                if (value is ArrayList list)
+                {
+                    foreach (var item in list)
+                    {
+                        if (item != null) yield return item;
+                    }
+                }
+                else
+                {
+                    yield return value;
+                }
+            }
+        }
+
+        private static IEnumerable<object> FindPathRecursive(IEnumerable<string> path, object sourceData)
+        {
             var target = sourceData;
-            var remainingPath = new Stack<string>(path.Reverse());
+            var remainingPath = new Queue<string>(path);
             while (remainingPath.Count > 0)
             {
-                var name = remainingPath.Pop();
+                var name = remainingPath.Dequeue();
 
                 if (name.StartsWith('[') && name.EndsWith(']'))
                 {
                     // array reference.
-                    if (remainingPath.Count < 1) return null; // didn't find a valid item
-                    if (!(target is ArrayList list)) return null; // can't do it
+                    if (remainingPath.Count < 1) yield break; // didn't find a valid item
+                    if (!(target is ArrayList list)) yield break; // can't do it
 
                     // Ignore the actual index, and recurse over every actual item
                     var pathArray = remainingPath.ToArray();
                     foreach (var item in list)
                     {
                         if (item == null) continue;
-                        var maybe = SumPathRecursive(pathArray, item);
-                        if (maybe != null) sum += maybe.Value;
+                        var walk = FindPathRecursive(pathArray, item);
+                        foreach (var value in walk)
+                        {
+                            yield return value;
+                        }
                     }
 
-                    return sum;
+                    yield break;
                 }
 
                 if (target is Dictionary<string, object> dict)
                 {
-                    if (!dict.ContainsKey(name)) return null; // data ended before path
+                    if (!dict.ContainsKey(name))  yield break; // data ended before path
                     target = dict[name];
                     if (remainingPath.Count > 0) continue; // otherwise we *require* a single value at target
                 }
 
-                // We have a single value. Try to get a number from it
-                if (target is double d) return (decimal)d;
-                if (target is int i) return i;
-                var lastChance = target.ToString();
-                if (decimal.TryParse(lastChance, out var d2)) return d2;
-
-                // Not a number-like value:
-                return null;
+                // We have a single value.
+                yield return target;
+                yield break;
             }
-
-            return sum;
+            yield return target;
         }
 
         private static object? GetFixedValue(FilterState pkg)

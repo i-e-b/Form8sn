@@ -59,7 +59,7 @@ namespace Form8snCore.DataExtraction
             return prefix + result + postfix;
         }
 
-        private static string FloatToString(decimal floatValue, int minDecimalPlaces, int maxDecimalPlaces, string decimalPlace, string thousandsPlace)
+        public static string FloatToString(decimal floatValue, int minDecimalPlaces, int maxDecimalPlaces, string decimalPlace, string thousandsPlace)
         {
             var result = new StringBuilder();
             var dotted = false;

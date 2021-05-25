@@ -15,7 +15,13 @@ namespace Form8snCore.DataExtraction
             Redirects = new HashSet<string>();
             RunningTotals = new Dictionary<string, decimal>();
         }
-        
+
+        public override string ToString()
+        {
+            if (SourcePath == null) return "<null>";
+            return string.Join(".", SourcePath);
+        }
+
         public MappingType Type { get; set; }
         public Dictionary<string, string> Params { get; set; }
         public string[]? SourcePath { get; set; }

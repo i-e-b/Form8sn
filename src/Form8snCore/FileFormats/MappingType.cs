@@ -34,6 +34,22 @@ namespace Form8snCore.FileFormats
         [UsesType(typeof(JoinMappingParams))]
         Concatenate = 6,
         
+        [Description("Select all the values on a path as a list")]
+        [UsesType(typeof(EmptyMappingParams))]
+        TakeAllValues = 7,
+        
+        [Description("Select all the different values on a path")]
+        [UsesType(typeof(EmptyMappingParams))]
+        Distinct = 8,
+        
+        [Description("Select all values on a path, and try to format them as date strings. Any values that can't be converted will be excluded")]
+        [UsesType(typeof(DateFormatMappingParams))]
+        FormatAllAsDate = 9,
+        
+        [Description("Select all values on a path, and try to format them as numeric strings. Any values that can't be converted will be excluded")]
+        [UsesType(typeof(NumberMappingParams))]
+        FormatAllAsNumber = 10,
+        
         [Description("Sum up all numeric values on the path")]
         [UsesType(typeof(EmptyMappingParams))]
         Total = 1000,
@@ -56,9 +72,32 @@ namespace Form8snCore.FileFormats
         [Description("Number of items to use before discarding the rest")]
         public int Count { get; set; }
     }
+    
     public class SkipMappingParams {
         [Description("Number of items to skip before using the rest")]
         public int Count { get; set; }
+    }
+
+    public class DateFormatMappingParams {
+        [Description("Format for date output\r\nSee https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings for details")]
+        public string FormatString { get; set; } = "";
+    }
+    
+    public class NumberMappingParams {
+        [Description("Decimal places")]
+        public int DecimalPlaces { get; set; } = 2;
+        
+        [Description("Thousands separator (blank for none)")]
+        public string ThousandsSeparator { get; set; } = "";
+        
+        [Description("Decimal place (defaults to '.')")]
+        public string DecimalSeparator { get; set; } = "";
+        
+        [Description("Prefix (like £ or $, placed on left, blank for none)")]
+        public string Prefix { get; set; } = "";
+        
+        [Description("Postfix (like ¥ or units of measure, placed on right, blank for none)")]
+        public string Postfix { get; set; } = "";
     }
 
     public class TextMappingParams {
