@@ -48,8 +48,11 @@ To-do:
 * [x] Render background switch
 * [x] Per-page filter for repeat data
 * [x] Implement running total over repeating pages
+* [x] Base, page, and box font sizes (all optional)
+* [x] Font name (optional)
 * [ ] Page total and page number filters
 * [ ] Option to hide if some other data is missing (for total / subtotals etc)
   (or maybe a general conditional setup)
-* [ ] Base, page, and box font sizes (all optional)
-* [ ] Font name (optional)
+* [ ] Distinct values filter (`SELECT DISTICT x FROM y` equivalent)
+* [ ] Auto-name a box if it has a default name and the data path has been set
+* [ ] Copy a box definition
