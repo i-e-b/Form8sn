@@ -47,6 +47,8 @@ namespace BasicImageFormFiller.EditForms
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
+            this.fontSizeTextBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // label1
@@ -86,7 +88,7 @@ namespace BasicImageFormFiller.EditForms
             // saveButton
             // 
             this.saveButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.saveButton.Location = new System.Drawing.Point(380, 317);
+            this.saveButton.Location = new System.Drawing.Point(380, 353);
             this.saveButton.Name = "saveButton";
             this.saveButton.Size = new System.Drawing.Size(55, 25);
             this.saveButton.TabIndex = 4;
@@ -97,7 +99,7 @@ namespace BasicImageFormFiller.EditForms
             // cancelButton
             // 
             this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.cancelButton.Location = new System.Drawing.Point(310, 317);
+            this.cancelButton.Location = new System.Drawing.Point(310, 353);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(55, 25);
             this.cancelButton.TabIndex = 5;
@@ -107,7 +109,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // label3
             // 
-            this.label3.Location = new System.Drawing.Point(12, 141);
+            this.label3.Location = new System.Drawing.Point(12, 180);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(161, 31);
             this.label3.TabIndex = 6;
@@ -118,10 +120,10 @@ namespace BasicImageFormFiller.EditForms
             // 
             this.notesTextBox.AcceptsReturn = true;
             this.notesTextBox.Anchor = ((System.Windows.Forms.AnchorStyles) ((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) | System.Windows.Forms.AnchorStyles.Left) | System.Windows.Forms.AnchorStyles.Right)));
-            this.notesTextBox.Location = new System.Drawing.Point(179, 141);
+            this.notesTextBox.Location = new System.Drawing.Point(179, 186);
             this.notesTextBox.Multiline = true;
             this.notesTextBox.Name = "notesTextBox";
-            this.notesTextBox.Size = new System.Drawing.Size(256, 170);
+            this.notesTextBox.Size = new System.Drawing.Size(256, 161);
             this.notesTextBox.TabIndex = 7;
             // 
             // widthTextBox
@@ -194,11 +196,29 @@ namespace BasicImageFormFiller.EditForms
             this.label8.Text = "Portrait: A4=210x297  US letter=216x279  US legal=216x356";
             this.label8.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
+            // label10
+            // 
+            this.label10.Location = new System.Drawing.Point(73, 144);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(100, 36);
+            this.label10.TabIndex = 17;
+            this.label10.Text = "Base Font Size\r\n(optional)";
+            this.label10.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            // 
+            // fontSizeTextBox
+            // 
+            this.fontSizeTextBox.Location = new System.Drawing.Point(179, 141);
+            this.fontSizeTextBox.Name = "fontSizeTextBox";
+            this.fontSizeTextBox.Size = new System.Drawing.Size(100, 20);
+            this.fontSizeTextBox.TabIndex = 19;
+            // 
             // EditPageMeta
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(447, 354);
+            this.ClientSize = new System.Drawing.Size(447, 390);
+            this.Controls.Add(this.fontSizeTextBox);
+            this.Controls.Add(this.label10);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.label6);
@@ -225,6 +245,10 @@ namespace BasicImageFormFiller.EditForms
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.TextBox fontSizeTextBox;
+
+        private System.Windows.Forms.Label label10;
 
         private System.Windows.Forms.Label label8;
 

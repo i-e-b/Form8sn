@@ -16,6 +16,11 @@ namespace Form8snCore.FileFormats
         public double HeightMillimetres { get; set; }
         
         /// <summary>
+        /// Optional: override the base font size for this page
+        /// </summary>
+        public int? PageFontSize { get; set; }
+        
+        /// <summary>
         /// Name for the page (not used in PDF)
         /// </summary>
         public string? Name { get; set; }

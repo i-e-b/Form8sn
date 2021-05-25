@@ -56,6 +56,8 @@ namespace BasicImageFormFiller.EditForms
             this.displayFormatInfo = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.processOrderTextBox = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.fontSizeTextBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // wrapTextCheckbox
@@ -69,7 +71,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // shrinkToFitCheckbox
             // 
-            this.shrinkToFitCheckbox.Location = new System.Drawing.Point(151, 101);
+            this.shrinkToFitCheckbox.Location = new System.Drawing.Point(296, 73);
             this.shrinkToFitCheckbox.Name = "shrinkToFitCheckbox";
             this.shrinkToFitCheckbox.Size = new System.Drawing.Size(139, 22);
             this.shrinkToFitCheckbox.TabIndex = 1;
@@ -270,7 +272,7 @@ namespace BasicImageFormFiller.EditForms
             this.setDataFormatButton.Name = "setDataFormatButton";
             this.setDataFormatButton.Size = new System.Drawing.Size(75, 23);
             this.setDataFormatButton.TabIndex = 21;
-            this.setDataFormatButton.Text = "Change";
+            this.setDataFormatButton.Text = "Set Format";
             this.setDataFormatButton.UseVisualStyleBackColor = true;
             this.setDataFormatButton.Click += new System.EventHandler(this.setDataFormatButton_Click);
             // 
@@ -298,11 +300,29 @@ namespace BasicImageFormFiller.EditForms
             this.processOrderTextBox.Size = new System.Drawing.Size(100, 20);
             this.processOrderTextBox.TabIndex = 24;
             // 
+            // label6
+            // 
+            this.label6.Location = new System.Drawing.Point(45, 102);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(100, 32);
+            this.label6.TabIndex = 25;
+            this.label6.Text = "Font Size\r\n(optional)";
+            this.label6.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            // 
+            // fontSizeTextBox
+            // 
+            this.fontSizeTextBox.Location = new System.Drawing.Point(151, 102);
+            this.fontSizeTextBox.Name = "fontSizeTextBox";
+            this.fontSizeTextBox.Size = new System.Drawing.Size(100, 20);
+            this.fontSizeTextBox.TabIndex = 26;
+            // 
             // BoxEdit
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(505, 381);
+            this.Controls.Add(this.fontSizeTextBox);
+            this.Controls.Add(this.label6);
             this.Controls.Add(this.processOrderTextBox);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.displayFormatInfo);
@@ -336,6 +356,10 @@ namespace BasicImageFormFiller.EditForms
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.TextBox fontSizeTextBox;
+
+        private System.Windows.Forms.Label label6;
 
         private System.Windows.Forms.TextBox processOrderTextBox;
 

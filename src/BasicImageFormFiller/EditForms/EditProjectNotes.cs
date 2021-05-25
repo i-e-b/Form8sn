@@ -22,6 +22,8 @@ namespace BasicImageFormFiller.EditForms
             
             nameTextBox!.Text = _project.Index.Name;
             notesTextBox!.Text = _project.Index.Notes;
+            fontFamilyTextBox!.Text = _project.Index.FontName?.ToString() ?? "";
+            fontSizeTextBox!.Text = _project.Index.BaseFontSize?.ToString() ?? "";
         }
 
         private void saveButton_Click(object sender, EventArgs e)
@@ -30,6 +32,8 @@ namespace BasicImageFormFiller.EditForms
             {
                 _project.Index.Name = nameTextBox!.Text ?? "Untitled";
                 _project.Index.Notes = notesTextBox!.Text ?? "";
+                _project.Index.BaseFontSize = int.TryParse(fontSizeTextBox!.Text, out var size) ? size : (int?) null;
+                _project.Index.FontName = string.IsNullOrWhiteSpace(fontFamilyTextBox!.Text) ? null : fontFamilyTextBox!.Text;
                 _project.Save();
             }
             Close();

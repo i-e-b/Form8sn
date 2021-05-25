@@ -46,6 +46,10 @@ To-do:
 
 * [x] Apply display format to output
 * [x] Render background switch
-* [ ] Per-page filter for repeat data
+* [x] Per-page filter for repeat data
+* [x] Implement running total over repeating pages
 * [ ] Page total and page number filters
-* [ ] Implement running total over repeating pages (add at end of page render)
+* [ ] Option to hide if some other data is missing (for total / subtotals etc)
+  (or maybe a general conditional setup)
+* [ ] Base, page, and box font sizes (all optional)
+* [ ] Font name (optional)

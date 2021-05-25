@@ -17,13 +17,23 @@ namespace Form8snCore
 {
     public class RenderProject
     {
-        private const string BaseFontFamily = "Courier New";
+        private const string FallbackFontFamily = "Courier New";
         private const XFontStyle BaseFontStyle = XFontStyle.Bold;
         private static readonly Stopwatch _layoutTimer = new Stopwatch();
         private static readonly Stopwatch _loadingTimer = new Stopwatch();
         private static readonly Stopwatch _filterTimer = new Stopwatch();
         private static readonly Stopwatch _renderTimer = new Stopwatch();
         private static readonly Stopwatch _totalTimer = new Stopwatch();
+        
+        private static readonly Dictionary<int, XFont> _fontCache = new Dictionary<int, XFont>();
+        private static string? _baseFontFamily;
+
+        private static XFont GetFont(int size)
+        {
+            if (_fontCache.ContainsKey(size)) return _fontCache[size];
+            _fontCache.Add(size, new XFont(_baseFontFamily ?? FallbackFontFamily, size, BaseFontStyle));
+            return _fontCache[size];
+        }
 
         public static RenderResultInfo ToFile(string outputFilePath, string dataFilePath, Project project)
         {
@@ -34,6 +44,7 @@ namespace Form8snCore
             _totalTimer.Restart();
 
             _loadingTimer.Start();
+            _baseFontFamily = project.Index.FontName;
             var result = new RenderResultInfo {Success = false};
             if (!File.Exists(dataFilePath))
             {
@@ -52,10 +63,6 @@ namespace Form8snCore
             document.Info.CreationDate = DateTime.UtcNow;
             _renderTimer.Stop();
 
-            _loadingTimer.Start();
-            var font = new XFont(BaseFontFamily, 16, BaseFontStyle);
-            _loadingTimer.Stop();
-            
             var runningTotals = new Dictionary<string, decimal>(); // path -> total
 
             // TODO: if we have any 'page total count' filters, we will need to count pages. Either before, or go back and edit afterwards
@@ -63,7 +70,8 @@ namespace Form8snCore
             {
                 _loadingTimer.Start();
                 var pageDef = project.Index.Pages[pageIndex];
-                using var image = XImage.FromFile(pageDef.GetBackgroundPath(project));
+                using var image = XImage.FromFile(pageDef.GetBackgroundPath(project)); // we need to load the image regardless, to get the pixel size
+                var font = GetFont(pageDef.PageFontSize ?? project.Index.BaseFontSize ?? 16);
                 _loadingTimer.Stop();
 
                 if (pageDef.RepeatMode.Repeats)
@@ -190,10 +198,11 @@ namespace Form8snCore
             return explicitOrderGap; // shouldn't be hit
         }
 
-        private static Result<Nothing> RenderBox(DataMapper mapper, int pageIndex, XFont font, KeyValuePair<string, TemplateBox> boxDef,
+        private static Result<Nothing> RenderBox(DataMapper mapper, int pageIndex, XFont baseFont, KeyValuePair<string, TemplateBox> boxDef,
             double fx, double fy, XGraphics gfx, Dictionary<string, decimal> runningTotals)
         {
             var box = boxDef.Value;
+            var font = (box.BoxFontSize != null) ? GetFont(box.BoxFontSize.Value) : baseFont;
 
             // Read data, apply filters, apply display formatting
             _filterTimer.Start();
@@ -337,7 +346,7 @@ namespace Form8snCore
             while (true)
             {
                 baseSize -= baseSize / 10;
-                altFont = new XFont(BaseFontFamily, baseSize, BaseFontStyle);
+                altFont = GetFont((int)baseSize);
 
                 var widthRemains = boxWidth;
                 var heightAccumulated = 0.0;
@@ -411,11 +420,11 @@ namespace Form8snCore
         private static XFont ShrinkFontToFit(string str, double boxWidth, double boxHeight, XGraphics gfx, XFont font, XSize size)
         {
             var baseSize = font.Size;
-            var altFont = new XFont(BaseFontFamily, baseSize, BaseFontStyle);
+            var altFont = GetFont((int)baseSize);
             while (size.Width > boxWidth || size.Height > boxHeight)
             {
                 baseSize -= baseSize / 10;
-                altFont = new XFont(BaseFontFamily, baseSize, BaseFontStyle);
+                altFont = GetFont((int)baseSize);
                 size = gfx.MeasureString(str, altFont);
                 if (baseSize < 4) break;
             }

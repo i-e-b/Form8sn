@@ -1,3 +1,4 @@
+// ReSharper disable RedundantDefaultMemberInitializer
 namespace Form8snCore.FileFormats
 {
     public class TemplateBox
@@ -14,6 +15,11 @@ namespace Form8snCore.FileFormats
         /// <para>This can be combined with WrapText</para>
         /// </summary>
         public bool ShrinkToFit { get; set; } = true;
+
+        /// <summary>
+        /// Optional: Font size to use for this box (before shrinking is applied)
+        /// </summary>
+        public int? BoxFontSize { get; set; }
 
         /// <summary>
         /// Text position within the box.

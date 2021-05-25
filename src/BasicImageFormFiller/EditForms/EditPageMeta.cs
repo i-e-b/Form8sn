@@ -29,6 +29,8 @@ namespace BasicImageFormFiller.EditForms
             renderBackgroundCheckbox!.Checked = page.RenderBackground;
             notesTextBox!.Text = page.Notes;
             
+            fontSizeTextBox!.Text = page.PageFontSize?.ToString() ?? "16";
+            
             widthTextBox!.Text = page.WidthMillimetres.ToString(CultureInfo.InvariantCulture);
             heightTextBox!.Text = page.HeightMillimetres.ToString(CultureInfo.InvariantCulture);
         }
@@ -46,6 +48,7 @@ namespace BasicImageFormFiller.EditForms
                 page.Name = nameTextBox!.Text;
                 page.RenderBackground = renderBackgroundCheckbox!.Checked;
                 page.Notes = notesTextBox!.Text;
+                page.PageFontSize = int.TryParse(fontSizeTextBox!.Text, out var size) ? size : (int?) null;
                 
                 if (int.TryParse(widthTextBox!.Text, out var w)) page.WidthMillimetres = w;
                 if (int.TryParse(heightTextBox!.Text, out var h)) page.HeightMillimetres = h;
