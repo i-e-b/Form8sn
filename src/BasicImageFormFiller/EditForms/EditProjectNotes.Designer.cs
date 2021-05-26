@@ -162,8 +162,6 @@ namespace BasicImageFormFiller.EditForms
         private System.Windows.Forms.TextBox fontFamilyTextBox;
         private System.Windows.Forms.TextBox fontSizeTextBox;
 
-        private System.Windows.Forms.TextBox textBox1;
-
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label4;
 
