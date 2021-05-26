@@ -9,7 +9,6 @@ using Containers;
 using Containers.Types;
 using Form8snCore.DataExtraction;
 using Form8snCore.FileFormats;
-using Form8snCore.Rendering;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using SkinnyJson;
@@ -83,6 +82,8 @@ namespace Form8snCore.Rendering
                             return result;
                         }
                     
+                        pageResult.ResultData.RepeatIndex = repeatIndex;
+                        pageResult.ResultData.RepeatCount = dataSets.Count;
                         pageList.Add(pageResult.ResultData);
                     }
                 }
@@ -101,7 +102,6 @@ namespace Form8snCore.Rendering
                 }
             }
 
-            // TODO: back-fill page count boxes
             // TODO: remove boxes that have null/empty dependencies
 
             // Next, go through the prepared page and render them to PDF
@@ -113,8 +113,7 @@ namespace Form8snCore.Rendering
                 var font = GetFont(pageDef.PageFontSize ?? project.Index.BaseFontSize ?? 16);
                 _loadingTimer.Stop();
 
-                var pageResult = OutputPage(document, pageList[pageIndex], font, image);
-                ClearPageTotals(runningTotals);
+                var pageResult = OutputPage(document, pageList[pageIndex], font, image, pageIndex, pageList.Count);
                 if (pageResult.IsFailure)
                 {
                     result.ErrorMessage = pageResult.FailureMessage;
@@ -159,6 +158,11 @@ namespace Form8snCore.Rendering
 
         private static Result<DocumentBox?> PrepareBox(DataMapper mapper, TemplateBox box, Dictionary<string,decimal> runningTotals, int pageIndex)
         {
+            if (mapper.IsPageValue(box, out var type))
+            {
+                return Result.Success<DocumentBox?>(new DocumentBox(box){BoxType = type});
+            }
+
             var str = mapper.FindBoxData(box, pageIndex, runningTotals);
             if (str == null) return Result.Success<DocumentBox?>(null); // empty data is considered OK
             
@@ -171,7 +175,7 @@ namespace Form8snCore.Rendering
             return Result.Success<DocumentBox?>(new DocumentBox(box, str));
         }
 
-        private static Result<Nothing> OutputPage(PdfDocument document, DocumentPage pageToRender, XFont font, XImage image)
+        private static Result<Nothing> OutputPage(PdfDocument document, DocumentPage pageToRender, XFont font, XImage image, int pageIndex, int pageTotal)
         {
             var page = document.AddPage();
             var pageDef = pageToRender.Definition;
@@ -202,7 +206,7 @@ namespace Form8snCore.Rendering
             // Draw each box.
             foreach (var boxDef in pageToRender.DocumentBoxes)
             {
-                var result = RenderBox(font, boxDef, fx, fy, gfx);
+                var result = RenderBox(font, boxDef, fx, fy, gfx, pageToRender, pageIndex, pageTotal);
                 if (result.IsFailure) return result;
             }
 
@@ -234,13 +238,22 @@ namespace Form8snCore.Rendering
             return explicitOrderGap; // shouldn't be hit
         }
 
-        private static Result<Nothing> RenderBox(XFont baseFont, KeyValuePair<string, DocumentBox> boxDef, double fx, double fy, XGraphics gfx)
+        private static Result<Nothing> RenderBox(XFont baseFont, KeyValuePair<string, DocumentBox> boxDef, double fx, double fy, XGraphics gfx, DocumentPage pageToRender, int pageIndex, int pageTotal)
         {
             var box = boxDef.Value;
             var font = (box.Definition.BoxFontSize != null) ? GetFont(box.Definition.BoxFontSize.Value) : baseFont;
 
-            // Read data, apply filters, apply display formatting
-            var str = box.RenderContent;
+            // Read data, or pick a special type
+            var str = box.BoxType switch
+            {
+                DocumentBoxType.Normal => box.RenderContent,
+                DocumentBoxType.CurrentPageNumber => (pageIndex + 1).ToString(),
+                DocumentBoxType.TotalPageCount => pageTotal.ToString(),
+                DocumentBoxType.RepeatingPageNumber => (pageToRender.RepeatIndex+1).ToString(),
+                DocumentBoxType.RepeatingPageTotalCount => pageToRender.RepeatCount.ToString(),
+                _ =>  box.RenderContent
+            };
+
             if (str == null) return Result.Success(); // empty data is considered OK
 
             // boxes are defined in terms of the background image pixels, so we need to convert

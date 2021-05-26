@@ -16,5 +16,7 @@ namespace Form8snCore.Rendering
         
         public TemplatePage Definition { get; set; }
         public Dictionary<string, DocumentBox> DocumentBoxes { get; set; }
+        public int RepeatIndex { get; set; }
+        public int RepeatCount { get; set; }
     }
 }

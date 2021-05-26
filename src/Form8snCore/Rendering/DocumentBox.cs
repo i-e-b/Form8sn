@@ -18,7 +18,8 @@ namespace Form8snCore.Rendering
             Definition = src;
             RenderContent = null;
         }
-        
+
+        public DocumentBoxType BoxType { get; set; }
         public TemplateBox Definition { get; set; }
         public string? RenderContent { get; set; }
     }

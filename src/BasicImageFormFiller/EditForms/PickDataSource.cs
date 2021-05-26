@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using Form8snCore.DataExtraction;
 using Form8snCore.FileFormats;
+using Form8snCore.Rendering;
 
 namespace BasicImageFormFiller.EditForms
 {
@@ -40,7 +41,45 @@ namespace BasicImageFormFiller.EditForms
             AddDataFilters(project, data);
             if (repeaterPath != null) AddRepeaterPath(project, data, repeaterPath);
             if (pageIndex != null) AddPageDataFilters(project, data, pageIndex!.Value);
+            AddPageNumbers(repeaterPath);
+            
             SelectPath(previous); // pick previous source if it exists
+        }
+
+        private void AddPageNumbers(string[]? repeaterPath)
+        {
+            var pagesNode = new TreeNode{Text="Page numbers", ForeColor = Color.SteelBlue};
+            
+            pagesNode.Nodes.Add(new TreeNode{
+                Text = "Current Page Number",
+                Tag = $"P{Separator}{nameof(DocumentBoxType.CurrentPageNumber)}",
+                Name = nameof(DocumentBoxType.CurrentPageNumber),
+            });
+            
+            pagesNode.Nodes.Add(new TreeNode{
+                Text = "Total Page Count",
+                Tag = $"P{Separator}{nameof(DocumentBoxType.TotalPageCount)}",
+                Name = nameof(DocumentBoxType.TotalPageCount),
+            });
+
+            if (repeaterPath != null)
+            {
+                pagesNode.Nodes.Add(new TreeNode
+                {
+                    Text = "Repeating Page Number",
+                    Tag = $"P{Separator}{nameof(DocumentBoxType.RepeatingPageNumber)}",
+                    Name = nameof(DocumentBoxType.RepeatingPageNumber),
+                });
+
+                pagesNode.Nodes.Add(new TreeNode
+                {
+                    Text = "Repeating Page Total Count",
+                    Tag = $"P{Separator}{nameof(DocumentBoxType.RepeatingPageTotalCount)}",
+                    Name = nameof(DocumentBoxType.RepeatingPageTotalCount),
+                });
+            }
+
+            treeView!.Nodes.Add(pagesNode);
         }
 
         private void AddRepeaterPath(Project project, object sampleData, string[] repeaterPath)

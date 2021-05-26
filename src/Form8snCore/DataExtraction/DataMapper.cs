@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Form8snCore.FileFormats;
+using Form8snCore.Rendering;
 
 namespace Form8snCore.DataExtraction
 {
@@ -93,6 +95,21 @@ namespace Form8snCore.DataExtraction
         {
             _repeatData = null;
             _originalPath = null;
+        }
+
+        /// <summary>
+        /// Returns true if this box requires the page count to be known.
+        /// </summary>
+        public bool IsPageValue(TemplateBox box, out DocumentBoxType type)
+        {
+            type = DocumentBoxType.Normal;
+            if (box.MappingPath == null || box.MappingPath.Length != 2) return false;
+            
+            var filter = box.MappingPath[0];
+            if (filter != "P") return false;
+            
+            if (!Enum.TryParse(box.MappingPath[1], out type)) return false;
+            return true;
         }
     }
 }

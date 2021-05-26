@@ -12,43 +12,43 @@ namespace Form8snCore.FileFormats
     {
         [Description("Pass data directly along")]
         [UsesType(typeof(EmptyMappingParams))]
-        None = 0, 
+        None = 0,
         
         [Description("Supply an unchanging value")]
         [UsesType(typeof(TextMappingParams))]
-        FixedValue = 2,
+        FixedValue,
         
         [Description("Split a list into a list of sub-lists, each up to 'count' long")]
         [UsesType(typeof(MaxCountMappingParams))]
-        SplitIntoN = 3,
+        SplitIntoN,
         
         [Description("Return the first 'count' words, discarding others")]
         [UsesType(typeof(TakeMappingParams))]
-        TakeWords = 4,
+        TakeWords,
         
         [Description("Discard the first 'count' words, returning others")]
         [UsesType(typeof(SkipMappingParams))]
-        SkipWords = 5,
+        SkipWords,
         
         [Description("Join all elements of a list (treating them as strings)")]
         [UsesType(typeof(JoinMappingParams))]
-        Concatenate = 6,
+        Concatenate,
         
         [Description("Select all the values on a path as a list")]
         [UsesType(typeof(EmptyMappingParams))]
-        TakeAllValues = 7,
+        TakeAllValues,
         
         [Description("Select all the different values on a path")]
         [UsesType(typeof(EmptyMappingParams))]
-        Distinct = 8,
+        Distinct,
         
         [Description("Select all values on a path, and try to format them as date strings. Any values that can't be converted will be excluded")]
         [UsesType(typeof(DateFormatMappingParams))]
-        FormatAllAsDate = 9,
+        FormatAllAsDate,
         
         [Description("Select all values on a path, and try to format them as numeric strings. Any values that can't be converted will be excluded")]
         [UsesType(typeof(NumberMappingParams))]
-        FormatAllAsNumber = 10,
+        FormatAllAsNumber,
         
         [Description("Sum up all numeric values on the path")]
         [UsesType(typeof(EmptyMappingParams))]
