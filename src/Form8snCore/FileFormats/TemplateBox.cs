@@ -4,6 +4,32 @@ namespace Form8snCore.FileFormats
     public class TemplateBox
     {
         /// <summary>
+        /// Create a box that is a copy of another
+        /// </summary>
+        /// <param name="parent"></param>
+        public TemplateBox(TemplateBox parent)
+        {
+            WrapText = parent.WrapText;
+            ShrinkToFit = parent.ShrinkToFit;
+            BoxFontSize = parent.BoxFontSize;
+            Alignment = parent.Alignment;
+            DependsOn = parent.DependsOn;
+            DisplayFormat = parent.DisplayFormat;
+            MappingPath = parent.MappingPath;
+            BoxOrder = parent.BoxOrder;
+            
+            Width = parent.Width;
+            Height = parent.Height;
+            Top = parent.Top + (Height / 2);
+            Left = parent.Left + (Width / 2);
+        }
+
+        /// <summary>
+        /// Create a new empty box
+        /// </summary>
+        public TemplateBox() { }
+
+        /// <summary>
         /// If text doesn't fit in the box, break on whitespace
         /// <para>This can be combined with ShrinkToFit</para>
         /// </summary>

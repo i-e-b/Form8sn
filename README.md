@@ -55,4 +55,4 @@ To-do:
   (or maybe a general conditional setup)
 * [x] Distinct values filter (`SELECT DISTICT x FROM y` equivalent)
 * [x] Auto-name a box if it has a default name and the data path has been set
-* [ ] Copy a box definition
+* [x] Copy a box definition

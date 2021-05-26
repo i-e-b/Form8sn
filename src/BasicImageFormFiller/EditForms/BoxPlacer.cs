@@ -315,7 +315,7 @@ namespace BasicImageFormFiller.EditForms
         private string? FindBoxKey(float docX, float docY)
         {
             if (_project == null) return null;
-            foreach (var (key, box) in _project.Pages[_pageIndex].Boxes)
+            foreach (var (key, box) in _project.Pages[_pageIndex].Boxes.Reverse()) // reverse so you can pick 'on top' boxes in an intuitive way.
             {
                 if (box.Top > docY) continue;
                 if (box.Left > docX) continue;

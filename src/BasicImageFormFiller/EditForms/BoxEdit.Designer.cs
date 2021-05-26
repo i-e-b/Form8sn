@@ -60,6 +60,7 @@ namespace BasicImageFormFiller.EditForms
             this.fontSizeTextBox = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.dependsOnComboBox = new System.Windows.Forms.ComboBox();
+            this.copyBoxButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // wrapTextCheckbox
@@ -336,11 +337,23 @@ namespace BasicImageFormFiller.EditForms
             this.dependsOnComboBox.Size = new System.Drawing.Size(121, 21);
             this.dependsOnComboBox.TabIndex = 28;
             // 
+            // copyBoxButton
+            // 
+            this.copyBoxButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.copyBoxButton.Location = new System.Drawing.Point(256, 391);
+            this.copyBoxButton.Name = "copyBoxButton";
+            this.copyBoxButton.Size = new System.Drawing.Size(75, 23);
+            this.copyBoxButton.TabIndex = 29;
+            this.copyBoxButton.Text = "Copy";
+            this.copyBoxButton.UseVisualStyleBackColor = false;
+            this.copyBoxButton.Click += new System.EventHandler(this.copyBoxButton_Click);
+            // 
             // BoxEdit
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(505, 426);
+            this.Controls.Add(this.copyBoxButton);
             this.Controls.Add(this.dependsOnComboBox);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.fontSizeTextBox);
@@ -378,6 +391,10 @@ namespace BasicImageFormFiller.EditForms
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.Button copyBoxButton;
+
+        private System.Windows.Forms.Button button1;
 
         private System.Windows.Forms.ComboBox dependsOnComboBox;
 

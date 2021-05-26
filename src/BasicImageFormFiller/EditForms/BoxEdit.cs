@@ -67,70 +67,27 @@ namespace BasicImageFormFiller.EditForms
 
         private void saveButton_Click(object sender, EventArgs e)
         {
-            var container = _project!.Pages[_pageIndex].Boxes;
-
-            var box = _project!.Pages[_pageIndex].Boxes[_boxKey];
-            box.WrapText = wrapTextCheckbox!.Checked;
-            box.ShrinkToFit = shrinkToFitCheckbox!.Checked;
-            
-            if (string.IsNullOrWhiteSpace(fontSizeTextBox!.Text)) box.BoxFontSize = null;
-            else if (int.TryParse(fontSizeTextBox!.Text, out var fontSize)) box.BoxFontSize = fontSize;
-            else box.BoxFontSize = null;
-
-            if (string.IsNullOrWhiteSpace(processOrderTextBox!.Text)) box.BoxOrder = null;
-            else if (int.TryParse(processOrderTextBox!.Text, out var order)) box.BoxOrder = order;
-            else box.BoxOrder = null;
-            
-            if (string.IsNullOrWhiteSpace(dependsOnComboBox!.Text)) box.DependsOn = null;
-            else if (NotCircular(dependsOnComboBox!.Text, _boxKey)) box.DependsOn = dependsOnComboBox!.Text;
-
-            if (topLeft!.Checked) box.Alignment = TextAlignment.TopLeft;
-            else if (topCentre!.Checked) box.Alignment = TextAlignment.TopCentre;
-            else if (topRight!.Checked) box.Alignment = TextAlignment.TopRight;
-            
-            else if (midLeft!.Checked) box.Alignment = TextAlignment.MidlineLeft;
-            else if (midCentre!.Checked) box.Alignment = TextAlignment.MidlineCentre;
-            else if (midRight!.Checked) box.Alignment = TextAlignment.MidlineRight;
-            
-            else if (bottomLeft!.Checked) box.Alignment = TextAlignment.BottomLeft;
-            else if (bottomCentre!.Checked) box.Alignment = TextAlignment.BottomCentre;
-            else if (bottomRight!.Checked) box.Alignment = TextAlignment.BottomRight;
-            else box.Alignment = TextAlignment.MidlineLeft;
-            
-            
-            // If key has changed, try updating
-            var newKey = boxKeyTextbox!.Text;
-            // if key has changed and it's not already in use:
-            if (newKey != _boxKey && !string.IsNullOrWhiteSpace(newKey) && !container.ContainsKey(newKey)) 
-            {
-                var tmp = container[_boxKey];
-                container.Remove(_boxKey);
-                container.Add(newKey, tmp);
-            }
-            
+            UpdateBoxDefinition();
             _project?.Save();
             Close();
         }
 
-        private bool NotCircular(string boxDependsOn, string boxKey)
+        private void copyBoxButton_Click(object sender, EventArgs e)
         {
-            const bool circular = false;
-            const bool ok = true;
-            
-            var page = _project?.Pages[_pageIndex];
-            if (page == null) return circular;
-            if (boxDependsOn == boxKey) return circular;
-            
-            var currentBox = page.Boxes[boxDependsOn];
-            for (int i = 0; i < 255; i++) // safety limit
-            {
-                if (currentBox.DependsOn == null) return ok;
-                if (currentBox.DependsOn == boxKey) return circular;
-                
-                if (!page.Boxes.ContainsKey(currentBox.DependsOn)) return ok; // the chain is broken, but no circular
-                currentBox = page.Boxes[currentBox.DependsOn!];
-            }
-            return circular;
+            // Write a new box with a copy name and an offset, then save & close
+            UpdateBoxDefinition();
+            CopyBox();
+            _project?.Save();
+            Close();
+        }
+
+        private void setDataFormatButton_Click(object sender, EventArgs e)
+        {
+            if (_project == null) return;
+            // A display format edit form, like the filter editor
+            var dfe = new DisplayFormatEditor(_project, _pageIndex, _boxKey);
+            dfe.ShowDialog();
+            UpdateDisplayFormatInfo();
         }
 
         private void deleteButton_Click(object sender, EventArgs e)
@@ -168,6 +125,72 @@ namespace BasicImageFormFiller.EditForms
             }
         }
 
+        
+        private void UpdateBoxDefinition()
+        {
+            var container = _project!.Pages[_pageIndex].Boxes;
+
+            var box = _project!.Pages[_pageIndex].Boxes[_boxKey];
+            box.WrapText = wrapTextCheckbox!.Checked;
+            box.ShrinkToFit = shrinkToFitCheckbox!.Checked;
+
+            if (string.IsNullOrWhiteSpace(fontSizeTextBox!.Text)) box.BoxFontSize = null;
+            else if (int.TryParse(fontSizeTextBox!.Text, out var fontSize)) box.BoxFontSize = fontSize;
+            else box.BoxFontSize = null;
+
+            if (string.IsNullOrWhiteSpace(processOrderTextBox!.Text)) box.BoxOrder = null;
+            else if (int.TryParse(processOrderTextBox!.Text, out var order)) box.BoxOrder = order;
+            else box.BoxOrder = null;
+
+            if (string.IsNullOrWhiteSpace(dependsOnComboBox!.Text)) box.DependsOn = null;
+            else if (NotCircular(dependsOnComboBox!.Text, _boxKey)) box.DependsOn = dependsOnComboBox!.Text;
+
+            if (topLeft!.Checked) box.Alignment = TextAlignment.TopLeft;
+            else if (topCentre!.Checked) box.Alignment = TextAlignment.TopCentre;
+            else if (topRight!.Checked) box.Alignment = TextAlignment.TopRight;
+
+            else if (midLeft!.Checked) box.Alignment = TextAlignment.MidlineLeft;
+            else if (midCentre!.Checked) box.Alignment = TextAlignment.MidlineCentre;
+            else if (midRight!.Checked) box.Alignment = TextAlignment.MidlineRight;
+
+            else if (bottomLeft!.Checked) box.Alignment = TextAlignment.BottomLeft;
+            else if (bottomCentre!.Checked) box.Alignment = TextAlignment.BottomCentre;
+            else if (bottomRight!.Checked) box.Alignment = TextAlignment.BottomRight;
+            else box.Alignment = TextAlignment.MidlineLeft;
+
+
+            // If key has changed, try updating
+            var newKey = boxKeyTextbox!.Text;
+            // if key has changed and it's not already in use:
+            if (newKey != _boxKey && !string.IsNullOrWhiteSpace(newKey) && !container.ContainsKey(newKey))
+            {
+                var tmp = container[_boxKey];
+                container.Remove(_boxKey);
+                container.Add(newKey, tmp);
+            }
+        }
+
+        private bool NotCircular(string boxDependsOn, string boxKey)
+        {
+            const bool circular = false;
+            const bool ok = true;
+            
+            var page = _project?.Pages[_pageIndex];
+            if (page == null) return circular;
+            if (boxDependsOn == boxKey) return circular;
+            
+            var currentBox = page.Boxes[boxDependsOn];
+            for (int i = 0; i < 255; i++) // safety limit
+            {
+                if (currentBox.DependsOn == null) return ok;
+                if (currentBox.DependsOn == boxKey) return circular;
+                
+                if (!page.Boxes.ContainsKey(currentBox.DependsOn)) return ok; // the chain is broken, but no circular
+                currentBox = page.Boxes[currentBox.DependsOn!];
+            }
+            return circular;
+        }
+
         private static string? AutoNameBox(TemplateBox box)
         {
             if (box.MappingPath == null) return null;
@@ -179,16 +202,6 @@ namespace BasicImageFormFiller.EditForms
             
             return sb.ToString();
         }
-
-        private void setDataFormatButton_Click(object sender, EventArgs e)
-        {
-            if (_project == null) return;
-            // A display format edit form, like the filter editor
-            var dfe = new DisplayFormatEditor(_project, _pageIndex, _boxKey);
-            dfe.ShowDialog();
-            UpdateDisplayFormatInfo();
-        }
-
 
         private bool IsUsingDefaultName(string? name)
         {
@@ -226,6 +239,27 @@ namespace BasicImageFormFiller.EditForms
             );
             var split = paramText.Length > 0 ? ":\r\n" : "";
             displayFormatInfo!.Text = $"{format.Type}{split}{paramText}";
+        }
+
+        private void CopyBox()
+        {
+            var parentKey = boxKeyTextbox!.Text;
+            if (_project == null || string.IsNullOrEmpty(parentKey) || !_project.Pages[_pageIndex].Boxes.ContainsKey(parentKey)) return;
+            var parent = _project.Pages[_pageIndex].Boxes[parentKey];
+            
+            string? name = null;
+            for (int i = 0; i < 255; i++)
+            {
+                var potential = $"copy {i+1} of {parentKey}";
+                if (_project!.Pages[_pageIndex].Boxes.ContainsKey(potential)) continue; // already used
+                name = potential;
+                break;
+            }
+            if (name == null) return;
+            
+            _project!.Pages[_pageIndex].Boxes.Add(
+                name, new TemplateBox(parent)
+            );
         }
     }
 }
