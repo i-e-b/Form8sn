@@ -80,7 +80,9 @@ namespace BasicImageFormFiller.EditForms
             g.DrawImage(_imageCache, new PointF(dx, dy));
             
             var explicitlyOrdered = new List<TemplateBox>();
+            var dependentBoxes = new Dictionary<string, string>(); // key =(depends on)=> value
 
+            // Draw the boxes
             foreach (var entry in _project.Pages[_pageIndex].Boxes)
             {
                 var name = entry.Key;
@@ -89,6 +91,7 @@ namespace BasicImageFormFiller.EditForms
 
                 var boxColor = hasMap ? Brushes.Turquoise! : Brushes.Pink!;
                 if (box.BoxOrder != null) explicitlyOrdered.Add(box);
+                if (box.DependsOn != null) dependentBoxes.Add(name, box.DependsOn);
 
                 var rect = new Rectangle((int) box.Left, (int) box.Top, (int) box.Width, (int) box.Height);
                 rect.Offset((int) dx, (int) dy);
@@ -99,25 +102,49 @@ namespace BasicImageFormFiller.EditForms
                 g.DrawString(name, Font, Brushes.Black!, left, top);
             }
 
-            if (explicitlyOrdered.Count < 2) return;
-            // Create a new pen to draw the arrow
-            using var b = new SolidBrush(Color.FromArgb(100, 0, 0, 0));
-            using Pen p = new Pen(b, 2.1f) {CustomEndCap = new AdjustableArrowCap(5,5,true)};
-            int prevX = -1;
-            int prevY = -1;
-            foreach (var box in explicitlyOrdered.OrderBy(b => b.BoxOrder))
+            // Draw arrows for any explicitly ordered boxes
+            if (explicitlyOrdered.Count > 1)
             {
-                int nextX = (int)(box.Left + (box.Width / 2));
-                int nextY = (int)(box.Top + (box.Height / 2));
-
-                if (prevX >= 0 || prevY >= 0)
+                // Create a new pen to draw the arrow
+                using var b = new SolidBrush(Color.FromArgb(100, 0, 0, 0));
+                using Pen p = new Pen(b, 2.1f) {CustomEndCap = new AdjustableArrowCap(5, 5, true)};
+                int prevX = -1;
+                int prevY = -1;
+                foreach (var box in explicitlyOrdered.OrderBy(o => o.BoxOrder))
                 {
-                    // Draw an arrow
-                    g.DrawLine(p, dx + prevX, dy + prevY, dx + nextX, dy + nextY);
+                    int nextX = (int) (box.Left + (box.Width / 2));
+                    int nextY = (int) (box.Top + (box.Height / 2));
+
+                    if (prevX >= 0 || prevY >= 0)
+                    {
+                        // Draw an arrow
+                        g.DrawLine(p, dx + prevX, dy + prevY, dx + nextX, dy + nextY);
+                    }
+
+                    prevX = nextX;
+                    prevY = nextY;
                 }
-                
-                prevX = nextX;
-                prevY = nextY;
+            }
+
+            // Draw arrows for any dependent box chains
+            if (dependentBoxes.Count > 0)
+            {
+                using var b = new SolidBrush(Color.FromArgb(100, 0, 0, 255));
+                using Pen p = new Pen(b, 2.1f) {DashStyle = DashStyle.Dot, CustomEndCap = new AdjustableArrowCap(5, 5, true)};
+                foreach (var (key, value) in dependentBoxes)
+                {
+                    var fromBox = _project.Pages[_pageIndex].Boxes[key];
+                    var toBox = _project.Pages[_pageIndex].Boxes[value];
+                    
+                    var prevX = (int) (fromBox.Left + (fromBox.Width / 2));
+                    var prevY = (int) (fromBox.Top + (fromBox.Height / 2));
+                    var nextX = (int) (toBox.Left + (toBox.Width / 2));
+                    var nextY = (int) (toBox.Top + (toBox.Height / 2));
+
+                    if (prevX >= 0 || prevY >= 0) { // Draw an arrow
+                        g.DrawLine(p, dx + prevX, dy + prevY, dx + nextX, dy + nextY);
+                    }
+                }
             }
         }
 
@@ -314,7 +341,7 @@ namespace BasicImageFormFiller.EditForms
             if (width < 5 || height < 2) return;
 
             var container = _project.Pages[_pageIndex].Boxes;
-            string key = "Box_1";
+            string key = "";
             for (int i = 1; i < 256; i++)
             {
                 key = $"Box_{i}";

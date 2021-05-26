@@ -26,6 +26,13 @@ namespace Form8snCore.FileFormats
         /// Text will flow out of the box if there is a value that can't be displayed inside the box
         /// </summary>
         public TextAlignment Alignment { get; set; }
+
+        /// <summary>
+        /// Key for another box on this page.
+        /// If the 'DependsOn' box has no content, this box will not show.
+        /// This property can be chained.
+        /// </summary>
+        public string? DependsOn { get; set; }
         
         /// <summary>
         /// Top edge of the box.

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 using Form8snCore.FileFormats;
 
@@ -30,6 +31,8 @@ namespace BasicImageFormFiller.EditForms
                 ? ""
                 : string.Join(".", box.MappingPath);
             
+            SetupDependentCombo(project, pageIndex, boxKey, box);
+
             UpdateDisplayFormatInfo();
             
             processOrderTextBox!.Text = box.BoxOrder?.ToString() ?? "";
@@ -51,7 +54,7 @@ namespace BasicImageFormFiller.EditForms
             bottomCentre!.Checked = box.Alignment == TextAlignment.BottomCentre;
             bottomRight!.Checked = box.Alignment == TextAlignment.BottomRight;
         }
-
+        
         private void BoxEdit_FormClosing(object sender, FormClosingEventArgs e)
         {
             
@@ -77,6 +80,9 @@ namespace BasicImageFormFiller.EditForms
             if (string.IsNullOrWhiteSpace(processOrderTextBox!.Text)) box.BoxOrder = null;
             else if (int.TryParse(processOrderTextBox!.Text, out var order)) box.BoxOrder = order;
             else box.BoxOrder = null;
+            
+            if (string.IsNullOrWhiteSpace(dependsOnComboBox!.Text)) box.DependsOn = null;
+            else if (NotCircular(dependsOnComboBox!.Text, _boxKey)) box.DependsOn = dependsOnComboBox!.Text;
 
             if (topLeft!.Checked) box.Alignment = TextAlignment.TopLeft;
             else if (topCentre!.Checked) box.Alignment = TextAlignment.TopCentre;
@@ -106,9 +112,35 @@ namespace BasicImageFormFiller.EditForms
             Close();
         }
 
+        private bool NotCircular(string boxDependsOn, string boxKey)
+        {
+            const bool circular = false;
+            const bool ok = true;
+            
+            var page = _project?.Pages[_pageIndex];
+            if (page == null) return circular;
+            if (boxDependsOn == boxKey) return circular;
+            
+            var currentBox = page.Boxes[boxDependsOn];
+            for (int i = 0; i < 255; i++) // safety limit
+            {
+                if (currentBox.DependsOn == null) return ok;
+                if (currentBox.DependsOn == boxKey) return circular;
+                
+                if (!page.Boxes.ContainsKey(currentBox.DependsOn)) return ok; // the chain is broken, but no circular
+                currentBox = page.Boxes[currentBox.DependsOn!];
+            }
+            return circular;
+        }
+
         private void deleteButton_Click(object sender, EventArgs e)
         {
-            _project!.Pages[_pageIndex].Boxes.Remove(_boxKey);
+            var boxDict = _project!.Pages[_pageIndex].Boxes;
+            boxDict.Remove(_boxKey);
+            
+            // delete any dependencies
+            foreach (var box in boxDict.Values) { if (box.DependsOn == _boxKey) box.DependsOn = null; }
+            
             _project?.Save();
             Close();
         }
@@ -126,8 +158,26 @@ namespace BasicImageFormFiller.EditForms
             {
                 box.MappingPath = mapEdit.SelectedPath;
                 dataPathLabel!.Text = string.Join(".", box.MappingPath);
+
+                if (IsUsingDefaultName(boxKeyTextbox?.Text)) // auto-name the box based on the data path
+                {
+                    boxKeyTextbox!.Text = AutoNameBox(box) ??  boxKeyTextbox!.Text;
+                }
+
                 _project.Save();
             }
+        }
+
+        private static string? AutoNameBox(TemplateBox box)
+        {
+            if (box.MappingPath == null) return null;
+            var sb = new StringBuilder();
+            
+            if (box.MappingPath[0] == "#") sb.Append("filter ");
+            sb.Append(string.Join(" ", box.MappingPath.Skip(1)));
+            if (box.MappingPath[0] == "D") sb.Append(" from page");
+            
+            return sb.ToString();
         }
 
         private void setDataFormatButton_Click(object sender, EventArgs e)
@@ -137,6 +187,27 @@ namespace BasicImageFormFiller.EditForms
             var dfe = new DisplayFormatEditor(_project, _pageIndex, _boxKey);
             dfe.ShowDialog();
             UpdateDisplayFormatInfo();
+        }
+
+
+        private bool IsUsingDefaultName(string? name)
+        {
+            if (name == null) return false;
+            if (!name.StartsWith("Box_")) return false;
+            if (!int.TryParse(name.Substring(4), out _)) return false;
+            return true;
+        }
+
+        private void SetupDependentCombo(Project project, int pageIndex, string boxKey, TemplateBox box)
+        {
+            dependsOnComboBox!.Items.Clear();
+            dependsOnComboBox!.Items.Add(""); // Blank is no dependency
+            foreach (var key in project.Pages[pageIndex].Boxes.Keys.OrderBy(s=>s))
+            {
+                if (key != boxKey) dependsOnComboBox!.Items.Add(key);
+            }
+
+            dependsOnComboBox.SelectedItem = box.DependsOn ?? "";
         }
 
         private void UpdateDisplayFormatInfo()

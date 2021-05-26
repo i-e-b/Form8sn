@@ -58,6 +58,8 @@ namespace BasicImageFormFiller.EditForms
             this.processOrderTextBox = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.fontSizeTextBox = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.dependsOnComboBox = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // wrapTextCheckbox
@@ -98,7 +100,7 @@ namespace BasicImageFormFiller.EditForms
             // saveButton
             // 
             this.saveButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.saveButton.Location = new System.Drawing.Point(418, 346);
+            this.saveButton.Location = new System.Drawing.Point(418, 391);
             this.saveButton.Name = "saveButton";
             this.saveButton.Size = new System.Drawing.Size(75, 23);
             this.saveButton.TabIndex = 4;
@@ -109,7 +111,7 @@ namespace BasicImageFormFiller.EditForms
             // cancelButton
             // 
             this.cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.cancelButton.Location = new System.Drawing.Point(337, 346);
+            this.cancelButton.Location = new System.Drawing.Point(337, 391);
             this.cancelButton.Name = "cancelButton";
             this.cancelButton.Size = new System.Drawing.Size(75, 23);
             this.cancelButton.TabIndex = 5;
@@ -119,7 +121,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // topLeft
             // 
-            this.topLeft.Location = new System.Drawing.Point(151, 236);
+            this.topLeft.Location = new System.Drawing.Point(151, 289);
             this.topLeft.Name = "topLeft";
             this.topLeft.Size = new System.Drawing.Size(104, 24);
             this.topLeft.TabIndex = 6;
@@ -129,7 +131,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // label2
             // 
-            this.label2.Location = new System.Drawing.Point(19, 227);
+            this.label2.Location = new System.Drawing.Point(19, 280);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(126, 42);
             this.label2.TabIndex = 7;
@@ -138,7 +140,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // topCentre
             // 
-            this.topCentre.Location = new System.Drawing.Point(261, 236);
+            this.topCentre.Location = new System.Drawing.Point(261, 289);
             this.topCentre.Name = "topCentre";
             this.topCentre.Size = new System.Drawing.Size(104, 24);
             this.topCentre.TabIndex = 8;
@@ -148,7 +150,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // topRight
             // 
-            this.topRight.Location = new System.Drawing.Point(371, 236);
+            this.topRight.Location = new System.Drawing.Point(371, 289);
             this.topRight.Name = "topRight";
             this.topRight.Size = new System.Drawing.Size(104, 24);
             this.topRight.TabIndex = 9;
@@ -158,7 +160,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // midRight
             // 
-            this.midRight.Location = new System.Drawing.Point(371, 266);
+            this.midRight.Location = new System.Drawing.Point(371, 319);
             this.midRight.Name = "midRight";
             this.midRight.Size = new System.Drawing.Size(104, 24);
             this.midRight.TabIndex = 12;
@@ -168,7 +170,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // midCentre
             // 
-            this.midCentre.Location = new System.Drawing.Point(261, 266);
+            this.midCentre.Location = new System.Drawing.Point(261, 319);
             this.midCentre.Name = "midCentre";
             this.midCentre.Size = new System.Drawing.Size(104, 24);
             this.midCentre.TabIndex = 11;
@@ -178,7 +180,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // midLeft
             // 
-            this.midLeft.Location = new System.Drawing.Point(151, 266);
+            this.midLeft.Location = new System.Drawing.Point(151, 319);
             this.midLeft.Name = "midLeft";
             this.midLeft.Size = new System.Drawing.Size(104, 24);
             this.midLeft.TabIndex = 10;
@@ -188,7 +190,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // bottomRight
             // 
-            this.bottomRight.Location = new System.Drawing.Point(371, 296);
+            this.bottomRight.Location = new System.Drawing.Point(371, 349);
             this.bottomRight.Name = "bottomRight";
             this.bottomRight.Size = new System.Drawing.Size(104, 24);
             this.bottomRight.TabIndex = 15;
@@ -198,7 +200,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // bottomCentre
             // 
-            this.bottomCentre.Location = new System.Drawing.Point(261, 296);
+            this.bottomCentre.Location = new System.Drawing.Point(261, 349);
             this.bottomCentre.Name = "bottomCentre";
             this.bottomCentre.Size = new System.Drawing.Size(104, 24);
             this.bottomCentre.TabIndex = 14;
@@ -208,7 +210,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // bottomLeft
             // 
-            this.bottomLeft.Location = new System.Drawing.Point(151, 296);
+            this.bottomLeft.Location = new System.Drawing.Point(151, 349);
             this.bottomLeft.Name = "bottomLeft";
             this.bottomLeft.Size = new System.Drawing.Size(104, 24);
             this.bottomLeft.TabIndex = 13;
@@ -219,7 +221,7 @@ namespace BasicImageFormFiller.EditForms
             // deleteButton
             // 
             this.deleteButton.Anchor = ((System.Windows.Forms.AnchorStyles) ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.deleteButton.Location = new System.Drawing.Point(12, 346);
+            this.deleteButton.Location = new System.Drawing.Point(12, 391);
             this.deleteButton.Name = "deleteButton";
             this.deleteButton.Size = new System.Drawing.Size(75, 23);
             this.deleteButton.TabIndex = 16;
@@ -295,7 +297,7 @@ namespace BasicImageFormFiller.EditForms
             // 
             // processOrderTextBox
             // 
-            this.processOrderTextBox.Location = new System.Drawing.Point(155, 190);
+            this.processOrderTextBox.Location = new System.Drawing.Point(151, 190);
             this.processOrderTextBox.Name = "processOrderTextBox";
             this.processOrderTextBox.Size = new System.Drawing.Size(100, 20);
             this.processOrderTextBox.TabIndex = 24;
@@ -311,16 +313,36 @@ namespace BasicImageFormFiller.EditForms
             // 
             // fontSizeTextBox
             // 
-            this.fontSizeTextBox.Location = new System.Drawing.Point(151, 102);
+            this.fontSizeTextBox.Location = new System.Drawing.Point(151, 99);
             this.fontSizeTextBox.Name = "fontSizeTextBox";
             this.fontSizeTextBox.Size = new System.Drawing.Size(100, 20);
             this.fontSizeTextBox.TabIndex = 26;
+            // 
+            // label7
+            // 
+            this.label7.Location = new System.Drawing.Point(12, 236);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(133, 44);
+            this.label7.TabIndex = 27;
+            this.label7.Text = "Depends On\r\n(hide box if other is empty)";
+            this.label7.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            // 
+            // dependsOnComboBox
+            // 
+            this.dependsOnComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.dependsOnComboBox.FormattingEnabled = true;
+            this.dependsOnComboBox.Location = new System.Drawing.Point(151, 233);
+            this.dependsOnComboBox.Name = "dependsOnComboBox";
+            this.dependsOnComboBox.Size = new System.Drawing.Size(121, 21);
+            this.dependsOnComboBox.TabIndex = 28;
             // 
             // BoxEdit
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(505, 381);
+            this.ClientSize = new System.Drawing.Size(505, 426);
+            this.Controls.Add(this.dependsOnComboBox);
+            this.Controls.Add(this.label7);
             this.Controls.Add(this.fontSizeTextBox);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.processOrderTextBox);
@@ -356,6 +378,10 @@ namespace BasicImageFormFiller.EditForms
             this.ResumeLayout(false);
             this.PerformLayout();
         }
+
+        private System.Windows.Forms.ComboBox dependsOnComboBox;
+
+        private System.Windows.Forms.Label label7;
 
         private System.Windows.Forms.TextBox fontSizeTextBox;
 
