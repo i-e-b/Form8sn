@@ -102,7 +102,8 @@ namespace Form8snCore.Rendering
                 }
             }
 
-            // TODO: remove boxes that have null/empty dependencies
+            // remove boxes that have null/empty dependencies
+            PruneBoxes(pageList);
 
             // Next, go through the prepared page and render them to PDF
             for (var pageIndex = 0; pageIndex < pageList.Count; pageIndex++)
@@ -130,6 +131,32 @@ namespace Form8snCore.Rendering
             result.LoadingTime = _loadingTimer.Elapsed;
 
             return result;
+        }
+
+        private static void PruneBoxes(List<DocumentPage> pageList)
+        {
+            foreach (var page in pageList)
+            {
+                var boxesToKill = new List<string>(); //key list
+                foreach (var box in page.DocumentBoxes)
+                {
+                    var definition = box.Value.Definition;
+                    if (string.IsNullOrWhiteSpace(definition.DependsOn)) continue; // not dependent
+                    
+                    // Follow the depends chain until we hit one that's either empty, missing, or we hit the end
+                    var nextBox = box.Value;
+                    while (nextBox.Definition.DependsOn != null)
+                    {
+                        if (!page.DocumentBoxes.ContainsKey(nextBox.Definition.DependsOn)) { boxesToKill.Add(box.Key); break; } // has been early-culled
+                        nextBox = page.DocumentBoxes[nextBox.Definition.DependsOn];
+                        if (string.IsNullOrEmpty(nextBox.RenderContent)) { boxesToKill.Add(box.Key); break; } // dependent is empty
+                        if (string.IsNullOrEmpty(nextBox.Definition.DependsOn)) break; // end of the chain, has a value
+                        if (nextBox.Definition.DependsOn == box.Key) { boxesToKill.Add(box.Key); break; } // loop in chain. Drop this box
+                    }
+                }
+
+                foreach (var key in boxesToKill) { page.DocumentBoxes.Remove(key); }
+            }
         }
 
         private static void ClearPageTotals(Dictionary<string,decimal> runningTotals)
