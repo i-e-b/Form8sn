@@ -31,6 +31,13 @@ The general plan:
 The PDF generation phase should be as fast as possible. If we can, it should be a streaming process so we
 don't need to load the whole PDF template or output into memory.
 
+What is working now:
+--------------------
+
+Inputs are JPEG images.
+Schema is implicit with a sample data file.
+Direct output of PDF is working, but the special file format is not present.
+
 Components
 ==========
 
@@ -44,15 +51,10 @@ Components
 To-do:
 ------
 
-* [x] Apply display format to output
-* [x] Render background switch
-* [x] Per-page filter for repeat data
-* [x] Implement running total over repeating pages
-* [x] Base, page, and box font sizes (all optional)
-* [x] Font name (optional)
-* [x] Page total and page number filters
-* [x] Option to hide if some other data is missing (for total / subtotals etc)
-  (or maybe a general conditional setup)
-* [x] Distinct values filter (`SELECT DISTICT x FROM y` equivalent)
-* [x] Auto-name a box if it has a default name and the data path has been set
-* [x] Copy a box definition
+* [ ] Clean up UI (maybe remove the `PageEditScreen`, or clean it up)
+* [ ] Write some documentation
+* [ ] Ensure the core PDFsharp and Form8snCore don't use GDI+
+* [ ] Handle PDFs as input
+* [ ] Decode PDF forms so we can use existing 'boxes'
+* [ ] Embed Form8sn instructions in PDF files and handle those
+* [ ] Web-based form editor?
