@@ -11,9 +11,6 @@ namespace BasicImageFormFiller.EditForms
 {
     public partial class PickDataSource : Form
     {
-        private const char Separator = '\x1F';
-        private const string FilterMarker = "#";
-
         public string[]? SelectedPath { get; set; }
         public string? SelectedTag { get; set; }
         
@@ -52,13 +49,13 @@ namespace BasicImageFormFiller.EditForms
             
             pagesNode.Nodes.Add(new TreeNode{
                 Text = "Current Page Number",
-                Tag = $"P{Separator}{nameof(DocumentBoxType.CurrentPageNumber)}",
+                Tag = $"{Strings.PageDataMarker}{Strings.Separator}{nameof(DocumentBoxType.CurrentPageNumber)}",
                 Name = nameof(DocumentBoxType.CurrentPageNumber),
             });
             
             pagesNode.Nodes.Add(new TreeNode{
                 Text = "Total Page Count",
-                Tag = $"P{Separator}{nameof(DocumentBoxType.TotalPageCount)}",
+                Tag = $"{Strings.PageDataMarker}{Strings.Separator}{nameof(DocumentBoxType.TotalPageCount)}",
                 Name = nameof(DocumentBoxType.TotalPageCount),
             });
 
@@ -67,14 +64,14 @@ namespace BasicImageFormFiller.EditForms
                 pagesNode.Nodes.Add(new TreeNode
                 {
                     Text = "Repeating Page Number",
-                    Tag = $"P{Separator}{nameof(DocumentBoxType.RepeatingPageNumber)}",
+                    Tag = $"{Strings.PageDataMarker}{Strings.Separator}{nameof(DocumentBoxType.RepeatingPageNumber)}",
                     Name = nameof(DocumentBoxType.RepeatingPageNumber),
                 });
 
                 pagesNode.Nodes.Add(new TreeNode
                 {
                     Text = "Repeating Page Total Count",
-                    Tag = $"P{Separator}{nameof(DocumentBoxType.RepeatingPageTotalCount)}",
+                    Tag = $"{Strings.PageDataMarker}{Strings.Separator}{nameof(DocumentBoxType.RepeatingPageTotalCount)}",
                     Name = nameof(DocumentBoxType.RepeatingPageTotalCount),
                 });
             }
@@ -164,10 +161,10 @@ namespace BasicImageFormFiller.EditForms
             );
             if (repeatData is ArrayList list) repeatData = list[0];
             
-            var filters = new TreeNode {Text = "Page Filters", Name = "P", Tag = FilterMarker, ForeColor = Color.DimGray};
+            var filters = new TreeNode {Text = "Page Filters", Name = "P", Tag = Strings.FilterMarker, ForeColor = Color.DimGray};
             foreach (var filter in project.Pages[pageIndex].PageDataFilters)
             {
-                var path = FilterMarker + Separator + filter.Key;
+                var path = Strings.FilterMarker + Strings.Separator + filter.Key;
                 var sample = MappingActions.ApplyFilter(
                     filter.Value.MappingType,
                     filter.Value.MappingParameters,
@@ -197,10 +194,10 @@ namespace BasicImageFormFiller.EditForms
 
         private void AddDataFilters(Project project, object data)
         {
-            var filters = new TreeNode {Text = "Filters", Name = "#", Tag = FilterMarker, ForeColor = Color.DimGray};
+            var filters = new TreeNode {Text = "Filters", Name = "#", Tag = Strings.FilterMarker, ForeColor = Color.DimGray};
             foreach (var filter in project.Index.DataFilters)
             {
-                var path = FilterMarker + Separator + filter.Key;
+                var path = Strings.FilterMarker + Strings.Separator + filter.Key;
                 var sample = MappingActions.ApplyFilter(
                     filter.Value.MappingType,
                     filter.Value.MappingParameters,
@@ -263,7 +260,7 @@ namespace BasicImageFormFiller.EditForms
                 var collection = new List<TreeNode>();
                 foreach (var kvp in dict)
                 {
-                    collection.AddRange(ReadObjectRecursive(kvp.Value, path + Separator + kvp.Key, kvp.Key));
+                    collection.AddRange(ReadObjectRecursive(kvp.Value, path + Strings.Separator + kvp.Key, kvp.Key));
                 }
                 outp.Add(new TreeNode(node, collection.ToArray()){
                     Tag = path,
@@ -280,10 +277,10 @@ namespace BasicImageFormFiller.EditForms
                     var idxStr = $"[{index}]";
                     if (kvp != null)
                     {
-                        collection.AddRange(ReadObjectRecursive(kvp, path + Separator + idxStr, idxStr));
+                        collection.AddRange(ReadObjectRecursive(kvp, path + Strings.Separator + idxStr, idxStr));
                     } else collection.Add(new TreeNode{
                         Text = idxStr + " = <null>",
-                        Tag = path + Separator + idxStr,
+                        Tag = path + Strings.Separator + idxStr,
                         Name = name,
                         ForeColor = Color.Purple,
                     });
@@ -313,7 +310,7 @@ namespace BasicImageFormFiller.EditForms
             SelectedTag = e.Node?.Tag?.ToString();
             pickButton!.Enabled = !string.IsNullOrWhiteSpace(SelectedTag);
             tweakPathButton!.Enabled = !string.IsNullOrWhiteSpace(SelectedTag);
-            pathPreview!.Text = SelectedTag?.Replace(Separator, '.') ?? "< invalid path >";
+            pathPreview!.Text = SelectedTag?.Replace(Strings.Separator, '.') ?? "< invalid path >";
         }
 
         private void cancelButton_Click(object sender, EventArgs e)
@@ -323,7 +320,7 @@ namespace BasicImageFormFiller.EditForms
 
         private void pickButton_Click(object sender, EventArgs e)
         {
-            SelectedPath = SelectedTag?.Split(Separator);
+            SelectedPath = SelectedTag?.Split(Strings.Separator);
             Close();
         }
 
@@ -332,12 +329,12 @@ namespace BasicImageFormFiller.EditForms
             // Allow the user to adjust the path. This is needed if we
             // expect inputs longer than the sample data provides
             if (SelectedTag == null) return;
-            var pe = new EditPathForm(null, SelectedTag!.Split(Separator));
+            var pe = new EditPathForm(null, SelectedTag!.Split(Strings.Separator));
             pe.ShowDialog();
             if (pe.EditedPath == null) return; // cancelled or closed
 
-            SelectedTag = string.Join(Separator, pe.EditedPath);
-            pathPreview!.Text = SelectedTag?.Replace(Separator, '.') ?? "< invalid path >";
+            SelectedTag = string.Join(Strings.Separator, pe.EditedPath);
+            pathPreview!.Text = SelectedTag?.Replace(Strings.Separator, '.') ?? "< invalid path >";
         }
     }
 }

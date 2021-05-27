@@ -50,6 +50,10 @@ namespace Form8snCore.FileFormats
         [UsesType(typeof(NumberMappingParams))]
         FormatAllAsNumber,
         
+        [Description("Compare the value at the path to a known parameter. This filter's output will be set to 'Same' if they are equal, or 'Different' otherwise")]
+        [UsesType(typeof(IfElseMappingParams))]
+        IfElse,
+        
         [Description("Sum up all numeric values on the path")]
         [UsesType(typeof(EmptyMappingParams))]
         Total = 1000,
@@ -57,6 +61,21 @@ namespace Form8snCore.FileFormats
         [Description("Sum up numeric values on the path that have been used so far")]
         [UsesType(typeof(EmptyMappingParams))]
         RunningTotal = 1001
+    }
+
+    
+    /// <summary>
+    /// This is a special type that we override with `IfElseMappingParamsUI` in `BasicImageFormFiller.EditForms.FilterEditor.CreateTypedContainerForParams()`
+    /// </summary>
+    public class IfElseMappingParams
+    {
+        [Description("Value to compare to the input data item")]
+        public string ExpectedValue { get; set; } = "";
+        
+        [Description("Data to output if Value and input data are the same")]
+        public string? Same { get; set; } // this is secretly mapped to `PropertyGridDataPicker` in BasicImageFormFiller/EditForms/PropertyGridSpecialTypes/PropertyGridDataPicker.cs
+        [Description("Data to output if Value and input data are different")]
+        public string? Different { get; set; }
     }
 
     public class JoinMappingParams {
