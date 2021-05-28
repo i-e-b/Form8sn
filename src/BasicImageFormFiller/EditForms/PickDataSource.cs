@@ -109,15 +109,13 @@ namespace BasicImageFormFiller.EditForms
             );
             
             // sample should be an ArrayList.
-            if (sample is ArrayList list)
+            if (sample is ArrayList list && list.Count > 0)
             {
-                var page1 = list[0] as ArrayList;
-
-                if (page1 == null)
+                if (list[0] == null) // invalid list
                 {
                     pageNode.Nodes.Add(new TreeNode {Text = "Invalid result", ForeColor = Color.Red, BackColor = Color.Pink});
                 }
-                else
+                else if (list[0] is ArrayList page1) // each page has multiple rows
                 {
                     var sampleNodes = ReadObjectRecursive(page1, "D", "XXX").ToArray();
                     if (sampleNodes.Length < 1)
@@ -131,8 +129,25 @@ namespace BasicImageFormFiller.EditForms
                         {
                             if (node != null) pageNode.Nodes.Add(node);
                         }
+
                         pageNode.Expand(); // expand first node by default
                     }
+                }
+                else if (list[0] is Dictionary<string, object> dict) // each page has a single compound object
+                {
+                    var sampleNodes = ReadObjectRecursive(dict, "D", "XXX");
+                    if (sampleNodes.Count != 1) throw new Exception("Unexpected object result in page data ReadObjectRecursive");
+                    
+                    foreach (TreeNode? node in sampleNodes[0].Nodes)
+                    {
+                        if (node != null) pageNode.Nodes.Add(node);
+                    }
+
+                    pageNode.Expand(); // expand first node by default
+                }
+                else // single value
+                {
+                    pageNode.Nodes.Add(new TreeNode {Text = "Invalid result", ForeColor = Color.Red, BackColor = Color.Pink}); // TODO: can I handle single values here?
                 }
             }
             else
