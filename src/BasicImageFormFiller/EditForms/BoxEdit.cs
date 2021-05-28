@@ -160,7 +160,7 @@ namespace BasicImageFormFiller.EditForms
 
 
             // If key has changed, try updating
-            var newKey = boxKeyTextbox!.Text;
+            var newKey = Strings.CleanKeyName(boxKeyTextbox!.Text);
             // if key has changed and it's not already in use:
             if (newKey != _boxKey && !string.IsNullOrWhiteSpace(newKey) && !container.ContainsKey(newKey))
             {

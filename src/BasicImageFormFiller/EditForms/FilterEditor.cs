@@ -91,7 +91,7 @@ namespace BasicImageFormFiller.EditForms
             MapPropertiesToDictionary(filter.MappingParameters, filterPropertyGrid!.SelectedObject);
 
             // If key has changed, try updating
-            var newKey = filterNameTextbox!.Text;
+            var newKey = Strings.CleanKeyName(filterNameTextbox!.Text);
             // if key has changed and it's not already in use:
             if (newKey != _filterName && !string.IsNullOrWhiteSpace(newKey) && !container.ContainsKey(newKey))
             {
