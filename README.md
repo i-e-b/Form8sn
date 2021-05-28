@@ -51,7 +51,7 @@ Components
 To-do:
 ------
 
-* [ ] Clean up UI (maybe remove the `PageEditScreen`, or clean it up)
+* [x] Clean up UI (maybe remove the `PageEditScreen`, or clean it up)
 * [ ] Write some documentation
 * [ ] Ensure the core PDFsharp and Form8snCore don't use GDI+
 * [ ] Handle PDFs as input

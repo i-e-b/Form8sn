@@ -61,6 +61,7 @@ using PdfSharp.Pdf;
 
 namespace PdfSharp.Drawing
 {
+
     /// <summary>
     /// Defines an object used to draw text.
     /// </summary>

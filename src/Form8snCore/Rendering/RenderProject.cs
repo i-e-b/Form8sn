@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -221,7 +220,7 @@ namespace Form8snCore.Rendering
             _loadingTimer.Start();
             if (pageDef.RenderBackground)
             {
-                var destRect = new RectangleF(0, 0, (float) page.Width.Point, (float) page.Height.Point);
+                var destRect = new XRect(0, 0, (float) page.Width.Point, (float) page.Height.Point);
                 gfx.DrawImage(image, destRect);
             }
             _loadingTimer.Stop();
