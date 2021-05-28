@@ -80,7 +80,7 @@ namespace BasicImageFormFiller
                 path = Path.Combine(path, IndexFileName);
 
             if (!File.Exists(path)) ShowFailure("Index file not accessible. Check permissions?");
-            _currentModule = new MainProjectScreen(new Project(path));
+            _currentModule = new MainProjectScreen(new Project(path), 0);
             ShowPage(_currentModule.StartScreen());
         }
 

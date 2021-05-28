@@ -85,7 +85,7 @@ namespace BasicImageFormFiller.ModuleScreens
             {
                 case BackToPageCommand:
                 {
-                    moduleScreen.SwitchToModule(new PageEditScreen(_project, _pageIndex));
+                    moduleScreen.SwitchToModule(new MainProjectScreen(_project, _pageIndex));
                     break;
                 }
 

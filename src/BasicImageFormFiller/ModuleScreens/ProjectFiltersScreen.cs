@@ -84,7 +84,7 @@ namespace BasicImageFormFiller.ModuleScreens
             {
                 case BackToTemplateCommand:
                 {
-                    moduleScreen.SwitchToModule(new MainProjectScreen(_project));
+                    moduleScreen.SwitchToModule(new MainProjectScreen(_project, 0));
                     break;
                 }
 

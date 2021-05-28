@@ -15,6 +15,10 @@ namespace BasicImageFormFiller.ModuleScreens
     {
         private readonly Project _project;
         private StateChangePermission _stateChange = StateChangePermission.Allowed;
+        private int _lastPageIndex;
+       
+        #region Action links
+        // Project wide
         private const string EditProjectNotesCommand = "/edit-project-notes";
         private const string SetDataFiltersCommand = "/set-data-filters";
         private const string MovePageUpCommand = "/move-up";
@@ -22,11 +26,20 @@ namespace BasicImageFormFiller.ModuleScreens
         private const string SetSampleFileCommand = "/set-sample-file";
         private const string RenderSampleCommand = "/render-sample";
         private const string AddPageAtEndCommand = "/add-at-end";
-        private const string EditPageCommand = "/edit-page";
         private const string InsertPageCommand = "/insert-page";
 
-        public MainProjectScreen(Project project)
+        // per-page
+        private const string ChangePageRepeatCommand = "/change-repeat";
+        private const string EditPageFiltersCommand  = "/edit-filters";
+        private const string EditBoxesCommand        = "/edit-boxes";
+        private const string EditMetaDataCommand     = "/edit-meta";
+        private const string EditBackgroundCommand   = "/pick-background";
+        private const string DeletePageCommand       = "/delete-this-page";
+        #endregion
+        
+        public MainProjectScreen(Project project, int pageIndex)
         {
+            _lastPageIndex = pageIndex;
             _project = project;
         }
 
@@ -53,6 +66,7 @@ namespace BasicImageFormFiller.ModuleScreens
                 T.g("a",  "href",AddPageAtEndCommand)["Insert new page here"]
                 );
 
+            content.Add(T.g("script")[$"var d=document.getElementById('page{_lastPageIndex}'); if(d)d.scrollIntoView();"]);
             return content;
         }
 
@@ -96,9 +110,13 @@ namespace BasicImageFormFiller.ModuleScreens
         {
             var clearLine = T.g("hr/", "style","clear:both");
             var bg = string.IsNullOrWhiteSpace(templatePage.BackgroundImage)
-                ? T.g("div", "style", "float:left;width:60%")["no background"]
-                : T.g("div", "style", "float:left;width:60%;height:50%;overflow-y:scroll")[
-                    templatePage.BackgroundImage,
+                ? T.g("div",  "style", "float:left;width:50%")[
+                    "no background | ",
+                    T.g("a", "href", EditBackgroundCommand)["Pick background image"]
+                ]
+                : T.g("div", "style", "float:left;width:50%;height:60%;overflow-y:scroll")[
+                    templatePage.BackgroundImage, " | ",
+                    T.g("a", "href", EditBackgroundCommand)["Pick background image"],
                     T.g("br/"),
                     T.g("img", "src", templatePage.GetBackgroundPreviewUrl(_project), "width", "100%")
                 ];
@@ -106,19 +124,50 @@ namespace BasicImageFormFiller.ModuleScreens
             content.Add(
                 T.g("a", "href", $"{InsertPageCommand}?index={index}")["Insert new page here"],
                 clearLine,
-                T.g("div", "style", "float:left;width:30%")[
-                    T.g("h3")[$"Page {index + 1}: ", templatePage.Name ?? "Untitled"],
-                    T.g()[
-                        T.g("a", "href", $"{EditPageCommand}?index={index}")[$"Edit page {index + 1} "],
-                        " | Move ",
-                        T.g("a", "href", $"{MovePageUpCommand}?index={index}")["Up"], " ",
-                        T.g("a", "href", $"{MovePageDownCommand}?index={index}")["Down"]
-                    ],
-                    T.g("p",  "style","font-style:italic;")[templatePage.Notes??""]
+                T.g("div", "id",$"page{index}", "style","float:left;width:40%;margin-right:5%;")[
+                    RenderPageCommands(templatePage, index)
                 ],
                 bg,
                 clearLine
             );
+        }
+
+        private TagContent RenderPageCommands(TemplatePage page, int index)
+        {
+            var content = T.g()[
+                T.g("h3")[$"Page {index + 1}: ", page.Name ?? "Untitled"],
+                T.g()[
+                    "Move ",
+                    T.g("a", "href", $"{MovePageUpCommand}?index={index}")["Up"], " ",
+                    T.g("a", "href", $"{MovePageDownCommand}?index={index}")["Down"]
+                ],
+                T.g("p",  "style","font-style:italic;")[page.Notes??""],
+                T.g("a", "href",$"{DeletePageCommand}?index={index}",  "style","color:#f00")["Delete this page"]
+            ];
+            
+            
+            var changeRpt = T.g("a", "href",$"{ChangePageRepeatCommand}?index={index}")["Change repeat mode"];
+            var repeats = page.RepeatMode.Repeats
+                ? T.g("p")[$"Page repeats over '{RepeatPath(page)}' ", T.g("br/"), changeRpt]
+                : T.g("p")["Single page ", changeRpt];
+            content.Add(repeats);
+            
+            content.Add(
+                T.g("ul")[
+                    T.g("li").Repeat(
+                        T.g("a", "href", $"{EditBoxesCommand}?index={index}")[" [ Boxes ] "],
+                        T.g("a", "href", $"{EditPageFiltersCommand}?index={index}")["Page specific filters"],
+                        T.g("a", "href", $"{EditMetaDataCommand}?index={index}")["Edit page info & notes"]
+                    )
+                ]);
+            
+            return content;
+        }
+        
+        private static string RepeatPath(TemplatePage page)
+        {
+            if (page.RepeatMode.DataPath == null) return "<invalid reference>";
+            return string.Join(".", page.RepeatMode.DataPath);
         }
 
         public StateChangePermission StateChangeRequest() => _stateChange;
@@ -131,9 +180,11 @@ namespace BasicImageFormFiller.ModuleScreens
             
             switch (prefix)
             {
+                #region Project commands
+
                 case AddPageAtEndCommand:
                 {
-                    _project.Pages.Add(new TemplatePage{Name = "Untitled"});
+                    _project.Pages.Add(new TemplatePage {Name = "Untitled"});
                     _project.Save();
                     moduleScreen.ShowPage(StartScreen());
                     break;
@@ -158,7 +209,11 @@ namespace BasicImageFormFiller.ModuleScreens
 
                 case RenderSampleCommand:
                 {
-                    if (string.IsNullOrWhiteSpace(_project.Index.SampleFileName)) { moduleScreen.ShowPage(StartScreen()); return; }
+                    if (string.IsNullOrWhiteSpace(_project.Index.SampleFileName))
+                    {
+                        moduleScreen.ShowPage(StartScreen());
+                        return;
+                    }
 
                     var file = moduleScreen.PickNewFile();
                     if (!string.IsNullOrWhiteSpace(file))
@@ -187,17 +242,9 @@ namespace BasicImageFormFiller.ModuleScreens
                 case InsertPageCommand:
                 {
                     var idx = Url.GetIndexFromQuery(command);
-                    _project.Pages.Insert(idx, new TemplatePage{Name = "Untitled"});
+                    _project.Pages.Insert(idx, new TemplatePage {Name = "Untitled"});
                     _project.Save();
                     moduleScreen.ShowPage(StartScreen());
-                    break;
-                }
-
-                case EditPageCommand:
-                {
-                    var idx = Url.GetIndexFromQuery(command);
-                    if (idx >= _project.Pages.Count) throw new Exception("Page index out of range");
-                    moduleScreen.SwitchToModule(new PageEditScreen(_project, idx));
                     break;
                 }
 
@@ -206,8 +253,8 @@ namespace BasicImageFormFiller.ModuleScreens
                     var idx = Url.GetIndexFromQuery(command);
                     if (idx <= 0) return; // ignore up past top
                     var tmp = _project.Pages[idx];
-                    _project.Pages[idx] = _project.Pages[idx-1];
-                    _project.Pages[idx-1] = tmp;
+                    _project.Pages[idx] = _project.Pages[idx - 1];
+                    _project.Pages[idx - 1] = tmp;
                     _project.Save();
                     moduleScreen.ShowPage(StartScreen());
                     return;
@@ -218,16 +265,119 @@ namespace BasicImageFormFiller.ModuleScreens
                     var idx = Url.GetIndexFromQuery(command);
                     if (idx >= _project.Pages.Count - 1) return; // ignore down past bottom
                     var tmp = _project.Pages[idx];
-                    _project.Pages[idx] = _project.Pages[idx+1];
-                    _project.Pages[idx+1] = tmp;
+                    _project.Pages[idx] = _project.Pages[idx + 1];
+                    _project.Pages[idx + 1] = tmp;
                     _project.Save();
                     moduleScreen.ShowPage(StartScreen());
                     return;
                 }
 
+                #endregion
+
+                #region Page commands
+
+                case DeletePageCommand:
+                {
+                    var pageIndex = Url.GetIndexFromQuery(command);
+                    var result = MessageBox.Show("Are you sure", "Delete", MessageBoxButtons.YesNo);
+                    if (result == DialogResult.Yes)
+                    {
+                        _project.Index.Pages.RemoveAt(pageIndex);
+                        _project.Save();
+                    }
+
+                    _lastPageIndex = Math.Max(0, pageIndex-1);
+                    moduleScreen.ShowPage(StartScreen());
+                    break;
+                }
+
+                case EditBackgroundCommand:
+                {
+                    var pageIndex = Url.GetIndexFromQuery(command);
+                    ChooseBackgroundFile(moduleScreen, pageIndex);
+                    _lastPageIndex = pageIndex;
+                    moduleScreen.ShowPage(StartScreen());
+                    break;
+                }
+
+                case EditMetaDataCommand:
+                {
+                    var pageIndex = Url.GetIndexFromQuery(command);
+                    _stateChange = StateChangePermission.NotAllowed;
+                    
+                    new EditPageMeta(this, _project, pageIndex).ShowDialog();
+                    
+                    _lastPageIndex = pageIndex;
+                    moduleScreen.ShowPage(StartScreen());
+                    break;
+                }
+
+                case EditBoxesCommand:
+                {
+                    var pageIndex = Url.GetIndexFromQuery(command);
+                    _stateChange = StateChangePermission.NotAllowed;
+                    
+                    new BoxPlacer(this, _project, pageIndex).ShowDialog();
+                    
+                    _lastPageIndex = pageIndex;
+                    moduleScreen.ShowPage(StartScreen());
+                    break;
+                }
+
+                case EditPageFiltersCommand:
+                {
+                    var pageIndex = Url.GetIndexFromQuery(command);
+                    moduleScreen.SwitchToModule(new PageFiltersScreen(_project, pageIndex));
+                    break;
+                }
+
+                case ChangePageRepeatCommand:
+                {
+                    var pageIndex = Url.GetIndexFromQuery(command);
+                    if (string.IsNullOrWhiteSpace(_project.Index.SampleFileName))
+                    {
+                        MessageBox.Show("Please add a sample file before setting repeat mappings");
+                        moduleScreen.ShowPage(StartScreen());
+                        return;
+                    }
+                    _stateChange = StateChangePermission.NotAllowed;
+                    
+                    new RepeatModePicker(this, _project, pageIndex).ShowDialog();
+                    
+                    _project.Reload();
+                    _lastPageIndex = pageIndex;
+                    moduleScreen.ShowPage(StartScreen());
+                    break;
+                }
+
+                #endregion
+                
                 default:
                     throw new Exception($"Unexpected command: {command}");
             }
+        }
+
+        
+        private void ChooseBackgroundFile(ITagModuleScreen module, int pageIndex)
+        {
+            // If cancel, do nothing
+            // If not in the project directory, copy it in and continue with that as the new path
+            // Check that it's json
+            //  - if not, delete the file and go back to the old one (if present)
+            //  - if OK, set the sample value and save
+            
+            var ok = module.PickAFile(out var filePath);
+            if (!ok || filePath == null) return;
+
+            if (Path.GetDirectoryName(filePath) != _project.BasePath)
+            {
+                var newPath = Path.Combine(_project.BasePath, Path.GetFileName(filePath));
+                File.Copy(filePath, newPath);
+                filePath = newPath;
+            }
+
+            _project.Pages[pageIndex].BackgroundImage = Path.GetFileName(filePath);
+            _project.Save();
         }
 
         private void ChooseSampleFile(ITagModuleScreen module)
