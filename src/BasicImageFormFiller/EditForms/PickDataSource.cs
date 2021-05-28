@@ -11,12 +11,13 @@ namespace BasicImageFormFiller.EditForms
 {
     public partial class PickDataSource : Form
     {
+        private readonly bool _allowEmpty;
         public string[]? SelectedPath { get; set; }
         public string? SelectedTag { get; set; }
         
         /// <summary> Don't use this one </summary>
         public PickDataSource() { InitializeComponent(); }
-        
+
         /// <summary>
         /// Create a form to pick a data source item or group
         /// </summary>
@@ -25,8 +26,10 @@ namespace BasicImageFormFiller.EditForms
         /// <param name="previous">Optional: The path that was previously selected. This will be shown as expanded and selected if it's still valid</param>
         /// <param name="repeaterPath">Optional: Page-specific repeater data path. This will show the data for page 1, but the path selection will be correct for all pages</param>
         /// <param name="pageIndex">Optional: If given, page-specific filters will be shown</param>
-        public PickDataSource(Project project, string prompt, string[]? previous, string[]? repeaterPath, int? pageIndex)
+        /// <param name="allowEmpty">If true, the pick button will be available when no item is selected</param>
+        public PickDataSource(Project project, string prompt, string[]? previous, string[]? repeaterPath, int? pageIndex, bool allowEmpty)
         {
+            _allowEmpty = allowEmpty;
             InitializeComponent();
             Text = prompt;
             
@@ -40,6 +43,7 @@ namespace BasicImageFormFiller.EditForms
             if (pageIndex != null) AddPageDataFilters(project, data, pageIndex!.Value);
             AddPageNumbers(repeaterPath);
             
+            if (allowEmpty) pickButton!.Enabled = true;
             SelectPath(previous); // pick previous source if it exists
         }
 
@@ -308,18 +312,20 @@ namespace BasicImageFormFiller.EditForms
         private void treeView_AfterSelect(object sender, TreeViewEventArgs e)
         {
             SelectedTag = e.Node?.Tag?.ToString();
-            pickButton!.Enabled = !string.IsNullOrWhiteSpace(SelectedTag);
+            pickButton!.Enabled = _allowEmpty || !string.IsNullOrWhiteSpace(SelectedTag);
             tweakPathButton!.Enabled = !string.IsNullOrWhiteSpace(SelectedTag);
             pathPreview!.Text = SelectedTag?.Replace(Strings.Separator, '.') ?? "< invalid path >";
         }
 
         private void cancelButton_Click(object sender, EventArgs e)
         {
+            DialogResult = DialogResult.Cancel;
             Close();
         }
 
         private void pickButton_Click(object sender, EventArgs e)
         {
+            DialogResult = DialogResult.OK;
             SelectedPath = SelectedTag?.Split(Strings.Separator);
             Close();
         }

@@ -62,8 +62,9 @@ namespace BasicImageFormFiller.ModuleScreens
             foreach (var kvp in map.MappingParameters)
             {
                 sb.Append(kvp.Key);
-                sb.Append("=");
+                sb.Append("='");
                 sb.Append(kvp.Value);
+                sb.Append("';");
             }
             sb.Append(") ");
             return sb.ToString();

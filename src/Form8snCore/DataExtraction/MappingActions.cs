@@ -84,6 +84,9 @@ namespace Form8snCore.DataExtraction
                 case MappingType.Total:
                     return SumOfAllOnPath(pkg);
                 
+                case MappingType.Count:
+                    return CountOfItem(pkg);
+                
                 case MappingType.Distinct:
                     return ListOfDistinctValues(pkg);
                 
@@ -104,6 +107,19 @@ namespace Form8snCore.DataExtraction
                 
                 default: return "Not yet implemented";
             }
+        }
+
+        private static object CountOfItem(FilterState pkg)
+        {
+            if (pkg.Data == null || pkg.SourcePath == null || pkg.SourcePath.Length < 1) return 0;
+
+            var target = GetDataAtPath(pkg);
+            if (target == null) return 0;
+            
+            if (target is string str) return str.Length;
+            if (target is ArrayList list) return list.Count;
+            
+            return 0;
         }
 
         private static object? FormatAllValuesAsNumberStrings(FilterState pkg)

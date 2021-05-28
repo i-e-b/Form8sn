@@ -54,6 +54,10 @@ namespace Form8snCore.FileFormats
         [UsesType(typeof(IfElseMappingParams))]
         IfElse,
         
+        [Description("Return the number of items in a list, or the number of characters in a string. If value is empty or not found, this will return 0")]
+        [UsesType(typeof(EmptyMappingParams))]
+        Count,
+        
         [Description("Sum up all numeric values on the path")]
         [UsesType(typeof(EmptyMappingParams))]
         Total = 1000,

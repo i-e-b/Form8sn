@@ -8,12 +8,12 @@ namespace BasicImageFormFiller.EditForms.PropertyGridSpecialTypes
     /// </summary>
     [Editor(typeof(PropertyGridDataPickEditor), typeof(System.Drawing.Design.UITypeEditor))]
     [TypeConverter(typeof(ExpandableObjectConverter))]
-    public class PropertyGridDataPicker
+    public class PropertyGridDataPicker: ISpecialString
     {
         public PropertyGridDataPicker() { }
         public PropertyGridDataPicker(string? parsedValue, Project? project, int? pageIndex)
         {
-            Path = parsedValue?.Split(Strings.Separator);
+            Path = string.IsNullOrWhiteSpace(parsedValue) ? null : parsedValue.Split(Strings.Separator);
             BaseProject = project;
             PageDefinitionIndex = pageIndex;
         }
@@ -24,8 +24,10 @@ namespace BasicImageFormFiller.EditForms.PropertyGridSpecialTypes
 
         public override string ToString()
         {
-            if (Path == null || Path.Length < 1) return "Choose a data path";
+            if (Path == null || Path.Length < 1) return "< no data >";
             return string.Join(".", Path);
         }
+
+        public string? StringValue => Path == null ? null : string.Join(Strings.Separator, Path);
     }
 }

@@ -112,14 +112,16 @@ namespace BasicImageFormFiller.EditForms
             var props = obj.GetType().GetProperties().Where(p => p.CanRead);
             foreach (var prop in props)
             {
+                var propValue = prop.GetValue(obj);
+                var value = (propValue is ISpecialString ss) ? ss.StringValue : propValue?.ToString();
+                
                 if (dict.ContainsKey(prop.Name))
                 {
-                    var value = prop.GetValue(obj);
-                    if (value != null) dict[prop.Name] = value.ToString()!;
+                    if (value != null) dict[prop.Name] = value!;
                 }
                 else
                 {
-                    dict.Add(prop.Name, prop.GetValue(obj)?.ToString() ?? "");
+                    dict.Add(prop.Name, value ?? "");
                 }
             }
         }
@@ -158,7 +160,7 @@ namespace BasicImageFormFiller.EditForms
             string[]? repeatPath = null;
             if (_pageIndex != null) repeatPath = _project.Pages[_pageIndex.Value].RepeatMode.DataPath;
 
-            var rm = new PickDataSource(_project, "Pick filter data source", _selectedPath, repeatPath, _pageIndex);
+            var rm = new PickDataSource(_project, "Pick filter data source", _selectedPath, repeatPath, _pageIndex, allowEmpty: false);
             rm.ShowDialog();
             if (rm.SelectedPath == null) return;
 

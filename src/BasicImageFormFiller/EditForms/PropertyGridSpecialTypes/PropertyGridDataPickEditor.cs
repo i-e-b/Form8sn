@@ -26,9 +26,11 @@ namespace BasicImageFormFiller.EditForms.PropertyGridSpecialTypes
             string[]? pagePath = null;
             if (pageIndex.HasValue) pagePath = editValue.BaseProject.Pages[pageIndex.Value].RepeatMode.DataPath;
 
-            using var form = new PickDataSource(editValue.BaseProject, "Pick data path", prevPath, pagePath, pageIndex);
-            svc.ShowDialog(form);
-            if (form.SelectedPath != null) editValue.Path = form.SelectedPath;
+            using var form = new PickDataSource(editValue.BaseProject, "Pick data path", prevPath, pagePath, pageIndex, allowEmpty:true);
+            if (svc.ShowDialog(form) == DialogResult.OK)
+            {
+                editValue.Path = form.SelectedPath;
+            }
 
             return editValue; // can also replace the wrapper object here
         }
