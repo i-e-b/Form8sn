@@ -98,11 +98,75 @@ namespace BasicImageFormFiller.EditForms
                 var tmp = container[_filterName];
                 container.Remove(_filterName);
                 container.Add(newKey, tmp);
+
+                FixFilterReferences(_filterName, newKey);
             }
 
             _project.Save();
 
             Close();
+        }
+
+        private void FixFilterReferences(string oldKey, string newKey)
+        {
+            if (_project == null) return;
+            var pageSet = _project.Index.Pages;
+            
+            
+            if (_pageIndex != null)  // Do on-page references ONLY
+            {
+                pageSet = new List<TemplatePage> {_project.Pages[_pageIndex.Value]};
+            }
+            else // Do global filter search
+            {
+                foreach (var filter in _project.Index.DataFilters)
+                {
+                    TryUpdateFilterReference(oldKey, newKey, filter.Value.DataPath);
+                    TryToUpdateFilterNameInMappingParameters(oldKey, newKey, filter.Value.MappingParameters);
+                }
+            }
+
+            foreach (var page in pageSet)
+            {
+                foreach (var box in page.Boxes)
+                {
+                    TryUpdateFilterReference(oldKey, newKey, box.Value.MappingPath);
+                }
+
+                foreach (var pageFilter in page.PageDataFilters)
+                {
+                    TryUpdateFilterReference(oldKey, newKey, pageFilter.Value.DataPath);
+                    TryToUpdateFilterNameInMappingParameters(oldKey, newKey, pageFilter.Value.MappingParameters);
+                }
+
+                if (page.RepeatMode.DataPath != null)
+                {
+                    var path = page.RepeatMode.DataPath;
+                    TryUpdateFilterReference(oldKey, newKey, path);
+                }
+            }
+        }
+
+        private static void TryToUpdateFilterNameInMappingParameters(string oldKey, string newKey, Dictionary<string, string>? map)
+        {
+            if (map == null) return;
+            var mapKeys = map.Keys.ToList(); // ToList() is required
+            foreach (var paramKey in mapKeys)
+            {
+                var value = map[paramKey];
+                if (value.Length <= 2 || !value.StartsWith("#.")) continue;
+
+                // value looks like a path
+                var path = map[paramKey].Split('.');
+                TryUpdateFilterReference(oldKey, newKey, path);
+                map[paramKey] = string.Join(".", path);
+            }
+        }
+
+        private static void TryUpdateFilterReference(string oldKey, string newKey, string[]? path)
+        {
+            if (path == null || path.Length <= 1 || path[0] != Strings.FilterMarker) return;
+            if (path[1] == oldKey) path[1] = newKey;
         }
 
         private void MapPropertiesToDictionary(Dictionary<string, string> dict, object? obj)
@@ -116,12 +180,12 @@ namespace BasicImageFormFiller.EditForms
                 if (prop.DeclaringType != baseType)
                 {
                     // Inherited property. If it is hidden by another type, ignore it
-                    if (props.Any(p=>p.Name == prop.Name && p.DeclaringType == baseType)) continue;
+                    if (props.Any(p => p.Name == prop.Name && p.DeclaringType == baseType)) continue;
                 }
 
                 var propValue = prop.GetValue(obj);
                 var value = (propValue is ISpecialString ss) ? ss.StringValue : propValue?.ToString();
-                
+
                 if (dict.ContainsKey(prop.Name)) dict[prop.Name] = value ?? "";
                 else dict.Add(prop.Name, value ?? "");
             }
@@ -135,7 +199,7 @@ namespace BasicImageFormFiller.EditForms
             foreach (var prop in props)
             {
                 var existingValue = dict.ContainsKey(prop.Name) ? dict[prop.Name] : null;
-                
+
                 if (prop.PropertyType == typeof(int)) prop.SetValue(obj, ParseIntOrDefault(existingValue));
                 else if (prop.PropertyType == typeof(PropertyGridDataPicker)) prop.SetValue(obj, new PropertyGridDataPicker(existingValue, _project, _pageIndex));
                 else prop.SetValue(obj, existingValue);

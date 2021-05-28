@@ -7,6 +7,14 @@ namespace Form8snCore.FileFormats
         public const string FilterMarker = "#";
         public const string PageDataMarker = "P";
         
-        public static string? CleanKeyName(string? name) => name?.Replace('.', '·'); // prevent '.' in names from breaking paths.
+        /// <summary>
+        /// Apply this to user inputs for Box names and Filter names.
+        /// Prevents accidental use of path elements
+        /// </summary>
+        public static string? CleanKeyName(string? name)
+        {
+            if (name == "#") return "＃"; // 'fullwidth' octothorpe
+            return name?.Replace('.', '·'); // mid-dot
+        }
     }
 }

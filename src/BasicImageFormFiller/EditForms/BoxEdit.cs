@@ -167,6 +167,18 @@ namespace BasicImageFormFiller.EditForms
                 var tmp = container[_boxKey];
                 container.Remove(_boxKey);
                 container.Add(newKey, tmp);
+                
+                FixReferences(_boxKey, newKey);
+            }
+        }
+
+        private void FixReferences(string oldKey, string newKey)
+        {
+            if (_project == null) return;
+            // scan all 'dependsOn' on this page and fix
+            foreach (var box in _project.Pages[_pageIndex].Boxes.Values)
+            {
+                if (box.DependsOn == oldKey) box.DependsOn = newKey;
             }
         }
 

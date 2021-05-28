@@ -10,7 +10,6 @@ namespace BasicImageFormFiller.ModuleScreens
         
         public void InterpretCommand(ITagModuleScreen moduleScreen, string command)
         {
-            // TODO: new & open
             switch (command)
             {
                 case NewTemplate:
