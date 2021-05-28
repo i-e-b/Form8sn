@@ -109,20 +109,21 @@ namespace BasicImageFormFiller.EditForms
         {
             if (obj == null) return;
 
-            var props = obj.GetType().GetProperties().Where(p => p.CanRead);
+            var baseType = obj.GetType();
+            var props = baseType.GetProperties().Where(p => p.CanRead).ToList();
             foreach (var prop in props)
             {
+                if (prop.DeclaringType != baseType)
+                {
+                    // Inherited property. If it is hidden by another type, ignore it
+                    if (props.Any(p=>p.Name == prop.Name && p.DeclaringType == baseType)) continue;
+                }
+
                 var propValue = prop.GetValue(obj);
                 var value = (propValue is ISpecialString ss) ? ss.StringValue : propValue?.ToString();
                 
-                if (dict.ContainsKey(prop.Name))
-                {
-                    if (value != null) dict[prop.Name] = value!;
-                }
-                else
-                {
-                    dict.Add(prop.Name, value ?? "");
-                }
+                if (dict.ContainsKey(prop.Name)) dict[prop.Name] = value ?? "";
+                else dict.Add(prop.Name, value ?? "");
             }
         }
 

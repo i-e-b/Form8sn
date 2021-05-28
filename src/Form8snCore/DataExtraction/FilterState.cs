@@ -44,8 +44,24 @@ namespace Form8snCore.DataExtraction
             return new FilterState{
                 Type = newFilterDef.MappingType,
                 SourcePath = newFilterDef.DataPath,
-                OriginalPath = OriginalPath, // TODO: not sure if this is the most useful way of carrying over.
+                OriginalPath = OriginalPath,
                 Params = newFilterDef.MappingParameters,
+                
+                RepeaterData = RepeaterData,
+                Data = Data,
+                FilterSet = FilterSet,
+                Redirects = Redirects,
+                RunningTotals = RunningTotals
+            };
+        }
+
+        public FilterState NewPath(string[] path)
+        {
+            return new FilterState{
+                Type = MappingType.None,
+                SourcePath = path,
+                OriginalPath = OriginalPath,
+                Params = Params,
                 
                 RepeaterData = RepeaterData,
                 Data = Data,

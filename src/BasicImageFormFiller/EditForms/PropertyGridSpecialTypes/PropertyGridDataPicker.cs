@@ -13,7 +13,7 @@ namespace BasicImageFormFiller.EditForms.PropertyGridSpecialTypes
         public PropertyGridDataPicker() { }
         public PropertyGridDataPicker(string? parsedValue, Project? project, int? pageIndex)
         {
-            Path = string.IsNullOrWhiteSpace(parsedValue) ? null : parsedValue.Split(Strings.Separator);
+            Path = string.IsNullOrWhiteSpace(parsedValue) ? null : parsedValue.Split('.');
             BaseProject = project;
             PageDefinitionIndex = pageIndex;
         }
@@ -28,6 +28,6 @@ namespace BasicImageFormFiller.EditForms.PropertyGridSpecialTypes
             return string.Join(".", Path);
         }
 
-        public string? StringValue => Path == null ? null : string.Join(Strings.Separator, Path);
+        public string? StringValue => Path == null ? null : string.Join(".", Path);
     }
 }
