@@ -31,9 +31,7 @@ namespace BasicImageFormFiller.EditForms
             _pageIndex = pageIndex;
             InitializeComponent();
 
-            var filter = _pageIndex == null
-                ? _project.Index.DataFilters[_filterName]
-                : _project.Pages[_pageIndex.Value].PageDataFilters[_filterName];
+            var filter = GetMappingInfo();
 
             filterNameTextbox!.Text = _filterName;
 
@@ -46,6 +44,14 @@ namespace BasicImageFormFiller.EditForms
             var propObj = CreateTypedContainerForParams(filter.MappingType.ToString());
             MapDictionaryToProperties(filter.MappingParameters, propObj);
             filterPropertyGrid!.SelectedObject = propObj;
+        }
+
+        private MappingInfo GetMappingInfo()
+        {
+            var filter = _pageIndex == null
+                ? _project!.Index.DataFilters[_filterName!]
+                : _project!.Pages[_pageIndex.Value].PageDataFilters[_filterName!];
+            return filter;
         }
 
         private void FillWithEnum(IList items, Type type)
@@ -108,7 +114,8 @@ namespace BasicImageFormFiller.EditForms
             {
                 if (dict.ContainsKey(prop.Name))
                 {
-                    dict[prop.Name] = prop.GetValue(obj)?.ToString() ?? "";
+                    var value = prop.GetValue(obj);
+                    if (value != null) dict[prop.Name] = value.ToString()!;
                 }
                 else
                 {
@@ -124,11 +131,19 @@ namespace BasicImageFormFiller.EditForms
             var props = obj.GetType().GetProperties().Where(p => p.CanWrite);
             foreach (var prop in props)
             {
-                if (!dict.ContainsKey(prop.Name)) continue;
-                if (prop.PropertyType == typeof(int)) prop.SetValue(obj, int.Parse(dict[prop.Name]));
-                else if (prop.PropertyType == typeof(PropertyGridDataPicker)) prop.SetValue(obj, new PropertyGridDataPicker(dict[prop.Name], _project, _pageIndex));
-                else prop.SetValue(obj, dict[prop.Name]);
+                var existingValue = dict.ContainsKey(prop.Name) ? dict[prop.Name] : null;
+                
+                if (prop.PropertyType == typeof(int)) prop.SetValue(obj, ParseIntOrDefault(existingValue));
+                else if (prop.PropertyType == typeof(PropertyGridDataPicker)) prop.SetValue(obj, new PropertyGridDataPicker(existingValue, _project, _pageIndex));
+                else prop.SetValue(obj, existingValue);
             }
+        }
+
+        private int ParseIntOrDefault(string? str)
+        {
+            if (string.IsNullOrEmpty(str)) return 0;
+            if (int.TryParse(str, out var i)) return i;
+            return 0;
         }
 
         private void cancelButton_Click(object sender, EventArgs e)
@@ -167,7 +182,10 @@ namespace BasicImageFormFiller.EditForms
 
         private void filterTypeComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            filterPropertyGrid!.SelectedObject = CreateTypedContainerForParams(filterTypeComboBox!.SelectedItem?.ToString()) ?? new { };
+            var filter = GetMappingInfo();
+            var newParams = CreateTypedContainerForParams(filterTypeComboBox!.SelectedItem?.ToString()) ?? new { };
+            MapDictionaryToProperties(filter.MappingParameters, newParams);
+            filterPropertyGrid!.SelectedObject = newParams;
         }
     }
 }

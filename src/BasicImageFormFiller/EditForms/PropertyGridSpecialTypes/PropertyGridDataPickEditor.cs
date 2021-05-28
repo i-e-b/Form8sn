@@ -16,19 +16,21 @@ namespace BasicImageFormFiller.EditForms.PropertyGridSpecialTypes
         public override object EditValue(ITypeDescriptorContext context, IServiceProvider provider, object value)
         {
             var svc = provider.GetService(typeof(IWindowsFormsEditorService)) as IWindowsFormsEditorService;
-            if (svc == null || !(value is PropertyGridDataPicker picker)) return value;
+            if (svc == null) return value;
 
-            if (picker.BaseProject == null) throw new Exception("Data Grid path picker had no project attached");
-            var prevPath = picker.Path;
-            var pageIndex = picker.PageDefinitionIndex;
+            var editValue = value as PropertyGridDataPicker ?? throw new Exception("Data Grid path picker was null");
+            
+            if (editValue.BaseProject == null) throw new Exception("Data Grid path picker had no project attached");
+            var prevPath = editValue.Path;
+            var pageIndex = editValue.PageDefinitionIndex;
             string[]? pagePath = null;
-            if (pageIndex.HasValue) pagePath = picker.BaseProject.Pages[pageIndex.Value].RepeatMode.DataPath;
+            if (pageIndex.HasValue) pagePath = editValue.BaseProject.Pages[pageIndex.Value].RepeatMode.DataPath;
 
-            using var form = new PickDataSource(picker.BaseProject, "Pick data path", prevPath, pagePath, pageIndex);
+            using var form = new PickDataSource(editValue.BaseProject, "Pick data path", prevPath, pagePath, pageIndex);
             svc.ShowDialog(form);
-            if (form.SelectedPath != null) picker.Path = form.SelectedPath;
+            if (form.SelectedPath != null) editValue.Path = form.SelectedPath;
 
-            return value; // can also replace the wrapper object here
+            return editValue; // can also replace the wrapper object here
         }
     }
 }

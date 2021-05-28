@@ -11,9 +11,9 @@ namespace BasicImageFormFiller.EditForms.PropertyGridSpecialTypes
     public class PropertyGridDataPicker
     {
         public PropertyGridDataPicker() { }
-        public PropertyGridDataPicker(string parsedValue, Project? project, int? pageIndex)
+        public PropertyGridDataPicker(string? parsedValue, Project? project, int? pageIndex)
         {
-            Path = parsedValue.Split(Strings.Separator);
+            Path = parsedValue?.Split(Strings.Separator);
             BaseProject = project;
             PageDefinitionIndex = pageIndex;
         }
