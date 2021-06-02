@@ -22,12 +22,12 @@
 namespace System.Drawing.Printing
 {
 
-using System.ComponentModel;
-using System.Drawing.Toolkit;
+using ComponentModel;
+using Toolkit;
 
-public delegate void QueryPageSettingsEventHandler (Object sender, QueryPageSettingsEventArgs e);
-public delegate void PrintEventHandler(Object sender, PrintEventArgs e);
-public delegate void PrintPageEventHandler(Object sender, PrintPageEventArgs e);
+public delegate void QueryPageSettingsEventHandler (object sender, QueryPageSettingsEventArgs e);
+public delegate void PrintEventHandler(object sender, PrintEventArgs e);
+public delegate void PrintPageEventHandler(object sender, PrintPageEventArgs e);
 
 
 
@@ -42,20 +42,16 @@ public class PrintDocument
 #endif
 {
 	// Internal state.
-	private PageSettings defaultPageSettings;
-	private String documentName;
-	private bool originAtMargins;
-	private PrinterSettings printerSettings;
 	internal IToolkitPrintSession session;
 
 	// Constructor.
 	public PrintDocument()
 			{
-				this.documentName = "document";
-				this.originAtMargins = false;
-				this.PrintController = null;
-				this.printerSettings = new PrinterSettings();
-				this.defaultPageSettings = new PageSettings(printerSettings);
+				DocumentName = "document";
+				OriginAtMargins = false;
+				PrintController = null;
+				PrinterSettings = new PrinterSettings();
+				DefaultPageSettings = new PageSettings(PrinterSettings);
 			}
 
 	// Get or set the document's properties.
@@ -63,45 +59,15 @@ public class PrintDocument
 	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 	[Browsable(false)]
 #endif
-	public PageSettings DefaultPageSettings
-			{
-				get
-				{
-					return defaultPageSettings;
-				}
-				set
-				{
-					defaultPageSettings = value;
-				}
-			}
+	public PageSettings DefaultPageSettings { get; set; }
 #if CONFIG_COMPONENT_MODEL
 	[DefaultValue("document")]
 #endif
-	public String DocumentName
-			{
-				get
-				{
-					return documentName;
-				}
-				set
-				{
-					documentName = value;
-				}
-			}
+	public string DocumentName { get; set; }
 #if CONFIG_COMPONENT_MODEL
 	[DefaultValue(false)]
 #endif
-	public bool OriginAtMargins
-			{
-				get
-				{
-					return originAtMargins;
-				}
-				set
-				{
-					originAtMargins = value;
-				}
-			}
+	public bool OriginAtMargins { get; set; }
 #if CONFIG_COMPONENT_MODEL
 	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 	[Browsable(false)]
@@ -111,17 +77,7 @@ public class PrintDocument
 	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 	[Browsable(false)]
 #endif
-	public PrinterSettings PrinterSettings
-			{
-				get
-				{
-					return printerSettings;
-				}
-				set
-				{
-					printerSettings = value;
-				}
-			}
+	public PrinterSettings PrinterSettings { get; set; }
 
 	// Print the document.
 	public void Print()
@@ -195,9 +151,9 @@ public class PrintDocument
 			}
 
 	// Convert this object into a string.
-	public override String ToString()
+	public override string ToString()
 			{
-				return "[PrintDocument " + documentName + "]";
+				return "[PrintDocument " + DocumentName + "]";
 			}
 
 	// Event that is emitted at the beginning of the print process.

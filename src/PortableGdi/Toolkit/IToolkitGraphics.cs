@@ -22,9 +22,9 @@
 namespace System.Drawing.Toolkit
 {
 
-using System.Drawing;
-using System.Drawing.Text;
-using System.Drawing.Drawing2D;
+using Drawing;
+using Text;
+using Drawing2D;
 
 [NonStandardExtra]
 public interface IToolkitGraphics : IDisposable
@@ -85,14 +85,14 @@ public interface IToolkitGraphics : IDisposable
 				   int numberOfSegments, float tension);
 
 	// Draw a string using the current font and brush.
-	void DrawString(String s, int x, int y, StringFormat format);
+	void DrawString(string s, int x, int y, StringFormat format);
 
 	// Draw a string using the current font and brush within a
 	// layout rectangle that is defined by four points.
-	void DrawString(String s, Point[] layoutRectangle, StringFormat format);
+	void DrawString(string s, Point[] layoutRectangle, StringFormat format);
 
 	// Measure a string using the current font and a given layout rectangle.
-	Size MeasureString(String s, Point[] layoutRectangle,
+	Size MeasureString(string s, Point[] layoutRectangle,
 					   StringFormat format, out int charactersFitted,
 					   out int linesFilled, bool ascentOnly);
 
@@ -124,7 +124,7 @@ public interface IToolkitGraphics : IDisposable
 	void SetClipRects(Rectangle[] rects);
 
 	// Set the clipping region to a complex mask.  TODO
-	void SetClipMask(Object mask, int topx, int topy);
+	void SetClipMask(object mask, int topx, int topy);
 
 	// Get the line spacing for the font selected into this graphics object.
 	int GetLineSpacing();

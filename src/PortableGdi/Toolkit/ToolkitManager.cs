@@ -24,9 +24,9 @@ using System.Drawing.Imaging;
 namespace System.Drawing.Toolkit
 {
 
-using System.Drawing.Printing;
-using System.Reflection;
-using System.IO;
+using Printing;
+using Reflection;
+using IO;
 
 [NonStandardExtra]
 public sealed class ToolkitManager
@@ -186,15 +186,15 @@ public sealed class ToolkitManager
 			}
 
 	// Get the raw frame data for an "Image" or "Icon" object.
-	public static Frame GetImageFrame(Object image)
+	public static Frame GetImageFrame(object image)
 			{
-				if(image is System.Drawing.Image)
+				if(image is Image)
 				{
-					return ((System.Drawing.Image)image).dgImage.GetFrame(0);
+					return ((Image)image).dgImage.GetFrame(0);
 				}
-				else if(image is System.Drawing.Icon)
+				else if(image is Icon)
 				{
-					return ((System.Drawing.Icon)image).frame;
+					return ((Icon)image).frame;
 				}
 				else
 				{
@@ -212,12 +212,12 @@ public sealed class ToolkitManager
 			}
 
 	// Get the override toolkit name.
-	private static String GetToolkitOverride()
+	private static string GetToolkitOverride()
 			{
-				String name;
+				string name;
 
 				// Search for "--toolkit" in the command-line options.
-				String[] args = Environment.GetCommandLineArgs();
+				string[] args = Environment.GetCommandLineArgs();
 				int index;
 				name = null;
 				for(index = 1; index < args.Length; ++index)

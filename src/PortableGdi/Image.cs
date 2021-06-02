@@ -23,10 +23,10 @@ using System.Drawing.Imaging.ImageFormats;
 namespace System.Drawing
 {
 
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.Drawing.Imaging;
+using IO;
+using Runtime.InteropServices;
+using Runtime.Serialization;
+using Imaging;
 
 #if !ECMA_COMPAT
 [Serializable]
@@ -47,7 +47,7 @@ public abstract class Image
 	internal int height;
 	internal float horizontalResolution;
 	internal ColorPalette palette;
-	internal System.Drawing.Imaging.PixelFormat pixelFormat;
+	internal PixelFormat pixelFormat;
 	internal int[] propertyIdList;
 	internal PropertyItem[] propertyItems;
 	internal float verticalResolution;
@@ -129,7 +129,7 @@ public abstract class Image
 					return new SizeF(width, height);
 				}
 			}
-	public System.Drawing.Imaging.PixelFormat PixelFormat
+	public PixelFormat PixelFormat
 			{
 				get
 				{
@@ -190,7 +190,7 @@ public abstract class Image
 			}
 
 	// Make a copy of this object.
-	public virtual Object Clone()
+	public virtual object Clone()
 			{
 				// TODO
 				return null;
@@ -212,12 +212,12 @@ public abstract class Image
 			}
 
 	// Load an image from a file.
-	public static Image FromFile(String filename)
+	public static Image FromFile(string filename)
 			{
 				return FromFile(filename, false);
 			}
 	public static Image FromFile
-				(String filename, bool useEmbeddedColorManagement)
+				(string filename, bool useEmbeddedColorManagement)
 			{
 				var image = new PortableImage();
 				image.Load(filename);
@@ -287,31 +287,31 @@ public abstract class Image
 
 	// Get the number of bits per pixel in a specific format.
 	public static int GetPixelFormatSize
-				(System.Drawing.Imaging.PixelFormat pixfmt)
+				(PixelFormat pixfmt)
 			{
 				switch(pixfmt)
 				{
-					case System.Drawing.Imaging.PixelFormat.Format1bppIndexed:
+					case PixelFormat.Format1bppIndexed:
 						return 1;
-					case System.Drawing.Imaging.PixelFormat.Format4bppIndexed:
+					case PixelFormat.Format4bppIndexed:
 						return 4;
-					case System.Drawing.Imaging.PixelFormat.Format8bppIndexed:
+					case PixelFormat.Format8bppIndexed:
 						return 8;
-					case System.Drawing.Imaging.PixelFormat.Format16bppRgb555:
-					case System.Drawing.Imaging.PixelFormat.Format16bppRgb565:
-					case System.Drawing.Imaging.PixelFormat.Format16bppArgb1555:
-					case System.Drawing.Imaging.PixelFormat.
+					case PixelFormat.Format16bppRgb555:
+					case PixelFormat.Format16bppRgb565:
+					case PixelFormat.Format16bppArgb1555:
+					case PixelFormat.
 							Format16bppGrayScale:	return 16;
-					case System.Drawing.Imaging.PixelFormat.Format24bppRgb:
+					case PixelFormat.Format24bppRgb:
 						return 24;
-					case System.Drawing.Imaging.PixelFormat.Format32bppRgb:
-					case System.Drawing.Imaging.PixelFormat.Format32bppPArgb:
-					case System.Drawing.Imaging.PixelFormat.Format32bppArgb:
+					case PixelFormat.Format32bppRgb:
+					case PixelFormat.Format32bppPArgb:
+					case PixelFormat.Format32bppArgb:
 						return 32;
-					case System.Drawing.Imaging.PixelFormat.Format48bppRgb:
+					case PixelFormat.Format48bppRgb:
 						return 48;
-					case System.Drawing.Imaging.PixelFormat.Format64bppPArgb:
-					case System.Drawing.Imaging.PixelFormat.Format64bppArgb:
+					case PixelFormat.Format64bppPArgb:
+					case PixelFormat.Format64bppArgb:
 						return 64;
 				}
 				return 0;
@@ -340,22 +340,22 @@ public abstract class Image
 
 	// Check for specific kinds of pixel formats.
 	public static bool IsAlphaPixelFormat
-				(System.Drawing.Imaging.PixelFormat pixfmt)
+				(PixelFormat pixfmt)
 			{
 				return ((pixfmt &
-					System.Drawing.Imaging.PixelFormat.Alpha) != 0);
+					PixelFormat.Alpha) != 0);
 			}
 	public static bool IsCanonicalPixelFormat
-				(System.Drawing.Imaging.PixelFormat pixfmt)
+				(PixelFormat pixfmt)
 			{
 				return ((pixfmt &
-					System.Drawing.Imaging.PixelFormat.Canonical) != 0);
+					PixelFormat.Canonical) != 0);
 			}
 	public static bool IsExtendedPixelFormat
-				(System.Drawing.Imaging.PixelFormat pixfmt)
+				(PixelFormat pixfmt)
 			{
 				return ((pixfmt &
-					System.Drawing.Imaging.PixelFormat.Extended) != 0);
+					PixelFormat.Extended) != 0);
 			}
 
 	// Remove a specific property.
@@ -373,17 +373,17 @@ public abstract class Image
 			}
 
 	// Save this image to a file.
-	public void Save(String filename)
+	public void Save(string filename)
 			{
 				dgImage.Save(filename);
 			}
 #if !ECMA_COMPAT
-	public void Save(String filename, ImageFormat format)
+	public void Save(string filename, ImageFormat format)
 			{
 				dgImage.Save(filename, ImageFormatToDG(format));
 			}
 	[TODO]
-	public void Save(String filename, ImageCodecInfo encoder,
+	public void Save(string filename, ImageCodecInfo encoder,
 					 EncoderParameters encoderParameters)
 			{
 				// TODO
@@ -497,13 +497,13 @@ public abstract class Image
 			#endif
 				horizontalResolution = Graphics.DefaultScreenDpi;
 				verticalResolution = Graphics.DefaultScreenDpi;
-				pixelFormat = (System.Drawing.Imaging.PixelFormat)
+				pixelFormat = (PixelFormat)
 					(dgImage.PixelFormat);
 			}
 
 	// This is an internal member and should not be used.
 	// Returns a bitmap which is the reformatted (to newFormat) of the image.
-	public Image Reformat(System.Drawing.Imaging.PixelFormat newFormat)
+	public Image Reformat(PixelFormat newFormat)
 			{
 				return new Bitmap(dgImage.Reformat((PixelFormat)newFormat));
 			}

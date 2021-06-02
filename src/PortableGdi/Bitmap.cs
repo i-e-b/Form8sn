@@ -26,13 +26,13 @@ using System.Security;
 
 namespace System.Drawing
 {
-using System.IO;
-using System.Security;
-using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.Drawing.Imaging;
-using System.ComponentModel;
-using System.Drawing.Toolkit;
+using IO;
+using Security;
+using Runtime.InteropServices;
+using Runtime.Serialization;
+using Imaging;
+using ComponentModel;
+using Toolkit;
 
 	public enum ImageLockMode
 	{
@@ -52,7 +52,7 @@ using System.Drawing.Toolkit;
 [Editor("System.Drawing.Design.BitmapEditor, System.Drawing.Design",
 		typeof(UITypeEditor))]
 #endif
-public sealed class Bitmap : System.Drawing.Image
+public sealed class Bitmap : Image
 {
 	// Constructors.
 	public Bitmap(Image original)
@@ -66,17 +66,17 @@ public sealed class Bitmap : System.Drawing.Image
 				dgImage.Load(stream);
 				SetDGImage(dgImage);
 			}
-	public Bitmap(String filename) : this(filename, false) {}
-	public Bitmap(String filename, bool useIcm)
+	public Bitmap(string filename) : this(filename, false) {}
+	public Bitmap(string filename, bool useIcm)
 			{
 				PortableImage dgImage = new PortableImage();
 				dgImage.Load(filename);
 				SetDGImage(dgImage);
 			}
 	public Bitmap(int width, int height)
-			: this(width, height, Imaging.PixelFormat.Format24bppRgb) {}
+			: this(width, height, PixelFormat.Format24bppRgb) {}
 	public Bitmap(int width, int height,
-				  System.Drawing.Imaging.PixelFormat format)
+				  PixelFormat format)
 			{
 				SetDGImage(new PortableImage
 					(width, height, (PixelFormat)format));
@@ -92,7 +92,7 @@ public sealed class Bitmap : System.Drawing.Image
 					(width, height, PixelFormat.Format24bppRgb));
 				dgImage.AddFrame();
 			}
-	public Bitmap(Type type, String resource)
+	public Bitmap(Type type, string resource)
 			{
 				Stream stream = GetManifestResourceStream(type, resource);
 				if(stream == null)
@@ -118,7 +118,7 @@ public sealed class Bitmap : System.Drawing.Image
 				}
 			}
 	public Bitmap(int width, int height, int stride,
-				  System.Drawing.Imaging.PixelFormat format, IntPtr scan0)
+				  PixelFormat format, IntPtr scan0)
 			{
 				// We don't support loading bitmaps from unmanaged buffers.
 				throw new SecurityException();
@@ -130,7 +130,7 @@ public sealed class Bitmap : System.Drawing.Image
 #endif
 
 	// Get a manifest resource stream.  Profile-safe version.
-	internal static Stream GetManifestResourceStream(Type type, String name)
+	internal static Stream GetManifestResourceStream(Type type, string name)
 			{
 			#if !ECMA_COMPAT
 				return type.Module.Assembly.GetManifestResourceStream
@@ -148,7 +148,7 @@ public sealed class Bitmap : System.Drawing.Image
 	// Clone this bitmap and transform it into a new pixel format
 	[TODO]
 	public Bitmap Clone
-				(Rectangle rect, System.Drawing.Imaging.PixelFormat format)
+				(Rectangle rect, PixelFormat format)
 			{
 				// TODO : There has to be a better way !!
 				Bitmap b = new Bitmap(rect.Width, rect.Height, format);
@@ -163,7 +163,7 @@ public sealed class Bitmap : System.Drawing.Image
 			}
 	[TODO]
 	public Bitmap Clone
-				(RectangleF rect, System.Drawing.Imaging.PixelFormat format)
+				(RectangleF rect, PixelFormat format)
 			{
 				// TODO : There has to be a better way !!
 				Bitmap b = new Bitmap((int)rect.Width, (int)rect.Height, format);
@@ -185,7 +185,7 @@ public sealed class Bitmap : System.Drawing.Image
 			}
 
 	// Create a bitmap from a Windows resource name.
-	public static Bitmap FromResource(IntPtr hinstance, String bitmapName)
+	public static Bitmap FromResource(IntPtr hinstance, string bitmapName)
 			{
 				throw new SecurityException();
 			}
@@ -236,7 +236,7 @@ public sealed class Bitmap : System.Drawing.Image
 	// We also assume that "format" is the same as the bitmap's real format.
 	public unsafe BitmapData LockBits
 					(Rectangle rect, ImageLockMode flags,
-					 System.Drawing.Imaging.PixelFormat format)
+					 PixelFormat format)
 			{
 				BitmapData bitmapData = new BitmapData();
 				bitmapData.Width = rect.Width;
@@ -247,7 +247,7 @@ public sealed class Bitmap : System.Drawing.Image
 					Frame frame = dgImage.GetFrame(0);
 					if(frame != null)
 					{
-						if (format != this.PixelFormat)
+						if (format != PixelFormat)
 						{
 							frame = frame.Reformat(format);
 						}
@@ -289,7 +289,7 @@ public sealed class Bitmap : System.Drawing.Image
 				{
 					Frame frame = dgImage.GetFrame(f);
 					int color = transparentColor.ToArgb();
-					if(!Image.IsAlphaPixelFormat(PixelFormat))
+					if(!IsAlphaPixelFormat(PixelFormat))
 					{
 						// Remove the alpha component.
 						color = color & 0x00FFFFFF;

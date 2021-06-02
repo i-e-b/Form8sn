@@ -25,36 +25,14 @@ namespace System.Drawing.Imaging
     public sealed class ColorMap
     {
         // Internal state.
-        private Color newColor;
-        private Color oldColor;
 
         // Constructor.
         public ColorMap() {}
 
         // Get or set this object's properties.
-        public Color NewColor
-        {
-            get
-            {
-                return newColor;
-            }
-            set
-            {
-                newColor = value;
-            }
-        }
-        public Color OldColor
-        {
-            get
-            {
-                return oldColor;
-            }
-            set
-            {
-                oldColor = value;
-            }
-        }
+        public Color NewColor { get; set; }
 
+        public Color OldColor { get; set; }
     }; // class ColorMap
 
 }; // namespace System.Drawing.Imaging

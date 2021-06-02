@@ -29,49 +29,44 @@ public sealed class RegionData
 {
 
 	// Public interface
-	public byte[] Data
-	{
-		get { return data; }
-		set	{ data = value; }
-	}
+	public byte[] Data { get; set; }
 
 	public RegionData Clone() 
 	{
 		RegionData rd = new RegionData();
-		if ( data != null )
+		if ( Data != null )
 		{
-			rd.data = (byte[]) data.Clone();
+			rd.Data = (byte[]) Data.Clone();
 		}
 		return rd ;
 	}
 
 	// Internal state.
-	private byte[] data;
 
 	/*
 	 * Flags & Constants
 	 */
 	// Basic regions
-	private const Int32 REG_RECT        = 0x10000000;
-	private const Int32 REG_PATH        = 0x10000001;
-	private const Int32 REG_EMPTY       = 0x10000002;
-	private const Int32 REG_INF         = 0x10000003;
+	private const int REG_RECT        = 0x10000000;
+	private const int REG_PATH        = 0x10000001;
+	private const int REG_EMPTY       = 0x10000002;
+	private const int REG_INF         = 0x10000003;
 	// Operation codes
-	private const Int32 OP_INTERSECT    = 0x00000001;
-	private const Int32 OP_UNION        = 0x00000002;
-	private const Int32 OP_XOR          = 0x00000003;
-	private const Int32 OP_EXCLUDE      = 0x00000004;
-	private const Int32 OP_COMPLEMENT   = 0x00000005;
+	private const int OP_INTERSECT    = 0x00000001;
+	private const int OP_UNION        = 0x00000002;
+	private const int OP_XOR          = 0x00000003;
+	private const int OP_EXCLUDE      = 0x00000004;
+	private const int OP_COMPLEMENT   = 0x00000005;
 	// Magic number
-	private const Int32  _MAGIC_        = unchecked( (Int32) 0xDBC01001 );
+	private const int  _MAGIC_        = unchecked( (int) 0xDBC01001 );
 	// Format qualifiers for path data
-	private const Int32 FMT_SHORT       = 0x00004000;
-	private const Int32 FMT_SINGLE      = 0x00000000;
+	private const int FMT_SHORT       = 0x00004000;
+	private const int FMT_SINGLE      = 0x00000000;
 	// Array handling
-	private const Int32 HEADER_SIZE     = 0x00000010;
-	private const Int32 CAP_MIN         = 0x00000080;
-	private const Int32 CAP_MAX         = 0x7FFFFFFF;
-	private const Int32 CAP_INC         = 0x00000100;
+	private const int HEADER_SIZE     = 0x00000010;
+	private const int CAP_MIN         = 0x00000080;
+	private const int CAP_MAX         = 0x7FFFFFFF;
+	private const int CAP_INC         = 0x00000100;
 
 	static private byte[] dataRectangleF;
 	static private byte[] dataEmpty;
@@ -174,7 +169,7 @@ public sealed class RegionData
 	 */
 	internal Region ConstructRegion ( RegionData other ) 
 	{
-		return Evaluate( other.data ); // other.Data );
+		return Evaluate( other.Data ); // other.Data );
 	}
 
 	/*
@@ -189,14 +184,14 @@ public sealed class RegionData
 	// check if we are the infinite region
 	internal bool IsInfinite()
 	{
-		return (( GetInt32( data, 12 ) == 0 ) && 
-			    ( GetInt32( data, HEADER_SIZE ) == REG_INF ));
+		return (( GetInt32( Data, 12 ) == 0 ) && 
+			    ( GetInt32( Data, HEADER_SIZE ) == REG_INF ));
 	}
 	// check if we are the empty region
 	internal bool IsEmpty()
 	{
-		return (( GetInt32( data, 12 ) == 0 ) && 
-				( GetInt32( data, HEADER_SIZE ) == REG_EMPTY ));
+		return (( GetInt32( Data, 12 ) == 0 ) && 
+				( GetInt32( Data, HEADER_SIZE ) == REG_EMPTY ));
 	}
 
 	/*
@@ -210,7 +205,7 @@ public sealed class RegionData
 		Resize( size ) ;
 		*/
 		// optimize performance by cloning template
-		data = (byte[])dataRectangleF.Clone();	
+		Data = (byte[])dataRectangleF.Clone();	
 		
 		int index = HEADER_SIZE;
 		PutSingle( rect.X      , index+=4 );
@@ -233,7 +228,7 @@ public sealed class RegionData
 		*/
 		
 		// optimize performance by cloning template
-		data = (byte[])dataEmpty.Clone();	
+		Data = (byte[])dataEmpty.Clone();	
 	}
 	private void InitializeInfiniteRegionData()
 	{
@@ -244,7 +239,7 @@ public sealed class RegionData
 		*/
 		
 		// optimize performance by cloning template
-		data = (byte[])dataInfinite.Clone();	
+		Data = (byte[])dataInfinite.Clone();	
 	}
 
 	/*
@@ -262,14 +257,14 @@ public sealed class RegionData
 	{
 		if ( ( dX == 0.0f) && ( dY == 0.0f ) )
 			return ; // nothing to do
-		int size = 8 + GetInt32( data, 0 ) ;
-		int nrOps2 = GetInt32( data, 12 ) ;
+		int size = 8 + GetInt32( Data, 0 ) ;
+		int nrOps2 = GetInt32( Data, 12 ) ;
 		int readPointer = HEADER_SIZE ;
 		int writePointer = readPointer ;
 		while ( readPointer < size ) 
 		{
-			Token T = NextToken( data, ref readPointer, false );
-			Int32 tokenType = GetInt32( T.rawData , 0 );
+			Token T = NextToken( Data, ref readPointer, false );
+			int tokenType = GetInt32( T.rawData , 0 );
 			switch (tokenType) 
 			{
 				case REG_RECT:
@@ -309,7 +304,7 @@ public sealed class RegionData
 		{
 			return ; // bail out
 		}
-		byte[] oldData = (byte[]) this.data.Clone(); // this.Clone().Data ;
+		byte[] oldData = (byte[]) Data.Clone(); // this.Clone().Data ;
 		int oldSize = 8 + GetInt32( oldData, 0 ) ;
 		int nrOps2 = GetInt32( oldData, 12 ) ;
 		int readPointer =  StartRegionData() ;
@@ -323,7 +318,7 @@ public sealed class RegionData
 		while ( readPointer < oldSize ) 
 		{
 			Token T = NextToken( oldData, ref readPointer, false );
-			Int32 tokenType = GetInt32( T.rawData , 0 );
+			int tokenType = GetInt32( T.rawData , 0 );
 			switch (tokenType) 
 			{
 				case REG_RECT:
@@ -541,7 +536,7 @@ public sealed class RegionData
 		}
 		else if ( IsInfinite() )		       // return the other region 
 		{
-			data = otherdata.data;
+			Data = otherdata.Data;
 		}
 		else if ( otherdata.IsInfinite() ) // bail out
 		{
@@ -557,7 +552,7 @@ public sealed class RegionData
 	{
 		if ( IsEmpty() )			       // return the other region
 		{
-			data = other.GetRegionData().Data ;
+			Data = other.GetRegionData().Data ;
 		}
 		else if ( other.GetRegionData().IsEmpty() )    // bail out
 		{
@@ -581,7 +576,7 @@ public sealed class RegionData
 	{
 		if ( IsEmpty() )			       // return the other region
 		{
-			data = other.GetRegionData().Data ;
+			Data = other.GetRegionData().Data ;
 		}
 		else if ( other.GetRegionData().IsEmpty() )    // bail out
 		{
@@ -615,7 +610,7 @@ public sealed class RegionData
 		
 		if ( IsEmpty() )			      // return the other region
 		{
-			data = other.GetRegionData().Data ;
+			Data = other.GetRegionData().Data ;
 		}
 		else if ( other.GetRegionData().IsEmpty() )   // return the empty region
 		{
@@ -630,14 +625,14 @@ public sealed class RegionData
 			RegionOperation( OP_COMPLEMENT, -1, other );
 		}
 	}
-	private void RegionOperation( int opcode, int regtype, Object regionObject )
+	private void RegionOperation( int opcode, int regtype, object regionObject )
 	{
 		// get current twice number of operations 
-		int nrOps2 =  GetInt32( data, 12 ) ;
+		int nrOps2 =  GetInt32( Data, 12 ) ;
 		// skip header from current data
-		int size = data.Length - HEADER_SIZE;
+		int size = Data.Length - HEADER_SIZE;
 		byte[] bytes = new byte[size];
-		Array.Copy( data , HEADER_SIZE, bytes , 0, size );
+		Array.Copy( Data , HEADER_SIZE, bytes , 0, size );
 		// create a fresh region data
 		int index = StartRegionData(size+40); // need size+40 bytes most time
 		// insert the new op code
@@ -645,7 +640,7 @@ public sealed class RegionData
 		index+=4;
 		// add old data
 		EnsureCapacity( index + size ) ;
-		Array.Copy( bytes, 0, data, index, size );
+		Array.Copy( bytes, 0, Data, index, size );
 		index+=size;
 		// insert new data, update twice number of operations 
 		switch (regtype) 
@@ -665,7 +660,7 @@ public sealed class RegionData
 			default:
 			{
 				index = AddRegion( (Region) regionObject ,index );
-				nrOps2 += ( 2 + GetInt32( ((Region) regionObject).GetRegionData().data , 12 ) );
+				nrOps2 += ( 2 + GetInt32( ((Region) regionObject).GetRegionData().Data , 12 ) );
 			}
 			break;
 		}
@@ -678,25 +673,25 @@ public sealed class RegionData
 	 * IO for primitive data types
 	 */
 	// Put a byte at specified index
-	private void PutByte( Byte value, int index )
+	private void PutByte( byte value, int index )
 	{
-		data[index] = value ;
+		Data[index] = value ;
 	}
 	// Read a byte from specified index
-	private static Byte GetByte( byte[] bts, int index )
+	private static byte GetByte( byte[] bts, int index )
 	{
 		return bts[index] ;
 	}
 	// Put an unsigned short at specified index
-	private void PutInt16( Int16 value, int index )
+	private void PutInt16( short value, int index )
 	{
 		if( BitConverter.IsLittleEndian ) {
-			data[index+0] = (byte)(value    );
-			data[index+1] = (byte)(value>> 8);
+			Data[index+0] = (byte)(value    );
+			Data[index+1] = (byte)(value>> 8);
 		}
 		else {
-			data[index+1] = (byte)(value    );
-			data[index+0] = (byte)(value>> 8);
+			Data[index+1] = (byte)(value    );
+			Data[index+0] = (byte)(value>> 8);
 		}
 		/*
 		not using BitConverter enhances performance
@@ -708,7 +703,7 @@ public sealed class RegionData
 		*/
 	}
 	// Read an unsigned short from specified index
-	private static Int16 GetInt16( byte[] bts, int index )
+	private static short GetInt16( byte[] bts, int index )
 	{
 		if(BitConverter.IsLittleEndian)
 		{
@@ -725,19 +720,19 @@ public sealed class RegionData
 		// return BitConverter.ToInt16( bts , index ) ;
 	}
 	// Put an unsigned integer at specified index
-	private void PutInt32( Int32 value, int index )
+	private void PutInt32( int value, int index )
 	{
 		if( BitConverter.IsLittleEndian ) {
-			data[index+0] = (byte)(value    );
-			data[index+1] = (byte)(value>> 8);
-			data[index+2] = (byte)(value>>16);
-			data[index+3] = (byte)(value>>24);
+			Data[index+0] = (byte)(value    );
+			Data[index+1] = (byte)(value>> 8);
+			Data[index+2] = (byte)(value>>16);
+			Data[index+3] = (byte)(value>>24);
 		}
 		else {
-			data[index+3] = (byte)(value    );
-			data[index+2] = (byte)(value>> 8);
-			data[index+1] = (byte)(value>>16);
-			data[index+0] = (byte)(value>>24);
+			Data[index+3] = (byte)(value    );
+			Data[index+2] = (byte)(value>> 8);
+			Data[index+1] = (byte)(value>>16);
+			Data[index+0] = (byte)(value>>24);
 		}
 		/*
 		not using BitConverter enhances performance
@@ -749,7 +744,7 @@ public sealed class RegionData
 		*/
 	}
 	// Read an unsigned integer from specified index
-	private static Int32 GetInt32( byte[] bts, int index )
+	private static int GetInt32( byte[] bts, int index )
 	{
 		if(BitConverter.IsLittleEndian)
 		{
@@ -771,17 +766,17 @@ public sealed class RegionData
 	
 	// Put a single precision floating point at specified index using
 	//  IEEE floating point standard representation
-	private void PutSingle( Single value, int index )
+	private void PutSingle( float value, int index )
 	{
 		byte[] bytes = BitConverter.GetBytes( value ) ;
 		for ( ushort s = 0; s<4 ; s++ )
 		{
-			data[index+s] = bytes[s] ;
+			Data[index+s] = bytes[s] ;
 		}
 	}
 	
 	// Read a single precision floating point from specified index 
-	private static Single GetSingle( byte[] bts, int index )
+	private static float GetSingle( byte[] bts, int index )
 	{
 		return BitConverter.ToSingle( bts , index ) ;
 	}
@@ -791,10 +786,10 @@ public sealed class RegionData
 	 * Private methods for updating the internal state
 	 */
 	[TODO]
-		private Int32 CheckSum() 
+		private int CheckSum() 
 		{
 			// TODO: compute check sum
-			return unchecked( (Int32) 0xFFFFFFFF );
+			return unchecked( (int) 0xFFFFFFFF );
 		}
 	/*
 	 * Tha data header format:
@@ -805,7 +800,7 @@ public sealed class RegionData
 	 *   08-11    magic number		    Int32
 	 *   12-15    2 * (nr. of bin. operations)    Int32
 	 */
-	private void WriteHeader( int size, Int32 _2nrOps )
+	private void WriteHeader( int size, int _2nrOps )
 	{
 		PutInt32( size	,  0 ) ;
 		PutInt32( CheckSum()  ,  4 ) ;
@@ -814,15 +809,15 @@ public sealed class RegionData
 	}
 	private void Resize( int size ) 
 	{
-		if ( size != data.Length ) {
+		if ( size != Data.Length ) {
 			byte[] bytes = new byte[ size ];
-			Array.Copy( data , bytes , size );
-			data = bytes ;
+			Array.Copy( Data , bytes , size );
+			Data = bytes ;
 		}
 	}
 	private void EnsureCapacity( int newsize )
 	{
-		uint oldcap = (uint) data.Length ;
+		uint oldcap = (uint) Data.Length ;
 		if( newsize <= oldcap ) { // check before calculating new cap
 			return; 
 		}
@@ -836,21 +831,21 @@ public sealed class RegionData
 			throw new OverflowException( "array too large" );
 		}
 		byte[] bytes = new byte[ newcap ];
-		Array.Copy( data , bytes , oldcap );
-		data = bytes ;
+		Array.Copy( Data , bytes , oldcap );
+		Data = bytes ;
 	}
 	// Start a new region data.
 	// Returns next free write index.
 	private int StartRegionData()
 	{
-		data = new byte[CAP_MIN];
+		Data = new byte[CAP_MIN];
 		return HEADER_SIZE ;
 	}
 	// Start a new region data with specifix size.
 	// Returns next free write index.
 	private int StartRegionData(int size)
 	{
-		data = new byte[size];
+		Data = new byte[size];
 		return HEADER_SIZE ;
 	}
 	// Add a rectangle region at the given index.
@@ -883,8 +878,8 @@ public sealed class RegionData
 			index+=2;
 			for ( int i=0; i<nrPoints; i++ ) 
 			{
-				PutInt16( (Int16) path.PathPoints[i].X , index+=2 );
-				PutInt16( (Int16) path.PathPoints[i].Y , index+=2 );
+				PutInt16( (short) path.PathPoints[i].X , index+=2 );
+				PutInt16( (short) path.PathPoints[i].Y , index+=2 );
 			}
 			index+=1;
 		} 
@@ -923,10 +918,10 @@ public sealed class RegionData
 	// Returns next free write index.
 	private int AddRegion( Region region , int index ) 
 	{ 
-		byte[] other = region.GetRegionData().data ; // use member direct, region.GetRegionData().Data ;
+		byte[] other = region.GetRegionData().Data ; // use member direct, region.GetRegionData().Data ;
 		int size = other.Length - HEADER_SIZE ;
 		EnsureCapacity( index + size );
-		Array.Copy( other, HEADER_SIZE, data, index, size );
+		Array.Copy( other, HEADER_SIZE, Data, index, size );
 		return index + size ;
 	}
 	// Add a chunk of raw data at a given index.
@@ -935,7 +930,7 @@ public sealed class RegionData
 	{ 
 		int size = raw.Length ;
 		EnsureCapacity( index + size );
-		Array.Copy( raw, 0, data, index, size ) ;
+		Array.Copy( raw, 0, Data, index, size ) ;
 		return index + size ;
 	}
 	// If we can cast all coordinates to short without loosing in precision, 
@@ -944,7 +939,7 @@ public sealed class RegionData
 	{
 		foreach ( PointF p in path.PathPoints ) 
 		{
-			if ( ( p.X != (Int16) p.X ) || ( p.Y != (Int16) p.Y ) )
+			if ( ( p.X != (short) p.X ) || ( p.Y != (short) p.Y ) )
 			{
 				return false ;
 			}
@@ -954,7 +949,7 @@ public sealed class RegionData
 	// Returns a basic Region from a given raw byte representation
 	private Region GetRegion( byte[] raw )
 	{
-		Int32 regtype = GetInt32( raw , 0 );
+		int regtype = GetInt32( raw , 0 );
 		Region region = null;
 		switch (regtype) {
 			case REG_RECT:
@@ -989,10 +984,10 @@ public sealed class RegionData
 	private RectangleF GetRectangle( byte[] raw ) 
 	{ 
 		int index = 0;
-		Single X = GetSingle( raw, index+=4 );
-		Single Y = GetSingle( raw, index+=4 );
-		Single W = GetSingle( raw, index+=4 );
-		Single H = GetSingle( raw, index+=4 );
+		float X = GetSingle( raw, index+=4 );
+		float Y = GetSingle( raw, index+=4 );
+		float W = GetSingle( raw, index+=4 );
+		float H = GetSingle( raw, index+=4 );
 		return new RectangleF( X, Y, W, H );
 	}
 	// Returns a graphics path from a given raw byte representation
@@ -1005,19 +1000,19 @@ public sealed class RegionData
 		int index = 16 ;
 		if ( format == FMT_SHORT ) 
 		{
-			Int16 X , Y ;
+			short X , Y ;
 			index+=2 ;
 			for ( int n=0; n<nrPoints; n++ ) 
 			{
 				X = GetInt16( raw , index+=2 ) ;
 				Y = GetInt16( raw , index+=2 ) ;
-				points[n] = new PointF( (Single) X , (Single) Y );
+				points[n] = new PointF( (float) X , (float) Y );
 			}
 			index+=1 ;
 		} 
 		else 
 		{
-			Single X , Y ;
+			float X , Y ;
 			for ( int n=0; n<nrPoints; n++ ) 
 			{
 				X = GetSingle( raw , index+=4 ) ;
@@ -1088,17 +1083,17 @@ public sealed class RegionData
 		// associated region, for DATA Token only
 		public Region region = new Region();
 
-		private Int32 GetOpCode()
+		private int GetOpCode()
 		{
-			if ( this.Type != Token.OP ) 
+			if ( Type != OP ) 
 				throw new InvalidOperationException();
-			return GetInt32( this.rawData, 0 );
+			return GetInt32( rawData, 0 );
 		}
 
 		public Token Eval( Token A, Token B ) 
 		{
-			if ( ! ( ( this.Type == Token.OP ) && 
-					( A.Type == Token.DATA ) && ( B.Type == Token.DATA ) ) )
+			if ( ! ( ( Type == OP ) && 
+					( A.Type == DATA ) && ( B.Type == DATA ) ) )
 			{
 				throw new InvalidOperationException();
 			}
@@ -1136,13 +1131,13 @@ public sealed class RegionData
 				break;
 			}
 			Token c = new Token();
-			c.Type = Token.DATA;
+			c.Type = DATA;
 			c.region = A.region;
 			
 			RegionData regdata = A.region.GetRegionData();
-			int size = GetInt32( regdata.data, 0 ) - 8 ;
+			int size = GetInt32( regdata.Data, 0 ) - 8 ;
 			c.rawData = new byte[size] ;
-			Array.Copy( regdata.data, 
+			Array.Copy( regdata.Data, 
 						HEADER_SIZE, c.rawData, 0, size ) ;
 			return c;
 		}
@@ -1153,7 +1148,7 @@ public sealed class RegionData
 	{
 		Token tok = new Token();
 		int size = 4;
-		Int32 lookahead = GetInt32( regdat, index );
+		int lookahead = GetInt32( regdat, index );
 
 		switch( lookahead ) {
 		

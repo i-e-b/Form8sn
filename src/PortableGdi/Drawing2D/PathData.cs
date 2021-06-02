@@ -25,38 +25,15 @@ namespace System.Drawing.Drawing2D
     public sealed class PathData
     {
         // Internal state.
-        private PointF[] pts;
-        private byte[] types;
 
         // Constructor.
         public PathData() {}
 
         // Get or set the path points.
-        public PointF[] Points
-        {
-            get
-            {
-                return pts;
-            }
-            set
-            {
-                pts = value;
-            }
-        }
+        public PointF[] Points { get; set; }
 
         // Get or set the path type values.
-        public byte[] Types
-        {
-            get
-            {
-                return types;
-            }
-            set
-            {
-                types = value;
-            }
-        }
-
+        public byte[] Types { get; set; }
     }; // class PathData
 
 }; // namespace System.Drawing.Drawing2D

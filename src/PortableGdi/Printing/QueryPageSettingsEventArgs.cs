@@ -25,27 +25,15 @@ namespace System.Drawing.Printing
     public class QueryPageSettingsEventArgs : PrintEventArgs
     {
         // Internal state.
-        private PageSettings pageSettings;
 
         // Constructor.
         public QueryPageSettingsEventArgs(PageSettings pageSettings)
         {
-            this.pageSettings = pageSettings;
+            PageSettings = pageSettings;
         }
 
         // Get or set the page settings.
-        public PageSettings PageSettings
-        {
-            get
-            {
-                return pageSettings;
-            }
-            set
-            {
-                pageSettings = value;
-            }
-        }
-
+        public PageSettings PageSettings { get; set; }
     }; // class QueryPageSettingsEventArgs
 
 }; // namespace System.Drawing.Printing

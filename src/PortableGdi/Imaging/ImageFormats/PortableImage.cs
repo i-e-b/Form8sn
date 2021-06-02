@@ -22,51 +22,46 @@ using System.IO;
 
 namespace System.Drawing.Imaging.ImageFormats
 {
+	
 	public class PortableImage : MarshalByRefObject, ICloneable, IDisposable
 {
 	// Internal state.
-	private int width;
-	private int height;
 	internal PixelFormat pixelFormat;
-	private int numFrames;
 	private Frame[] frames;
-	private String format;
-	private int[] palette;
-	private int transparentPixel;
 
 	// Standard image formats.
-	public const String Png = "png";
-	public const String Jpeg = "jpeg";
-	public const String Gif = "gif";
-	public const String Tiff = "tiff";
-	public const String Bmp = "bmp";
-	public const String Icon = "icon";
-	public const String Cursor = "cursor";
-	public const String Exif = "exif";
+	public const string Png = "png";
+	public const string Jpeg = "jpeg";
+	public const string Gif = "gif";
+	public const string Tiff = "tiff";
+	public const string Bmp = "bmp";
+	public const string Icon = "icon";
+	public const string Cursor = "cursor";
+	public const string Exif = "exif";
 
 	// Constructors.
 	public PortableImage()
 			{
-				this.width = 0;
-				this.height = 0;
-				this.pixelFormat = PixelFormat.Undefined;
-				this.numFrames = 0;
-				this.frames = null;
-				this.format = null;
-				this.palette = null;
-				this.transparentPixel = -1;
+				Width = 0;
+				Height = 0;
+				pixelFormat = PixelFormat.Undefined;
+				NumFrames = 0;
+				frames = null;
+				LoadFormat = null;
+				Palette = null;
+				TransparentPixel = -1;
 			}
 
 	public PortableImage(int width, int height, PixelFormat pixelFormat)
 			{
-				this.width = width;
-				this.height = height;
+				Width = width;
+				Height = height;
 				this.pixelFormat = pixelFormat;
-				this.numFrames = 0;
-				this.frames = null;
-				this.format = null;
-				this.palette = null;
-				this.transparentPixel = -1;
+				NumFrames = 0;
+				frames = null;
+				LoadFormat = null;
+				Palette = null;
+				TransparentPixel = -1;
 			}
 
 	private PortableImage(PortableImage image, Frame thisFrameOnly) :
@@ -74,20 +69,20 @@ namespace System.Drawing.Imaging.ImageFormats
 			{
 				if(thisFrameOnly != null)
 				{
-					this.numFrames = 1;
-					this.frames = new Frame [1];
-					this.frames[0] = thisFrameOnly.CloneFrame(this);
+					NumFrames = 1;
+					frames = new Frame [1];
+					frames[0] = thisFrameOnly.CloneFrame(this);
 				}
 				else
 				{
-					this.numFrames = image.numFrames;
+					NumFrames = image.NumFrames;
 					if(image.frames != null)
 					{
 						int frame;
-						this.frames = new Frame [this.numFrames];
-						for(frame = 0; frame < this.numFrames; ++frame)
+						frames = new Frame [NumFrames];
+						for(frame = 0; frame < NumFrames; ++frame)
 						{
-							this.frames[frame] =
+							frames[frame] =
 								image.frames[frame].CloneFrame(this);
 						}
 					}
@@ -97,15 +92,15 @@ namespace System.Drawing.Imaging.ImageFormats
 
 	private PortableImage(PortableImage image, PixelFormat format)
 			{
-				this.width = image.width;
-				this.height = image.height;
-				this.pixelFormat = image.pixelFormat;
-				this.format = image.format;
-				if(image.palette != null)
+				Width = image.Width;
+				Height = image.Height;
+				pixelFormat = image.pixelFormat;
+				LoadFormat = image.LoadFormat;
+				if(image.Palette != null)
 				{
-					this.palette = (int[])(image.palette.Clone());
+					Palette = (int[])(image.Palette.Clone());
 				}
-				this.transparentPixel = image.transparentPixel;
+				TransparentPixel = image.TransparentPixel;
 			}
 
 	// Destructor.
@@ -116,37 +111,11 @@ namespace System.Drawing.Imaging.ImageFormats
 
 	// Get or set the image's overall properties.  The individual frames
 	// may have different properties from the ones stated here.
-	public int Width
-			{
-				get
-				{
-					return width;
-				}
-				set
-				{
-					width = value;
-				}
-			}
+	public int Width { get; set; }
 
-	public int Height
-			{
-				get
-				{
-					return height;
-				}
-				set
-				{
-					height = value;
-				}
-			}
+	public int Height { get; set; }
 
-	public int NumFrames
-			{
-				get
-				{
-					return numFrames;
-				}
-			}
+	public int NumFrames { get; private set; }
 
 	public PixelFormat PixelFormat
 			{
@@ -160,58 +129,23 @@ namespace System.Drawing.Imaging.ImageFormats
 				}
 			}
 
-	public String LoadFormat
-			{
-				get
-				{
-					// Format the image was loaded in (e.g. "jpeg").
-					// Returns a null value if created in-memory.
-					return format;
-				}
-				set
-				{
-					format = value;
-				}
-			}
+	public string LoadFormat { get; set; }
 
-	public int[] Palette
-			{
-				get
-				{
-					// The palette for indexed images, null if an RGB image.
-					return palette;
-				}
-				set
-				{
-					palette = value;
-				}
-			}
+	public int[] Palette { get; set; }
 
-	public int TransparentPixel
-			{
-				get
-				{
-					// Index into "Palette" of the transparent pixel value.
-					// Returns -1 if there is no transparent pixel specified.
-					return transparentPixel;
-				}
-				set
-				{
-					transparentPixel = value;
-				}
-			}
+	public int TransparentPixel { get; set; }
 
 	// Add a new frame to this image.
 	public Frame AddFrame()
 			{
-				return AddFrame(width, height, pixelFormat);
+				return AddFrame(Width, Height, pixelFormat);
 			}
 
 	public Frame AddFrame(int width, int height, PixelFormat pixelFormat)
 			{
 				Frame frame = new Frame(this, width, height, pixelFormat);
-				frame.Palette = palette;
-				frame.TransparentPixel = transparentPixel;
+				frame.Palette = Palette;
+				frame.TransparentPixel = TransparentPixel;
 				return AddFrame(frame);
 			}
 
@@ -220,21 +154,21 @@ namespace System.Drawing.Imaging.ImageFormats
 				if(frames == null)
 				{
 					frames = new Frame[] {frame};
-					numFrames = 1;
+					NumFrames = 1;
 				}
 				else
 				{
-					Frame[] newFrames = new Frame [numFrames + 1];
-					Array.Copy(frames, 0, newFrames, 0, numFrames);
+					Frame[] newFrames = new Frame [NumFrames + 1];
+					Array.Copy(frames, 0, newFrames, 0, NumFrames);
 					frames = newFrames;
-					frames[numFrames] = frame;
-					++numFrames;
+					frames[NumFrames] = frame;
+					++NumFrames;
 				}
 				return frame;
 			}
 
 	// Clone this object.
-	public Object Clone()
+	public object Clone()
 			{
 				return new PortableImage(this, null);
 			}
@@ -251,21 +185,21 @@ namespace System.Drawing.Imaging.ImageFormats
 				if(frames != null)
 				{
 					int frame;
-					for(frame = 0; frame < numFrames; ++frame)
+					for(frame = 0; frame < NumFrames; ++frame)
 					{
 						frames[frame].Dispose();
 					}
 					frames = null;
-					numFrames = 0;
+					NumFrames = 0;
 				}
-				palette = null;
-				transparentPixel = -1;
+				Palette = null;
+				TransparentPixel = -1;
 			}
 
 	// Get a particular frame within this image.
 	public Frame GetFrame(int frame)
 			{
-				if(frame >= 0 && frame < numFrames && frames != null)
+				if(frame >= 0 && frame < NumFrames && frames != null)
 				{
 					return frames[frame];
 				}
@@ -277,7 +211,7 @@ namespace System.Drawing.Imaging.ImageFormats
 
 	public void SetFrame(int frame, Frame newFrame)
 			{
-				if(frame >= 0 && frame < numFrames && newFrame != null)
+				if(frame >= 0 && frame < NumFrames && newFrame != null)
 				{
 					newFrame.NewImage(this);
 					frames[frame] = newFrame;
@@ -285,7 +219,7 @@ namespace System.Drawing.Imaging.ImageFormats
 			}
 
 	// Determine if it is possible to load a particular format.
-	public static bool CanLoadFormat(String format)
+	public static bool CanLoadFormat(string format)
 			{
 				return (format == Bmp || format == Icon ||
 				        format == Cursor || format == Png ||
@@ -294,7 +228,7 @@ namespace System.Drawing.Imaging.ImageFormats
 			}
 
 	// Determine if it is possible to save a particular format.
-	public static bool CanSaveFormat(String format)
+	public static bool CanSaveFormat(string format)
 			{
 				return (format == Bmp || format == Icon ||
 				        format == Cursor || format == Png ||
@@ -303,7 +237,7 @@ namespace System.Drawing.Imaging.ImageFormats
 
 	// Load an image from a stream into this object.  This will
 	// throw "FormatException" if the format could not be loaded.
-	public void Load(String filename)
+	public void Load(string filename)
 			{
 				if(filename == null)
 				{
@@ -373,7 +307,7 @@ namespace System.Drawing.Imaging.ImageFormats
 
 	// Save this image to a stream, in a particular format.
 	// If the format is not specified, it defaults to "png".
-	public void Save(String filename)
+	public void Save(string filename)
 			{
 				Stream stream = new FileStream
 					(filename, FileMode.Create, FileAccess.Write);
@@ -387,7 +321,7 @@ namespace System.Drawing.Imaging.ImageFormats
 				}
 			}
 
-	public void Save(String filename, String format)
+	public void Save(string filename, string format)
 			{
 				Stream stream = new FileStream
 					(filename, FileMode.Create, FileAccess.Write);
@@ -406,7 +340,7 @@ namespace System.Drawing.Imaging.ImageFormats
 				Save(stream, null);
 			}
 
-	public void Save(Stream stream, String format)
+	public void Save(Stream stream, string format)
 			{
 				// Select a default format for the save.
 				if(format == null)

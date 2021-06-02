@@ -24,8 +24,8 @@ using System.Drawing.Drawing2D;
 namespace System.Drawing.Imaging
 {
 
-using System.IO;
-using System.Runtime.InteropServices;
+using IO;
+using Runtime.InteropServices;
 public enum EmfType
 {
 	None		= 0,
@@ -67,61 +67,61 @@ public sealed class Metafile : Image
 				// TODO
 			}
 	[TODO]
-	public Metafile(IntPtr referenceHdc, EmfType type, String description)
+	public Metafile(IntPtr referenceHdc, EmfType type, string description)
 			{
 				// TODO
 			}
 	[TODO]
 	public Metafile(IntPtr referenceHdc, Rectangle frameRect,
 					MetafileFrameUnit frameUnit, EmfType type,
-					String description)
+					string description)
 			{
 				// TODO
 			}
 	[TODO]
 	public Metafile(IntPtr referenceHdc, RectangleF frameRect,
 					MetafileFrameUnit frameUnit, EmfType type,
-					String description)
+					string description)
 			{
 				// TODO
 			}
 	[TODO]
 	public Metafile(Stream stream, IntPtr referenceHdc,
-					EmfType type, String description)
+					EmfType type, string description)
 			{
 				// TODO
 			}
 	[TODO]
 	public Metafile(Stream stream, IntPtr referenceHdc,
 					Rectangle frameRect, MetafileFrameUnit frameUnit,
-					EmfType type, String description)
+					EmfType type, string description)
 			{
 				// TODO
 			}
 	[TODO]
 	public Metafile(Stream stream, IntPtr referenceHdc,
 					RectangleF frameRect, MetafileFrameUnit frameUnit,
-					EmfType type, String description)
+					EmfType type, string description)
 			{
 				// TODO
 			}
 	[TODO]
-	public Metafile(String fileName, IntPtr referenceHdc,
-					EmfType type, String description)
+	public Metafile(string fileName, IntPtr referenceHdc,
+					EmfType type, string description)
 			{
 				// TODO
 			}
 	[TODO]
-	public Metafile(String fileName, IntPtr referenceHdc,
+	public Metafile(string fileName, IntPtr referenceHdc,
 					Rectangle frameRect, MetafileFrameUnit frameUnit,
-					EmfType type, String description)
+					EmfType type, string description)
 			{
 				// TODO
 			}
 	[TODO]
-	public Metafile(String fileName, IntPtr referenceHdc,
+	public Metafile(string fileName, IntPtr referenceHdc,
 					RectangleF frameRect, MetafileFrameUnit frameUnit,
-					EmfType type, String description)
+					EmfType type, string description)
 			{
 				// TODO
 			}
@@ -181,44 +181,44 @@ public sealed class Metafile : Image
 					RectangleF frameRect, MetafileFrameUnit frameUnit,
 					EmfType type)
 			: this(stream, referenceHdc, frameRect, frameUnit, type, null) {}
-	public Metafile(String fileName)
+	public Metafile(string fileName)
 			: this(fileName, IntPtr.Zero, EmfType.EmfPlusDual, null) {}
-	public Metafile(String fileName, IntPtr referenceHdc)
+	public Metafile(string fileName, IntPtr referenceHdc)
 			: this(fileName, referenceHdc, EmfType.EmfPlusDual, null) {}
-	public Metafile(String fileName, IntPtr referenceHdc, EmfType type)
+	public Metafile(string fileName, IntPtr referenceHdc, EmfType type)
 			: this(fileName, referenceHdc, type, null) {}
-	public Metafile(String fileName, IntPtr referenceHdc, Rectangle frameRect)
+	public Metafile(string fileName, IntPtr referenceHdc, Rectangle frameRect)
 			: this(fileName, referenceHdc, frameRect,
 				   MetafileFrameUnit.GdiCompatible,
 				   EmfType.EmfPlusDual, null) {}
-	public Metafile(String fileName, IntPtr referenceHdc, RectangleF frameRect)
+	public Metafile(string fileName, IntPtr referenceHdc, RectangleF frameRect)
 			: this(fileName, referenceHdc, frameRect,
 				   MetafileFrameUnit.GdiCompatible,
 				   EmfType.EmfPlusDual, null) {}
-	public Metafile(String fileName, IntPtr referenceHdc,
+	public Metafile(string fileName, IntPtr referenceHdc,
 					Rectangle frameRect, MetafileFrameUnit frameUnit)
 			: this(fileName, referenceHdc, frameRect, frameUnit,
 				   EmfType.EmfPlusDual, null) {}
-	public Metafile(String fileName, IntPtr referenceHdc,
+	public Metafile(string fileName, IntPtr referenceHdc,
 					RectangleF frameRect, MetafileFrameUnit frameUnit)
 			: this(fileName, referenceHdc, frameRect, frameUnit,
 				   EmfType.EmfPlusDual, null) {}
-	public Metafile(String fileName, IntPtr referenceHdc,
+	public Metafile(string fileName, IntPtr referenceHdc,
 					Rectangle frameRect, MetafileFrameUnit frameUnit,
 					EmfType type)
 			: this(fileName, referenceHdc, frameRect, frameUnit, type, null) {}
-	public Metafile(String fileName, IntPtr referenceHdc,
+	public Metafile(string fileName, IntPtr referenceHdc,
 					RectangleF frameRect, MetafileFrameUnit frameUnit,
 					EmfType type)
 			: this(fileName, referenceHdc, frameRect, frameUnit, type, null) {}
-	public Metafile(String fileName, IntPtr referenceHdc,
+	public Metafile(string fileName, IntPtr referenceHdc,
 					Rectangle frameRect, MetafileFrameUnit frameUnit,
-					String description)
+					string description)
 			: this(fileName, referenceHdc, frameRect, frameUnit,
 				   EmfType.EmfPlusDual, description) {}
-	public Metafile(String fileName, IntPtr referenceHdc,
+	public Metafile(string fileName, IntPtr referenceHdc,
 					RectangleF frameRect, MetafileFrameUnit frameUnit,
-					String description)
+					string description)
 			: this(fileName, referenceHdc, frameRect, frameUnit,
 				   EmfType.EmfPlusDual, description) {}
 
@@ -260,7 +260,7 @@ public sealed class Metafile : Image
 				file.Detach();
 				return header;
 			}
-	public static MetafileHeader GetMetafileHeader(String fileName)
+	public static MetafileHeader GetMetafileHeader(string fileName)
 			{
 				Metafile file = new Metafile(fileName);
 				MetafileHeader header = file.GetMetafileHeader();

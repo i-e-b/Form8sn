@@ -21,84 +21,83 @@
 namespace System.Drawing
 {
 
-using System.Drawing.Text;
-using System.Drawing.Toolkit;
+using Text;
+using Toolkit;
 
 public sealed class FontFamily : MarshalByRefObject, IDisposable
 {
 	// Internal state.
-	private GenericFontFamilies genericFamily;
-	private String name;
-	private FontCollection fontCollection;
-	private FontStyle metricsStyle;
-	private int ascent;
-	private int descent;
-	private int emHeight;
-	private int lineSpacing;
+	private readonly GenericFontFamilies _genericFamily;
+	private FontCollection? _fontCollection;
+	private FontStyle _metricsStyle;
+	private int _ascent;
+	private int _descent;
+	private int _emHeight;
+	private int _lineSpacing;
 
 	// Constructors.
 	public FontFamily(GenericFontFamilies genericFamily)
 			{
-				this.genericFamily = genericFamily;
-				this.fontCollection = null;
-				this.metricsStyle = (FontStyle)(-1);
+				_genericFamily = genericFamily;
+				_fontCollection = null;
+				_metricsStyle = (FontStyle)(-1);
 				switch(genericFamily)
 				{
 					case GenericFontFamilies.Serif:
 					default:
 					{
-						this.name = "Times New Roman";
+						Name = "Times New Roman";
 					}
 					break;
 
 					case GenericFontFamilies.SansSerif:
 					{
-						this.name = "Microsoft Sans Serif";
+						Name = "Microsoft Sans Serif";
 					}
 					break;
 
 					case GenericFontFamilies.Monospace:
 					{
-						this.name = "Courier New";
+						Name = "Courier New";
 					}
 					break;
 				}
 			}
-	public FontFamily(String name) : this(name, null) {}
-	public FontFamily(String name, FontCollection fontCollection)
+	public FontFamily(string name) : this(name, null) {}
+	public FontFamily(string name, FontCollection fontCollection)
 			{
 				if(name == null)
 				{
 					throw new ArgumentNullException("name");
 				}
-				this.name = name;
-				this.fontCollection = fontCollection;
-				this.metricsStyle = (FontStyle)(-1);
+				Name = name;
+				_fontCollection = fontCollection;
+				_metricsStyle = (FontStyle)(-1);
 
 				// Intuit the generic family based on common font names.
-				if(String.Compare(name, "Times", true) == 0 ||
-				   String.Compare(name, "Times New Roman", true) == 0)
+				if(string.Compare(name, "Times", true) == 0 ||
+				   string.Compare(name, "Times New Roman", true) == 0)
 				{
-					this.genericFamily = GenericFontFamilies.Serif;
+					_genericFamily = GenericFontFamilies.Serif;
 				}
-				else if(String.Compare(name, "Helvetica", true) == 0 ||
-				        String.Compare(name, "Helv", true) == 0 ||
-				        String.Compare
+				else if(string.Compare(name, "Helvetica", true) == 0 ||
+				        string.Compare(name, "Helv", true) == 0 ||
+				        string.Compare
 							(name, "Microsoft Sans Serif", true) == 0 ||
-				        String.Compare(name, "Arial", true) == 0 ||
+				        string.Compare(name, "Arial", true) == 0 ||
 						(name.Length >= 6 &&
-				        	String.Compare(name, 0, "Arial ", 0, 6, true) == 0))
+				        	string.Compare(name, 0, "Arial ", 0, 6, true) == 0))
 				{
-					this.genericFamily = GenericFontFamilies.SansSerif;
+					_genericFamily = GenericFontFamilies.SansSerif;
 				}
-				else if(String.Compare(name, "Courier", true) == 0 ||
-				        String.Compare(name, "Courier New", true) == 0)
+				else if(string.Compare(name, "Courier", true) == 0 ||
+				        string.Compare(name, "Courier New", true) == 0)
 				{
-					this.genericFamily = GenericFontFamilies.Monospace;
+					_genericFamily = GenericFontFamilies.Monospace;
 				}
 				else
 				{
-					this.genericFamily = GenericFontFamilies.Serif;
+					_genericFamily = GenericFontFamilies.Serif;
 				}
 			}
 
@@ -139,13 +138,7 @@ public sealed class FontFamily : MarshalByRefObject, IDisposable
 			}
 
 	// Get the name of this font family.
-	public String Name
-			{
-				get
-				{
-					return name;
-				}
-			}
+	public string Name { get; }
 
 	// Dispose of this object.
 	public void Dispose()
@@ -154,7 +147,7 @@ public sealed class FontFamily : MarshalByRefObject, IDisposable
 			}
 
 	// Determine if two objects are equal.
-	public override bool Equals(Object obj)
+	public override bool Equals(object obj)
 			{
 				FontFamily other = (obj as FontFamily);
 				if(other != null)
@@ -170,13 +163,13 @@ public sealed class FontFamily : MarshalByRefObject, IDisposable
 	// Get the font family metrics.
 	private void GetMetrics(FontStyle style)
 			{
-				if(style != metricsStyle)
+				if(style != _metricsStyle)
 				{
 					ToolkitManager.Toolkit.GetFontFamilyMetrics
-						(genericFamily, name, style,
-						 out ascent, out descent,
-						 out emHeight, out lineSpacing);
-					metricsStyle = style;
+						(_genericFamily, Name, style,
+						 out _ascent, out _descent,
+						 out _emHeight, out _lineSpacing);
+					_metricsStyle = style;
 				}
 			}
 
@@ -184,21 +177,21 @@ public sealed class FontFamily : MarshalByRefObject, IDisposable
 	public int GetCellAscent(FontStyle style)
 			{
 				GetMetrics(style);
-				return ascent;
+				return _ascent;
 			}
 
 	// Get the cell descent for a particular style.
 	public int GetCellDescent(FontStyle style)
 			{
 				GetMetrics(style);
-				return descent;
+				return _descent;
 			}
 
 	// Get the em height for a particular style.
 	public int GetEmHeight(FontStyle style)
 			{
 				GetMetrics(style);
-				return emHeight;
+				return _emHeight;
 			}
 
 	// Get a list of all font families with a specified graphics context.
@@ -225,11 +218,11 @@ public sealed class FontFamily : MarshalByRefObject, IDisposable
 	public int GetLineSpacing(FontStyle style)
 			{
 				GetMetrics(style);
-				return lineSpacing;
+				return _lineSpacing;
 			}
 
 	// Get the name of this font in a specified language.
-	public String GetName(int language)
+	public string GetName(int language)
 			{
 				// We don't support language identifiers.
 				return Name;
@@ -244,7 +237,7 @@ public sealed class FontFamily : MarshalByRefObject, IDisposable
 			}
 
 	// Convert this object into a string.
-	public override String ToString()
+	public override string ToString()
 			{
 				return "[FontFamily: Name=" + Name + "]";
 			}

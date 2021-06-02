@@ -214,14 +214,14 @@ namespace System.Drawing.Imaging.ImageFormats
 				{
 					this.stream = stream;
 					this.buffer = buffer;
-					this.origCodeSize = codeSize;
+					origCodeSize = codeSize;
 					this.codeSize = codeSize;
-					this.codeMask = (1 << codeSize) - 1;
-					this.codeMax = (1 << codeSize);
-					this.posn = 0;
-					this.len = 0;
-					this.last = 0;
-					this.numBits = 0;
+					codeMask = (1 << codeSize) - 1;
+					codeMax = (1 << codeSize);
+					posn = 0;
+					len = 0;
+					last = 0;
+					numBits = 0;
 				}
 
 		// Get the next code from the input stream.

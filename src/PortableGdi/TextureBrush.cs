@@ -21,14 +21,13 @@
 namespace System.Drawing
 {
 
-using System.Drawing.Toolkit;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
+using Toolkit;
+using Drawing2D;
+using Imaging;
 
 public sealed class TextureBrush : Brush
 {
 	// Internal state.
-	private Image image;
 	private RectangleF dstRect;
 	private WrapMode wrapMode;
 	private ImageAttributes imageAttr;
@@ -41,7 +40,7 @@ public sealed class TextureBrush : Brush
 				{
 					throw new ArgumentNullException("image");
 				}
-				this.image = image;
+				Image = image;
 			}
 	public TextureBrush(Image image, Rectangle dstRect)
 			{
@@ -49,7 +48,7 @@ public sealed class TextureBrush : Brush
 				{
 					throw new ArgumentNullException("image");
 				}
-				this.image = image;
+				Image = image;
 				this.dstRect = (RectangleF)dstRect;
 			}
 	public TextureBrush(Image image, RectangleF dstRect)
@@ -58,7 +57,7 @@ public sealed class TextureBrush : Brush
 				{
 					throw new ArgumentNullException("image");
 				}
-				this.image = image;
+				Image = image;
 				this.dstRect = dstRect;
 			}
 	public TextureBrush(Image image, WrapMode wrapMode)
@@ -67,7 +66,7 @@ public sealed class TextureBrush : Brush
 				{
 					throw new ArgumentNullException("image");
 				}
-				this.image = image;
+				Image = image;
 				this.wrapMode = wrapMode;
 			}
 	public TextureBrush(Image image, Rectangle dstRect,
@@ -77,7 +76,7 @@ public sealed class TextureBrush : Brush
 				{
 					throw new ArgumentNullException("image");
 				}
-				this.image = image;
+				Image = image;
 				this.dstRect = (RectangleF)dstRect;
 				this.imageAttr = imageAttr;
 			}
@@ -88,7 +87,7 @@ public sealed class TextureBrush : Brush
 				{
 					throw new ArgumentNullException("image");
 				}
-				this.image = image;
+				Image = image;
 				this.dstRect = dstRect;
 				this.imageAttr = imageAttr;
 			}
@@ -99,7 +98,7 @@ public sealed class TextureBrush : Brush
 				{
 					throw new ArgumentNullException("image");
 				}
-				this.image = image;
+				Image = image;
 				this.wrapMode = wrapMode;
 				this.dstRect = (RectangleF)dstRect;
 			}
@@ -110,19 +109,13 @@ public sealed class TextureBrush : Brush
 				{
 					throw new ArgumentNullException("image");
 				}
-				this.image = image;
+				Image = image;
 				this.wrapMode = wrapMode;
 				this.dstRect = dstRect;
 			}
 
 	// Get the image associated with this texture brush.
-	public Image Image
-			{
-				get
-				{
-					return image;
-				}
-			}
+	public Image Image { get; }
 
 	// Get or set the transformation matrix.
 	public Matrix Transform
@@ -178,13 +171,13 @@ public sealed class TextureBrush : Brush
 			}
 
 	// Clone this brush.
-	public override Object Clone()
+	public override object Clone()
 			{
 				lock(this)
 				{
 					TextureBrush brush = (TextureBrush)(MemberwiseClone());
-					brush.toolkit = null;
-					brush.toolkitBrush = null;
+					brush.Toolkit = null;
+					brush.ToolkitBrush = null;
 					return brush;
 				}
 			}
@@ -272,13 +265,13 @@ public sealed class TextureBrush : Brush
 			}
 
 	// Create this brush for a specific toolkit.  Inner part of "GetBrush()".
-	internal override IToolkitBrush CreateBrush(IToolkit toolkit)
+	protected override IToolkitBrush CreateBrush(IToolkit toolkit)
 			{
-				if(image.toolkitImage == null)
+				if(Image.toolkitImage == null)
 				{
-					image.toolkitImage = toolkit.CreateImage(image.dgImage, 0);
+					Image.toolkitImage = toolkit.CreateImage(Image.dgImage, 0);
 				}
-				return toolkit.CreateTextureBrush(this, image.toolkitImage,
+				return toolkit.CreateTextureBrush(this, Image.toolkitImage,
 												  dstRect, imageAttr);
 			}
 

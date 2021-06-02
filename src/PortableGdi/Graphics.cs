@@ -24,11 +24,11 @@
 namespace System.Drawing
 {
 
-using System.Runtime.InteropServices;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.Drawing.Text;
-using System.Drawing.Toolkit;
+using Runtime.InteropServices;
+using Drawing2D;
+using Imaging;
+using Text;
+using Toolkit;
 
 public enum PenType
 {
@@ -64,8 +64,6 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 	private TextLayoutManager textLayoutManager;
 	private Region clip;
 	internal Matrix transform;
-	private float pageScale;
-	private GraphicsUnit pageUnit;
 	internal GraphicsContainer stackTop;
 	internal static Graphics defaultGraphics;
 	// The window this graphics represents overlying the IToolkitGraphics
@@ -81,12 +79,12 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 	internal Graphics(IToolkitGraphics graphics)
 			{
 				this.graphics = graphics;
-				this.clip = null;
-				this.transform = null;
-				this.pageScale = 1.0f;
-				this.pageUnit = GraphicsUnit.World;
-				this.stackTop = null;
-				this.baseWindow = Rectangle.Empty;
+				clip = null;
+				transform = null;
+				PageScale = 1.0f;
+				PageUnit = GraphicsUnit.World;
+				stackTop = null;
+				baseWindow = Rectangle.Empty;
 			}
 
 	// Window Constructor. Copies the existing Graphics and creates a new
@@ -118,10 +116,10 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 				clip.Translate(-baseWindow.X, -baseWindow.Y);
 				this.baseWindow = baseWindow;
 				if (graphics.transform != null)
-					this.transform = new Matrix(graphics.transform);
-				this.pageScale = graphics.pageScale;
-				this.pageUnit = graphics.pageUnit;
-				this.stackTop = null;
+					transform = new Matrix(graphics.transform);
+				PageScale = graphics.PageScale;
+				PageUnit = graphics.PageUnit;
+				stackTop = null;
 				Clip = clip;
 			}
 
@@ -308,28 +306,10 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					return (clip.Width <= 0.0f && clip.Height <= 0.0f);
 				}
 			}
-	public float PageScale
-			{
-				get
-				{
-					return pageScale;
-				}
-				set
-				{
-					pageScale = value;
-				}
-			}
-	public GraphicsUnit PageUnit
-			{
-				get
-				{
-					return pageUnit;
-				}
-				set
-				{
-					pageUnit = value;
-				}
-			}
+	public float PageScale { get; set; }
+
+	public GraphicsUnit PageUnit { get; set; }
+
 	public PixelOffsetMode PixelOffsetMode
 			{
 				get
@@ -592,7 +572,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					DrawPath( pen, path );
 				}
 				else {
-					Point[] rect = ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, pageUnit);
+					Point[] rect = ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, PageUnit);
 					lock(this)
 					{
 						SelectPen(pen);
@@ -616,7 +596,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					DrawPath( pen, path );
 				}
 				else {
-					Point[] rect = ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, pageUnit);
+					Point[] rect = ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, PageUnit);
 					lock(this)
 					{
 						SelectPen(pen);
@@ -651,10 +631,10 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 
 				int dx1, dy1, dx2, dy2;
 				int dx3, dy3, dx4, dy4;
-				ConvertPoint(x1 + baseWindow.X, y1 + baseWindow.Y, out dx1, out dy1, pageUnit);
-				ConvertPoint(x2 + baseWindow.X, y2 + baseWindow.Y, out dx2, out dy2, pageUnit);
-				ConvertPoint(x3 + baseWindow.X, y3 + baseWindow.Y, out dx3, out dy3, pageUnit);
-				ConvertPoint(x4 + baseWindow.X, y4 + baseWindow.Y, out dx4, out dy4, pageUnit);
+				ConvertPoint(x1 + baseWindow.X, y1 + baseWindow.Y, out dx1, out dy1, PageUnit);
+				ConvertPoint(x2 + baseWindow.X, y2 + baseWindow.Y, out dx2, out dy2, PageUnit);
+				ConvertPoint(x3 + baseWindow.X, y3 + baseWindow.Y, out dx3, out dy3, PageUnit);
+				ConvertPoint(x4 + baseWindow.X, y4 + baseWindow.Y, out dx4, out dy4, PageUnit);
 				lock(this)
 				{
 					SelectPen(pen);
@@ -684,10 +664,10 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 
 				int dx1, dy1, dx2, dy2;
 				int dx3, dy3, dx4, dy4;
-				ConvertPoint(x1 + baseWindow.X, y1 + baseWindow.Y, out dx1, out dy1, pageUnit);
-				ConvertPoint(x2 + baseWindow.X, y2 + baseWindow.Y, out dx2, out dy2, pageUnit);
-				ConvertPoint(x3 + baseWindow.X, y3 + baseWindow.Y, out dx3, out dy3, pageUnit);
-				ConvertPoint(x4 + baseWindow.X, y4 + baseWindow.Y, out dx4, out dy4, pageUnit);
+				ConvertPoint(x1 + baseWindow.X, y1 + baseWindow.Y, out dx1, out dy1, PageUnit);
+				ConvertPoint(x2 + baseWindow.X, y2 + baseWindow.Y, out dx2, out dy2, PageUnit);
+				ConvertPoint(x3 + baseWindow.X, y3 + baseWindow.Y, out dx3, out dy3, PageUnit);
+				ConvertPoint(x4 + baseWindow.X, y4 + baseWindow.Y, out dx4, out dy4, PageUnit);
 				lock(this)
 				{
 					SelectBrush(brush);
@@ -755,7 +735,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					return;
 				}
 
-				points = ConvertPoints(points, 4, pageUnit);
+				points = ConvertPoints(points, 4, PageUnit);
 				BaseOffsetPoints(points);
 				lock(this)
 				{
@@ -772,7 +752,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					return;
 				}
 
-				Point[] dpoints = ConvertPoints(points, 4, pageUnit);
+				Point[] dpoints = ConvertPoints(points, 4, PageUnit);
 				BaseOffsetPoints(dpoints);
 				lock(this)
 				{
@@ -827,7 +807,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 	public void DrawCurve(Pen pen, Point[] points,
 						  int offset, int numberOfSegments, float tension)
 			{
-				points = ConvertPoints(points, 4, pageUnit);
+				points = ConvertPoints(points, 4, PageUnit);
 				BaseOffsetPoints(points);
 				if(offset < 0 || offset >= (points.Length - 1))
 				{
@@ -858,7 +838,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 	public void DrawCurve(Pen pen, PointF[] points,
 						  int offset, int numberOfSegments, float tension)
 			{
-				Point[] dpoints = ConvertPoints(points, 4, pageUnit);
+				Point[] dpoints = ConvertPoints(points, 4, PageUnit);
 				BaseOffsetPoints(dpoints);
 				if(offset < 0 || offset >= (points.Length - 1))
 				{
@@ -910,7 +890,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					DrawPath( pen, path );
 				}
 				else {
-					Point[] rect = ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, pageUnit);
+					Point[] rect = ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, PageUnit);
 					lock(this)
 					{
 						SelectPen(pen);
@@ -934,7 +914,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					DrawPath( pen, path );
 				}
 				else {
-					Point[] rect = ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, pageUnit);
+					Point[] rect = ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, PageUnit);
 					lock(this)
 					{
 						SelectPen(pen);
@@ -951,7 +931,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					IToolkitImage toolkitImage = icon.GetToolkitImage(this);
 					if(toolkitImage != null)
 					{
-						ConvertPoint(ref x, ref y, pageUnit);
+						ConvertPoint(ref x, ref y, PageUnit);
 						ToolkitGraphics.DrawImage
 							(toolkitImage, x + baseWindow.X,
 							 y + baseWindow.Y);
@@ -979,7 +959,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 						(0, 0, icon.Width, icon.Height, GraphicsUnit.Pixel);
 					Point[] dest = ConvertRectangle3
 						(targetRect.X, targetRect.Y,
-						 targetRect.Width, targetRect.Height, pageUnit);
+						 targetRect.Width, targetRect.Height, PageUnit);
 					BaseOffsetPoints(dest);
 					lock(this)
 					{
@@ -1019,7 +999,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					Point[] src = ConvertUnits
 						(0, 0, width, height, GraphicsUnit.Pixel);
 					Point[] dest = ConvertRectangle3
-						(targetRect.X, targetRect.Y, width, height, pageUnit);
+						(targetRect.X, targetRect.Y, width, height, PageUnit);
 					BaseOffsetPoints(dest);
 					lock(this)
 					{
@@ -1066,7 +1046,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 	public void DrawImage(Image image, Point[] destPoints)
 			{
 				Point[] src = ConvertUnits(0, 0, image.Width, image.Height, GraphicsUnit.Pixel);
-				Point[] dest = ConvertPoints(destPoints, 3, pageUnit);
+				Point[] dest = ConvertPoints(destPoints, 3, PageUnit);
 				ToolkitDrawImage(image, src, dest);
 			}
 
@@ -1078,21 +1058,21 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 	public void DrawImage(Image image, PointF[] destPoints)
 			{
 				Point[] src = ConvertUnits(0, 0, image.Width,  image.Height, GraphicsUnit.Pixel);
-				Point[] dest = ConvertPoints(destPoints, 3, pageUnit);
+				Point[] dest = ConvertPoints(destPoints, 3, PageUnit);
 				ToolkitDrawImage(image, src, dest);
 			}
 
 	public void DrawImage(Image image, Rectangle rect)
 			{
 				Point[] src = ConvertUnits(0, 0, image.Width,  image.Height, GraphicsUnit.Pixel);
-				Point[] dest = ConvertRectangle3(rect.X, rect.Y, rect.Width, rect.Height, pageUnit);
+				Point[] dest = ConvertRectangle3(rect.X, rect.Y, rect.Width, rect.Height, PageUnit);
 				ToolkitDrawImage(image, src, dest);
 			}
 
 	public void DrawImage(Image image, RectangleF rect)
 			{
 				Point[] src = ConvertUnits(0, 0, image.Width,  image.Height, GraphicsUnit.Pixel);
-				Point[] dest = ConvertRectangle3(rect.X, rect.Y, rect.Width, rect.Height, pageUnit);
+				Point[] dest = ConvertRectangle3(rect.X, rect.Y, rect.Width, rect.Height, PageUnit);
 				ToolkitDrawImage(image, src, dest);
 			}
 
@@ -1100,7 +1080,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 			{
 				lock(this)
 				{
-					ConvertPoint(ref x, ref y, pageUnit);
+					ConvertPoint(ref x, ref y, PageUnit);
 					ToolkitDrawImage(image, x, y);
 				}
 			}
@@ -1108,7 +1088,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 	public void DrawImage(Image image, float x, float y)
 			{
 				int dx, dy;
-				ConvertPoint(x, y, out dx, out dy, pageUnit);
+				ConvertPoint(x, y, out dx, out dy, PageUnit);
 				ToolkitDrawImage(image, dx, dy);
 			}
 
@@ -1116,7 +1096,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 						  Rectangle srcRect, GraphicsUnit srcUnit)
 			{
 				Point[] src = ConvertUnits(srcRect.X, srcRect.Y, srcRect.Width, srcRect.Height, srcUnit);
-				Point[] dest = ConvertPoints(destPoints, 3, pageUnit);
+				Point[] dest = ConvertPoints(destPoints, 3, PageUnit);
 				ToolkitDrawImage(image, src, dest);
 			}
 	
@@ -1124,7 +1104,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 						  RectangleF srcRect, GraphicsUnit srcUnit)
 			{
 				Point[] src = ConvertUnits(srcRect.X, srcRect.Y, srcRect.Width, srcRect.Height, srcUnit);
-				Point[] dest = ConvertPoints(destPoints, 3, pageUnit);
+				Point[] dest = ConvertPoints(destPoints, 3, PageUnit);
 				ToolkitDrawImage(image, src, dest);
 			}
 	
@@ -1132,7 +1112,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 						  Rectangle srcRect, GraphicsUnit srcUnit)
 			{
 				Point[] src = ConvertUnits(srcRect.X, srcRect.Y, srcRect.Width, srcRect.Height, srcUnit);
-				Point[] dest = ConvertRectangle3(destRect.X, destRect.Y, destRect.Width, destRect.Height, pageUnit);
+				Point[] dest = ConvertRectangle3(destRect.X, destRect.Y, destRect.Width, destRect.Height, PageUnit);
 				ToolkitDrawImage(image, src, dest);
 			}
 	
@@ -1140,20 +1120,20 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 						  RectangleF srcRect, GraphicsUnit srcUnit)
 			{
 				Point[] src = ConvertUnits(srcRect.X, srcRect.Y, srcRect.Width, srcRect.Height, srcUnit);
-				Point[] dest = ConvertRectangle3(destRect.X, destRect.Y, destRect.Width, destRect.Height, pageUnit);
+				Point[] dest = ConvertRectangle3(destRect.X, destRect.Y, destRect.Width, destRect.Height, PageUnit);
 				ToolkitDrawImage(image, src, dest);
 			}
 	public void DrawImage(Image image, int x, int y, int width, int height)
 			{
 				Point[] src = ConvertUnits(0, 0, image.Width,  image.Height, GraphicsUnit.Pixel);
-				Point[] dest = ConvertRectangle3(x, y, width, height, pageUnit);
+				Point[] dest = ConvertRectangle3(x, y, width, height, PageUnit);
 				ToolkitDrawImage(image, src, dest);
 			}
 	public void DrawImage(Image image, int x, int y,
 						  Rectangle srcRect, GraphicsUnit srcUnit)
 			{
 				Point[] src = ConvertUnits(srcRect.X, srcRect.Y, srcRect.Width, srcRect.Height, srcUnit);
-				Point[] dest = ConvertRectangle3(x, y, 0, 0, pageUnit);
+				Point[] dest = ConvertRectangle3(x, y, 0, 0, PageUnit);
 				dest[1].X = image.Width;
 				dest[2].Y = image.Height;
 				ToolkitDrawImage(image, src, dest);
@@ -1162,14 +1142,14 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 						  RectangleF srcRect, GraphicsUnit srcUnit)
 			{
 				Point[] src = ConvertUnits(srcRect.X, srcRect.Y, srcRect.Width, srcRect.Height, srcUnit);
-				Point[] dest = ConvertRectangle3(x, y, srcRect.Width, srcRect.Height, pageUnit);
+				Point[] dest = ConvertRectangle3(x, y, srcRect.Width, srcRect.Height, PageUnit);
 				ToolkitDrawImage(image, src, dest);
 			}
 	public void DrawImage(Image image, float x, float y,
 						  float width, float height)
 			{
 				Point[] src = ConvertUnits(0, 0, image.Width,  image.Height, GraphicsUnit.Pixel);
-				Point[] dest = ConvertRectangle3(x, y, width, height, pageUnit);
+				Point[] dest = ConvertRectangle3(x, y, width, height, PageUnit);
 				ToolkitDrawImage(image, src, dest);
 			}
 	public void DrawImage(Image image, Rectangle destRect,
@@ -1177,7 +1157,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 						  GraphicsUnit srcUnit)
 			{
 				Point[] src = ConvertUnits(srcX, srcY, srcWidth, srcHeight, srcUnit);
-				Point[] dest = ConvertRectangle3(destRect.X, destRect.Y, destRect.Width, destRect.Height, pageUnit);
+				Point[] dest = ConvertRectangle3(destRect.X, destRect.Y, destRect.Width, destRect.Height, PageUnit);
 				ToolkitDrawImage(image, src, dest);
 			}
 	
@@ -1187,7 +1167,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 						  GraphicsUnit srcUnit)
 			{
 				Point[] src = ConvertUnits(srcX, srcY, srcWidth, srcHeight, srcUnit);
-				Point[] dest = ConvertRectangle3(destRect.X, destRect.Y, destRect.Width, destRect.Height, pageUnit);
+				Point[] dest = ConvertRectangle3(destRect.X, destRect.Y, destRect.Width, destRect.Height, PageUnit);
 				ToolkitDrawImage(image, src, dest);
 			}
 
@@ -1319,8 +1299,8 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					return;
 				}
 
-				ConvertPoint(ref x1, ref y1, pageUnit);
-				ConvertPoint(ref x2, ref y2, pageUnit);
+				ConvertPoint(ref x1, ref y1, PageUnit);
+				ConvertPoint(ref x2, ref y2, PageUnit);
 				if (x1 == x2 && y1 == y2)
 					return;
 				lock(this)
@@ -1339,8 +1319,8 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 				}
 
 				int dx1, dy1, dx2, dy2;
-				ConvertPoint(x1, y1, out dx1, out dy1, pageUnit);
-				ConvertPoint(x2, y2, out dx2, out dy2, pageUnit);
+				ConvertPoint(x1, y1, out dx1, out dy1, PageUnit);
+				ConvertPoint(x2, y2, out dx2, out dy2, PageUnit);
 				lock(this)
 				{
 					SelectPen(pen);
@@ -1358,7 +1338,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					return;
 				}
 
-				points = ConvertPoints(points, 2, pageUnit);
+				points = ConvertPoints(points, 2, PageUnit);
 				BaseOffsetPoints(points);
 				lock(this)
 				{
@@ -1374,7 +1354,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					return;
 				}
 
-				Point[] dpoints = ConvertPoints(points, 2, pageUnit);
+				Point[] dpoints = ConvertPoints(points, 2, PageUnit);
 				BaseOffsetPoints(dpoints);
 				lock(this)
 				{
@@ -1435,7 +1415,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					return;
 				}
 
-				Point[] rect = ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, pageUnit);
+				Point[] rect = ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, PageUnit);
 				lock(this)
 				{
 					SelectPen(pen);
@@ -1451,7 +1431,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					return;
 				}
 
-				Point[] rect = ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, pageUnit);
+				Point[] rect = ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, PageUnit);
 				lock(this)
 				{
 					SelectPen(pen);
@@ -1468,7 +1448,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					return;
 				}
 
-				points = ConvertPoints(points, 2, pageUnit);
+				points = ConvertPoints(points, 2, PageUnit);
 				BaseOffsetPoints(points);
 				lock(this)
 				{
@@ -1484,7 +1464,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					return;
 				}
 
-				Point[] dpoints = ConvertPoints(points, 2, pageUnit);
+				Point[] dpoints = ConvertPoints(points, 2, PageUnit);
 				BaseOffsetPoints(dpoints);
 				lock(this)
 				{
@@ -1511,7 +1491,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					lock(this)
 					{
 						SelectPen(pen);
-						ToolkitGraphics.DrawPolygon(ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, pageUnit));
+						ToolkitGraphics.DrawPolygon(ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, PageUnit));
 					}
 				}
 			}
@@ -1529,7 +1509,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					lock(this)
 					{
 						SelectPen(pen);
-						ToolkitGraphics.DrawPolygon(ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, pageUnit));
+						ToolkitGraphics.DrawPolygon(ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, PageUnit));
 					}
 				}
 			}
@@ -1563,21 +1543,21 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 			}
 
 	// Draw a string.
-	public void DrawString(String s, Font font, Brush brush, PointF point)
+	public void DrawString(string s, Font font, Brush brush, PointF point)
 			{
 				DrawString(s, font, brush, point.X, point.Y, null);
 			}
-	public void DrawString(String s, Font font, Brush brush,
+	public void DrawString(string s, Font font, Brush brush,
 						   RectangleF layoutRectangle)
 			{
 				DrawString(s, font, brush, layoutRectangle, null);
 			}
-	public void DrawString(String s, Font font, Brush brush,
+	public void DrawString(string s, Font font, Brush brush,
 						   PointF point, StringFormat format)
 			{
 				DrawString(s, font, brush, point.X, point.Y, format);
 			}
-	public void DrawString(String s, Font font, Brush brush,
+	public void DrawString(string s, Font font, Brush brush,
 						   RectangleF layoutRectangle, StringFormat format)
 			{
 				// bail out now if there's nothing to draw
@@ -1587,7 +1567,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 				}
 
 				// bail out now if there's nothing to draw
-				if(((Object)s) == null || s.Length == 0) { return; }
+				if(((object)s) == null || s.Length == 0) { return; }
 
 				// make a little inset around the text dependent of the font size
 				layoutRectangle.Inflate((int)(-font.SizeInPoints*DpiX/369.7184), 0);
@@ -1598,7 +1578,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					 (layoutRectangle.Y + baseWindow.Y),
 					 (layoutRectangle.Width - 1),
 					 (layoutRectangle.Height - 1),
-					 pageUnit);
+					 PageUnit);
 
 				// create a layout rectangle from the device coordinates
 				Rectangle deviceLayout = new Rectangle
@@ -1648,7 +1628,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 						
 						// draw the text
 						textLayoutManager.Draw
-							(this, s, this.TransformFont(font), deviceLayout, format, brush);
+							(this, s, TransformFont(font), deviceLayout, format, brush);
 					}
 					finally
 					{
@@ -1675,12 +1655,12 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 		return font;
 	}
 	
-	public void DrawString(String s, Font font, Brush brush, float x, float y)
+	public void DrawString(string s, Font font, Brush brush, float x, float y)
 			{
 				DrawString(s, font, brush, x, y, null);
 			}
 
-	public void DrawString(String s, Font font, Brush brush,
+	public void DrawString(string s, Font font, Brush brush,
 						   float x, float y, StringFormat format)
 			{
 				DrawString(s, font, brush, new RectangleF(x, y, 999999.0f, 999999.0f), format);
@@ -2010,7 +1990,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					return;
 				}
 
-				points = ConvertPoints(points, 4, pageUnit);
+				points = ConvertPoints(points, 4, PageUnit);
 				BaseOffsetPoints(points);
 				lock(this)
 				{
@@ -2028,7 +2008,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					return;
 				}
 
-				Point[] dpoints = ConvertPoints(points, 4, pageUnit);
+				Point[] dpoints = ConvertPoints(points, 4, PageUnit);
 				BaseOffsetPoints(dpoints);
 				lock(this)
 				{
@@ -2062,7 +2042,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					FillPath( brush, path );
 				}
 				else {
-					Point[] rect = ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, pageUnit);
+					Point[] rect = ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, PageUnit);
 					lock(this)
 					{
 						SelectBrush(brush);
@@ -2086,7 +2066,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					FillPath( brush, path );
 				}
 				else {
-					Point[] rect = ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, pageUnit);
+					Point[] rect = ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, PageUnit);
 					lock(this)
 					{
 						SelectBrush(brush);
@@ -2148,7 +2128,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					FillPath( brush, path );
 				}
 				else {
-					Point[] rect = ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, pageUnit);
+					Point[] rect = ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, PageUnit);
 					lock(this)
 					{
 						SelectBrush(brush);
@@ -2173,7 +2153,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					FillPath( brush, path );
 				}
 				else {
-					Point[] rect = ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, pageUnit);
+					Point[] rect = ConvertRectangle(x + baseWindow.X, y + baseWindow.Y, width, height, PageUnit);
 					lock(this)
 					{
 						SelectBrush(brush);
@@ -2199,7 +2179,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					return;
 				}
 
-				points = ConvertPoints(points, 2, pageUnit);
+				points = ConvertPoints(points, 2, PageUnit);
 				BaseOffsetPoints(points);
 				lock(this)
 				{
@@ -2215,7 +2195,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					return;
 				}
 
-				Point[] dpoints = ConvertPoints(points, 2, pageUnit);
+				Point[] dpoints = ConvertPoints(points, 2, PageUnit);
 				BaseOffsetPoints(dpoints);
 				lock(this)
 				{
@@ -2245,7 +2225,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 				{
 					SelectBrush(brush);
 					ToolkitGraphics.FillPolygon(ConvertRectangle(x + baseWindow.X,
-						y + baseWindow.Y, width, height, pageUnit), FillMode.Alternate);
+						y + baseWindow.Y, width, height, PageUnit), FillMode.Alternate);
 				}
 			}
 	public void FillRectangle(Brush brush, float x, float y,
@@ -2261,7 +2241,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 				{
 					SelectBrush(brush);
 					ToolkitGraphics.FillPolygon(ConvertRectangle(x + baseWindow.X,
-						y + baseWindow.Y, width, height, pageUnit), FillMode.Alternate);
+						y + baseWindow.Y, width, height, PageUnit), FillMode.Alternate);
 				}
 			}
 
@@ -2302,7 +2282,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					return;
 				}
 
-				RectangleF[] rs = region.GetRegionScans(new Drawing.Drawing2D.Matrix());
+				RectangleF[] rs = region.GetRegionScans(new Matrix());
 				for (int i = 0; i < rs.Length; i++)
 				{
 					Rectangle b = Rectangle.Truncate(rs[i]);
@@ -2457,7 +2437,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 	{
 		private SplitWord[] words;
 		private int wordCount;
-		private String text;
+		private string text;
 		private Point[] linePositions;
 		private Graphics graphics;
 		private Font font;
@@ -2479,29 +2459,29 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					{
 						this.start = start;
 						this.length = length;
-						this.width = 0;
-						this.line = -1;
+						width = 0;
+						line = -1;
 					}
 
 		}; // struct SplitWord
 
 
-		public StringDrawPositionCalculator(String text, Graphics graphics, Font font, RectangleF layout, StringFormat format)
+		public StringDrawPositionCalculator(string text, Graphics graphics, Font font, RectangleF layout, StringFormat format)
 				{
 					this.text = text;
 					this.graphics = graphics;
 					this.font = font;
 					this.layout = layout;
 					this.format = format;
-					this.HotKeyIdx = -1;
+					HotKeyIdx = -1;
 					
-					if(format.HotkeyPrefix == System.Drawing.Text.HotkeyPrefix.Show)
+					if(format.HotkeyPrefix == HotkeyPrefix.Show)
 					{
 						HotKeyIdx = text.IndexOf('&');
 						if( HotKeyIdx != -1)
 						{
 							if (HotKeyIdx >= text.Length-1 ||
-						 		Char.IsControl(text[HotKeyIdx]))
+						 		char.IsControl(text[HotKeyIdx]))
 							{
 								HotKeyIdx = -1;
 							}
@@ -2545,7 +2525,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 						else
 						{
 							// Skip over the whitespace.
-							while(i < len && Char.IsWhiteSpace(text[i]))
+							while(i < len && char.IsWhiteSpace(text[i]))
 							{
 								i++;
 							}
@@ -2555,7 +2535,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 								while(i < len)
 								{
 									c = text[i];
-									if(Char.IsWhiteSpace(c) ||
+									if(char.IsWhiteSpace(c) ||
 									   c == '\n' || c == '\r')
 									{
 										break;
@@ -2614,9 +2594,9 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 						{
 							if (HotKeyIdx >= textStart && HotKeyIdx < textStart+textLength)
 							{
-								String startString = text.Substring(textStart, 
+								string startString = text.Substring(textStart, 
 													 	HotKeyIdx -  textStart );
-								String endString = text.Substring(HotKeyIdx+1, 
+								string endString = text.Substring(HotKeyIdx+1, 
 														textLength - (HotKeyIdx -textStart) -1);
 								graphics.ToolkitGraphics.DrawString(startString, linePosition.X, linePosition.Y, null);  
 								Font underlineFont = new Font (font, font.Style | FontStyle.Underline);
@@ -2632,7 +2612,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 							} 
 							else
 							{
-								String lineText = text.Substring(textStart, textLength);
+								string lineText = text.Substring(textStart, textLength);
 								graphics.ToolkitGraphics.DrawString(lineText, linePosition.X, linePosition.Y, null);
 							}
 						}
@@ -2748,7 +2728,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 							currSize = 0;
 							continue;
 						}
-						if (Char.IsWhiteSpace(c))
+						if (char.IsWhiteSpace(c))
 						{
 							if( i< wordCount-1)
 							{
@@ -2860,7 +2840,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 	{
 		// Internal state.
 		private Graphics graphics;
-		private String text;
+		private string text;
 		private Font font;
 		private Rectangle layout;
 		private StringFormat format;
@@ -2876,7 +2856,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 
 		// Constructor.
 		public StringMeasurePositionCalculator
-					(Graphics graphics, String text, Font font,
+					(Graphics graphics, string text, Font font,
 					 Rectangle layout, StringFormat format)
 				{
 					this.graphics = graphics;
@@ -3218,46 +3198,46 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 	}; // class StringMeasurePositionCalculator
 
 	// Measure the character ranges for a string.
-	public Region[] MeasureCharacterRanges(String text, Font font, RectangleF layoutRect, StringFormat stringFormat)
+	public Region[] MeasureCharacterRanges(string text, Font font, RectangleF layoutRect, StringFormat stringFormat)
 			{
 				StringMeasurePositionCalculator calculator = new StringMeasurePositionCalculator(this, text, font, Rectangle.Truncate(layoutRect), stringFormat);		
 				return calculator.GetRegions();
 			}
 
 	// Non Microsoft
-	public Rectangle[] MeasureCharacters(String text, Font font, RectangleF layoutRect, StringFormat stringFormat)
+	public Rectangle[] MeasureCharacters(string text, Font font, RectangleF layoutRect, StringFormat stringFormat)
 			{
 				StringMeasurePositionCalculator calculator = new StringMeasurePositionCalculator(this, text, font, Rectangle.Truncate(layoutRect), stringFormat);		
 				return calculator.GetCharBounds();
 			}
 
 	// Measure the size of a string.
-	public SizeF MeasureString(String text, Font font)
+	public SizeF MeasureString(string text, Font font)
 			{		
 				return MeasureString(text, font, new SizeF(0.0f, 0.0f), null);
 			}
-	public SizeF MeasureString(String text, Font font, int width)
+	public SizeF MeasureString(string text, Font font, int width)
 			{
 				return MeasureString
 					(text, font, new SizeF(width, 999999.0f), null);
 			}
-	public SizeF MeasureString(String text, Font font, SizeF layoutArea)
+	public SizeF MeasureString(string text, Font font, SizeF layoutArea)
 			{
 				return MeasureString(text, font, layoutArea, null);
 			}
-	public SizeF MeasureString(String text, Font font,
+	public SizeF MeasureString(string text, Font font,
 							   int width, StringFormat format)
 			{
 				return MeasureString
 					(text, font, new SizeF(width, 999999.0f), format);
 			}
-	public SizeF MeasureString(String text, Font font,
+	public SizeF MeasureString(string text, Font font,
 							   PointF origin, StringFormat format)
 			{
 				return MeasureString
 					(text, font, new SizeF(0.0f, 0.0f), format);
 			}
-	public SizeF MeasureString(String text, Font font,
+	public SizeF MeasureString(string text, Font font,
 							   SizeF layoutArea, StringFormat format)
 			{
 				int charactersFitted, linesFilled;
@@ -3265,12 +3245,12 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					(text, font, layoutArea, format, out charactersFitted,
 					 out linesFilled);
 			}
-	public SizeF MeasureString(String text, Font font, SizeF layoutArea,
+	public SizeF MeasureString(string text, Font font, SizeF layoutArea,
 	                           StringFormat format, out int charactersFitted,
 	                           out int linesFilled)
 			{
 				// bail out now if there's nothing to measure
-				if(((Object)text) == null || text.Length == 0)
+				if(((object)text) == null || text.Length == 0)
 				{
 					charactersFitted = 0;
 					linesFilled = 0;
@@ -3735,12 +3715,12 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 						// Convert from Device to Page.
 						for (int i = 0; i < pts.Length; i++)
 						{
-							if (pageUnit == GraphicsUnit.Pixel)
+							if (PageUnit == GraphicsUnit.Pixel)
 								continue;
 							x = pts[i].X;
 							y = pts[i].Y;
 							// Apply the page unit to get page co-ordinates.
-							switch(pageUnit)
+							switch(PageUnit)
 							{
 								case GraphicsUnit.Display:
 								{
@@ -3781,10 +3761,10 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 							}
 
 							// Apply the inverse of the page scale factor.
-							if(pageScale != 1.0f)
+							if(PageScale != 1.0f)
 							{
-								x /= pageScale;
-								y /= pageScale;
+								x /= PageScale;
+								y /= PageScale;
 							}
 							pts[i] = new Point((int)x, (int)y);
 						}
@@ -3819,14 +3799,14 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 						{
 							x = pts[i].X;
 							y = pts[i].Y;
-							if(pageScale != 1.0f)
+							if(PageScale != 1.0f)
 							{
-								x *= pageScale;
-								y *= pageScale;
+								x *= PageScale;
+								y *= PageScale;
 							}
 
 							// Apply the page unit to get device co-ordinates.
-							switch(pageUnit)
+							switch(PageUnit)
 							{
 								case GraphicsUnit.Display:
 								{
@@ -3888,12 +3868,12 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 						// Convert from Device to Page.
 						for (int i = 0; i < pts.Length; i++)
 						{
-							if (pageUnit == GraphicsUnit.Pixel)
+							if (PageUnit == GraphicsUnit.Pixel)
 								continue;
 							x = pts[i].X;
 							y = pts[i].Y;
 							// Apply the page unit to get page co-ordinates.
-							switch(pageUnit)
+							switch(PageUnit)
 							{
 								case GraphicsUnit.Display:
 								{
@@ -3934,10 +3914,10 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 							}
 
 							// Apply the inverse of the page scale factor.
-							if(pageScale != 1.0f)
+							if(PageScale != 1.0f)
 							{
-								x /= pageScale;
-								y /= pageScale;
+								x /= PageScale;
+								y /= PageScale;
 							}
 							pts[i] = new PointF(x, y);
 						}
@@ -3972,14 +3952,14 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 						{
 							x = pts[i].X;
 							y = pts[i].Y;
-							if(pageScale != 1.0f)
+							if(PageScale != 1.0f)
 							{
-								x *= pageScale;
-								y *= pageScale;
+								x *= PageScale;
+								y *= PageScale;
 							}
 
 							// Apply the page unit to get device co-ordinates.
-							switch(pageUnit)
+							switch(PageUnit)
 							{
 								case GraphicsUnit.Display:
 								{
@@ -4108,10 +4088,10 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 				}
 
 				// Apply the page scale factor.
-				if(pageScale != 1.0f)
+				if(PageScale != 1.0f)
 				{
-					newX *= pageScale;
-					newY *= pageScale;
+					newX *= PageScale;
+					newY *= PageScale;
 				}
 
 				// Apply the page unit to get device co-ordinates.
@@ -4184,10 +4164,10 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 				}
 
 				// Apply the page scale factor.
-				if(pageScale != 1.0f)
+				if(PageScale != 1.0f)
 				{
-					newX *= pageScale;
-					newY *= pageScale;
+					newX *= PageScale;
+					newY *= PageScale;
 				}
 
 				// Apply the page unit to get device co-ordinates.
@@ -4305,7 +4285,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 				pt2y = y;
 				pt3x = x;
 				pt3y = y + height;
-				if(transform != null || pageScale != 1.0f ||
+				if(transform != null || PageScale != 1.0f ||
 				   (unit != GraphicsUnit.Pixel && unit != GraphicsUnit.World))
 				{
 					ConvertPoint(ref pt1x, ref pt1y, unit);
@@ -4367,7 +4347,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 				// Apply the page unit to get page co-ordinates.
 				newX = (float)width;
 				newY = (float)height;
-				switch(pageUnit)
+				switch(PageUnit)
 				{
 					case GraphicsUnit.World:
 					case GraphicsUnit.Pixel:
@@ -4417,10 +4397,10 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 				newY /= adjustY;
 
 				// Apply the inverse of the page scale factor.
-				if(pageScale != 1.0f)
+				if(PageScale != 1.0f)
 				{
-					newX /= pageScale;
-					newY /= pageScale;
+					newX /= PageScale;
+					newY /= PageScale;
 				}
 
 				// Apply the inverse of the world transform.
@@ -4614,7 +4594,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 	private void UpdateClip()
 			{
 				RectangleF[] rectsF;
-				if (transform == null && pageScale == 1.0f && pageUnit == GraphicsUnit.World)
+				if (transform == null && PageScale == 1.0f && PageUnit == GraphicsUnit.World)
 				{
 					rectsF = clip.GetRegionScansIdentity();
 				}
@@ -4653,9 +4633,9 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 	// Determine if this graphics object is using 1-to-1 pixel mappings.
 	internal bool IsPixelUnits()
 			{
-				if((pageUnit == GraphicsUnit.Pixel ||
-				    pageUnit == GraphicsUnit.World) &&
-				   transform == null && pageScale == 1.0f)
+				if((PageUnit == GraphicsUnit.Pixel ||
+				    PageUnit == GraphicsUnit.World) &&
+				   transform == null && PageScale == 1.0f)
 				{
 					return true;
 				}
@@ -4682,7 +4662,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 				if(color.A == 0) { return; }
 
 				int dx, dy;
-				ConvertPoint(x, y, out dx, out dy, pageUnit);
+				ConvertPoint(x, y, out dx, out dy, PageUnit);
 				lock(this)
 				{
 					ToolkitGraphics.DrawGlyph
@@ -4749,10 +4729,10 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 		// Constructor.
 		public CharSpan()
 				{
-					this.start = 0;
-					this.length = 0;
-					this.pixelWidth = -1;
-					this.newline = false;
+					start = 0;
+					length = 0;
+					pixelWidth = -1;
+					newline = false;
 				}
 
 
@@ -4770,7 +4750,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 				{
 					this.start = start;
 					this.length = length;
-					this.pixelWidth = -1;
+					pixelWidth = -1;
 					this.newline = newline;
 				}
 
@@ -4816,7 +4796,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 		private Graphics         graphics;
 		private IToolkitGraphics toolkitGraphics;
 		private Rectangle        layout;
-		private String           text;
+		private string           text;
 		private StringFormat     format;
 
 		private static readonly StringFormat SF_DEFAULT = StringFormat.GenericDefault;
@@ -4884,14 +4864,14 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 
 		// Calculate and draw the string by drawing each line.
 		public void Draw
-					(Graphics graphics, String text, Font font,
+					(Graphics graphics, string text, Font font,
 					 Rectangle drawLayout, StringFormat format, Brush brush)
 				{
 					// set the current graphics
 					this.graphics = graphics;
 
 					// set the current toolkit graphics
-					this.toolkitGraphics = graphics.ToolkitGraphics;
+					toolkitGraphics = graphics.ToolkitGraphics;
 
 					// set the current text
 					this.text = text;
@@ -4900,7 +4880,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					this.font = font;
 
 					// set the current layout rectangle
-					this.layout = drawLayout;
+					layout = drawLayout;
 
 					// set the current brush
 					this.brush = brush;
@@ -4912,7 +4892,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					this.format = format;
 
 					// set the default hotkey index
-					this.hotkeyIndex = -1;
+					hotkeyIndex = -1;
 
 					// set the current line height
 					lineHeight = font.Height;
@@ -4960,7 +4940,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 						if(hotkeyIndex != -1)
 						{
 							if(hotkeyIndex >= (text.Length - 1) ||
-							   Char.IsControl(text[hotkeyIndex + 1]))
+							   char.IsControl(text[hotkeyIndex + 1]))
 							{
 								// no need for this anymore
 								hotkeyIndex = -1;
@@ -5254,7 +5234,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 						if(hotkeyIndex < start ||
 						   hotkeyIndex >= (start + length))
 						{
-							String s = text.Substring(start, length);
+							string s = text.Substring(start, length);
 							toolkitGraphics.DrawString(s, x, y, format);
 						}
 						else
@@ -5270,7 +5250,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					int cf, lf;
 
 					// set the default ellipsis
-					String ellipsis = null;
+					string ellipsis = null;
 
 					// set the maximum width
 					int maxWidth = layout.Width;
@@ -5294,7 +5274,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					}
 
 					// set the default draw string
-					String drawS = null;
+					string drawS = null;
 
 					// trim and draw the string
 					switch(format.Trimming)
@@ -5394,13 +5374,13 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 
 		// Draw a line containing hotkey text.
 		private void DrawLineWithHotKey
-					(String text, int start, int length, int x, int y)
+					(string text, int start, int length, int x, int y)
 				{
 					// declare the out variables
 					int cf, lf;
 
 					// set the default text
-					String s = null;
+					string s = null;
 
 					// draw the pre-hotkey text
 					if(hotkeyIndex > start)
@@ -5455,7 +5435,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 		//
 		// Note that this is currently broken. Turn this on at your own risk.
 		public Size GetBounds
-					(Graphics graphics, String text, Font font,
+					(Graphics graphics, string text, Font font,
 					 SizeF layoutSize, StringFormat format,
 					 out int charactersFitted, out int linesFilled)
 				{
@@ -5463,7 +5443,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					this.graphics = graphics;
 
 					// set the current toolkit graphics
-					this.toolkitGraphics = graphics.ToolkitGraphics;
+					toolkitGraphics = graphics.ToolkitGraphics;
 
 					// set the current text
 					this.text = text;
@@ -5478,7 +5458,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					this.format = format;
 
 					// set the current layout rectangle
-					this.layout = new Rectangle
+					layout = new Rectangle
 						(0, 0, (int)layoutSize.Width, (int)layoutSize.Height);
 
 					// set the current line height
@@ -5524,7 +5504,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 						if(hotkeyIndex != -1)
 						{
 							if(hotkeyIndex < (text.Length - 1) &&
-							   !Char.IsControl(text[hotkeyIndex + 1]))
+							   !char.IsControl(text[hotkeyIndex + 1]))
 							{
 								// remove the hotkey character
 								text = text.Substring(0, hotkeyIndex) +
@@ -5699,7 +5679,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 					if(span.pixelWidth == -1)
 					{
 						// get the text of the span
-						String s = text.Substring(span.start, span.length);
+						string s = text.Substring(span.start, span.length);
 
 						// declare out variables
 						int cf, lf;
@@ -5823,9 +5803,9 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 		// width of the trimmed string. The trimming algorithm tries to place
 		// the characters removed in the center of the string but also tries
 		// to guarantee that the last path seperator character is shown.
-		private String TrimToPath
+		private string TrimToPath
 					(int start, int length, int maxWidth, out int width,
-					 String ellipsis)
+					 string ellipsis)
 				{
 					// declare out variables
 					int cf, lf;

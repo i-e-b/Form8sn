@@ -27,14 +27,14 @@ namespace System.Drawing.Toolkit
     {
 
         // Get the default printer name on this system.
-        String DefaultPrinterName { get; }
+        string DefaultPrinterName { get; }
 
         // Get a list of all installed printers on this system.
-        String[] InstalledPrinters { get; }
+        string[] InstalledPrinters { get; }
 
         // Get the printer control object for a specific printer.
         // Returns null if the printer name is not recognised.
-        IToolkitPrinter GetPrinter(String name);
+        IToolkitPrinter GetPrinter(string name);
 
     }; // interface IToolkitPrintingSystem
 

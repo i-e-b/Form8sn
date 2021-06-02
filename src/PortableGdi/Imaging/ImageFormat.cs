@@ -28,36 +28,6 @@ public sealed class ImageFormat
 {
 	// Internal state.
 	private Guid guid;
-	private static readonly ImageFormat bmp =
-			new ImageFormat
-				(new Guid("{b96b3cab-0728-11d3-9d7b-0000f81ef32e}"));
-	private static readonly ImageFormat emf =
-			new ImageFormat
-				(new Guid("{b96b3cac-0728-11d3-9d7b-0000f81ef32e}"));
-	private static readonly ImageFormat exif =
-			new ImageFormat
-				(new Guid("{b96b3cb2-0728-11d3-9d7b-0000f81ef32e}"));
-	private static readonly ImageFormat gif =
-			new ImageFormat
-				(new Guid("{b96b3cb0-0728-11d3-9d7b-0000f81ef32e}"));
-	private static readonly ImageFormat icon =
-			new ImageFormat
-				(new Guid("{b96b3cb5-0728-11d3-9d7b-0000f81ef32e}"));
-	private static readonly ImageFormat jpeg =
-			new ImageFormat
-				(new Guid("{b96b3cae-0728-11d3-9d7b-0000f81ef32e}"));
-	private static readonly ImageFormat memoryBmp =
-			new ImageFormat
-				(new Guid("{b96b3caa-0728-11d3-9d7b-0000f81ef32e}"));
-	private static readonly ImageFormat png =
-			new ImageFormat
-				(new Guid("{b96b3caf-0728-11d3-9d7b-0000f81ef32e}"));
-	private static readonly ImageFormat tiff =
-			new ImageFormat
-				(new Guid("{b96b3cb1-0728-11d3-9d7b-0000f81ef32e}"));
-	private static readonly ImageFormat wmf =
-			new ImageFormat
-				(new Guid("{b96b3cad-0728-11d3-9d7b-0000f81ef32e}"));
 
 	// Constructor.
 	public ImageFormat(Guid guid)
@@ -75,79 +45,38 @@ public sealed class ImageFormat
 			}
 
 	// Standard image formats.
-	public static ImageFormat Bmp
-			{
-				get
-				{
-					return bmp;
-				}
-			}
-	public static ImageFormat Emf
-			{
-				get
-				{
-					return emf;
-				}
-			}
-	public static ImageFormat Exif
-			{
-				get
-				{
-					return exif;
-				}
-			}
-	public static ImageFormat Gif
-			{
-				get
-				{
-					return gif;
-				}
-			}
-	public static ImageFormat Icon
-			{
-				get
-				{
-					return icon;
-				}
-			}
-	public static ImageFormat Jpeg
-			{
-				get
-				{
-					return jpeg;
-				}
-			}
-	public static ImageFormat MemoryBmp
-			{
-				get
-				{
-					return memoryBmp;
-				}
-			}
-	public static ImageFormat Png
-			{
-				get
-				{
-					return png;
-				}
-			}
-	public static ImageFormat Tiff
-			{
-				get
-				{
-					return tiff;
-				}
-			}
-	public static ImageFormat Wmf
-			{
-				get
-				{
-					return wmf;
-				}
-			}
+	public static ImageFormat Bmp { get; } = new ImageFormat
+		(new Guid("{b96b3cab-0728-11d3-9d7b-0000f81ef32e}"));
+
+	public static ImageFormat Emf { get; } = new ImageFormat
+		(new Guid("{b96b3cac-0728-11d3-9d7b-0000f81ef32e}"));
+
+	public static ImageFormat Exif { get; } = new ImageFormat
+		(new Guid("{b96b3cb2-0728-11d3-9d7b-0000f81ef32e}"));
+
+	public static ImageFormat Gif { get; } = new ImageFormat
+		(new Guid("{b96b3cb0-0728-11d3-9d7b-0000f81ef32e}"));
+
+	public static ImageFormat Icon { get; } = new ImageFormat
+		(new Guid("{b96b3cb5-0728-11d3-9d7b-0000f81ef32e}"));
+
+	public static ImageFormat Jpeg { get; } = new ImageFormat
+		(new Guid("{b96b3cae-0728-11d3-9d7b-0000f81ef32e}"));
+
+	public static ImageFormat MemoryBmp { get; } = new ImageFormat
+		(new Guid("{b96b3caa-0728-11d3-9d7b-0000f81ef32e}"));
+
+	public static ImageFormat Png { get; } = new ImageFormat
+		(new Guid("{b96b3caf-0728-11d3-9d7b-0000f81ef32e}"));
+
+	public static ImageFormat Tiff { get; } = new ImageFormat
+		(new Guid("{b96b3cb1-0728-11d3-9d7b-0000f81ef32e}"));
+
+	public static ImageFormat Wmf { get; } = new ImageFormat
+		(new Guid("{b96b3cad-0728-11d3-9d7b-0000f81ef32e}"));
 
 	// Determine if two objects are equal.
-	public override bool Equals(Object obj)
+	public override bool Equals(object obj)
 			{
 				ImageFormat other = (obj as ImageFormat);
 				if(other != null)
@@ -167,45 +96,45 @@ public sealed class ImageFormat
 			}
 
 	// Convert this object into a string.
-	public override String ToString()
+	public override string ToString()
 			{
-				if(this == bmp)
+				if(this == Bmp)
 				{
 					return "Bmp";
 				}
-				else if(this == emf)
+				else if(this == Emf)
 				{
 					return "Emf";
 				}
-				else if(this == exif)
+				else if(this == Exif)
 				{
 					return "Exif";
 				}
-				else if(this == gif)
+				else if(this == Gif)
 				{
 					return "Gif";
 				}
-				else if(this == icon)
+				else if(this == Icon)
 				{
 					return "Icon";
 				}
-				else if(this == jpeg)
+				else if(this == Jpeg)
 				{
 					return "Jpeg";
 				}
-				else if(this == memoryBmp)
+				else if(this == MemoryBmp)
 				{
 					return "MemoryBMP";
 				}
-				else if(this == png)
+				else if(this == Png)
 				{
 					return "Png";
 				}
-				else if(this == tiff)
+				else if(this == Tiff)
 				{
 					return "Tiff";
 				}
-				else if(this == wmf)
+				else if(this == Wmf)
 				{
 					return "Wmf";
 				}

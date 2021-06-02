@@ -23,90 +23,28 @@ namespace System.Drawing.Imaging
 {
 
 using System;
-using System.Runtime.InteropServices;
+using Runtime.InteropServices;
 
 public sealed class BitmapData
 {
 	// Internal state.
-	private int height;
-	private PixelFormat pixelFormat;
-	private int reserved;
-	private IntPtr scan0;
-	private int stride;
-	private int width;
 	internal GCHandle dataHandle;
 
 	// Constructor.
 	public BitmapData() {}
 
 	// Get or set this object's properties.
-	public int Height
-			{
-				get
-				{
-					return height;
-				}
-				set
-				{
-					height = value;
-				}
-			}
-	public PixelFormat PixelFormat
-			{
-				get
-				{
-					return pixelFormat;
-				}
-				set
-				{
-					pixelFormat = value;
-				}
-			}
-	public int Reserved
-			{
-				get
-				{
-					return reserved;
-				}
-				set
-				{
-					reserved = value;
-				}
-			}
-	public IntPtr Scan0
-			{
-				get
-				{
-					return scan0;
-				}
-				set
-				{
-					scan0 = value;
-				}
-			}
-	public int Stride
-			{
-				get
-				{
-					return stride;
-				}
-				set
-				{
-					stride = value;
-				}
-			}
-	public int Width
-			{
-				get
-				{
-					return width;
-				}
-				set
-				{
-					width = value;
-				}
-			}
+	public int Height { get; set; }
 
+	public PixelFormat PixelFormat { get; set; }
+
+	public int Reserved { get; set; }
+
+	public IntPtr Scan0 { get; set; }
+
+	public int Stride { get; set; }
+
+	public int Width { get; set; }
 }; // class BitmapData
 
 }; // namespace System.Drawing.Imaging

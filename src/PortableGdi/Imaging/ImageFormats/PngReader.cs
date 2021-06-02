@@ -991,7 +991,6 @@ namespace System.Drawing.Imaging.ImageFormats
 		// Internal state.
 		private Stream stream;
 		private uint length;
-		private int type;
 		private Crc32 crc;
 		private bool crcChecked;
 
@@ -1007,7 +1006,7 @@ namespace System.Drawing.Imaging.ImageFormats
 						throw new FormatException("truncated chunk header");
 					}
 					length = (uint)(Utils.ReadInt32B(buffer, 0));
-					type = Utils.ReadInt32B(buffer, 4);
+					Type = Utils.ReadInt32B(buffer, 4);
 
 					// Initialize the checksum process.
 					crc = new Crc32();
@@ -1025,13 +1024,7 @@ namespace System.Drawing.Imaging.ImageFormats
 				}
 
 		// Get the chunk type.
-		public int Type
-				{
-					get
-					{
-						return type;
-					}
-				}
+		public int Type { get; private set; }
 
 		// Read data from the chunk.
 		public int Read(byte[] buffer, int offset, int count)
@@ -1091,7 +1084,7 @@ namespace System.Drawing.Imaging.ImageFormats
 						throw new FormatException("truncated chunk header");
 					}
 					length = (uint)(Utils.ReadInt32B(buffer, 0));
-					type = Utils.ReadInt32B(buffer, 4);
+					Type = Utils.ReadInt32B(buffer, 4);
 
 					// Reset the checksum computation.
 					crc.Reset();
@@ -1114,9 +1107,9 @@ namespace System.Drawing.Imaging.ImageFormats
 		public ZlibDecompressor(ChunkReader reader)
 				{
 					this.reader = reader;
-					this.buffer = new byte [1024];
-					this.inflater = new Inflater();
-					this.done = false;
+					buffer = new byte [1024];
+					inflater = new Inflater();
+					done = false;
 				}
 
 		// Read more input from the IDAT chunks.  False if no more.
@@ -1321,7 +1314,7 @@ namespace System.Drawing.Imaging.ImageFormats
 
 					// Initialize the other values.
 					this.decompressor = decompressor;
-					this.y = 0;
+					y = 0;
 					this.height = height;
 				}
 

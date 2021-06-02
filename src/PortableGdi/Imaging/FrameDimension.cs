@@ -28,15 +28,6 @@ public sealed class FrameDimension
 {
 	// Internal state.
 	private Guid guid;
-	private static readonly FrameDimension page =
-			new FrameDimension
-				(new Guid("{7462dc86-6180-4c7e-8e3f-ee7333a7a483}"));
-	private static readonly FrameDimension resolution =
-			new FrameDimension
-				(new Guid("{84236f7b-3bd3-428f-8dab-4ea1439ca315}"));
-	private static readonly FrameDimension time =
-			new FrameDimension
-				(new Guid("{6aedbd6d-3fb5-418a-83a6-7f45229dc872}"));
 
 	// Constructor.
 	public FrameDimension(Guid guid)
@@ -54,30 +45,17 @@ public sealed class FrameDimension
 			}
 
 	// Get standard frame dimension objects.
-	public static FrameDimension Page
-			{
-				get
-				{
-					return page;
-				}
-			}
-	public static FrameDimension Resolution
-			{
-				get
-				{
-					return resolution;
-				}
-			}
-	public static FrameDimension Time
-			{
-				get
-				{
-					return time;
-				}
-			}
+	public static FrameDimension Page { get; } = new FrameDimension
+		(new Guid("{7462dc86-6180-4c7e-8e3f-ee7333a7a483}"));
+
+	public static FrameDimension Resolution { get; } = new FrameDimension
+		(new Guid("{84236f7b-3bd3-428f-8dab-4ea1439ca315}"));
+
+	public static FrameDimension Time { get; } = new FrameDimension
+		(new Guid("{6aedbd6d-3fb5-418a-83a6-7f45229dc872}"));
 
 	// Determine if two objects are equal.
-	public override bool Equals(Object obj)
+	public override bool Equals(object obj)
 			{
 				FrameDimension other = (obj as FrameDimension);
 				if(other != null)
@@ -97,17 +75,17 @@ public sealed class FrameDimension
 			}
 
 	// Convert this object into a string.
-	public override String ToString()
+	public override string ToString()
 			{
-				if(this == page)
+				if(this == Page)
 				{
 					return "Page";
 				}
-				else if(this == resolution)
+				else if(this == Resolution)
 				{
 					return "Resolution";
 				}
-				else if(this == time)
+				else if(this == Time)
 				{
 					return "Time";
 				}

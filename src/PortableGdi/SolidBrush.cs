@@ -21,7 +21,7 @@
 namespace System.Drawing
 {
 
-    using System.Drawing.Toolkit;
+    using Toolkit;
 
     public sealed class SolidBrush : Brush
     {
@@ -52,13 +52,13 @@ namespace System.Drawing
         }
 
         // Clone this brush.
-        public override Object Clone()
+        public override object Clone()
         {
             return new SolidBrush(color);
         }
 
         // Create this brush for a specific toolkit.  Inner part of "GetBrush()".
-        internal override IToolkitBrush CreateBrush(IToolkit toolkit)
+        protected override IToolkitBrush CreateBrush(IToolkit toolkit)
         {
             return toolkit.CreateSolidBrush(color);
         }

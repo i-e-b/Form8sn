@@ -22,7 +22,7 @@
 namespace System.Drawing.Imaging
 {
 
-using System.Drawing.Drawing2D;
+using Drawing2D;
 
 public sealed class ImageAttributes : ICloneable, IDisposable
 {
@@ -51,7 +51,7 @@ public sealed class ImageAttributes : ICloneable, IDisposable
 		public float gamma;
 		public bool noOp;
 		public ColorChannelFlag channelFlags;
-		public String profile;
+		public string profile;
 		public ColorMap[] map;
 		public float threshold;
 
@@ -63,7 +63,7 @@ public sealed class ImageAttributes : ICloneable, IDisposable
 				}
 
 		// Clone this object.
-		public Object Clone()
+		public object Clone()
 				{
 					AttributeInfo info = (AttributeInfo)(MemberwiseClone());
 					if(next != null)
@@ -192,7 +192,7 @@ public sealed class ImageAttributes : ICloneable, IDisposable
 			}
 
 	// Clone this object.
-	public Object Clone()
+	public object Clone()
 			{
 				ImageAttributes attrs = (ImageAttributes)(MemberwiseClone());
 				if(info != null)
@@ -310,12 +310,12 @@ public sealed class ImageAttributes : ICloneable, IDisposable
 			}
 
 	// Set an output channel color profile setting.
-	public void SetOutputChannelColorProfile(String colorProfileFilename)
+	public void SetOutputChannelColorProfile(string colorProfileFilename)
 			{
 				SetOutputChannelColorProfile(colorProfileFilename,
 											 ColorAdjustType.Default);
 			}
-	public void SetOutputChannelColorProfile(String colorProfileFilename,
+	public void SetOutputChannelColorProfile(string colorProfileFilename,
 											 ColorAdjustType type)
 			{
 				GetInfo(type).profile = colorProfileFilename;

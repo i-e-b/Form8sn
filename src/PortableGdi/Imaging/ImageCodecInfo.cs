@@ -21,190 +21,76 @@
 
 namespace System.Drawing.Imaging
 {
+    using Runtime.InteropServices;
 
-using System.Runtime.InteropServices;
-[Flags]
-public enum ImageCodecFlags
-{
-	Encoder			= 0x00000001,
-	Decoder			= 0x00000002,
-	SupportBitmap	= 0x00000004,
-	SupportVector	= 0x00000008,
-	SeekableEncode	= 0x00000010,
-	BlockingDecoder	= 0x00000020,
-	Builtin			= 0x00010000,
-	System			= 0x00020000,
-	User			= 0x00040000
-
-};
+    [Flags]
+    public enum ImageCodecFlags
+    {
+        Encoder = 0x00000001,
+        Decoder = 0x00000002,
+        SupportBitmap = 0x00000004,
+        SupportVector = 0x00000008,
+        SeekableEncode = 0x00000010,
+        BlockingDecoder = 0x00000020,
+        Builtin = 0x00010000,
+        System = 0x00020000,
+        User = 0x00040000
+    };
 #if !ECMA_COMPAT
-[ComVisible(false)]
+    [ComVisible(false)]
 #endif
-public sealed class ImageCodecInfo
-{
-	// Internal state.
+    public sealed class ImageCodecInfo
+    {
+        // Internal state.
 #if !ECMA_COMPAT
-	private Guid clsid;
-	private Guid formatId;
 #endif
-	private String codecName;
-	private String dllName;
-	private String filenameExtension;
-	private ImageCodecFlags flags;
-	private String formatDescription;
-	private String mimeType;
-	private byte[][] signatureMasks;
-	private byte[][] signaturePatterns;
-	private int version;
 
-	// Constructor.
-	internal ImageCodecInfo() {}
+        // Constructor.
+        internal ImageCodecInfo()
+        {
+            SignatureMasks = new byte[][]{};
+            SignaturePatterns = new byte[][]{};
+        }
 
-	// Get or set this object's properties.
+        // Get or set this object's properties.
 #if !ECMA_COMPAT
-	public Guid Clsid
-			{
-				get
-				{
-					return clsid;
-				}
-				set
-				{
-					clsid = value;
-				}
-			}
+        public Guid Clsid { get; set; }
 #endif
-	public String CodecName
-			{
-				get
-				{
-					return codecName;
-				}
-				set
-				{
-					codecName = value;
-				}
-			}
-	public String DllName
-			{
-				get
-				{
-					return dllName;
-				}
-				set
-				{
-					dllName = value;
-				}
-			}
-	public String FilenameExtension
-			{
-				get
-				{
-					return filenameExtension;
-				}
-				set
-				{
-					filenameExtension = value;
-				}
-			}
-	public ImageCodecFlags Flags
-			{
-				get
-				{
-					return flags;
-				}
-				set
-				{
-					flags = value;
-				}
-			}
-	public String FormatDescription
-			{
-				get
-				{
-					return formatDescription;
-				}
-				set
-				{
-					formatDescription = value;
-				}
-			}
+        public string CodecName { get; set; }="";
+
+        public string DllName { get; set; }="";
+
+        public string FilenameExtension { get; set; }="";
+
+        public ImageCodecFlags Flags { get; set; }
+
+        public string FormatDescription { get; set; }="";
 #if !ECMA_COMPAT
-	public Guid FormatID
-			{
-				get
-				{
-					return formatId;
-				}
-				set
-				{
-					formatId = value;
-				}
-			}
+        // ReSharper disable once InconsistentNaming
+        public Guid FormatID { get; set; }
 #endif
-	public String MimeType
-			{
-				get
-				{
-					return mimeType;
-				}
-				set
-				{
-					mimeType = value;
-				}
-			}
-	[CLSCompliant(false)]
-	public byte[][] SignatureMasks
-			{
-				get
-				{
-					return signatureMasks;
-				}
-				set
-				{
-					signatureMasks = value;
-				}
-			}
-	[CLSCompliant(false)]
-	public byte[][] SignaturePatterns
-			{
-				get
-				{
-					return signaturePatterns;
-				}
-				set
-				{
-					signaturePatterns = value;
-				}
-			}
-	public int Version
-			{
-				get
-				{
-					return version;
-				}
-				set
-				{
-					version = value;
-				}
-			}
+        public string MimeType { get; set; }="";
 
-	// Find all image decoders.
-	[TODO]
-	public static ImageCodecInfo[] GetImageDecoders()
-			{
-				// TODO
-				return null;
-			}
+        public byte[][] SignatureMasks { get; set; }
 
-	// Find all image encoders.
-	[TODO]
-	public static ImageCodecInfo[] GetImageEncoders()
-			{
-				// TODO
-				return null;
-			}
+        public byte[][] SignaturePatterns { get; set; }
 
-}; // class ImageCodecInfo
+        public int Version { get; set; }
 
+        // Find all image decoders.
+        [TODO]
+        public static ImageCodecInfo[] GetImageDecoders()
+        {
+            // TODO
+            return new ImageCodecInfo[0];
+        }
+
+        // Find all image encoders.
+        [TODO]
+        public static ImageCodecInfo[] GetImageEncoders()
+        {
+            // TODO
+            return new ImageCodecInfo[0];
+        }
+    }; // class ImageCodecInfo
 }; // namespace System.Drawing.Imaging

@@ -25,123 +25,31 @@ namespace System.Drawing.Imaging
 public sealed class WmfPlaceableFileHeader
 {
 	// Internal state.
-	private short bboxBottom;
-	private short bboxLeft;
-	private short bboxRight;
-	private short bboxTop;
-	private short checksum;
-	private short hmf;
-	private short inch;
-	private int key;
-	private int reserved;
 
 	// Constructor.
 	public WmfPlaceableFileHeader()
 			{
-				key = unchecked((int)0x9AC6CDD7);
+				Key = unchecked((int)0x9AC6CDD7);
 			}
 
 	// Get or set this object's properties.
-	public short BboxBottom
-			{
-				get
-				{
-					return bboxBottom;
-				}
-				set
-				{
-					bboxBottom = value;
-				}
-			}
-	public short BboxLeft
-			{
-				get
-				{
-					return bboxLeft;
-				}
-				set
-				{
-					bboxLeft = value;
-				}
-			}
-	public short BboxRight
-			{
-				get
-				{
-					return bboxRight;
-				}
-				set
-				{
-					bboxRight = value;
-				}
-			}
-	public short BboxTop
-			{
-				get
-				{
-					return bboxTop;
-				}
-				set
-				{
-					bboxTop = value;
-				}
-			}
-	public short Checksum
-			{
-				get
-				{
-					return checksum;
-				}
-				set
-				{
-					checksum = value;
-				}
-			}
-	public short Hmf
-			{
-				get
-				{
-					return hmf;
-				}
-				set
-				{
-					hmf = value;
-				}
-			}
-	public short Inch
-			{
-				get
-				{
-					return inch;
-				}
-				set
-				{
-					inch = value;
-				}
-			}
-	public int Key
-			{
-				get
-				{
-					return key;
-				}
-				set
-				{
-					key = value;
-				}
-			}
-	public int Reserved
-			{
-				get
-				{
-					return reserved;
-				}
-				set
-				{
-					reserved = value;
-				}
-			}
+	public short BboxBottom { get; set; }
 
+	public short BboxLeft { get; set; }
+
+	public short BboxRight { get; set; }
+
+	public short BboxTop { get; set; }
+
+	public short Checksum { get; set; }
+
+	public short Hmf { get; set; }
+
+	public short Inch { get; set; }
+
+	public int Key { get; set; }
+
+	public int Reserved { get; set; }
 }; // class WmfPlaceableFileHeader
 
 }; // namespace System.Drawing.Imaging

@@ -22,7 +22,7 @@
 namespace System.Drawing.Toolkit
 {
 
-    using System.Drawing.Printing;
+    using Printing;
 
     [NonStandardExtra]
     public interface IToolkitPrintSession

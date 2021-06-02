@@ -47,47 +47,34 @@ namespace System.Drawing.Printing
     public class PaperSource
     {
         // Internal state.
-        private PaperSourceKind kind;
-        private String name;
 
         // Constructor.
-        internal PaperSource(PaperSourceKind kind, String name)
+        internal PaperSource(PaperSourceKind kind, string name)
         {
-            this.kind = kind;
+            Kind = kind;
             if(name == null)
             {
-                this.name = kind.ToString();
+                SourceName = kind.ToString();
             }
             else
             {
-                this.name = name;
+                SourceName = name;
             }
         }
 
         // Get the paper kind.
-        public PaperSourceKind Kind
-        {
-            get
-            {
-                return kind;
-            }
-        }
-        public String SourceName
-        {
-            get
-            {
-                return name;
-            }
-        }
+        public PaperSourceKind Kind { get; }
+
+        public string SourceName { get; }
 
         // Convert this object into a string.
-        public override String ToString()
+        public override string ToString()
         {
             StringBuilder builder = new StringBuilder();
             builder.Append("[PaperSource ");
-            builder.Append(name);
+            builder.Append(SourceName);
             builder.Append(" Kind=");
-            builder.Append(kind.ToString());
+            builder.Append(Kind.ToString());
             builder.Append(']');
             return builder.ToString();
         }

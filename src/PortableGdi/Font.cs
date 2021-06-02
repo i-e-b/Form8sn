@@ -22,10 +22,10 @@ namespace System.Drawing
 {
 
 using System.Text;
-using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.Drawing.Toolkit;
-using System.ComponentModel;
+using Runtime.InteropServices;
+using Runtime.Serialization;
+using Toolkit;
+using ComponentModel;
 
 // enum GraphicsUnit
 
@@ -46,69 +46,39 @@ public sealed class Font
 #endif
 {
 	// Internal state.
-	private IToolkit toolkit;
-	private IToolkitFont toolkitFont;
-	private FontFamily fontFamily;
-	private FontStyle fontStyle;
-	private byte gdiCharSet;
-	private bool gdiVerticalFont;
-	private float size;
-	private GraphicsUnit unit;
+	private IToolkit? _toolkit;
+	private IToolkitFont? _toolkitFont;
+
 	// Cached height of the font in pixels.
-	private int pixelHeight;
+	private int _pixelHeight;
 
 	// Constructors.
 	public Font(Font prototype, FontStyle newStyle)
 			: this(prototype.FontFamily, prototype.Size, newStyle,
 				   prototype.Unit, prototype.GdiCharSet,
 				   prototype.GdiVerticalFont) {}
-	public Font(FontFamily family, float emSize)
-			: this(family, emSize, FontStyle.Regular,
-			       GraphicsUnit.Point, 1, false) {}
-	public Font(FontFamily family, float emSize, FontStyle style)
-			: this(family, emSize, style, GraphicsUnit.Point, 1, false) {}
-	public Font(FontFamily family, float emSize, GraphicsUnit unit)
-			: this(family, emSize, FontStyle.Regular, unit, 1, false) {}
-	public Font(FontFamily family, float emSize, FontStyle style,
-				GraphicsUnit unit)
-			: this(family, emSize, style, unit, 1, false) {}
-	public Font(FontFamily family, float emSize, FontStyle style,
-				GraphicsUnit unit, byte gdiCharSet)
-			: this(family, emSize, style, unit, gdiCharSet, false) {}
-	public Font(String familyName, float emSize)
-			: this(new FontFamily(familyName), emSize,
-			       FontStyle.Regular, GraphicsUnit.Point, 1, false) {}
-	public Font(String familyName, float emSize, FontStyle style)
-			: this(new FontFamily(familyName), emSize,
-			       style, GraphicsUnit.Point, 1, false) {}
-	public Font(String familyName, float emSize, GraphicsUnit unit)
-			: this(new FontFamily(familyName), emSize,
-			       FontStyle.Regular, unit, 1, false) {}
-	public Font(String familyName, float emSize, FontStyle style,
-				GraphicsUnit unit)
-			: this(new FontFamily(familyName), emSize,
-			       style, unit, 1, false) {}
-	public Font(String familyName, float emSize, FontStyle style,
-				GraphicsUnit unit, byte gdiCharSet)
-			: this(new FontFamily(familyName), emSize,
-			       style, unit, gdiCharSet, false) {}
-	public Font(String familyName, float emSize, FontStyle style,
-				GraphicsUnit unit, byte gdiCharSet, bool gdiVerticalFont)
-			: this(new FontFamily(familyName), emSize,
-			       style, unit, gdiCharSet, gdiVerticalFont) {}
-	public Font(FontFamily family, float emSize, FontStyle style,
+	public Font(FontFamily family, float emSize) : this(family, emSize, FontStyle.Regular, GraphicsUnit.Point, 1, false) {}
+	public Font(FontFamily family, float emSize, FontStyle style) : this(family, emSize, style, GraphicsUnit.Point, 1, false) {}
+	public Font(FontFamily family, float emSize, GraphicsUnit unit) : this(family, emSize, FontStyle.Regular, unit, 1, false) {}
+	public Font(FontFamily family, float emSize, FontStyle style, GraphicsUnit unit) : this(family, emSize, style, unit, 1, false) {}
+	public Font(FontFamily family, float emSize, FontStyle style, GraphicsUnit unit, byte gdiCharSet) : this(family, emSize, style, unit, gdiCharSet, false) {}
+	public Font(string familyName, float emSize) : this(new FontFamily(familyName), emSize, FontStyle.Regular, GraphicsUnit.Point, 1, false) {}
+	public Font(string familyName, float emSize, FontStyle style) : this(new FontFamily(familyName), emSize, style, GraphicsUnit.Point, 1, false) {}
+	public Font(string familyName, float emSize, GraphicsUnit unit) : this(new FontFamily(familyName), emSize, FontStyle.Regular, unit, 1, false) {}
+	public Font(string familyName, float emSize, FontStyle style, GraphicsUnit unit) : this(new FontFamily(familyName), emSize, style, unit, 1, false) {}
+	public Font(string familyName, float emSize, FontStyle style, GraphicsUnit unit, byte gdiCharSet) : this(new FontFamily(familyName), emSize, style, unit, gdiCharSet, false) {}
+	public Font(string familyName, float emSize, FontStyle style, GraphicsUnit unit, byte gdiCharSet, bool gdiVerticalFont) : this(new FontFamily(familyName), emSize, style, unit, gdiCharSet, gdiVerticalFont) {}
+	public Font(FontFamily? family, float emSize, FontStyle style,
 				GraphicsUnit unit, byte gdiCharSet, bool gdiVerticalFont)
 			{
-				if(family == null)
-				{
-					throw new ArgumentNullException("family");
-				}
-				this.fontFamily = family;
-				this.size = emSize;
-				this.fontStyle = style;
-				this.unit = unit;
-				this.gdiCharSet = gdiCharSet;
-				this.gdiVerticalFont = gdiVerticalFont;
+				FontFamily = family ?? throw new ArgumentNullException(nameof(family));
+				OriginalFontName = family.Name;
+				SystemFontName = family.Name;
+				Size = emSize;
+				Style = style;
+				Unit = unit;
+				GdiCharSet = gdiCharSet;
+				GdiVerticalFont = gdiVerticalFont;
 			}
 #if CONFIG_SERIALIZATION
 	internal Font(SerializationInfo info, StreamingContext context)
@@ -129,8 +99,8 @@ public sealed class Font
 #endif
 	private Font(IToolkitFont font)
 			{
-				this.toolkit = toolkit;
-				this.toolkitFont = font;
+				_toolkit = _toolkit;
+				_toolkitFont = font;
 				// TODO: load the font information from the IToolkitFont
 			}
 
@@ -148,39 +118,21 @@ public sealed class Font
 			{
 				get
 				{
-					return ((fontStyle & FontStyle.Bold) != 0);
+					return ((Style & FontStyle.Bold) != 0);
 				}
 			}
 #if CONFIG_COMPONENT_MODEL
 	[Browsable(false)]
 #endif
-	public FontFamily FontFamily
-			{
-				get
-				{
-					return fontFamily;
-				}
-			}
+	public FontFamily FontFamily { get; }
 #if CONFIG_COMPONENT_MODEL
 	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 #endif
-	public byte GdiCharSet
-			{
-				get
-				{
-					return gdiCharSet;
-				}
-			}
+	public byte GdiCharSet { get; }
 #if CONFIG_COMPONENT_MODEL
 	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 #endif
-	public bool GdiVerticalFont
-			{
-				get
-				{
-					return gdiVerticalFont;
-				}
-			}
+	public bool GdiVerticalFont { get; }
 #if CONFIG_COMPONENT_MODEL
 	[Browsable(false)]
 #endif
@@ -202,7 +154,7 @@ public sealed class Font
 			{
 				get
 				{
-					return ((fontStyle & FontStyle.Italic) != 0);
+					return ((Style & FontStyle.Italic) != 0);
 				}
 			}
 #if CONFIG_COMPONENT_MODEL
@@ -213,20 +165,14 @@ public sealed class Font
 	[Editor("System.Drawing.Design.FontNameEditor, System.Drawing.Design",
 			typeof(UITypeEditor))]
 #endif
-	public String Name
+	public string Name
 			{
 				get
 				{
-					return fontFamily.Name;
+					return FontFamily.Name;
 				}
 			}
-	public float Size
-			{
-				get
-				{
-					return size;
-				}
-			}
+	public float Size { get; }
 #if CONFIG_COMPONENT_MODEL
 	[Browsable(false)]
 #endif
@@ -235,7 +181,7 @@ public sealed class Font
 				get
 				{
 					float adjust;
-					switch(unit)
+					switch(Unit)
 					{
 						case GraphicsUnit.World:
 						case GraphicsUnit.Pixel:
@@ -253,7 +199,7 @@ public sealed class Font
 
 						case GraphicsUnit.Point:
 						{
-							return size;
+							return Size;
 						}
 						// Not reached.
 
@@ -275,7 +221,7 @@ public sealed class Font
 						}
 						break;
 					}
-					return size * adjust;
+					return Size * adjust;
 				}
 			}
 #if CONFIG_COMPONENT_MODEL
@@ -285,48 +231,32 @@ public sealed class Font
 			{
 				get
 				{
-					return ((fontStyle & FontStyle.Strikeout) != 0);
+					return ((Style & FontStyle.Strikeout) != 0);
 				}
 			}
 #if CONFIG_COMPONENT_MODEL
 	[Browsable(false)]
 #endif
-	public FontStyle Style
-			{
-				get
-				{
-					return fontStyle;
-				}
-			}
+	public FontStyle Style { get; }
 #if CONFIG_COMPONENT_MODEL
 	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 #endif
-	public bool Underline
-			{
-				get
-				{
-					return ((fontStyle & FontStyle.Underline) != 0);
-				}
-			}
+	public bool Underline => ((Style & FontStyle.Underline) != 0);
 #if CONFIG_COMPONENT_MODEL
 	[TypeConverter(typeof(FontConverter.FontUnitConverter))]
 #endif
-	public GraphicsUnit Unit
-			{
-				get
-				{
-					return unit;
-				}
-			}
+	public GraphicsUnit Unit { get; }
+	public string OriginalFontName { get; set; }
+	public string SystemFontName { get; set; }
 
 	// Clone this object.
-	public Object Clone()
+	public object Clone()
 			{
 				lock(this)
 				{
 					Font font = (Font)(MemberwiseClone());
-					font.toolkit = null;
-					font.toolkitFont = null;
+					font._toolkit = null;
+					font._toolkitFont = null;
 					return font;
 				}
 			}
@@ -336,17 +266,17 @@ public sealed class Font
 			{
 				lock(this)
 				{
-					if(toolkitFont != null)
+					if(_toolkitFont != null)
 					{
-						toolkitFont.Dispose();
-						toolkitFont = null;
+						_toolkitFont.Dispose();
+						_toolkitFont = null;
 					}
-					toolkit = null;
+					_toolkit = null;
 				}
 			}
 
 	// Determine if two objects are equal.
-	public override bool Equals(Object obj)
+	public override bool Equals(object obj)
 			{
 				Font other = (obj as Font);
 				if(other != null)
@@ -366,8 +296,8 @@ public sealed class Font
 	// Get a hash code for this object.
 	public override int GetHashCode()
 			{
-				return Name.GetHashCode() + (((int)size) << 4) +
-				       (int)fontStyle;
+				return Name.GetHashCode() + (((int)Size) << 4) +
+				       (int)Style;
 			}
 
 	// Extract the active font from a native device context.
@@ -401,11 +331,11 @@ public sealed class Font
 			}
 
 	// Convert a native logical font descriptor into a font object.
-	public static Font FromLogFont(Object lf)
+	public static Font FromLogFont(object lf)
 			{
 				return FromLogFont(lf, IntPtr.Zero);
 			}
-	public static Font FromLogFont(Object lf, IntPtr hdc)
+	public static Font FromLogFont(object lf, IntPtr hdc)
 			{
 				IToolkitFont font;
 				font = ToolkitManager.Toolkit.GetFontFromLogFont(lf, hdc);
@@ -432,21 +362,21 @@ public sealed class Font
 				}
 				
 				// Get the font size in raw pixels.
-				if (pixelHeight == 0)
-					pixelHeight = graphics.GetLineSpacing(this);
+				if (_pixelHeight == 0)
+					_pixelHeight = graphics.GetLineSpacing(this);
 
 				// If the graphics object uses pixels (the most common case),
 				// then return the pixel value directly.
 				if(graphics.IsPixelUnits())
 				{
-					return (float)pixelHeight;
+					return (float)_pixelHeight;
 				}
 
 				// Get the dpi of the screen for the y axis.
 				float dpiY = graphics.DpiY;
 
 				// Convert the pixel value back into points.
-				float points = ((float)pixelHeight) / (dpiY / 72.0f);
+				float points = ((float)_pixelHeight) / (dpiY / 72.0f);
 
 				// Convert the points into the graphics object's unit.
 				switch(graphics.PageUnit)
@@ -488,35 +418,35 @@ public sealed class Font
 			}
 	public float GetHeight(float dpi)
 			{
-				if(unit == GraphicsUnit.World || unit == GraphicsUnit.Pixel)
+				if(Unit == GraphicsUnit.World || Unit == GraphicsUnit.Pixel)
 				{
 					return GetHeight(Graphics.DefaultGraphics);
 				}
 				else
 				{
-					return fontFamily.GetLineSpacing(fontStyle) *
-							(size / fontFamily.GetEmHeight(fontStyle)) * dpi / 72f;
+					return FontFamily.GetLineSpacing(Style) *
+							(Size / FontFamily.GetEmHeight(Style)) * dpi / 72f;
 				}
 			}
 
 	// Convert this object into a native font handle.
 	public IntPtr ToHfont()
 			{
-				if(toolkitFont == null)
+				if(_toolkitFont == null)
 				{
 					IToolkit toolkit = ToolkitManager.Toolkit;
 					float dpiY = toolkit.GetDefaultGraphics().DpiY;
 					GetFont(toolkit, dpiY);
 				}
-				return toolkitFont.GetHfont();
+				return _toolkitFont.GetHfont();
 			}
 
 	// Fill in a native font information structure with info about this font.
-	public void ToLogFont(Object lf)
+	public void ToLogFont(object lf)
 			{
 				ToLogFont(lf, null);
 			}
-	public void ToLogFont(Object lf, Graphics graphics)
+	public void ToLogFont(object lf, Graphics graphics)
 			{
 				IToolkitGraphics g;
 				if(graphics != null)
@@ -529,7 +459,7 @@ public sealed class Font
 				}
 				lock(this)
 				{
-					if(toolkitFont == null)
+					if(_toolkitFont == null)
 					{
 						if(g != null)
 						{
@@ -542,12 +472,12 @@ public sealed class Font
 							GetFont(toolkit, dpiY);
 						}
 					}
-					toolkitFont.ToLogFont(lf, g);
+					_toolkitFont.ToLogFont(lf, g);
 				}
 			}
 
 	// Convert this object into a string.
-	public override String ToString()
+	public override string ToString()
 			{
 				StringBuilder builder = new StringBuilder();
 				builder.Append("[Font: Name=");
@@ -596,17 +526,17 @@ public sealed class Font
 			{
 				lock(this)
 				{
-					if(this.toolkitFont == null)
+					if(_toolkitFont == null)
 					{
 						// We don't yet have a toolkit font yet.
-						this.toolkitFont = toolkit.CreateFont(this, dpi);
-						this.toolkit = toolkit;
-						return this.toolkitFont;
+						_toolkitFont = toolkit.CreateFont(this, dpi);
+						this._toolkit = toolkit;
+						return _toolkitFont;
 					}
-					else if(this.toolkit == toolkit)
+					else if(this._toolkit == toolkit)
 					{
 						// Same toolkit - return the cached pen information.
-						return this.toolkitFont;
+						return _toolkitFont;
 					}
 					else
 					{
@@ -615,11 +545,11 @@ public sealed class Font
 						// We null out "toolkitFont" before calling
 						// "CreateFont()" just in case an exception
 						// is thrown while creating the toolkit font.
-						this.toolkitFont.Dispose();
-						this.toolkitFont = null;
-						this.toolkitFont = toolkit.CreateFont(this, dpi);
-						this.toolkit = toolkit;
-						return this.toolkitFont;
+						_toolkitFont.Dispose();
+						_toolkitFont = null;
+						_toolkitFont = toolkit.CreateFont(this, dpi);
+						this._toolkit = toolkit;
+						return _toolkitFont;
 					}
 				}
 			}

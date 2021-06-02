@@ -24,12 +24,12 @@ using System.Drawing.Imaging.ImageFormats;
 namespace System.Drawing
 {
 
-using System.IO;
-using System.Security;
-using System.Runtime.Serialization;
-using System.Runtime.InteropServices;
-using System.ComponentModel;
-using System.Drawing.Toolkit;
+using IO;
+using Security;
+using Runtime.Serialization;
+using Runtime.InteropServices;
+using ComponentModel;
+using Toolkit;
 
 #if !ECMA_COMPAT
 [Serializable]
@@ -63,7 +63,7 @@ public sealed class Icon : MarshalByRefObject, ICloneable, IDisposable
 				Load(stream);
 				SelectFrame(width, height);
 			}
-	public Icon(String filename)
+	public Icon(string filename)
 			{
 				FileStream stream = new FileStream
 					(filename, FileMode.Open, FileAccess.Read);
@@ -83,7 +83,7 @@ public sealed class Icon : MarshalByRefObject, ICloneable, IDisposable
 			{
 				SelectFrame(width, height);
 			}
-	public Icon(Type type, String resource)
+	public Icon(Type type, string resource)
 			{
 				Stream stream = Bitmap.GetManifestResourceStream
 					(type, resource);
@@ -213,7 +213,7 @@ public sealed class Icon : MarshalByRefObject, ICloneable, IDisposable
 			}
 
 	// Implement the ICloneable interface.
-	public Object Clone()
+	public object Clone()
 			{
 				return new Icon(this);
 			}
@@ -285,7 +285,7 @@ public sealed class Icon : MarshalByRefObject, ICloneable, IDisposable
 			}
 
 	// Convert this object into a string.
-	public override String ToString()
+	public override string ToString()
 			{
 				return "Icon: " + Width + ", " + Height;
 			}

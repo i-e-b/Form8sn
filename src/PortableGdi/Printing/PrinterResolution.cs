@@ -34,45 +34,26 @@ namespace System.Drawing.Printing
     public class PrinterResolution
     {
         // Internal state.
-        private PrinterResolutionKind kind;
-        private int x;
-        private int y;
 
         // Constructors.
         internal PrinterResolution(PrinterResolutionKind kind, int x, int y)
         {
-            this.kind = kind;
-            this.x = x;
-            this.y = y;
+            Kind = kind;
+            X = x;
+            Y = y;
         }
 
         // Get this object's properties.
-        public PrinterResolutionKind Kind
-        {
-            get
-            {
-                return kind;
-            }
-        }
-        public int X
-        {
-            get
-            {
-                return x;
-            }
-        }
-        public int Y
-        {
-            get
-            {
-                return y;
-            }
-        }
+        public PrinterResolutionKind Kind { get; }
+
+        public int X { get; }
+
+        public int Y { get; }
 
         // Convert this object into a string.
-        public override String ToString()
+        public override string ToString()
         {
-            return "[PrinterResolution " + kind.ToString() + "]";
+            return "[PrinterResolution " + Kind.ToString() + "]";
         }
 
     }; // class PrinterResolution

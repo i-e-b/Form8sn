@@ -56,39 +56,39 @@ public interface IToolkitClipboard
 {
 	// Register a format name and get its clipboard identifier.
 	// Returns -1 if the system does not use clipboard identifiers.
-	int RegisterFormat(String name);
+	int RegisterFormat(string name);
 
 	// Get the format name for a particular clipboard identifier.
 	// Returns null if the clipboard identifier is not recognized.
-	String GetFormat(int id);
+	string GetFormat(int id);
 
 	// Set the contents of the X selection.
-	void SetSelection(String text, int index, int count);
+	void SetSelection(string text, int index, int count);
 
 	// Get the contents of the X selection.
-	String GetSelection();
+	string GetSelection();
 
 	// Start a clipboard set operation.  If "copy" is "true", then the
 	// data should persist beyond the lifetime of the current application.
 	void StartSet(bool copy);
 
 	// Set data for a particular format on the clipboard.
-	void SetData(String format, byte[] data);
+	void SetData(string format, byte[] data);
 
 	// Set plain text string data on the clipboard
-	void SetStringData(String text, int index, int count);
+	void SetStringData(string text, int index, int count);
 
 	// End a clipboard set operation.
 	void EndSet();
 
 	// Get the data formats that are currently on the clipboard.
-	String[] GetFormats();
+	string[] GetFormats();
 
 	// Get the data associated with a particular format; null if none.
-	byte[] GetData(String format);
+	byte[] GetData(string format);
 
 	// Get plain text string data from the clipboard; null if none.
-	String GetStringData();
+	string GetStringData();
 
 }; // interface IToolkitClipboard
 

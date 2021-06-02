@@ -553,8 +553,8 @@ namespace System.Drawing.Imaging.ImageFormats
 		public ChunkWriter(Stream stream)
 				{
 					this.stream = stream;
-					this.crc = new Crc32();
-					this.header = new byte [8];
+					crc = new Crc32();
+					header = new byte [8];
 				}
 
 		// Start a chunk with a particular type.
@@ -614,10 +614,10 @@ namespace System.Drawing.Imaging.ImageFormats
 		public ZlibCompressor(ChunkWriter writer)
 				{
 					this.writer = writer;
-					this.deflater = new Deflater();
-					this.outBuffer = new byte [4096];
-					this.outLen = 0;
-					this.wroteBlock = false;
+					deflater = new Deflater();
+					outBuffer = new byte [4096];
+					outLen = 0;
+					wroteBlock = false;
 				}
 
 		// Write data to this compressor.
@@ -712,7 +712,6 @@ namespace System.Drawing.Imaging.ImageFormats
 		private int bytesPerLine;
 		private int bytesPerPixel;
 		private bool usePaeth;
-		private byte[] scanline;
 		private byte[] prevScanline;
 		private byte[] paeth;
 		private byte[] filter;
@@ -724,9 +723,9 @@ namespace System.Drawing.Imaging.ImageFormats
 				{
 					// Initialize the object.
 					this.compressor = compressor;
-					this.usePaeth = true;
-					this.filter = new byte [1];
-					this.y = 0;
+					usePaeth = true;
+					filter = new byte [1];
+					y = 0;
 
 					// Get the scanline size parameters.
 					switch(format)
@@ -784,26 +783,20 @@ namespace System.Drawing.Imaging.ImageFormats
 					}
 
 					// Allocate space for the scanline buffers.
-					scanline = new byte [bytesPerLine];
+					Buffer = new byte [bytesPerLine];
 					prevScanline = new byte [bytesPerLine];
 					paeth = (usePaeth ? new byte [bytesPerLine] : null);
 				}
 
 		// Get the scanline buffer for the current scanline.
-		public byte[] Buffer
-				{
-					get
-					{
-						return scanline;
-					}
-				}
+		public byte[] Buffer { get; private set; }
 
 		// Flush the current scanline.
 		public void FlushScanline()
 				{
 					byte[] temp;
 					int x, posn, width;
-					int bpp = this.bytesPerPixel;
+					int bpp = bytesPerPixel;
 					int bytesPerLine = this.bytesPerLine;
 
 					// Filter the scanline.  We use a fairly simple approach,
@@ -817,14 +810,14 @@ namespace System.Drawing.Imaging.ImageFormats
 						temp = paeth;
 						for(posn = 0; posn < bpp; ++posn)
 						{
-							temp[posn] = (byte)(scanline[posn] -
+							temp[posn] = (byte)(Buffer[posn] -
 								PngReader.Paeth(0, prevScanline[posn], 0));
 						}
 						for(posn = bpp; posn < bytesPerLine; ++posn)
 						{
-							temp[posn] = (byte)(scanline[posn] -
+							temp[posn] = (byte)(Buffer[posn] -
 								PngReader.Paeth
-									(scanline[posn - bpp],
+									(Buffer[posn - bpp],
 									 prevScanline[posn],
 									 prevScanline[posn - bpp]));
 						}
@@ -833,7 +826,7 @@ namespace System.Drawing.Imaging.ImageFormats
 					else
 					{
 						// No filter is needed for this scanline.
-						temp = scanline;
+						temp = Buffer;
 						filter[0] = 0;
 					}
 
@@ -842,8 +835,8 @@ namespace System.Drawing.Imaging.ImageFormats
 					compressor.Write(temp, 0, bytesPerLine);
 
 					// Swap the buffers and advance to the next scanline.
-					temp = scanline;
-					scanline = prevScanline;
+					temp = Buffer;
+					Buffer = prevScanline;
 					prevScanline = temp;
 					++y;
 				}

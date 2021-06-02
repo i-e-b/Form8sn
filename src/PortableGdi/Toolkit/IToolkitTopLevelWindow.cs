@@ -72,7 +72,7 @@ namespace System.Drawing.Toolkit
         void SetMinimumSize(Size size);
 
         // Set the window title.
-        void SetTitle(String title);
+        void SetTitle(string title);
 
         // Change the set of supported window decorations and functions.
         void SetWindowFlags(ToolkitWindowFlags flags);

@@ -25,12 +25,8 @@ namespace System.Drawing.Printing
 public class PrintPageEventArgs : EventArgs
 {
 	// Internal state.
-	private bool cancel;
-	private bool hasMorePages;
 	internal Graphics graphics;
-	private Rectangle marginBounds;
 	private Rectangle pageBounds;
-	private PageSettings pageSettings;
 
 	// Constructor.
 	public PrintPageEventArgs(Graphics graphics,
@@ -38,39 +34,30 @@ public class PrintPageEventArgs : EventArgs
 							  Rectangle pageBounds,
 							  PageSettings pageSettings)
 			{
-				this.cancel = false;
-				this.hasMorePages = false;
+				Cancel = false;
+				HasMorePages = false;
 				this.graphics = graphics;
-				this.marginBounds = marginBounds;
+				MarginBounds = marginBounds;
 				this.pageBounds = pageBounds;
-				this.pageSettings = pageSettings;
+				PageSettings = pageSettings;
 			}
 	internal PrintPageEventArgs(PageSettings pageSettings)
 			{
-				this.cancel = false;
-				this.hasMorePages = false;
-				this.graphics = null;
-				this.pageBounds = pageSettings.Bounds;
+				Cancel = false;
+				HasMorePages = false;
+				graphics = null;
+				pageBounds = pageSettings.Bounds;
 				Margins margins = pageSettings.Margins;
-				this.marginBounds = new Rectangle
+				MarginBounds = new Rectangle
 					(margins.Left, margins.Top,
 					 pageBounds.Width - margins.Left - margins.Right,
 					 pageBounds.Height - margins.Top - margins.Bottom);
-				this.pageSettings = pageSettings;
+				PageSettings = pageSettings;
 			}
 
 	// Event properties.
-	public bool Cancel
-			{
-				get
-				{
-					return cancel;
-				}
-				set
-				{
-					cancel = value;
-				}
-			}
+	public bool Cancel { get; set; }
+
 	public Graphics Graphics
 			{
 				get
@@ -78,24 +65,10 @@ public class PrintPageEventArgs : EventArgs
 					return graphics;
 				}
 			}
-	public bool HasMorePages
-			{
-				get
-				{
-					return hasMorePages;
-				}
-				set
-				{
-					hasMorePages = value;
-				}
-			}
-	public Rectangle MarginBounds
-			{
-				get
-				{
-					return marginBounds;
-				}
-			}
+	public bool HasMorePages { get; set; }
+
+	public Rectangle MarginBounds { get; }
+
 	public Rectangle PageBounds
 			{
 				get
@@ -103,14 +76,7 @@ public class PrintPageEventArgs : EventArgs
 					return pageBounds;
 				}
 			}
-	public PageSettings PageSettings
-			{
-				get
-				{
-					return pageSettings;
-				}
-			}
-
+	public PageSettings PageSettings { get; }
 }; // class PrintPageEventArgs
 
 }; // namespace System.Drawing.Printing

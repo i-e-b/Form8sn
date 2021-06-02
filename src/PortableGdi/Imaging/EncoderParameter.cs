@@ -42,19 +42,19 @@ public sealed class EncoderParameter : IDisposable
 	private sealed class Tuple
 	{
 		// Accessible state.
-		public Object value1;
-		public Object value2;
-		public Object value3;
-		public Object value4;
+		public object value1;
+		public object value2;
+		public object value3;
+		public object value4;
 
 		// Constructor.
-		public Tuple(Object value1, Object value2)
+		public Tuple(object value1, object value2)
 				{
 					this.value1 = value1;
 					this.value2 = value2;
 				}
-		public Tuple(Object value1, Object value2,
-					 Object value3, Object value4)
+		public Tuple(object value1, object value2,
+					 object value3, object value4)
 				{
 					this.value1 = value1;
 					this.value2 = value2;
@@ -66,23 +66,21 @@ public sealed class EncoderParameter : IDisposable
 
 	// Internal state.
 	private Guid encoder;
-	private int numberOfValues;
-	private EncoderParameterValueType type;
-	private Object value;
+	private object value;
 
 	// Constructors.
 	public EncoderParameter(Encoder encoder, byte value)
 			{
 				this.encoder = encoder.Guid;
-				this.numberOfValues = 1;
-				this.type = EncoderParameterValueType.ValueTypeByte;
+				NumberOfValues = 1;
+				Type = EncoderParameterValueType.ValueTypeByte;
 				this.value = value;
 			}
 	public EncoderParameter(Encoder encoder, byte value, bool undefined)
 			{
 				this.encoder = encoder.Guid;
-				this.numberOfValues = 1;
-				this.type = (undefined ?
+				NumberOfValues = 1;
+				Type = (undefined ?
 							  EncoderParameterValueType.ValueTypeUndefined :
 							  EncoderParameterValueType.ValueTypeByte);
 				this.value = value;
@@ -90,15 +88,15 @@ public sealed class EncoderParameter : IDisposable
 	public EncoderParameter(Encoder encoder, byte[] value)
 			{
 				this.encoder = encoder.Guid;
-				this.numberOfValues = value.Length;
-				this.type = EncoderParameterValueType.ValueTypeByte;
+				NumberOfValues = value.Length;
+				Type = EncoderParameterValueType.ValueTypeByte;
 				this.value = value;
 			}
 	public EncoderParameter(Encoder encoder, byte[] value, bool undefined)
 			{
 				this.encoder = encoder.Guid;
-				this.numberOfValues = value.Length;
-				this.type = (undefined ?
+				NumberOfValues = value.Length;
+				Type = (undefined ?
 							  EncoderParameterValueType.ValueTypeUndefined :
 							  EncoderParameterValueType.ValueTypeByte);
 				this.value = value;
@@ -106,83 +104,83 @@ public sealed class EncoderParameter : IDisposable
 	public EncoderParameter(Encoder encoder, short value)
 			{
 				this.encoder = encoder.Guid;
-				this.numberOfValues = 1;
-				this.type = EncoderParameterValueType.ValueTypeShort;
+				NumberOfValues = 1;
+				Type = EncoderParameterValueType.ValueTypeShort;
 				this.value = value;
 			}
 	public EncoderParameter(Encoder encoder, short[] value)
 			{
 				this.encoder = encoder.Guid;
-				this.numberOfValues = value.Length;
-				this.type = EncoderParameterValueType.ValueTypeShort;
+				NumberOfValues = value.Length;
+				Type = EncoderParameterValueType.ValueTypeShort;
 				this.value = value;
 			}
 	public EncoderParameter(Encoder encoder, long value)
 			{
 				this.encoder = encoder.Guid;
-				this.numberOfValues = 1;
-				this.type = EncoderParameterValueType.ValueTypeLong;
+				NumberOfValues = 1;
+				Type = EncoderParameterValueType.ValueTypeLong;
 				this.value = value;
 			}
 	public EncoderParameter(Encoder encoder, long[] value)
 			{
 				this.encoder = encoder.Guid;
-				this.numberOfValues = value.Length;
-				this.type = EncoderParameterValueType.ValueTypeLong;
+				NumberOfValues = value.Length;
+				Type = EncoderParameterValueType.ValueTypeLong;
 				this.value = value;
 			}
-	public EncoderParameter(Encoder encoder, String value)
+	public EncoderParameter(Encoder encoder, string value)
 			{
 				this.encoder = encoder.Guid;
-				this.numberOfValues = value.Length + 1;
-				this.type = EncoderParameterValueType.ValueTypeAscii;
+				NumberOfValues = value.Length + 1;
+				Type = EncoderParameterValueType.ValueTypeAscii;
 				this.value = value;
 			}
 	public EncoderParameter(Encoder encoder, int numerator, int denominator)
 			{
 				this.encoder = encoder.Guid;
-				this.numberOfValues = 1;
-				this.type = EncoderParameterValueType.ValueTypeRational;
-				this.value = new Tuple(numerator, denominator);
+				NumberOfValues = 1;
+				Type = EncoderParameterValueType.ValueTypeRational;
+				value = new Tuple(numerator, denominator);
 			}
 	public EncoderParameter(Encoder encoder, int[] numerator,
 							int[] denominator)
 			{
 				this.encoder = encoder.Guid;
-				this.numberOfValues = numerator.Length;
-				this.type = EncoderParameterValueType.ValueTypeRational;
-				this.value = new Tuple(numerator, denominator);
+				NumberOfValues = numerator.Length;
+				Type = EncoderParameterValueType.ValueTypeRational;
+				value = new Tuple(numerator, denominator);
 			}
 	public EncoderParameter(Encoder encoder, long rangebegin, long rangeend)
 			{
 				this.encoder = encoder.Guid;
-				this.numberOfValues = 1;
-				this.type = EncoderParameterValueType.ValueTypeLongRange;
-				this.value = new Tuple(rangebegin, rangeend);
+				NumberOfValues = 1;
+				Type = EncoderParameterValueType.ValueTypeLongRange;
+				value = new Tuple(rangebegin, rangeend);
 			}
 	public EncoderParameter(Encoder encoder, long[] rangebegin,
 							long[] rangeend)
 			{
 				this.encoder = encoder.Guid;
-				this.numberOfValues = rangebegin.Length;
-				this.type = EncoderParameterValueType.ValueTypeLongRange;
-				this.value = new Tuple(rangebegin, rangeend);
+				NumberOfValues = rangebegin.Length;
+				Type = EncoderParameterValueType.ValueTypeLongRange;
+				value = new Tuple(rangebegin, rangeend);
 			}
 	public EncoderParameter(Encoder encoder, int NumberOfValues,
 							int Type, int Value)
 			{
 				this.encoder = encoder.Guid;
-				this.numberOfValues = NumberOfValues;
-				this.type = (EncoderParameterValueType)Type;
-				this.value = Value;
+				this.NumberOfValues = NumberOfValues;
+				this.Type = (EncoderParameterValueType)Type;
+				value = Value;
 			}
 	public EncoderParameter(Encoder encoder, int numerator1, int denominator1,
 							int numerator2, int denominator2)
 			{
 				this.encoder = encoder.Guid;
-				this.numberOfValues = 1;
-				this.type = EncoderParameterValueType.ValueTypeRationalRange;
-				this.value = new Tuple(numerator1, denominator1,
+				NumberOfValues = 1;
+				Type = EncoderParameterValueType.ValueTypeRationalRange;
+				value = new Tuple(numerator1, denominator1,
 									   numerator2, denominator2);
 			}
 	public EncoderParameter(Encoder encoder, int[] numerator1,
@@ -190,9 +188,9 @@ public sealed class EncoderParameter : IDisposable
 							int[] denominator2)
 			{
 				this.encoder = encoder.Guid;
-				this.numberOfValues = numerator1.Length;
-				this.type = EncoderParameterValueType.ValueTypeRationalRange;
-				this.value = new Tuple(numerator1, denominator1,
+				NumberOfValues = numerator1.Length;
+				Type = EncoderParameterValueType.ValueTypeRationalRange;
+				value = new Tuple(numerator1, denominator1,
 									   numerator2, denominator2);
 			}
 
@@ -208,27 +206,17 @@ public sealed class EncoderParameter : IDisposable
 					encoder = value.Guid;
 				}
 			}
-	public int NumberOfValues
-			{
-				get
-				{
-					return numberOfValues;
-				}
-			}
-	public EncoderParameterValueType Type
-			{
-				get
-				{
-					return type;
-				}
-			}
+	public int NumberOfValues { get; }
+
+	public EncoderParameterValueType Type { get; }
+
 	public EncoderParameterValueType ValueType
 			{
 				get
 				{
 					// For some reason, the API defines two ways
 					// of obtaining the same value.
-					return type;
+					return Type;
 				}
 			}
 

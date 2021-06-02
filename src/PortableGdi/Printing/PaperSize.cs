@@ -27,60 +27,59 @@ using System.Text;
 public class PaperSize
 {
 	// Internal state.
-	private PaperKind kind;
-	private String name;
+	private string name;
 	private int width;
 	private int height;
 
 	// Constructors.
-	public PaperSize(String name, int width, int height)
+	public PaperSize(string name, int width, int height)
 			{
-				this.kind = PaperKind.Custom;
+				Kind = PaperKind.Custom;
 				this.name = name;
 				this.width = width;
 				this.height = height;
 			}
 	internal PaperSize(PaperKind kind)
 			{
-				this.kind = kind;
-				this.name = kind.ToString();
+				Kind = kind;
+				name = kind.ToString();
 				// TODO: need to add all of the rest of the paper sizes.
 				switch(kind)
 				{
 					case PaperKind.Letter:
 					{
-						this.width = 850;
-						this.height = 1100;
+						width = 850;
+						height = 1100;
 					}
 					break;
 
 					case PaperKind.A4:
 					{
-						this.width = 857;
-						this.height = 1212;
+						width = 857;
+						height = 1212;
 					}
 					break;
 
 					case PaperKind.Executive:
 					{
-						this.width = 725;
-						this.height = 1050;
+						width = 725;
+						height = 1050;
 					}
 					break;
 
 					case PaperKind.Legal:
 					{
-						this.width = 850;
-						this.height = 1400;
+						width = 850;
+						height = 1400;
 					}
 					break;
 
 					default:
 					{
 						// Unknown paper size, so switch to "Letter".
-						this.kind = PaperKind.Letter;
-						this.width = 850;
-						this.height = 1100;
+						Kind = PaperKind.Letter;
+						width = 850;
+						height = 1100;
 					}
 					break;
 				}
@@ -95,21 +94,16 @@ public class PaperSize
 				}
 				set
 				{
-					if(kind != PaperKind.Custom)
+					if(Kind != PaperKind.Custom)
 					{
 						throw new ArgumentException("Arg_PaperSizeNotCustom");
 					}
 					height = value;
 				}
 			}
-	public PaperKind Kind
-			{
-				get
-				{
-					return kind;
-				}
-			}
-	public String PaperName
+	public PaperKind Kind { get; }
+
+	public string PaperName
 			{
 				get
 				{
@@ -117,7 +111,7 @@ public class PaperSize
 				}
 				set
 				{
-					if(kind != PaperKind.Custom)
+					if(Kind != PaperKind.Custom)
 					{
 						throw new ArgumentException("Arg_PaperSizeNotCustom");
 					}
@@ -132,7 +126,7 @@ public class PaperSize
 				}
 				set
 				{
-					if(kind != PaperKind.Custom)
+					if(Kind != PaperKind.Custom)
 					{
 						throw new ArgumentException("Arg_PaperSizeNotCustom");
 					}
@@ -141,13 +135,13 @@ public class PaperSize
 			}
 
 	// Convert this object into a string.
-	public override String ToString()
+	public override string ToString()
 			{
 				StringBuilder builder = new StringBuilder();
 				builder.Append("[PaperSize ");
 				builder.Append(name);
 				builder.Append(" Kind=");
-				builder.Append(kind.ToString());
+				builder.Append(Kind.ToString());
 				builder.Append(" Height=");
 				builder.Append(height.ToString());
 				builder.Append(" Width=");

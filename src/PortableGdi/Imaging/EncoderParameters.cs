@@ -27,35 +27,24 @@ namespace System.Drawing.Imaging
     public sealed class EncoderParameters : IDisposable
     {
         // Internal state.
-        private EncoderParameter[] parameters;
 
         // Constructors.
         public EncoderParameters()
         {
-            parameters = new EncoderParameter [1];
+            Param = new EncoderParameter [1];
         }
         public EncoderParameters(int count)
         {
-            parameters = new EncoderParameter [count];
+            Param = new EncoderParameter [count];
         }
 
         // Get or set the parameter array.
-        public EncoderParameter[] Param
-        {
-            get
-            {
-                return parameters;
-            }
-            set
-            {
-                parameters = value;
-            }
-        }
+        public EncoderParameter[] Param { get; set; }
 
         // Dispose this object.
         public void Dispose()
         {
-            parameters = null;
+            Param = null;
             GC.SuppressFinalize(this);
         }
 

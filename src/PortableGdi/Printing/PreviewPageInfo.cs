@@ -25,32 +25,18 @@ namespace System.Drawing.Printing
     public sealed class PreviewPageInfo
     {
         // Internal state.
-        private Image image;
-        private Size physicalSize;
 
         // Constructor.
         public PreviewPageInfo(Image image, Size physicalSize)
         {
-            this.image = image;
-            this.physicalSize = physicalSize;
+            Image = image;
+            PhysicalSize = physicalSize;
         }
 
         // Get this object's properties.
-        public Image Image
-        {
-            get
-            {
-                return image;
-            }
-        }
-        public Size PhysicalSize
-        {
-            get
-            {
-                return physicalSize;
-            }
-        }
+        public Image Image { get; }
 
+        public Size PhysicalSize { get; }
     }; // class PreviewPageInfo
 
 }; // namespace System.Drawing.Printing

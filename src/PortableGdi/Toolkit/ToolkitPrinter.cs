@@ -22,7 +22,7 @@
 namespace System.Drawing.Toolkit
 {
 
-using System.Drawing.Printing;
+using Printing;
 
 [NonStandardExtra]
 public interface IToolkitPrinter
@@ -34,7 +34,7 @@ public interface IToolkitPrinter
 	bool IsPlotter { get; }
 
 	// Get the output port for the printer.  String.Empty if none.
-	String OutputPort { get; }
+	string OutputPort { get; }
 
 	// Get the paper sizes supported by this printer.
 	PaperSize[] PaperSizes { get; }

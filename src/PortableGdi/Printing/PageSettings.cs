@@ -22,7 +22,7 @@
 namespace System.Drawing.Printing
 {
 
-using System.Runtime.InteropServices;
+using Runtime.InteropServices;
 using System.Text;
 
 #if !ECMA_COMPAT
@@ -203,7 +203,7 @@ public class PageSettings : ICloneable
 			}
 
 	// Clone this object.
-	public Object Clone()
+	public object Clone()
 			{
 				return MemberwiseClone();
 			}
@@ -221,7 +221,7 @@ public class PageSettings : ICloneable
 			}
 
 	// Convert this object into a string.
-	public override String ToString()
+	public override string ToString()
 			{
 				StringBuilder builder = new StringBuilder();
 				builder.Append("[PageSettings: Color=");

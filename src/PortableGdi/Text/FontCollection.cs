@@ -22,17 +22,17 @@
 namespace System.Drawing.Text
 {
 
-    using System.Collections;
+    using Collections;
 
     public abstract class FontCollection : IDisposable
     {
         // Internal state.
-        private ArrayList families;
+        private readonly ArrayList _families;
 
         // Constructor.
         internal FontCollection()
         {
-            families = new ArrayList();
+            _families = new ArrayList();
         }
 
         // Destructor.
@@ -44,7 +44,7 @@ namespace System.Drawing.Text
         // Add an element to this collection.
         internal void Add(FontFamily family)
         {
-            families.Add(family);
+            _families.Add(family);
         }
 
         // Dispose of this object.
@@ -59,15 +59,7 @@ namespace System.Drawing.Text
         }
 
         // Get the font families.
-        public FontFamily[] Families
-        {
-            get
-            {
-                return (FontFamily[])
-                    (families.ToArray(typeof(FontFamily)));
-            }
-        }
-
+        public FontFamily[] Families => (FontFamily[]) (_families.ToArray(typeof(FontFamily)));
     }; // class FontCollection
 
 }; // namespace System.Drawing.Text

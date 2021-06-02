@@ -29,7 +29,7 @@ namespace System.Drawing.Toolkit
         IntPtr GetHfont();
 
         // Get the LOGFONT information for this toolkit font.
-        void ToLogFont(Object lf, IToolkitGraphics graphics);
+        void ToLogFont(object lf, IToolkitGraphics graphics);
 
     }; // interface IToolkitFont
 

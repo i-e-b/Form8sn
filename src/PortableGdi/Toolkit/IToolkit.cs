@@ -23,10 +23,10 @@ using System.Drawing.Imaging.ImageFormats;
 namespace System.Drawing.Toolkit
 {
 
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.Drawing.Text;
-using System.Threading;
+using Drawing2D;
+using Imaging;
+using Text;
+using Threading;
 
 [NonStandardExtra]
 public interface IToolkit
@@ -132,7 +132,7 @@ public interface IToolkit
 
 	// Get font family metric information.
 	void GetFontFamilyMetrics(GenericFontFamilies genericFamily,
-							  String name, FontStyle style,
+							  string name, FontStyle style,
 							  out int ascent, out int descent,
 							  out int emHeight, out int lineSpacing);
 
@@ -146,7 +146,7 @@ public interface IToolkit
 
 	// Get the IToolkitFont that corresponds to LOGFONT information.
 	// Returns null if there is no way to obtain the information.
-	IToolkitFont GetFontFromLogFont(Object lf, IntPtr hdc);
+	IToolkitFont GetFontFromLogFont(object lf, IntPtr hdc);
 
 	// Get the default IToolkitGraphics object to measure screen sizes.
 	IToolkitGraphics GetDefaultGraphics();
@@ -167,10 +167,10 @@ public interface IToolkit
 
 	// Register a timer that should fire every "interval" milliseconds.
 	// Returns a cookie that can be used to identify the timer.
-	Object RegisterTimer(Object owner, int interval, EventHandler expire);
+	object RegisterTimer(object owner, int interval, EventHandler expire);
 
 	// Unregister a timer.
-	void UnregisterTimer(Object cookie);
+	void UnregisterTimer(object cookie);
 
 	// Convert a client point for a window into a screen point.
 	Point ClientToScreen(IToolkitWindow window, Point point);

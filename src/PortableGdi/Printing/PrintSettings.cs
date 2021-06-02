@@ -22,11 +22,11 @@
 namespace System.Drawing.Printing
 {
 
-using System.Drawing.Toolkit;
+using Toolkit;
 using System.Text;
-using System.Runtime.InteropServices;
-using System.ComponentModel;
-using System.Collections;
+using Runtime.InteropServices;
+using ComponentModel;
+using Collections;
 
 public enum Duplex
 {
@@ -57,11 +57,10 @@ public class PrinterSettings : ICloneable
 	private Duplex duplex;
 	private int fromPage;
 	private int landscapeAngle;
-	private int maximumCopies;
 	private int maximumPage;
 	private int minimumPage;
 	[NonSerializedAttribute]
-	private String printerName;
+	private string printerName;
 	private PrintRange printRange;
 	private bool printToFile;
 	private int toPage;
@@ -75,7 +74,7 @@ public class PrinterSettings : ICloneable
 				duplex = Duplex.Default;
 				fromPage = 0;
 				landscapeAngle = 0;
-				maximumCopies = 1;
+				MaximumCopies = 1;
 				maximumPage = 9999;
 				minimumPage = 0;
 				printerName = null;
@@ -198,13 +197,8 @@ public class PrinterSettings : ICloneable
 					landscapeAngle = value;
 				}
 			}
-	public int MaximumCopies
-			{
-				get
-				{
-					return maximumCopies;
-				}
-			}
+	public int MaximumCopies { get; }
+
 	public int MaximumPage
 			{
 				get
@@ -235,7 +229,7 @@ public class PrinterSettings : ICloneable
 					minimumPage = value;
 				}
 			}
-	public String PrinterName
+	public string PrinterName
 			{
 				get
 				{
@@ -361,7 +355,7 @@ public class PrinterSettings : ICloneable
 			}
 
 	// Clone this object.
-	public Object Clone()
+	public object Clone()
 			{
 				return MemberwiseClone();
 			}
@@ -408,7 +402,7 @@ public class PrinterSettings : ICloneable
 #endif
 
 	// Convert this object into a string.
-	public override String ToString()
+	public override string ToString()
 			{
 				StringBuilder builder = new StringBuilder();
 				builder.Append("[PrinterSettings ");
@@ -492,7 +486,7 @@ public class PrinterSettings : ICloneable
 						return false;
 					}
 				}
-		Object ICollection.SyncRoot
+		object ICollection.SyncRoot
 				{
 					get
 					{
@@ -548,7 +542,7 @@ public class PrinterSettings : ICloneable
 						return false;
 					}
 				}
-		Object ICollection.SyncRoot
+		object ICollection.SyncRoot
 				{
 					get
 					{
@@ -604,7 +598,7 @@ public class PrinterSettings : ICloneable
 						return false;
 					}
 				}
-		Object ICollection.SyncRoot
+		object ICollection.SyncRoot
 				{
 					get
 					{
@@ -624,16 +618,16 @@ public class PrinterSettings : ICloneable
 	public class StringCollection : ICollection, IEnumerable
 	{
 		// Internal state.
-		private String[] array;
+		private string[] array;
 
 		// Constructor.
-		public StringCollection(String[] array)
+		public StringCollection(string[] array)
 				{
 					this.array = array;
 				}
 
 		// Get a specific element within this collection.
-		public virtual String this[int index]
+		public virtual string this[int index]
 				{
 					get
 					{
@@ -660,7 +654,7 @@ public class PrinterSettings : ICloneable
 						return false;
 					}
 				}
-		Object ICollection.SyncRoot
+		object ICollection.SyncRoot
 				{
 					get
 					{

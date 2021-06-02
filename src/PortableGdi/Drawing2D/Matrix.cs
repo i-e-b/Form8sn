@@ -31,7 +31,7 @@ namespace System.Drawing.Drawing2D
 public sealed class Matrix : MarshalByRefObject, IDisposable
 {
 	// Internal state.
-	private float m11, m12, m21, m22, dx, dy;
+	private float m11, m12, m21, m22;
 
 	// Constructors.
 	public Matrix()
@@ -40,8 +40,8 @@ public sealed class Matrix : MarshalByRefObject, IDisposable
 				m12 = 0.0f;
 				m21 = 0.0f;
 				m22 = 1.0f;
-				dx  = 0.0f;
-				dy  = 0.0f;
+				OffsetX  = 0.0f;
+				OffsetY  = 0.0f;
 			}
 	public Matrix(Rectangle rect, Point[] plgpts)
 			{
@@ -89,12 +89,12 @@ public sealed class Matrix : MarshalByRefObject, IDisposable
                                                 plgpts[2].X - plgpts[0].X,
                                                 plgpts[2].Y - plgpts[0].Y
                                                 ); 
-                                this.dx = plgpts[0].X-rect.X/rect.Width*v1.X-rect.Y/rect.Height*v2.X;
-                                this.dy = plgpts[0].Y-rect.X/rect.Width*v1.Y-rect.Y/rect.Height*v2.Y;
-                                this.m11 = v1.X / rect.Width ;
-                                this.m12 = v1.Y / rect.Width ;
-                                this.m21 = v2.X / rect.Height ;
-                                this.m22 = v2.Y / rect.Height ;
+                                OffsetX = plgpts[0].X-rect.X/rect.Width*v1.X-rect.Y/rect.Height*v2.X;
+                                OffsetY = plgpts[0].Y-rect.X/rect.Width*v1.Y-rect.Y/rect.Height*v2.Y;
+                                m11 = v1.X / rect.Width ;
+                                m12 = v1.Y / rect.Width ;
+                                m21 = v2.X / rect.Height ;
+                                m22 = v2.Y / rect.Height ;
 			}
 			
 	public Matrix Clone()
@@ -109,17 +109,17 @@ public sealed class Matrix : MarshalByRefObject, IDisposable
 				this.m12 = m12;
 				this.m21 = m21;
 				this.m22 = m22;
-				this.dx  = dx;
-				this.dy  = dy;
+				OffsetX  = dx;
+				OffsetY  = dy;
 			}
 	internal Matrix(Matrix matrix)
 			{
-				this.m11 = matrix.m11;
-				this.m12 = matrix.m12;
-				this.m21 = matrix.m21;
-				this.m22 = matrix.m22;
-				this.dx  = matrix.dx;
-				this.dy  = matrix.dy;
+				m11 = matrix.m11;
+				m12 = matrix.m12;
+				m21 = matrix.m21;
+				m22 = matrix.m22;
+				OffsetX  = matrix.OffsetX;
+				OffsetY  = matrix.OffsetY;
 			}
 
 
@@ -143,7 +143,7 @@ public sealed class Matrix : MarshalByRefObject, IDisposable
 				{
 					return (m11 == 1.0f && m12 == 0.0f &&
 							m21 == 0.0f && m22 == 1.0f &&
-							dx == 0.0f && dy == 0.0f);
+							OffsetX == 0.0f && OffsetY == 0.0f);
 				}
 			}
 
@@ -157,22 +157,10 @@ public sealed class Matrix : MarshalByRefObject, IDisposable
 			}
 
 	// Get the X offset value.
-	public float OffsetX
-			{
-				get
-				{
-					return dx;
-				}
-			}
+	public float OffsetX { get; private set; }
 
 	// Get the Y offset value.
-	public float OffsetY
-			{
-				get
-				{
-					return dy;
-				}
-			}
+	public float OffsetY { get; private set; }
 
 	// Dispose of this matrix.
 	public void Dispose()
@@ -181,14 +169,14 @@ public sealed class Matrix : MarshalByRefObject, IDisposable
 			}
 
 	// Determine if two matrices are equal.
-	public override bool Equals(Object obj)
+	public override bool Equals(object obj)
 			{
 				Matrix other = (obj as Matrix);
 				if(other != null)
 				{
 					return (other.m11 == m11 && other.m12 == m12 &&
 							other.m21 == m21 && other.m22 == m22 &&
-							other.dx == dx && other.dy == dy);
+							other.OffsetX == OffsetX && other.OffsetY == OffsetY);
 				}
 				else
 				{
@@ -199,7 +187,7 @@ public sealed class Matrix : MarshalByRefObject, IDisposable
 	// Get a hash code for this object.
 	public override int GetHashCode()
 			{
-				return (int)(m11 + m12 + m21 + m22 + dx + dy);
+				return (int)(m11 + m12 + m21 + m22 + OffsetX + OffsetY);
 			}
 
 	// Invert this matrix.
@@ -217,9 +205,9 @@ public sealed class Matrix : MarshalByRefObject, IDisposable
 					m12 = -(this.m12 / determinant);
 					m21 = -(this.m21 / determinant);
 					m22 = this.m11 / determinant;
-					dx  = (this.m21 * this.dy - this.m22 * this.dx)
+					dx  = (this.m21 * OffsetY - this.m22 * OffsetX)
 								/ determinant;
-					dy  = (this.m12 * this.dx - this.m11 * this.dy)
+					dy  = (this.m12 * OffsetX - this.m11 * OffsetY)
 								/ determinant;
 
 					// Write the temporary variables back to the matrix.
@@ -227,8 +215,8 @@ public sealed class Matrix : MarshalByRefObject, IDisposable
 					this.m12 = m12;
 					this.m21 = m21;
 					this.m22 = m22;
-					this.dx  = dx;
-					this.dy  = dy;
+					OffsetX  = dx;
+					OffsetY  = dy;
 				}
 			}
 
@@ -248,20 +236,20 @@ public sealed class Matrix : MarshalByRefObject, IDisposable
 					  matrix1.m22 * matrix2.m21;
 				m22 = matrix1.m21 * matrix2.m12 +
 				      matrix1.m22 * matrix2.m22;
-				dx  = matrix1.dx  * matrix2.m11 +
-				      matrix1.dy  * matrix2.m21 +
-					  matrix2.dx;
-				dy  = matrix1.dx  * matrix2.m12 +
-				      matrix1.dy  * matrix2.m22 +
-					  matrix2.dy;
+				dx  = matrix1.OffsetX  * matrix2.m11 +
+				      matrix1.OffsetY  * matrix2.m21 +
+					  matrix2.OffsetX;
+				dy  = matrix1.OffsetX  * matrix2.m12 +
+				      matrix1.OffsetY  * matrix2.m22 +
+					  matrix2.OffsetY;
 
 				// Write the result back into the "this" object.
 				this.m11 = m11;
 				this.m12 = m12;
 				this.m21 = m21;
 				this.m22 = m22;
-				this.dx  = dx;
-				this.dy  = dy;
+				OffsetX  = dx;
+				OffsetY  = dy;
 			}
 
 	// Multiply two matrices.
@@ -296,8 +284,8 @@ public sealed class Matrix : MarshalByRefObject, IDisposable
 				m12 = 0.0f;
 				m21 = 0.0f;
 				m22 = 1.0f;
-				dx  = 0.0f;
-				dy  = 0.0f;
+				OffsetX  = 0.0f;
+				OffsetY  = 0.0f;
 			}
 
 	// Perform a rotation on this matrix.
@@ -407,8 +395,8 @@ public sealed class Matrix : MarshalByRefObject, IDisposable
 					m12 *= scaleY;
 					m21 *= scaleX;
 					m22 *= scaleY;
-					dx  *= scaleX;
-					dy  *= scaleY;
+					OffsetX  *= scaleX;
+					OffsetY  *= scaleY;
 				}
 			}
 
@@ -451,15 +439,15 @@ public sealed class Matrix : MarshalByRefObject, IDisposable
 					m12 = this.m11 * shearY + this.m12;
 					m21 = this.m21 + this.m22 * shearX;
 					m22 = this.m21 * shearY + this.m22;
-					dx  = this.dx  + this.dy * shearX;
-					dy  = this.dx  * shearY + this.dy;
+					dx  = OffsetX  + OffsetY * shearX;
+					dy  = OffsetX  * shearY + OffsetY;
 
 					this.m11 = m11;
 					this.m12 = m12;
 					this.m21 = m21;
 					this.m22 = m22;
-					this.dx  = dx;
-					this.dy  = dy;
+					OffsetX  = dx;
+					OffsetY  = dy;
 				}
 			}
 
@@ -476,8 +464,8 @@ public sealed class Matrix : MarshalByRefObject, IDisposable
 				{
 					x = (float)(pts[posn].X);
 					y = (float)(pts[posn].Y);
-					pts[posn].X = (int)(x * m11 + y * m21 + dx);
-					pts[posn].Y = (int)(x * m12 + y * m22 + dy);
+					pts[posn].X = (int)(x * m11 + y * m21 + OffsetX);
+					pts[posn].Y = (int)(x * m12 + y * m22 + OffsetY);
 				}
 			}
 	public void TransformPoints(PointF[] pts)
@@ -492,8 +480,8 @@ public sealed class Matrix : MarshalByRefObject, IDisposable
 				{
 					x = pts[posn].X;
 					y = pts[posn].Y;
-					pts[posn].X = x * m11 + y * m21 + dx;
-					pts[posn].Y = x * m12 + y * m22 + dy;
+					pts[posn].X = x * m11 + y * m21 + OffsetX;
+					pts[posn].Y = x * m12 + y * m22 + OffsetY;
 				}
 			}
 
@@ -534,20 +522,20 @@ public sealed class Matrix : MarshalByRefObject, IDisposable
 	// Translate the matrix.
 	public void Translate(float offsetX, float offsetY)
 			{
-				dx += offsetX * m11 + offsetY * m21;
-				dy += offsetX * m12 + offsetY * m22;
+				OffsetX += offsetX * m11 + offsetY * m21;
+				OffsetY += offsetX * m12 + offsetY * m22;
 			}
 	public void Translate(float offsetX, float offsetY, MatrixOrder order)
 			{
 				if(order == MatrixOrder.Prepend)
 				{
-					dx += offsetX * m11 + offsetY * m21;
-					dy += offsetX * m12 + offsetY * m22;
+					OffsetX += offsetX * m11 + offsetY * m21;
+					OffsetY += offsetX * m12 + offsetY * m22;
 				}
 				else
 				{
-					dx += offsetX;
-					dy += offsetY;
+					OffsetX += offsetX;
+					OffsetY += offsetY;
 				}
 			}
 
@@ -558,7 +546,7 @@ public sealed class Matrix : MarshalByRefObject, IDisposable
 				{
 					return new Matrix(matrix.m11, matrix.m12,
 									  matrix.m21, matrix.m22,
-									  matrix.dx,  matrix.dy);
+									  matrix.OffsetX,  matrix.OffsetY);
 				}
 				else
 				{
@@ -569,8 +557,8 @@ public sealed class Matrix : MarshalByRefObject, IDisposable
 	// Transform a particular point - faster version for only one point.
 	internal void TransformPoint(float x, float y, out float ox, out float oy)
 			{
-				ox = x * m11 + y * m21 + dx;
-				oy = x * m12 + y * m22 + dy;
+				ox = x * m11 + y * m21 + OffsetX;
+				oy = x * m12 + y * m22 + OffsetY;
 			}
 
 	// Transform a size value according to the inverse transformation.
@@ -604,14 +592,14 @@ public sealed class Matrix : MarshalByRefObject, IDisposable
         // private helper method to compute the determinant
         private float Determinant() 
         {
-                return this.m11 * this.m22 - this.m12 * this.m21;
+                return m11 * m22 - m12 * m21;
         } 
 		  
 	// Workaround for calculation new font size, if a transformation is set
 	// this does only work for scaling, not for rotation or multiply transformations
 	// Normally we should stretch or shrink the font.
 	internal float TransformFontSize( float fIn ) {
-		return Math.Abs(Math.Min( this.m11, this.m22 ) * fIn);
+		return Math.Abs(Math.Min( m11, m22 ) * fIn);
 	}
 }; // class Matrix
 

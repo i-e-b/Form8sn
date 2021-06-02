@@ -54,10 +54,6 @@ public class CustomLineCap : MarshalByRefObject, ICloneable, IDisposable
 	// Internal state.
 	private GraphicsPath fillPath;
 	private GraphicsPath strokePath;
-	private LineCap baseCap;
-	private float baseInset;
-	private LineJoin strokeJoin;
-	private float widthScale;
 	private LineCap endCap;
 	private LineCap startCap;
 
@@ -75,8 +71,8 @@ public class CustomLineCap : MarshalByRefObject, ICloneable, IDisposable
 			{
 				this.fillPath = fillPath;
 				this.strokePath = strokePath;
-				this.baseCap = baseCap;
-				this.baseInset = baseInset;
+				BaseCap = baseCap;
+				BaseInset = baseInset;
 			}
 
 	// Destructor.
@@ -86,53 +82,16 @@ public class CustomLineCap : MarshalByRefObject, ICloneable, IDisposable
 			}
 
 	// Get or set this object's properties.
-	public LineCap BaseCap
-			{
-				get
-				{
-					return baseCap;
-				}
-				set
-				{
-					baseCap = value;
-				}
-			}
-	public float BaseInset
-			{
-				get
-				{
-					return baseInset;
-				}
-				set
-				{
-					baseInset = value;
-				}
-			}
-	public LineJoin StrokeJoin
-			{
-				get
-				{
-					return strokeJoin;
-				}
-				set
-				{
-					strokeJoin = value;
-				}
-			}
-	public float WidthScale
-			{
-				get
-				{
-					return widthScale;
-				}
-				set
-				{
-					widthScale = value;
-				}
-			}
+	public LineCap BaseCap { get; set; }
+
+	public float BaseInset { get; set; }
+
+	public LineJoin StrokeJoin { get; set; }
+
+	public float WidthScale { get; set; }
 
 	// Clone this object.
-	public Object Clone()
+	public object Clone()
 			{
 				return MemberwiseClone();
 			}

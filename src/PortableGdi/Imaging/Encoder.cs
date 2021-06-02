@@ -27,7 +27,6 @@ namespace System.Drawing.Imaging
 public sealed class Encoder
 {
 	// Internal state.
-	private Guid guid;
 
 	// Standard encoders.
 	public static readonly Encoder ChrominanceTable =
@@ -61,18 +60,11 @@ public sealed class Encoder
 	// Constructor.
 	public Encoder(Guid guid)
 			{
-				this.guid = guid;
+				Guid = guid;
 			}
 
 	// Get the GUID of this encoder.
-	public Guid Guid
-			{
-				get
-				{
-					return guid;
-				}
-			}
-
+	public Guid Guid { get; }
 }; // class Encoder
 
 #endif // !ECMA_COMPAT

@@ -22,7 +22,7 @@
 namespace System.Drawing.Printing
 {
 
-using System.ComponentModel;
+using ComponentModel;
 using System.Text;
 
 #if CONFIG_COMPONENT_MODEL
@@ -131,13 +131,13 @@ public class Margins : ICloneable
 			}
 
 	// Clone this object.
-	public Object Clone()
+	public object Clone()
 			{
 				return MemberwiseClone();
 			}
 
 	// Determine if two objects are equal.
-	public override bool Equals(Object obj)
+	public override bool Equals(object obj)
 			{
 				Margins other = (obj as Margins);
 				if(other != null)
@@ -158,7 +158,7 @@ public class Margins : ICloneable
 			}
 
 	// Convert this object into a string.
-	public override String ToString()
+	public override string ToString()
 			{
 				StringBuilder builder = new StringBuilder();
 				builder.Append("[Margins Left=");

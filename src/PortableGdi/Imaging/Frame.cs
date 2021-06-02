@@ -31,14 +31,7 @@ namespace System.Drawing.Imaging
 	internal int width;
 	internal int height;
 	internal int stride;
-	private int maskStride;
 	internal PixelFormat pixelFormat;
-	private int[] palette;
-	private int transparentPixel;
-	private int hotspotX;
-	private int hotspotY;
-	private int offsetX;
-	private int offsetY;
 	internal byte[] data;
 	internal byte[] mask;
 	private bool generatedMask;
@@ -49,18 +42,18 @@ namespace System.Drawing.Imaging
 				this.image = image;
 				this.width = width;
 				this.height = height;
-				this.stride = Utils.FormatToStride(pixelFormat, width);
-				this.maskStride = (((width + 7) / 8) + 3) & ~3;
+				stride = Utils.FormatToStride(pixelFormat, width);
+				MaskStride = (((width + 7) / 8) + 3) & ~3;
 				this.pixelFormat = pixelFormat;
-				this.palette = null;
-				this.transparentPixel = -1;
-				this.hotspotX = 0;
-				this.hotspotY = 0;
-				this.offsetX = 0;
-				this.offsetY = 0;
-				this.data = new byte [height * stride];
-				this.mask = null;
-				this.generatedMask = false;
+				Palette = null;
+				TransparentPixel = -1;
+				HotspotX = 0;
+				HotspotY = 0;
+				OffsetX = 0;
+				OffsetY = 0;
+				data = new byte [height * stride];
+				mask = null;
+				generatedMask = false;
 			}
 	private Frame(PortableImage newImage, Frame frame, int newWidth, int newHeight, PixelFormat format, bool cloneData)
 			{
@@ -70,26 +63,26 @@ namespace System.Drawing.Imaging
 				height = newHeight;
 				pixelFormat = format;
 				stride =Utils.FormatToStride(pixelFormat, width);
-				maskStride = (((width + 7) / 8) + 3) & ~3;
+				MaskStride = (((width + 7) / 8) + 3) & ~3;
 				generatedMask = false;
-				if(frame.palette != null)
+				if(frame.Palette != null)
 				{
-					if(newImage != null && frame.palette == frame.image.Palette)
+					if(newImage != null && frame.Palette == frame.image.Palette)
 					{
 						// The palette is a copy of the image's.
-						palette = newImage.Palette;
+						Palette = newImage.Palette;
 					}
 					else if (cloneData)
 					{
 						// The palette is specific to this frame.
-						palette = (int[])(frame.palette.Clone());
+						Palette = (int[])(frame.Palette.Clone());
 					}
 				}
-				transparentPixel = frame.transparentPixel;
-				hotspotX = frame.hotspotX;
-				hotspotY = frame.hotspotY;
-				offsetX = frame.offsetX;
-				offsetY = frame.offsetY;
+				TransparentPixel = frame.TransparentPixel;
+				HotspotX = frame.HotspotX;
+				HotspotY = frame.HotspotY;
+				OffsetX = frame.OffsetX;
+				OffsetY = frame.OffsetY;
 				if(cloneData & frame.data != null)
 				{
 					data = (byte[])(frame.data.Clone());
@@ -130,13 +123,8 @@ namespace System.Drawing.Imaging
 					return stride;
 				}
 			}
-	public int MaskStride
-			{
-				get
-				{
-					return maskStride;
-				}
-			}
+	public int MaskStride { get; }
+
 	public PixelFormat PixelFormat
 			{
 				get
@@ -155,7 +143,7 @@ namespace System.Drawing.Imaging
 			{
 				get
 				{
-					if(mask == null && transparentPixel != -1)
+					if(mask == null && TransparentPixel != -1)
 					{
 						// Generate the mask from the pixel information.
 						GenerateTransparencyMask();
@@ -167,82 +155,24 @@ namespace System.Drawing.Imaging
 					return mask;
 				}
 			}
-	public int[] Palette
-			{
-				get
-				{
-					// The palette for indexed images, null if an RGB image.
-					return palette;
-				}
-				set
-				{
-					palette = value;
-				}
-			}
-	public int TransparentPixel
-			{
-				get
-				{
-					// Index into "Palette" of the transparent pixel value.
-					// Returns -1 if there is no transparent pixel specified.
-					return transparentPixel;
-				}
-				set
-				{
-					transparentPixel = value;
-				}
-			}
-	public int HotspotX
-			{
-				get
-				{
-					return hotspotX;
-				}
-				set
-				{
-					hotspotX = value;
-				}
-			}
-	public int HotspotY
-			{
-				get
-				{
-					return hotspotY;
-				}
-				set
-				{
-					hotspotY = value;
-				}
-			}
-	public int OffsetX
-			{
-				get
-				{
-					return offsetX;
-				}
-				set
-				{
-					offsetX = value;
-				}
-			}
-	public int OffsetY
-			{
-				get
-				{
-					return offsetY;
-				}
-				set
-				{
-					offsetY = value;
-				}
-			}
+	public int[] Palette { get; set; }
+
+	public int TransparentPixel { get; set; }
+
+	public int HotspotX { get; set; }
+
+	public int HotspotY { get; set; }
+
+	public int OffsetX { get; set; }
+
+	public int OffsetY { get; set; }
 
 	// Add a mask to this frame.
 	public void AddMask()
 			{
 				if(mask == null)
 				{
-					mask = new byte[height * maskStride];
+					mask = new byte[height * MaskStride];
 				}
 			}
 
@@ -255,7 +185,7 @@ namespace System.Drawing.Imaging
 	// Clone a frame without the data.
 	internal Frame CloneFrameEmpty(int newWidth, int newHeight, PixelFormat format)
 			{
-				return new Frame(this.image, this, newWidth, newHeight, format, false);
+				return new Frame(image, this, newWidth, newHeight, format, false);
 			}
 
 	internal void NewImage(PortableImage newImage)
@@ -354,23 +284,23 @@ namespace System.Drawing.Imaging
 					}
 					case (PixelFormat.Format8bppIndexed):
 					{
-						return palette[data[ptr]];
+						return Palette[data[ptr]];
 					}
 					case (PixelFormat.Format4bppIndexed):
 					{
 						ptr += x/2;
 						if ((x & 0x01) == 0)
-							return palette[data[ptr]>>4];
+							return Palette[data[ptr]>>4];
 						else
-							return palette[data[ptr] & 0x0F];
+							return Palette[data[ptr] & 0x0F];
 					}
 					case (PixelFormat.Format1bppIndexed):
 					{
 						ptr += x/8;
 						if ((data[ptr] &(1<<7 - (x & 0x07)))== 0)
-							return palette[0];
+							return Palette[0];
 						else
-							return palette[1];
+							return Palette[1];
 					}
 					default:
 					{
@@ -382,7 +312,7 @@ namespace System.Drawing.Imaging
 	// Get the mask value at a specific location.
 	public int GetMask(int x, int y)
 			{
-				int ptr = y * maskStride + x/8;
+				int ptr = y * MaskStride + x/8;
 				if ((mask[ptr] &(1<<7 - (x & 0x07)))== 0)
 					return 0;
 				else
@@ -413,7 +343,7 @@ namespace System.Drawing.Imaging
 			{
 				if(line >= 0 && line < height && mask != null)
 				{
-					Array.Copy(mask, line * maskStride, buffer, 0, maskStride);
+					Array.Copy(mask, line * MaskStride, buffer, 0, MaskStride);
 				}
 			}
 	public void GetMaskLine(int line, IntPtr buffer)
@@ -421,7 +351,7 @@ namespace System.Drawing.Imaging
 				if(line >= 0 && line < height && mask != null &&
 				   buffer != IntPtr.Zero)
 				{
-					Marshal.Copy(mask, line * maskStride, buffer, maskStride);
+					Marshal.Copy(mask, line * MaskStride, buffer, MaskStride);
 				}
 			}
 
@@ -464,18 +394,18 @@ namespace System.Drawing.Imaging
 						break;
 					case (PixelFormat.Format8bppIndexed):
 						ptr += x;
-						data[ptr] = (byte)Utils.BestPaletteColor(palette, color);
+						data[ptr] = (byte)Utils.BestPaletteColor(Palette, color);
 						break;
 					case (PixelFormat.Format4bppIndexed):
 						ptr += x/2;
 						if ((x & 0x01) == 0)
-							data[ptr] = (byte)(Utils.BestPaletteColor(palette, color)<< 4 | data[ptr] & 0x0F);
+							data[ptr] = (byte)(Utils.BestPaletteColor(Palette, color)<< 4 | data[ptr] & 0x0F);
 						else
-							data[ptr] =(byte)(Utils.BestPaletteColor(palette, color) & 0x0F | data[ptr] & 0xF0);
+							data[ptr] =(byte)(Utils.BestPaletteColor(Palette, color) & 0x0F | data[ptr] & 0xF0);
 						break;
 					case (PixelFormat.Format1bppIndexed):
 						ptr += x/8;
-						if (Utils.BestPaletteColor(palette, color) == 0)
+						if (Utils.BestPaletteColor(Palette, color) == 0)
 							data[ptr] &= (byte)(~(1<<7 - (x & 0x07)));
 						else
 							data[ptr] |= (byte)(1<<7 - (x & 0x07));
@@ -486,7 +416,7 @@ namespace System.Drawing.Imaging
 	// Set the mask value at a specific location.
 	public void SetMask(int x, int y, int value)
 			{
-				int ptr = y * maskStride + x/8;
+				int ptr = y * MaskStride + x/8;
 				if (value == 0)
 					mask[ptr] &= (byte)(~(1<<7 - (x & 0x07)));
 				else
@@ -517,7 +447,7 @@ namespace System.Drawing.Imaging
 			{
 				if(line >= 0 && line < height && mask != null)
 				{
-					Array.Copy(buffer, 0, mask, line * maskStride, maskStride);
+					Array.Copy(buffer, 0, mask, line * MaskStride, MaskStride);
 				}
 			}
 
@@ -526,7 +456,7 @@ namespace System.Drawing.Imaging
 				if(line >= 0 && line < height && mask != null &&
 				   buffer != IntPtr.Zero)
 				{
-					Marshal.Copy(buffer, mask, line * maskStride, maskStride);
+					Marshal.Copy(buffer, mask, line * MaskStride, MaskStride);
 				}
 			}
 
@@ -541,7 +471,7 @@ namespace System.Drawing.Imaging
 				// Return if there are no changes.
 				if (originx1 == destx1 && originy1 == desty1 && originx2 == destx2 &&
 					originy2 == desty2 && originx3 == destx3 && originy3 == desty3)
-					return this.CloneFrame(null);
+					return CloneFrame(null);
 				// TODO
 				if (originx1 != originx3 || originy1 != originy2 || desty2 != 0 || destx3 != 0)
 					throw new NotSupportedException ("No shearing or rotation yet");
@@ -658,9 +588,9 @@ namespace System.Drawing.Imaging
 				// if there is space and optionally optimize the palette.
 				// For now we just overwrite the old palette.
 
-				if (source.palette != null)
+				if (source.Palette != null)
 				{
-					dest.palette = (int[])source.palette.Clone();
+					dest.Palette = (int[])source.Palette.Clone();
 				}
 								
 				int bits = Utils.FormatToBitCount(source.pixelFormat);
@@ -673,7 +603,7 @@ namespace System.Drawing.Imaging
 				if (source.Mask != null)
 				{
 					dest.AddMask();
-					Copy(1, dest.mask, dest.maskStride,  x, y, width, height, source.mask, source.maskStride, sourceX, sourceY);
+					Copy(1, dest.mask, dest.MaskStride,  x, y, width, height, source.mask, source.MaskStride, sourceX, sourceY);
 				}
 
 			}
@@ -758,8 +688,8 @@ namespace System.Drawing.Imaging
 				byte[] data = this.data;
 
 				// Make sure that the frame is compatible with this operation.
-				if(palette == null || transparentPixel < 0 ||
-				   transparentPixel >= palette.Length ||
+				if(Palette == null || TransparentPixel < 0 ||
+				   TransparentPixel >= Palette.Length ||
 				   (pixelFormat & PixelFormat.Indexed) == 0 ||
 				   data == null)
 				{
@@ -773,11 +703,11 @@ namespace System.Drawing.Imaging
 				// Process the image lines looking for the transparency color.
 				int x, y, transparent, offset, maskOffset;
 				int width = this.width;
-				transparent = transparentPixel;
+				transparent = TransparentPixel;
 				for(y = 0; y < height; ++y)
 				{
 					offset = y * stride;
-					maskOffset = y * maskStride;
+					maskOffset = y * MaskStride;
 					if(pixelFormat == PixelFormat.Format8bppIndexed)
 					{
 						for(x = 0; x < width; ++x)
@@ -839,7 +769,7 @@ namespace System.Drawing.Imaging
 			{
 				byte[] data = this.data;
 				// Make sure that the frame is compatible with this operation.
-				if(palette != null || transparentPixel != -1 ||
+				if(Palette != null || TransparentPixel != -1 ||
 				   (pixelFormat & PixelFormat.Alpha) == 0 ||
 				   data == null)
 				{
@@ -856,7 +786,7 @@ namespace System.Drawing.Imaging
 				for(y = 0; y < height; ++y)
 				{
 					offset = y * stride;
-					maskOffset = y * maskStride;
+					maskOffset = y * MaskStride;
 					for(x = 0; x < width; ++x)
 					{
 						int alpha = 0xFF; 
@@ -904,10 +834,10 @@ namespace System.Drawing.Imaging
 				{
 					return;
 				}
-				if(transparentPixel >= 0 && palette != null &&
-				   transparentPixel < palette.Length)
+				if(TransparentPixel >= 0 && Palette != null &&
+				   TransparentPixel < Palette.Length)
 				{
-					color = palette[transparentPixel];
+					color = Palette[TransparentPixel];
 					if((pixelFormat & PixelFormat.Alpha) == 0)
 					{
 						color &= 0x00FFFFFF;

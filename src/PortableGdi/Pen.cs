@@ -21,8 +21,8 @@
 namespace System.Drawing
 {
 
-using System.Drawing.Drawing2D;
-using System.Drawing.Toolkit;
+using Drawing2D;
+using Toolkit;
 
 public enum PenAlignment
 {
@@ -72,14 +72,14 @@ public sealed class Pen : MarshalByRefObject, ICloneable, IDisposable
 					throw new ArgumentNullException("brush");
 				}
 				this.brush = brush;
-				this.width = 1.0f;
-				this.miterLimit = 10.0f;
+				width = 1.0f;
+				miterLimit = 10.0f;
 			}
 	public Pen(Color color)
 			{
 				this.color = color;
-				this.width = 1.0f;
-				this.miterLimit = 10.0f;
+				width = 1.0f;
+				miterLimit = 10.0f;
 			}
 	public Pen(Brush brush, float width)
 			{
@@ -89,13 +89,13 @@ public sealed class Pen : MarshalByRefObject, ICloneable, IDisposable
 				}
 				this.brush = brush;
 				this.width = width;
-				this.miterLimit = 10.0f;
+				miterLimit = 10.0f;
 			}
 	public Pen(Color color, float width)
 			{
 				this.color = color;
 				this.width = width;
-				this.miterLimit = 10.0f;
+				miterLimit = 10.0f;
 			}
 
 	// Destructor.
@@ -380,7 +380,7 @@ public sealed class Pen : MarshalByRefObject, ICloneable, IDisposable
 			}
 
 	// Clone this pen.
-	public Object Clone()
+	public object Clone()
 			{
 				lock(this)
 				{
@@ -423,17 +423,17 @@ public sealed class Pen : MarshalByRefObject, ICloneable, IDisposable
 			{
 				lock(this)
 				{
-					if(this.toolkitPen == null)
+					if(toolkitPen == null)
 					{
 						// We don't yet have a toolkit pen yet.
-						this.toolkitPen = toolkit.CreatePen(this);
+						toolkitPen = toolkit.CreatePen(this);
 						this.toolkit = toolkit;
-						return this.toolkitPen;
+						return toolkitPen;
 					}
 					else if(this.toolkit == toolkit)
 					{
 						// Same toolkit - return the cached pen information.
-						return this.toolkitPen;
+						return toolkitPen;
 					}
 					else
 					{
@@ -442,11 +442,11 @@ public sealed class Pen : MarshalByRefObject, ICloneable, IDisposable
 						// We null out "toolkitPen" before calling
 						// "CreatePen()" just in case an exception
 						// is thrown while creating the toolkit pen.
-						this.toolkitPen.Dispose();
-						this.toolkitPen = null;
-						this.toolkitPen = toolkit.CreatePen(this);
+						toolkitPen.Dispose();
+						toolkitPen = null;
+						toolkitPen = toolkit.CreatePen(this);
 						this.toolkit = toolkit;
-						return this.toolkitPen;
+						return toolkitPen;
 					}
 				}
 			}

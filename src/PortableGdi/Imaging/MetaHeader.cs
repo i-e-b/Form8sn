@@ -25,96 +25,24 @@ namespace System.Drawing.Imaging
 public sealed class MetaHeader
 {
 	// Internal state.
-	private short headerSize;
-	private short noObjects;
-	private short noParameters;
-	private short type;
-	private short version;
-	private int maxRecord;
-	private int size;
 
 	// Constructor.
 	public MetaHeader() {}
 
 	// Get or set this object's properties.
-	public short HeaderSize
-			{
-				get
-				{
-					return headerSize;
-				}
-				set
-				{
-					headerSize = value;
-				}
-			}
-	public int MaxRecord
-			{
-				get
-				{
-					return maxRecord;
-				}
-				set
-				{
-					maxRecord = value;
-				}
-			}
-	public short NoObjects
-			{
-				get
-				{
-					return noObjects;
-				}
-				set
-				{
-					noObjects = value;
-				}
-			}
-	public short NoParameters
-			{
-				get
-				{
-					return noParameters;
-				}
-				set
-				{
-					noParameters = value;
-				}
-			}
-	public int Size
-			{
-				get
-				{
-					return size;
-				}
-				set
-				{
-					size = value;
-				}
-			}
-	public short Type
-			{
-				get
-				{
-					return type;
-				}
-				set
-				{
-					type = value;
-				}
-			}
-	public short Version
-			{
-				get
-				{
-					return version;
-				}
-				set
-				{
-					version = value;
-				}
-			}
+	public short HeaderSize { get; set; }
 
+	public int MaxRecord { get; set; }
+
+	public short NoObjects { get; set; }
+
+	public short NoParameters { get; set; }
+
+	public int Size { get; set; }
+
+	public short Type { get; set; }
+
+	public short Version { get; set; }
 }; // class MetaHeader
 
 }; // namespace System.Drawing.Imaging

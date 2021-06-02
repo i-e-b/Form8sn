@@ -21,20 +21,13 @@
 namespace System.Drawing
 {
 
-using System.Drawing.Toolkit;
-using System.Drawing.Text;
+using Toolkit;
+using Text;
 
 public sealed class StringFormat
 	: MarshalByRefObject, ICloneable, IDisposable
 {
 	// Internal state.
-	private StringFormatFlags options;
-	private int language;
-	private StringAlignment alignment;
-	private StringDigitSubstitute digitMethod;
-	private HotkeyPrefix hotkeyPrefix;
-	private StringAlignment lineAlignment;
-	private StringTrimming trimming;
 	internal CharacterRange[] ranges;
 	private float firstTabOffset;
 	private float[] tabStops;
@@ -43,7 +36,7 @@ public sealed class StringFormat
 	// Constructors.
 	public StringFormat()
 			{
-				this.trimming = StringTrimming.Character;
+				Trimming = StringTrimming.Character;
 			}
 	public StringFormat(StringFormat format)
 			{
@@ -51,117 +44,57 @@ public sealed class StringFormat
 				{
 					throw new ArgumentNullException("format");
 				}
-				this.options = format.options;
-				this.language = format.language;
-				this.alignment = format.alignment;
-				this.digitMethod = format.digitMethod;
-				this.hotkeyPrefix = format.hotkeyPrefix;
-				this.lineAlignment = format.lineAlignment;
-				this.trimming = format.trimming;
-				this.ranges = format.ranges;
-				this.firstTabOffset = format.firstTabOffset;
-				this.tabStops = format.tabStops;
+				FormatFlags = format.FormatFlags;
+				DigitSubstitutionLanguage = format.DigitSubstitutionLanguage;
+				Alignment = format.Alignment;
+				DigitSubstitutionMethod = format.DigitSubstitutionMethod;
+				HotkeyPrefix = format.HotkeyPrefix;
+				LineAlignment = format.LineAlignment;
+				Trimming = format.Trimming;
+				ranges = format.ranges;
+				firstTabOffset = format.firstTabOffset;
+				tabStops = format.tabStops;
 			}
 	public StringFormat(StringFormatFlags options)
 			{
-				this.options = options;
-				this.trimming = StringTrimming.Character;
+				FormatFlags = options;
+				Trimming = StringTrimming.Character;
 				
 			}
 	public StringFormat(StringFormatFlags options, int language)
 			{
-				this.options = options;
-				this.language = language;
-				this.trimming = StringTrimming.Character;
+				FormatFlags = options;
+				DigitSubstitutionLanguage = language;
+				Trimming = StringTrimming.Character;
 			}
 	private StringFormat(bool typographic)
 			{
 				if(typographic)
 				{
-					this.options = (StringFormatFlags.LineLimit |
+					FormatFlags = (StringFormatFlags.LineLimit |
 					                StringFormatFlags.NoClip);
 				}
 				else
 				{
-					this.trimming = StringTrimming.Character;
+					Trimming = StringTrimming.Character;
 				}
 			}
 
 
 	// Get or set this object's properties.
-	public StringAlignment Alignment
-			{
-				get
-				{
-					return alignment;
-				}
-				set
-				{
-					alignment = value;
-				}
-			}
-	public int DigitSubstitutionLanguage
-			{
-				get
-				{
-					return language;
-				}
-			}
-	public StringDigitSubstitute DigitSubstitutionMethod
-			{
-				get
-				{
-					return digitMethod;
-				}
-				set
-				{
-					digitMethod = value;
-				}
-			}
-	public StringFormatFlags FormatFlags
-			{
-				get
-				{
-					return options;
-				}
-				set
-				{
-					options = value;
-				}
-			}
-	public HotkeyPrefix HotkeyPrefix
-			{
-				get
-				{
-					return hotkeyPrefix;
-				}
-				set
-				{
-					hotkeyPrefix = value;
-				}
-			}
-	public StringAlignment LineAlignment
-			{
-				get
-				{
-					return lineAlignment;
-				}
-				set
-				{
-					lineAlignment = value;
-				}
-			}
-	public StringTrimming Trimming
-			{
-				get
-				{
-					return trimming;
-				}
-				set
-				{
-					trimming = value;
-				}
-			}
+	public StringAlignment Alignment { get; set; }
+
+	public int DigitSubstitutionLanguage { get; private set; }
+
+	public StringDigitSubstitute DigitSubstitutionMethod { get; set; }
+
+	public StringFormatFlags FormatFlags { get; set; }
+
+	public HotkeyPrefix HotkeyPrefix { get; set; }
+
+	public StringAlignment LineAlignment { get; set; }
+
+	public StringTrimming Trimming { get; set; }
 
 	// Get the generic default string format.
 	public static StringFormat GenericDefault
@@ -177,7 +110,7 @@ public sealed class StringFormat
 
 
 	// Clone this object.
-	public Object Clone()
+	public object Clone()
 			{
 				return new StringFormat(this);
 			}
@@ -199,15 +132,15 @@ public sealed class StringFormat
 				}
 			#endif
 				firstTabOffset = this.firstTabOffset;
-				return this.tabStops;
+				return tabStops;
 			}
 
 	// Set the digit substitution properties.
 	public void SetDigitSubstitution
 				(int language, StringDigitSubstitute substitute)
 			{
-				this.language = language;
-				this.digitMethod = digitMethod;
+				DigitSubstitutionLanguage = language;
+				DigitSubstitutionMethod = DigitSubstitutionMethod;
 			}
 
 	// Set the measurable character ranges.
@@ -224,10 +157,10 @@ public sealed class StringFormat
 			}
 
 	// Convert this object into a string.
-	public override String ToString()
+	public override string ToString()
 			{
 				return "[StringFormat, FormatFlags=" +
-					   options.ToString() + "]";
+					   FormatFlags.ToString() + "]";
 			}
 
 }; // class StringFormat

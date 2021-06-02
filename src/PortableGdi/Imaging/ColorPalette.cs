@@ -25,32 +25,18 @@ namespace System.Drawing.Imaging
     public sealed class ColorPalette
     {
         // Internal state.
-        private Color[] entries;
-        private int flags;
 
         // Constructor.
         internal ColorPalette(Color[] entries, int flags)
         {
-            this.entries = entries;
-            this.flags = flags;
+            Entries = entries;
+            Flags = flags;
         }
 
         // Get this object's properties.
-        public Color[] Entries
-        {
-            get
-            {
-                return entries;
-            }
-        }
-        public int Flags
-        {
-            get
-            {
-                return flags;
-            }
-        }
+        public Color[] Entries { get; }
 
+        public int Flags { get; }
     }; // class ColorPalette
 
 }; // namespace System.Drawing.Imaging

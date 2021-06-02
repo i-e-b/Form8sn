@@ -23,10 +23,10 @@ using System.Drawing.Imaging.ImageFormats;
 namespace System.Drawing.Toolkit
 {
 
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.Drawing.Text;
-using System.Threading;
+using Drawing2D;
+using Imaging;
+using Text;
+using Threading;
 
 // This class is used to stub out toolkit support when a toolkit
 // cannot be found, and to also act as a base class for printer
@@ -206,7 +206,7 @@ public class NullToolkit : IToolkit
 	// Get font family metric information.
 	public virtual void GetFontFamilyMetrics
 				(GenericFontFamilies genericFamily,
-				 String name, FontStyle style,
+				 string name, FontStyle style,
 				 out int ascent, out int descent,
 				 out int emHeight, out int lineSpacing)
 			{
@@ -232,7 +232,7 @@ public class NullToolkit : IToolkit
 
 	// Get the IToolkitFont that corresponds to LOGFONT information.
 	// Returns null if there is no way to obtain the information.
-	public virtual IToolkitFont GetFontFromLogFont(Object lf, IntPtr hdc)
+	public virtual IToolkitFont GetFontFromLogFont(object lf, IntPtr hdc)
 			{
 				return null;
 			}
@@ -272,14 +272,14 @@ public class NullToolkit : IToolkit
 
 	// Register a timer that should fire every "interval" milliseconds.
 	// Returns a cookie that can be used to identify the timer.
-	public virtual Object RegisterTimer
-				(Object owner, int interval, EventHandler expire)
+	public virtual object RegisterTimer
+				(object owner, int interval, EventHandler expire)
 			{
 				return null;
 			}
 
 	// Unregister a timer.
-	public virtual void UnregisterTimer(Object cookie) {}
+	public virtual void UnregisterTimer(object cookie) {}
 
 	// Convert a client point for a window into a screen point.
 	public virtual Point ClientToScreen(IToolkitWindow window, Point point)

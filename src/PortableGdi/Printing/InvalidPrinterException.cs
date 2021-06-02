@@ -22,8 +22,8 @@
 namespace System.Drawing.Printing
 {
 
-    using System.Drawing.Printing;
-    using System.Runtime.Serialization;
+    using Printing;
+    using Runtime.Serialization;
 
     [Serializable]
     public class InvalidPrinterException : SystemException

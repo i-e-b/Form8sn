@@ -20,109 +20,116 @@
 
 namespace System.Drawing
 {
+    using Toolkit;
 
-using System.Drawing.Toolkit;
+    public interface IHatchBrush
+    {
+    }
 
-public interface IHatchBrush { }
-public interface IPathGradientBrush { }
-public interface ILinearGradientBrush { }
+    public interface IPathGradientBrush
+    {
+    }
+
+    public interface ILinearGradientBrush
+    {
+    }
 
 
-public abstract class Brush : MarshalByRefObject, ICloneable, IDisposable
-{
-	// Internal state.
-	internal IToolkit toolkit;
-	internal IToolkitBrush toolkitBrush;
+    public abstract class Brush : MarshalByRefObject, ICloneable, IDisposable
+    {
+        // Internal state.
+        internal IToolkit? Toolkit;
+        internal IToolkitBrush? ToolkitBrush;
 
-	// Constructor.
-	internal Brush()
-			{
-				toolkit = null;
-				toolkitBrush = null;
-			}
+        // Constructor.
+        internal Brush()
+        {
+            Toolkit = null;
+            ToolkitBrush = null;
+        }
 
-	// Destructor.
-	~Brush()
-			{
-				Dispose(false);
-			}
+        // Destructor.
+        ~Brush()
+        {
+            Dispose(false);
+        }
 
-	// Clone this brush.
-	public abstract Object Clone();
+        // Clone this brush.
+        public abstract object Clone();
 
-	// Dispose of this brush.
-	public void Dispose()
-			{
-				Dispose(true);
-				GC.SuppressFinalize(this);
-			}
-	protected virtual void Dispose(bool disposing)
-			{
-				lock(this)
-				{
-					if(toolkitBrush != null)
-					{
-						toolkitBrush.Dispose();
-						toolkitBrush = null;
-					}
-				}
-			}
+        // Dispose of this brush.
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-	// Mark this brush as modified, and flush all previous brush information.
-	// Used when a subclass modifies a brush's properties.
-	internal void Modified()
-			{
-				lock(this)
-				{
-					if(toolkitBrush != null)
-					{
-						toolkitBrush.Dispose();
-						toolkitBrush = null;
-					}
-					toolkit = null;
-				}
-			}
+        protected virtual void Dispose(bool disposing)
+        {
+            lock (this)
+            {
+                if (ToolkitBrush != null)
+                {
+                    ToolkitBrush.Dispose();
+                    ToolkitBrush = null;
+                }
+            }
+        }
 
-	// Get the toolkit version of this brush for a specific toolkit.
-	internal IToolkitBrush GetBrush(IToolkit toolkit)
-			{
-				lock(this)
-				{
-					if(this.toolkitBrush == null)
-					{
-						// We don't yet have a toolkit brush yet.
-						this.toolkitBrush = CreateBrush(toolkit);
-						this.toolkit = toolkit;
-						return this.toolkitBrush;
-					}
-					else if(this.toolkit == toolkit)
-					{
-						// Same toolkit - return the cached brush information.
-						return this.toolkitBrush;
-					}
-					else
-					{
-						// We have a brush for another toolkit,
-						// so dispose it and create for this toolkit.
-						// We null out "toolkitBrush" before calling
-						// "CreateBrush()" just in case an exception
-						// is thrown while creating the toolkit brush.
-						this.toolkitBrush.Dispose();
-						this.toolkitBrush = null;
-						this.toolkitBrush = CreateBrush(toolkit);
-						this.toolkit = toolkit;
-						return this.toolkitBrush;
-					}
-				}
-			}
+        // Mark this brush as modified, and flush all previous brush information.
+        // Used when a subclass modifies a brush's properties.
+        internal void Modified()
+        {
+            lock (this)
+            {
+                if (ToolkitBrush != null)
+                {
+                    ToolkitBrush.Dispose();
+                    ToolkitBrush = null;
+                }
 
-	// Create this brush for a specific toolkit.  Inner part of "GetBrush()".
-	internal virtual IToolkitBrush CreateBrush(IToolkit toolkit)
-			{
-				// Normally overridden in subclasses.
-				throw new InvalidOperationException();
-			}
+                Toolkit = null;
+            }
+        }
 
-}; // class Brush
+        // Get the toolkit version of this brush for a specific toolkit.
+        internal IToolkitBrush GetBrush(IToolkit? toolkit)
+        {
+            lock (this)
+            {
+                if (ToolkitBrush == null)
+                {
+                    // We don't yet have a toolkit brush yet.
+                    ToolkitBrush = CreateBrush(toolkit);
+                    Toolkit = toolkit;
+                    return ToolkitBrush;
+                }
+                else if (Toolkit == toolkit)
+                {
+                    // Same toolkit - return the cached brush information.
+                    return ToolkitBrush;
+                }
+                else
+                {
+                    // We have a brush for another toolkit,
+                    // so dispose it and create for this toolkit.
+                    // We null out "toolkitBrush" before calling
+                    // "CreateBrush()" just in case an exception
+                    // is thrown while creating the toolkit brush.
+                    ToolkitBrush.Dispose();
+                    ToolkitBrush = null;
+                    ToolkitBrush = CreateBrush(toolkit);
+                    Toolkit = toolkit;
+                    return ToolkitBrush;
+                }
+            }
+        }
 
+        // Create this brush for a specific toolkit.  Inner part of "GetBrush()".
+        protected virtual IToolkitBrush CreateBrush(IToolkit? toolkit)
+        {
+            // Normally overridden in subclasses.
+            throw new InvalidOperationException();
+        }
+    }; // class Brush
 }; // namespace System.Drawing

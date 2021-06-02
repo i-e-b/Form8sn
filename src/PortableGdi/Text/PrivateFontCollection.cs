@@ -1,6 +1,6 @@
 ﻿/*
- * PrintEventArgs.cs - Implementation of the
- *			"System.Drawing.Printing.PrintEventArgs" class.
+ * PrivateFontCollection.cs - Implementation of the
+ *			"System.Drawing.Text.PrivateFontCollection" class.
  *
  * Copyright (C) 2003  Southern Storm Software, Pty Ltd.
  *
@@ -19,22 +19,34 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-namespace System.Drawing.Printing
+namespace System.Drawing.Text
 {
 
-    using ComponentModel;
-
-    public class PrintEventArgs
-#if CONFIG_COMPONENT_MODEL
-	: CancelEventArgs
-#else
-        : EventArgs
-#endif
+    public sealed class PrivateFontCollection : FontCollection
     {
-
         // Constructor.
-        public PrintEventArgs() {}
+        public PrivateFontCollection() {}
 
-    }; // class PrintEventArgs
+        // Add a file-based font to the collection.
+        [TODO]
+        public void AddFontFile(String filename)
+        {
+            // TODO
+        }
 
-}; // namespace System.Drawing.Printing
+        // Add a memory-based font to the collection.
+        [TODO]
+        public void AddMemoryFont(IntPtr memory, int length)
+        {
+            // TODO
+        }
+
+        // Dispose of this object.
+        protected override void Dispose(bool disposing)
+        {
+            // Nothing to do here.
+        }
+
+    }; // class PrivateFontCollection
+
+}; // namespace System.Drawing.Text

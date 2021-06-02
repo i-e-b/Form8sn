@@ -88,9 +88,9 @@
 namespace System.Drawing
 {
 
-using System.Runtime.InteropServices;
-using System.Drawing.Drawing2D;
-using System.Drawing.Toolkit;
+using Runtime.InteropServices;
+using Drawing2D;
+using Toolkit;
 
 #if !ECMA_COMPAT
 [ComVisible(false)]
@@ -156,9 +156,9 @@ public sealed class Region : MarshalByRefObject, IDisposable
 			throw new ArgumentNullException("rgnData", "Argument cannot be null");
 		}
 		Region r = otherRgnData.ConstructRegion ( otherRgnData ) ;
-		this.rects = r.rects ;
-		this.extent = r.extent ;
-		this.rgnData = r.GetRegionData() ;
+		rects = r.rects ;
+		extent = r.extent ;
+		rgnData = r.GetRegionData() ;
 	}
 
 	// Helpers, to replace missing "Math" class in some profiles.

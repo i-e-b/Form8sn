@@ -22,7 +22,7 @@
 namespace System.Drawing.Drawing2D
 {
 
-    using System.Drawing.Text;
+    using Text;
 
     public sealed class GraphicsState : MarshalByRefObject
     {

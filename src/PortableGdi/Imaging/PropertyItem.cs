@@ -25,60 +25,18 @@ namespace System.Drawing.Imaging
     public sealed class PropertyItem
     {
         // Internal state.
-        private int id;
-        private int len;
-        private short type;
-        private byte[] value;
 
         // Constructor.
         internal PropertyItem() {}
 
         // Get or set this object's properties.
-        public int Id
-        {
-            get
-            {
-                return id;
-            }
-            set
-            {
-                id = value;
-            }
-        }
-        public int Len
-        {
-            get
-            {
-                return len;
-            }
-            set
-            {
-                len = value;
-            }
-        }
-        public short Type
-        {
-            get
-            {
-                return type;
-            }
-            set
-            {
-                type = value;
-            }
-        }
-        public byte[] Value
-        {
-            get
-            {
-                return value;
-            }
-            set
-            {
-                this.value = value;
-            }
-        }
+        public int Id { get; set; }
 
+        public int Len { get; set; }
+
+        public short Type { get; set; }
+
+        public byte[] Value { get; set; }
     }; // class PropertyItem
 
 }; // namespace System.Drawing.Imaging
