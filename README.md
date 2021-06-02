@@ -42,6 +42,7 @@ Components
 ==========
 
 * **PDFSharp** - A modified version of the main project (so I can add or specialise bits)
+* **PortableGdi** - A minimal version of `System.Drawing` to support PDFSharp. Based on GNU Portable.Net base libraries.
 * **BasicImageFormFiller** - GUI app to take scanned paper forms (in JPEG) and
   fill them in from arbitrary data, based on examples.
 * **TestApp** - Console app scratch space
@@ -60,3 +61,4 @@ To-do:
 * [ ] Decode PDF forms so we can use existing 'boxes'
 * [ ] Embed Form8sn instructions in PDF files and handle those? *(not important)*
 * [ ] Web-based form editor?
+* [ ] Full suite of tests
