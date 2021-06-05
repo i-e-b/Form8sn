@@ -2,7 +2,7 @@
 
 using System;
 
-namespace JpegLibrary
+namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 {
     /// <summary>
     /// Helper class for generating standard JPEG quantization table.

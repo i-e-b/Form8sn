@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
-namespace JpegLibrary
+namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 {
     /// <summary>
     /// A optimizer to optimize baseline JPEG file to reduce file size.

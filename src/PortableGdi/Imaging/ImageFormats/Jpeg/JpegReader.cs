@@ -5,7 +5,7 @@ using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace JpegLibrary
+namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 {
     /// <summary>
     /// A mutable struct to read markers and other content from JPEG stream.

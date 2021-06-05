@@ -4,7 +4,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace JpegLibrary.ScanDecoder
+namespace Portable.Drawing.Imaging.ImageFormats.Jpeg.ScanDecoder
 {
     internal sealed class JpegHuffmanBaselineScanDecoder : JpegHuffmanScanDecoder
     {

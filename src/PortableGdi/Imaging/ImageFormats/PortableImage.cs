@@ -28,6 +28,7 @@ namespace Portable.Drawing.Imaging.ImageFormats
 {
 	// Internal state.
 	internal PixelFormat pixelFormat;
+	internal ImageFlags imageFlags;
 	private Frame[] frames;
 
 	// Standard image formats.
@@ -298,7 +299,7 @@ namespace Portable.Drawing.Imaging.ImageFormats
 					//JpegReader.Load(stream, this, magic, 4);
 					// TODO: implement JPEG reading
 					stream.Seek(0, SeekOrigin.Begin);
-					JpegReader.Load(stream, this);
+					JpegReaderHelper.Load(stream, this);
 				}
 				else
 				{
@@ -425,6 +426,10 @@ namespace Portable.Drawing.Imaging.ImageFormats
 				return newImage;
 			}
 
+	public ImageFlags GetFlags()
+	{
+		return imageFlags;
+	}
 };
 
 	// class Image

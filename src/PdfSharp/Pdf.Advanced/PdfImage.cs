@@ -263,16 +263,13 @@ namespace PdfSharp.Pdf.Advanced
             byte[] imageBits = null;
             int streamLength = 0;
 
-#if CORE || GDI || WPF
             if (_image._importedImage != null)
             {
                 ImageDataDct idd = (ImageDataDct)_image._importedImage.ImageData;
                 imageBits = idd.Data;
                 streamLength = idd.Length;
             }
-#endif
 
-#if CORE || GDI
             if (_image._importedImage == null)
             {
                 if (!_image._path.StartsWith("*"))
@@ -281,16 +278,9 @@ namespace PdfSharp.Pdf.Advanced
                     // If the image was modified in memory, those changes will be lost and the original image, as it was read from the file, will be added to the PDF.
                     using (FileStream sourceFile = File.OpenRead(_image._path))
                     {
-                        int count;
-                        byte[] buffer = new byte[8192];
                         memory = new MemoryStream((int)sourceFile.Length);
+                        sourceFile.CopyTo(memory);
                         ownMemory = true;
-                        do
-                        {
-                            count = sourceFile.Read(buffer, 0, buffer.Length);
-                            // memory.Write(buffer, 0, buffer.Length);
-                            memory.Write(buffer, 0, count);
-                        } while (count > 0);
                     }
                 }
                 else
@@ -311,11 +301,9 @@ namespace PdfSharp.Pdf.Advanced
                     }
                     else
                     {
-#if CORE_WITH_GDI
                         // No stream, no filename, get image data.
                         // Save the image to a memory stream.
                         _image._gdiImage.Save(memory, ImageFormat.Jpeg);
-#endif
                     }
                 }
 
@@ -324,27 +312,7 @@ namespace PdfSharp.Pdf.Advanced
                     Debug.Assert(false, "Internal error? JPEG image, but file not found!");
                 }
             }
-#endif
-#if WPF
-            // AGHACK
-            //string filename = XImage.GetImageFilename(image._wpfImage);
-            //if (XImage.ReadJpegFile(filename, -1, ref imageBits))
-            //{
-            //  streamLength = imageBits.Length;
-            //}
-            //else
-            //  imageBits = null;
-#if !SILVERLIGHT
-            memory = _image.Memory;
-#else
-            memory = new MemoryStream();
-            ownMemory = true;
-#endif
-#endif
-#if NETFX_CORE
-            memory = new MemoryStream();
-            ownMemory = true;
-#endif
+
             // THHO4THHO Use ImageImporterJPEG here to avoid redundant code.
 
             if (imageBits == null)
@@ -356,18 +324,14 @@ namespace PdfSharp.Pdf.Advanced
                 // ReSharper disable once ConditionIsAlwaysTrueOrFalse
                 if (ownMemory)
                 {
-#if UWP || true
                     memory.Dispose();
-#else
-                memory.Close();
-#endif
                 }
             }
 
             bool tryFlateDecode = _document.Options.UseFlateDecoderForJpegImages == PdfUseFlateDecoderForJpegImages.Automatic;
             bool useFlateDecode = _document.Options.UseFlateDecoderForJpegImages == PdfUseFlateDecoderForJpegImages.Always;
 
-            FlateDecode fd = new FlateDecode();
+            var fd = new FlateDecode();
             byte[] imageDataCompressed = (useFlateDecode || tryFlateDecode) ? fd.Encode(imageBits, _document.Options.FlateEncodeMode) : null;
             if (useFlateDecode || tryFlateDecode && imageDataCompressed.Length < imageBits.Length)
             {
@@ -429,50 +393,6 @@ namespace PdfSharp.Pdf.Advanced
                 {
                     Elements[Keys.ColorSpace] = new PdfName("/DeviceRGB");
                 }
-            }
-#endif
-#if GDI
-            if (_image._importedImage == null)
-            {
-                if ((_image._gdiImage.Flags & ((int)ImageFlags.ColorSpaceCmyk | (int)ImageFlags.ColorSpaceYcck)) != 0)
-                {
-                    // TODO: Test with CMYK JPEG files (so far I only found ImageFlags.ColorSpaceYcck JPEG files ...)
-                    Elements[Keys.ColorSpace] = new PdfName("/DeviceCMYK");
-                    if ((_image._gdiImage.Flags & (int)ImageFlags.ColorSpaceYcck) != 0)
-                        Elements["/Decode"] = new PdfLiteral("[1 0 1 0 1 0 1 0]"); // Invert colors? Why??
-                }
-                else if ((_image._gdiImage.Flags & (int)ImageFlags.ColorSpaceGray) != 0)
-                {
-                    Elements[Keys.ColorSpace] = new PdfName("/DeviceGray");
-                }
-                else
-                {
-                    Elements[Keys.ColorSpace] = new PdfName("/DeviceRGB");
-                }
-            }
-#endif
-#if WPF
-            // TODOSILVERLIGHT
-#if !SILVERLIGHT
-            string pixelFormat = _image._wpfImage.Format.ToString();
-#else
-            string pixelFormat = "xxx";
-#endif
-            bool isCmyk = _image.IsCmyk;
-            bool isGrey = pixelFormat == "Gray8";
-            if (isCmyk)
-            {
-                // TODO: Test with CMYK JPEG files (so far I only found ImageFlags.ColorSpaceYcck JPEG files ...)
-                Elements[Keys.ColorSpace] = new PdfName("/DeviceCMYK");
-                Elements["/Decode"] = new PdfLiteral("[1 0 1 0 1 0 1 0]");  // Invert colors? Why??
-            }
-            else if (isGrey)
-            {
-                Elements[Keys.ColorSpace] = new PdfName("/DeviceGray");
-            }
-            else
-            {
-                Elements[Keys.ColorSpace] = new PdfName("/DeviceRGB");
             }
 #endif
         }

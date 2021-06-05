@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace JpegLibrary
+namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 {
     /// <summary>
     /// The encoder to encode image into baseline JPEG stream.

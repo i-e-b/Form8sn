@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace JpegLibrary
+namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 {
     /// <summary>
     /// The allocator for <see cref="JpegBlock8x8"/>.

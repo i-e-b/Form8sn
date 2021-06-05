@@ -1,11 +1,10 @@
 ﻿#nullable enable
 
 using System;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace JpegLibrary
+namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 {
     internal static class JpegMathHelper
     {

@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace JpegLibrary.ScanDecoder
+namespace Portable.Drawing.Imaging.ImageFormats.Jpeg.ScanDecoder
 {
     internal class JpegArithmeticProgressiveScanDecoder : JpegArithmeticScanDecoder
     {

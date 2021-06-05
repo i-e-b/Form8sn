@@ -108,7 +108,6 @@
     <Compile Include="Drawing\FontHelper.cs" />
     <Compile Include="Drawing\GeometryHelper.cs" />
     <Compile Include="Drawing\GraphicsStateStack.cs" />
-    <Compile Include="Drawing\ImageHelper.cs" />
     <Compile Include="Drawing\InternalGraphicsState.cs" />
     <Compile Include="Drawing.Internal\IImageImporter.cs" />
     <Compile Include="Drawing.Internal\ImageImporterBmp.cs" />

@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace JpegLibrary
+namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 {
     internal struct JpegHuffmanEncodingTableCollection
     {

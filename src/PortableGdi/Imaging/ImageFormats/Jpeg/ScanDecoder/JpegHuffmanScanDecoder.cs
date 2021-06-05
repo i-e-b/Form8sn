@@ -3,7 +3,7 @@
 using System;
 using System.Diagnostics;
 
-namespace JpegLibrary.ScanDecoder
+namespace Portable.Drawing.Imaging.ImageFormats.Jpeg.ScanDecoder
 {
     internal abstract class JpegHuffmanScanDecoder : JpegScanDecoder
     {

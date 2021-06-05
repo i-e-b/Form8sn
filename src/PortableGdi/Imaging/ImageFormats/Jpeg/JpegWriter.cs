@@ -5,7 +5,7 @@ using System.Buffers;
 using System.Buffers.Binary;
 using System.Diagnostics;
 
-namespace JpegLibrary
+namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 {
     /// <summary>
     /// A mutable struct for writing content into a buffer writer.

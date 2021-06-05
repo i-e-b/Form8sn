@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace JpegLibrary.ScanDecoder
+namespace Portable.Drawing.Imaging.ImageFormats.Jpeg.ScanDecoder
 {
     internal abstract class JpegArithmeticScanDecoder : JpegScanDecoder
     {

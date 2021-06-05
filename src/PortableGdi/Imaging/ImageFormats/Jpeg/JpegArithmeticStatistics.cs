@@ -2,7 +2,7 @@
 
 using System;
 
-namespace JpegLibrary
+namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 {
     internal class JpegArithmeticStatistics
     {

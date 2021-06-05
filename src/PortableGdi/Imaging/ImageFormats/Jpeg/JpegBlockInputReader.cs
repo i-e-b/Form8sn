@@ -1,6 +1,6 @@
 ﻿#nullable enable
 
-namespace JpegLibrary
+namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 {
     /// <summary>
     /// A input reader that read spatial block from the buffer.

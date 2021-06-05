@@ -4,7 +4,7 @@ using System;
 using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 
-namespace JpegLibrary
+namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 {
     internal class JpegArithmeticDecodingTable
     {

@@ -8,8 +8,7 @@
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
-
-namespace JpegLibrary
+namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 {
     /// <summary>
     /// Contains inaccurate, but fast forward and inverse DCT implementations.

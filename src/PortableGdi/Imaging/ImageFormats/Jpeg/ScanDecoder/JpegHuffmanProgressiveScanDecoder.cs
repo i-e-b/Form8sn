@@ -3,7 +3,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace JpegLibrary.ScanDecoder
+namespace Portable.Drawing.Imaging.ImageFormats.Jpeg.ScanDecoder
 {
     internal sealed class JpegHuffmanProgressiveScanDecoder : JpegHuffmanScanDecoder
     {

@@ -80,13 +80,7 @@ public abstract class Image
 			}
 
 	// Get this object's properties.
-	public int Flags
-			{
-				get
-				{
-					return flags;
-				}
-			}
+	public int Flags => flags;
 #if !ECMA_COMPAT
 	public Guid[] FrameDimensionsList
 			{
@@ -456,7 +450,7 @@ public abstract class Image
 	// Set the dgImage field within this object.
 	internal void SetDGImage(PortableImage dgImage)
 			{
-				flags = 0;
+				flags = (int)dgImage.GetFlags();
 			#if !ECMA_COMPAT
 				switch(dgImage.LoadFormat)
 				{

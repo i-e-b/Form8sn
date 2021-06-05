@@ -3,7 +3,7 @@
 using System;
 using System.Buffers;
 
-namespace JpegLibrary
+namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 {
     /// <summary>
     /// JPEG quantization table.

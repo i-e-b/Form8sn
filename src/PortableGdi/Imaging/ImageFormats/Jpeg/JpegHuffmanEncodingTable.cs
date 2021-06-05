@@ -3,7 +3,7 @@
 using System;
 using System.Diagnostics;
 
-namespace JpegLibrary
+namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 {
     /// <summary>
     /// A Huffman encoding table to encode symbols into JPEG stream.

@@ -1,6 +1,6 @@
 ﻿#nullable enable
 
-namespace JpegLibrary
+namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 {
     internal static class JpegMarkerHelper
     {

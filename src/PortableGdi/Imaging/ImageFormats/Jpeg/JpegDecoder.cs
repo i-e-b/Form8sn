@@ -1,6 +1,5 @@
 ﻿#nullable enable
 
-using JpegLibrary.ScanDecoder;
 using System;
 using System.Buffers;
 using System.Buffers.Binary;
@@ -10,8 +9,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Portable.Drawing.Imaging.ImageFormats.Jpeg.ScanDecoder;
 
-namespace JpegLibrary
+namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 {
     /// <summary>
     /// The decoder to decode image from JPEG stream.
@@ -166,7 +166,7 @@ namespace JpegLibrary
         /// </summary>
         /// <param name="quality">The estimated quality factor.</param>
         /// <returns>True if the quality is estimated. False when quantization tables don't exists or loaded.</returns>
-        public bool TryEstimateQuanlity(out float quality)
+        public bool TryEstimateQuality(out float quality)
         {
             if (_quantizationTables is null)
             {
