@@ -20,7 +20,7 @@
 
 using System.IO;
 
-namespace System.Drawing.Imaging.ImageFormats
+namespace Portable.Drawing.Imaging.ImageFormats
 {
 	internal sealed class BmpWriter
 {

@@ -19,7 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-namespace System.Drawing.Drawing2D
+using System.Drawing;
+
+namespace Portable.Drawing.Drawing2D
 {
 
     public sealed class PathData

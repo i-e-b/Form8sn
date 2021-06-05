@@ -31,10 +31,9 @@ using System;
 using System.Diagnostics;
 #if CORE || GDI
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using GdiFontFamily = System.Drawing.FontFamily;
-using GdiFont = System.Drawing.Font;
-using GdiFontStyle = System.Drawing.FontStyle;
+using GdiFontFamily = Portable.Drawing.FontFamily;
+using GdiFont = Portable.Drawing.Font;
+using GdiFontStyle = Portable.Drawing.FontStyle;
 #endif
 #if WPF
 using System.Windows;
@@ -258,7 +257,7 @@ namespace PdfSharp.Fonts
             else
             {
                 // Get or create the font source and cache it under the specified typeface key.
-                fontSource = XFontSource.GetOrCreateFromGdi(typefaceKey, font);
+                fontSource = XFontSource.GetOrCreateFromFile(typefaceKey, font);
             }
             return fontSource;
         }

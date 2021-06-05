@@ -19,10 +19,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-namespace System.Drawing.Imaging
-{
-    using Runtime.InteropServices;
+using System;
+using System.Runtime.InteropServices;
 
+namespace Portable.Drawing.Imaging
+{
     [Flags]
     public enum ImageCodecFlags
     {

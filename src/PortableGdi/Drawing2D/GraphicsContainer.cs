@@ -19,11 +19,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-namespace System.Drawing.Drawing2D
-{
+using System;
+using System.Drawing;
+using Portable.Drawing.Text;
 
-using Text;
-public enum CompositingMode
+namespace Portable.Drawing.Drawing2D
+{
+	public enum CompositingMode
 {
 	SourceOver = 0,
 	SourceCopy = 1

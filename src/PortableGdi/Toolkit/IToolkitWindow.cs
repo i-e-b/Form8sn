@@ -19,9 +19,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-using System.Drawing.Imaging;
+using System;
+using System.Drawing;
+using Portable.Drawing.Imaging;
 
-namespace System.Drawing.Toolkit
+namespace Portable.Drawing.Toolkit
 {
 	public enum ToolkitCursorType
 	{

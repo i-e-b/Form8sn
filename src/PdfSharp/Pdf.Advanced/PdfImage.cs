@@ -32,7 +32,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 #if CORE
-using System.Drawing.Imaging;
 #endif
 #if GDI
 using System.Drawing.Imaging;
@@ -43,6 +42,7 @@ using System.Windows.Media.Imaging;
 using PdfSharp.Drawing;
 using PdfSharp.Drawing.Internal;
 using PdfSharp.Pdf.Filters;
+using Portable.Drawing.Imaging;
 
 namespace PdfSharp.Pdf.Advanced
 {

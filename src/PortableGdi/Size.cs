@@ -18,11 +18,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-namespace System.Drawing
+using System;
+using System.Drawing;
+using System.Runtime.InteropServices;
+
+namespace Portable.Drawing
 {
-
-using Runtime.InteropServices;
-
 #if !ECMA_COMPAT
 [Serializable]
 [ComVisible(true)]

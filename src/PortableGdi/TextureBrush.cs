@@ -18,14 +18,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-namespace System.Drawing
+using System;
+using System.Drawing;
+using Portable.Drawing.Drawing2D;
+using Portable.Drawing.Imaging;
+using Portable.Drawing.Toolkit;
+
+namespace Portable.Drawing
 {
-
-using Toolkit;
-using Drawing2D;
-using Imaging;
-
-public sealed class TextureBrush : Brush
+	public sealed class TextureBrush : Brush
 {
 	// Internal state.
 	private RectangleF dstRect;

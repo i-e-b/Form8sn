@@ -18,13 +18,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-namespace System.Drawing
+using System;
+using Portable.Drawing.Text;
+using Portable.Drawing.Toolkit;
+
+namespace Portable.Drawing
 {
-
-using Text;
-using Toolkit;
-
-public sealed class FontFamily : MarshalByRefObject, IDisposable
+	public sealed class FontFamily : MarshalByRefObject, IDisposable
 {
 	// Internal state.
 	private readonly GenericFontFamilies _genericFamily;

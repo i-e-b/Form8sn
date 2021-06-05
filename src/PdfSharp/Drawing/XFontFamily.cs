@@ -30,9 +30,9 @@
 using System;
 #if CORE || GDI
 using System.Drawing;
-using GdiFont = System.Drawing.Font;
-using GdiFontFamily = System.Drawing.FontFamily;
-using GdiFontStyle = System.Drawing.FontStyle;
+using GdiFont = Portable.Drawing.Font;
+using GdiFontFamily = Portable.Drawing.FontFamily;
+using GdiFontStyle = Portable.Drawing.FontStyle;
 #endif
 #if WPF
 using System.Windows.Media;

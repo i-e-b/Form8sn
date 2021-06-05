@@ -19,11 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-namespace System.Drawing.Printing
-{
+using System.Text;
 
-    using System.Text;
-    
+namespace Portable.Drawing.Printing
+{
     public enum PaperSourceKind
     {
         None			= 0,

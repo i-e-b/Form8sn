@@ -19,12 +19,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-namespace System.Drawing.Printing
-{
-
-using ComponentModel;
+using System;
 using System.Text;
 
+namespace Portable.Drawing.Printing
+{
 #if CONFIG_COMPONENT_MODEL
 [TypeConverter(typeof(MarginsConverter))]
 #endif

@@ -18,19 +18,16 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-using System.Drawing.Imaging;
-using System.Drawing.Imaging.ImageFormats;
+using System;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Security;
+using Portable.Drawing.Imaging;
+using Portable.Drawing.Imaging.ImageFormats;
+using Portable.Drawing.Toolkit;
 
-namespace System.Drawing
+namespace Portable.Drawing
 {
-
-using IO;
-using Security;
-using Runtime.Serialization;
-using Runtime.InteropServices;
-using ComponentModel;
-using Toolkit;
-
 #if !ECMA_COMPAT
 [Serializable]
 [ComVisible(false)]

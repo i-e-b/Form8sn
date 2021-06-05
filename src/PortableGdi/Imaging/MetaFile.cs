@@ -19,14 +19,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-using System.Drawing.Drawing2D;
+using System;
+using System.Drawing;
+using System.IO;
+using System.Runtime.InteropServices;
 
-namespace System.Drawing.Imaging
+namespace Portable.Drawing.Imaging
 {
-
-using IO;
-using Runtime.InteropServices;
-public enum EmfType
+	public enum EmfType
 {
 	None		= 0,
 	EmfOnly     = 3,

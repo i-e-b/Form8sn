@@ -85,13 +85,13 @@
  * SOFTWARE.
  */
 
-namespace System.Drawing
+using System;
+using System.Drawing;
+using System.Runtime.InteropServices;
+using Portable.Drawing.Drawing2D;
+
+namespace Portable.Drawing
 {
-
-using Runtime.InteropServices;
-using Drawing2D;
-using Toolkit;
-
 #if !ECMA_COMPAT
 [ComVisible(false)]
 #endif

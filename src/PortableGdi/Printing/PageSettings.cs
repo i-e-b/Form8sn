@@ -19,12 +19,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-namespace System.Drawing.Printing
-{
-
-using Runtime.InteropServices;
+using System;
+using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Text;
 
+namespace Portable.Drawing.Printing
+{
 #if !ECMA_COMPAT
 [ComVisible(false)]
 #endif

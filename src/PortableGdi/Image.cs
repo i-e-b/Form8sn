@@ -18,16 +18,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-using System.Drawing.Imaging.ImageFormats;
+using System;
+using System.Drawing;
+using System.IO;
+using System.Runtime.InteropServices;
+using Portable.Drawing.Imaging;
+using Portable.Drawing.Imaging.ImageFormats;
 
-namespace System.Drawing
+namespace Portable.Drawing
 {
-
-using IO;
-using Runtime.InteropServices;
-using Runtime.Serialization;
-using Imaging;
-
 #if !ECMA_COMPAT
 [Serializable]
 [ComVisible(true)]
@@ -475,6 +474,7 @@ public abstract class Image
 						rawFormat = ImageFormat.Icon; break;
 					case PortableImage.Exif:
 						rawFormat = ImageFormat.Exif; break;
+					default: throw new Exception($"Unhandled image LoadFormat from type {dgImage.GetType().Name}");
 				}
 				frameDimensionsList = new Guid [0];
 				this.dgImage = dgImage;

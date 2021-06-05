@@ -19,14 +19,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-namespace System.Drawing.Toolkit
+using System;
+using System.Drawing;
+using Portable.Drawing.Drawing2D;
+using Portable.Drawing.Text;
+
+namespace Portable.Drawing.Toolkit
 {
-
-using Drawing;
-using Text;
-using Drawing2D;
-
-[NonStandardExtra]
+	[NonStandardExtra]
 public interface IToolkitGraphics : IDisposable
 {
 	// Get or set the graphics object's properties.

@@ -19,13 +19,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-namespace System.Drawing.Imaging
-{
-
 using System;
-using Runtime.InteropServices;
+using System.Runtime.InteropServices;
 
-public sealed class BitmapData
+namespace Portable.Drawing.Imaging
+{
+	public sealed class BitmapData
 {
 	// Internal state.
 	internal GCHandle dataHandle;

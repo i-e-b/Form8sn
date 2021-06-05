@@ -19,16 +19,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-using System.Drawing.Imaging;
+using System;
+using System.Drawing;
+using Portable.Drawing.Imaging;
+using Portable.Drawing.Printing;
+using Portable.Drawing.Toolkit.Portable;
 
-namespace System.Drawing.Toolkit
+namespace Portable.Drawing.Toolkit
 {
-
-using Printing;
-using Reflection;
-using IO;
-
-[NonStandardExtra]
+	[NonStandardExtra]
 public sealed class ToolkitManager
 {
 	// Global state.
@@ -291,7 +290,7 @@ public sealed class ToolkitManager
 				ConstructorInfo ctor = type.GetConstructor(new Type [0]);
 				return (IToolkit)(ctor.Invoke(new Object [0]));
 			#else
-				return new NullToolkit();
+				return new PortableToolkit();
 			#endif
 			}
 

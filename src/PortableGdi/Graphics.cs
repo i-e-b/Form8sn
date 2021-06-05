@@ -21,16 +21,17 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-namespace System.Drawing
+using System;
+using System.Drawing;
+using System.Runtime.InteropServices;
+using Portable.Drawing.Drawing2D;
+using Portable.Drawing.Imaging;
+using Portable.Drawing.Text;
+using Portable.Drawing.Toolkit;
+
+namespace Portable.Drawing
 {
-
-using Runtime.InteropServices;
-using Drawing2D;
-using Imaging;
-using Text;
-using Toolkit;
-
-public enum PenType
+	public enum PenType
 {
 	SolidColor		= 0,
 	HatchFill		= 1,

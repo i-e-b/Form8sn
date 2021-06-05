@@ -34,8 +34,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using PdfSharp.Fonts;
 #if CORE || GDI
-using GdiFont = System.Drawing.Font;
-using GdiFontStyle = System.Drawing.FontStyle;
+using GdiFont = Portable.Drawing.Font;
+using GdiFontStyle = Portable.Drawing.FontStyle;
 #endif
 #if WPF
 using System.Windows;
@@ -90,6 +90,8 @@ namespace PdfSharp.Drawing
             return fontSource;
         }
 
+        // Old platform specific stuff:
+        /*
 #if CORE || GDI
         internal static XFontSource GetOrCreateFromGdi(string typefaceKey, GdiFont gdiFont)
         {
@@ -163,7 +165,7 @@ namespace PdfSharp.Drawing
                 throw new InvalidOperationException("Cannot retrieve font data.");
 
             byte[] bytes = new byte[size];
-            int effectiveSize = NativeMethods.GetFontData(hdc, isTtcf ? ttcf : 0, 0, bytes, size);
+            int effectiveSize = NativeMethods.GetFontData(hdc, isTtcf ? ttcf : 0, 0, bytes, size); // TODO: replace this with portable call
             Debug.Assert(size == effectiveSize);
             // Clean up.
             NativeMethods.SelectObject(hdc, oldFont);
@@ -194,6 +196,25 @@ namespace PdfSharp.Drawing
             }
         }
 #endif
+        */
+        
+
+        public static XFontSource GetOrCreateFromFile(string typefaceKey, GdiFont gdiFont)
+        {
+            var basePath = Environment.GetFolderPath(Environment.SpecialFolder.Fonts, Environment.SpecialFolderOption.DoNotVerify);
+            
+            // Font file names usually bear little resemblance to the family and style names.
+            // Our portable GDI will need to read the whole font library and jump into headers to find the names.
+            // This is probably a mem-map one-time seek
+            var fontFileName = "DejaVuSansMono.ttf"; // gdiFont.SystemFontName?
+            var expected = Path.Combine(basePath, fontFileName);
+
+            if (!File.Exists(expected)) throw new Exception("No font found");
+            
+            byte[] bytes = File.ReadAllBytes(expected);
+            XFontSource fontSource = GetOrCreateFrom(typefaceKey, bytes);
+            return fontSource;
+        }
 
         static XFontSource GetOrCreateFrom(string typefaceKey, byte[] fontBytes)
         {

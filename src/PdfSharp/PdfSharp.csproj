@@ -198,7 +198,6 @@
     <Compile Include="Internal\Calc.cs" />
     <Compile Include="Internal\ColorHelper.cs" />
     <Compile Include="Internal\DoubleUtil.cs" />
-    <Compile Include="Internal\NativeMethods.cs" />
     <Compile Include="Internal\TokenizerHelper.cs" />
     <Compile Include="Pdf.AcroForms\enums\PdfAcroFieldFlags.cs" />
     <Compile Include="Pdf.AcroForms\PdfAcroField.cs" />

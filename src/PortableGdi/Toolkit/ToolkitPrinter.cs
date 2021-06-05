@@ -19,12 +19,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-namespace System.Drawing.Toolkit
+using System;
+using Portable.Drawing.Printing;
+
+namespace Portable.Drawing.Toolkit
 {
-
-using Printing;
-
-[NonStandardExtra]
+	[NonStandardExtra]
 public interface IToolkitPrinter
 {
 	// Determine if this printer supports duplex operation.

@@ -18,11 +18,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-namespace System.Drawing
+using System.Drawing;
+using Portable.Drawing.Toolkit;
+
+namespace Portable.Drawing
 {
-
-    using Toolkit;
-
     public sealed class SolidBrush : Brush
     {
         // Internal state.

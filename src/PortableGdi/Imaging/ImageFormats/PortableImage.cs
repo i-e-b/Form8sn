@@ -18,9 +18,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+using System;
 using System.IO;
 
-namespace System.Drawing.Imaging.ImageFormats
+namespace Portable.Drawing.Imaging.ImageFormats
 {
 	
 	public class PortableImage : MarshalByRefObject, ICloneable, IDisposable
@@ -296,7 +297,8 @@ namespace System.Drawing.Imaging.ImageFormats
 					// JPEG or EXIF image.
 					//JpegReader.Load(stream, this, magic, 4);
 					// TODO: implement JPEG reading
-					throw new NotImplementedException("MANAGED JPEG READER NOT YET IMPLEMENTED");
+					stream.Seek(0, SeekOrigin.Begin);
+					JpegReader.Load(stream, this);
 				}
 				else
 				{
@@ -423,6 +425,8 @@ namespace System.Drawing.Imaging.ImageFormats
 				return newImage;
 			}
 
-}; // class Image
+};
+
+	// class Image
 
 }; // namespace DotGNU.Images

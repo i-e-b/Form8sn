@@ -19,13 +19,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-namespace System.Drawing.Printing
+using System;
+
+namespace Portable.Drawing.Printing
 {
-
-    using Printing;
-    using Runtime.Serialization;
-
-    [Serializable]
+	[Serializable]
     public class InvalidPrinterException : SystemException
     {
         // Internal state.

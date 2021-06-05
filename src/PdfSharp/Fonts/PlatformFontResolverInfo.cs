@@ -29,7 +29,7 @@
 
 #if CORE || GDI
 using System.Drawing;
-using GdiFont = System.Drawing.Font;
+using GdiFont = Portable.Drawing.Font;
 
 #endif
 #if WPF
@@ -65,11 +65,11 @@ namespace PdfSharp.Fonts
 #endif
 
 #if CORE || GDI
-        public Font GdiFont
+        public GdiFont GdiFont
         {
             get { return _gdiFont; }
         }
-        readonly Font _gdiFont;
+        readonly GdiFont _gdiFont;
 #endif
 #if WPF
         public WpfFontFamily WpfFontFamily

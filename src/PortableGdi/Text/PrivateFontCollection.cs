@@ -19,7 +19,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-namespace System.Drawing.Text
+using System;
+
+namespace Portable.Drawing.Text
 {
 
     public sealed class PrivateFontCollection : FontCollection

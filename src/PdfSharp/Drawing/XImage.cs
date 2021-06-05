@@ -51,6 +51,7 @@ using PdfSharp.Drawing.Internal;
 using PdfSharp.Internal;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Pdf.Advanced;
+using Portable.Drawing;
 
 // WPFHACK
 #pragma warning disable 0169

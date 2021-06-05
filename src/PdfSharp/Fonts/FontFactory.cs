@@ -33,8 +33,8 @@ using System.Collections.Generic;
 using System.Text;
 #if CORE || GDI
 using System.Drawing;
-using GdiFontFamily = System.Drawing.FontFamily;
-using GdiFont = System.Drawing.Font;
+using GdiFontFamily = Portable.Drawing.FontFamily;
+using GdiFont = Portable.Drawing.Font;
 #endif
 #if WPF
 using System.Windows;

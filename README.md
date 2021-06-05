@@ -53,10 +53,10 @@ To-do:
 ------
 
 * [ ] Write some documentation
-* [ ] Ensure the core PDFsharp and Form8snCore don't use GDI+ **(important)** - check
-  out http://www.gnu.org/software/dotgnu/pnet.html and the System.Windows.Forms they have there.
-  Or just do the font reading from https://github.com/i-e-b/FontReaderCs, as that's all that
-  I think we use.
+* [ ] Ensure the core PDFsharp and Form8snCore don't use GDI+ **(important)**
+  * [ ] Portable system.drawing
+  * [ ] JPEG reading and writing
+  * [ ] Font reading & metrics
 * [ ] Handle PDFs as input
 * [ ] Decode PDF forms so we can use existing 'boxes'
 * [ ] Embed Form8sn instructions in PDF files and handle those? *(not important)*

@@ -19,13 +19,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-namespace System.Drawing.Printing
+using Portable.Drawing.Toolkit;
+
+namespace Portable.Drawing.Printing
 {
-
-using ComponentModel;
-using Toolkit;
-
-public delegate void QueryPageSettingsEventHandler (object sender, QueryPageSettingsEventArgs e);
+	public delegate void QueryPageSettingsEventHandler (object sender, QueryPageSettingsEventArgs e);
 public delegate void PrintEventHandler(object sender, PrintEventArgs e);
 public delegate void PrintPageEventHandler(object sender, PrintPageEventArgs e);
 

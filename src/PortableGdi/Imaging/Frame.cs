@@ -19,10 +19,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-using System.Drawing.Imaging.ImageFormats;
+using System;
 using System.Runtime.InteropServices;
+using Portable.Drawing.Imaging.ImageFormats;
 
-namespace System.Drawing.Imaging
+namespace Portable.Drawing.Imaging
 {
 	public class Frame : MarshalByRefObject, IDisposable
 {

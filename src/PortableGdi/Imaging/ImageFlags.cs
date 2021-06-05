@@ -1,4 +1,6 @@
-namespace System.Drawing.Imaging
+using System;
+
+namespace Portable.Drawing.Imaging
 {
     [Flags]
     public enum ImageFlags

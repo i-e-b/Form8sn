@@ -31,12 +31,12 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using PdfSharp.Internal;
+using Portable.Drawing.Imaging;
 #if CORE
 #endif
 #if CORE_WITH_GDI
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
+
 #elif GDI
 using System.Drawing;
 using System.Drawing.Drawing2D;

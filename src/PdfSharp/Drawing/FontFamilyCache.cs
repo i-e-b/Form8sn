@@ -35,7 +35,7 @@ using System.IO;
 using System.Text;
 #if CORE || GDI
 using System.Drawing;
-using GdiFontFamily = System.Drawing.FontFamily;
+using GdiFontFamily = Portable.Drawing.FontFamily;
 #endif
 #if WPF
 using System.Windows.Media;

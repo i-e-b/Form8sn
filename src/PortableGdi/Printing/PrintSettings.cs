@@ -19,16 +19,16 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-namespace System.Drawing.Printing
-{
-
-using Toolkit;
+using System;
+using System.Collections;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Text;
-using Runtime.InteropServices;
-using ComponentModel;
-using Collections;
+using Portable.Drawing.Toolkit;
 
-public enum Duplex
+namespace Portable.Drawing.Printing
+{
+	public enum Duplex
 {
 	None		= 0,
 	Default		= -1,
@@ -52,14 +52,14 @@ public class PrinterSettings : ICloneable
 	// Internal state.
 	private bool collate;
 	private short copies;
-	[NonSerializedAttribute]
+	[NonSerialized]
 	private PageSettings defaultPageSettings;
 	private Duplex duplex;
 	private int fromPage;
 	private int landscapeAngle;
 	private int maximumPage;
 	private int minimumPage;
-	[NonSerializedAttribute]
+	[NonSerialized]
 	private string printerName;
 	private PrintRange printRange;
 	private bool printToFile;

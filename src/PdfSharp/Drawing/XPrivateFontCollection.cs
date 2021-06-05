@@ -35,11 +35,10 @@ using System.Runtime.InteropServices;
 using PdfSharp.Fonts;
 #if CORE || GDI
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using GdiFontFamily = System.Drawing.FontFamily;
-using GdiFont = System.Drawing.Font;
-using GdiFontStyle = System.Drawing.FontStyle;
-using GdiPrivateFontCollection = System.Drawing.Text.PrivateFontCollection;
+using GdiFontFamily = Portable.Drawing.FontFamily;
+using GdiFont = Portable.Drawing.Font;
+using GdiFontStyle = Portable.Drawing.FontStyle;
+using GdiPrivateFontCollection = Portable.Drawing.Text.PrivateFontCollection;
 #endif
 #if WPF
 using System.Windows.Markup;

@@ -18,9 +18,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+using System;
 using System.IO;
 
-namespace System.Drawing.Imaging.ImageFormats
+namespace Portable.Drawing.Imaging.ImageFormats
 {
 	internal sealed class BmpReader
 {
@@ -192,7 +193,7 @@ namespace System.Drawing.Imaging.ImageFormats
 					stride = frame.MaskStride;
 				}
 
-				// BMP images are usuallystored upside down in the stream.
+				// BMP images are usually stored upside down in the stream.
 				if (reverse)
 				{
 					for(line = frame.Height - 1; line >= 0; --line)

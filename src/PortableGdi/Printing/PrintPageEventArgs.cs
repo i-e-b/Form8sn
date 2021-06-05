@@ -19,7 +19,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-namespace System.Drawing.Printing
+using System;
+using System.Drawing;
+
+namespace Portable.Drawing.Printing
 {
 
 public class PrintPageEventArgs : EventArgs

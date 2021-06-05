@@ -18,13 +18,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-namespace System.Drawing
+using System;
+using Portable.Drawing.Text;
+
+namespace Portable.Drawing
 {
-
-using Toolkit;
-using Text;
-
-public sealed class StringFormat
+	public sealed class StringFormat
 	: MarshalByRefObject, ICloneable, IDisposable
 {
 	// Internal state.

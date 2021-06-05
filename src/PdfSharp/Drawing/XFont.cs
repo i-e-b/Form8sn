@@ -35,10 +35,9 @@ using System.Globalization;
 using System.ComponentModel;
 #if CORE || GDI
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using GdiFontFamily = System.Drawing.FontFamily;
-using GdiFont = System.Drawing.Font;
-using GdiFontStyle = System.Drawing.FontStyle;
+using GdiFontFamily = Portable.Drawing.FontFamily;
+using GdiFont = Portable.Drawing.Font;
+using GdiFontStyle = Portable.Drawing.FontStyle;
 #endif
 #if WPF
 using System.Windows.Markup;
@@ -53,6 +52,7 @@ using PdfSharp.Fonts;
 using PdfSharp.Fonts.OpenType;
 using PdfSharp.Internal;
 using PdfSharp.Pdf;
+using Portable.Drawing;
 
 #if SILVERLIGHT
 #pragma warning disable 649
@@ -391,7 +391,7 @@ namespace PdfSharp.Drawing
                 if (_gdiFontFamily != null)
                 {
                     // Create font based on its family.
-                    _gdiFont = new Font(_gdiFontFamily, (float)_emSize, (GdiFontStyle)_style, GraphicsUnit.World);
+                    _gdiFont = new GdiFont(_gdiFontFamily, (float)_emSize, (GdiFontStyle)_style, GraphicsUnit.World);
                 }
 
                 if (_gdiFont != null)
@@ -796,7 +796,7 @@ namespace PdfSharp.Drawing
         {
             get { return _gdiFont; }
         }
-        Font _gdiFont;
+        GdiFont _gdiFont;
 
         internal static XFontStyle FontStyleFrom(GdiFont font)
         {
