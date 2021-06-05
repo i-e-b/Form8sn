@@ -32,6 +32,7 @@ namespace Portable.Drawing.Imaging.ImageFormats
             
             /*
             // TODO: bring in the huge complexity that is the JPEG read/write format.
+            // The PDF stuff doesn't need to read frames, so it would be neat to have this 'lazy'
             // Add a frame to the image object.
             Frame frame = image.AddFrame(image.Width, image.Height, PixelFormat.Format24bppRgb);
             

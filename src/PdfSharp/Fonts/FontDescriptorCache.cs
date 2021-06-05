@@ -74,7 +74,7 @@ namespace PdfSharp.Fonts
         public static FontDescriptor GetOrCreateDescriptorFor(XFont font)
         {
             if (font == null)
-                throw new ArgumentNullException("font");
+                throw new ArgumentNullException(nameof(font));
 
             //FontSelector1 selector = new FontSelector1(font);
             string fontDescriptorKey = FontDescriptor.ComputeKey(font);

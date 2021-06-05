@@ -28,10 +28,13 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using PdfSharp.Fonts;
 #if CORE || GDI
 using GdiFont = Portable.Drawing.Font;
@@ -47,6 +50,7 @@ using WpfGlyphTypeface = System.Windows.Media.GlyphTypeface;
 #endif
 using PdfSharp.Internal;
 using PdfSharp.Fonts.OpenType;
+using Portable.Drawing.Toolkit.Fonts;
 
 namespace PdfSharp.Drawing
 {
@@ -90,10 +94,14 @@ namespace PdfSharp.Drawing
             return fontSource;
         }
 
+        private static readonly Dictionary<string,string> _fontCache = new();
+        
         public static XFontSource GetOrCreateFromFile(string typefaceKey, GdiFont gdiFont)
         {
             var basePath = Environment.GetFolderPath(Environment.SpecialFolder.Fonts, Environment.SpecialFolderOption.DoNotVerify);
-            
+
+            if (_fontCache.Count < 1) ReadAvailableFonts(basePath);
+
             // Font file names usually bear little resemblance to the family and style names.
             // Our portable GDI will need to read the whole font library and jump into headers to find the names.
             // This is probably a mem-map one-time seek
@@ -105,6 +113,37 @@ namespace PdfSharp.Drawing
             byte[] bytes = File.ReadAllBytes(expected);
             XFontSource fontSource = GetOrCreateFrom(typefaceKey, bytes);
             return fontSource;
+        }
+
+        private static void ReadAvailableFonts(string? basePath)
+        {
+            //TODO: get font key from font file
+            var allFiles = Directory.EnumerateFiles(basePath, "*.ttf").ToList();
+            foreach (var file in allFiles)
+            {
+                try
+                {
+                    var ttf = new TrueTypeFont(file);
+                    var nameTable = ttf.GetTable("name") as TtfTableName;
+                    if (nameTable?.Names == null) continue;
+
+                    // TODO: add reading version 1 name table
+                    // TODO: use the gdiFont name and styles to figure the font out
+                    var id1 = nameTable.Names.FirstOrDefault(n => n.NameId == 1); // this is the 'family name' of the font
+                    if (id1 == null) continue;
+
+                    var key = id1.PlatformId == 3 && id1.EncodingId == 1
+                        ? Encoding.BigEndianUnicode.GetString(id1.ByteStringValue)
+                        : Encoding.UTF8.GetString(id1.ByteStringValue);
+
+                    if (!_fontCache.ContainsKey(key)) _fontCache.Add(key, file);
+                }
+                catch (Exception ex)
+                {
+                    throw;
+                    // ignoring
+                }
+            }
         }
 
         static XFontSource GetOrCreateFrom(string typefaceKey, byte[] fontBytes)
