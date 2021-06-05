@@ -51,6 +51,7 @@ using PdfSharp.Drawing;
 
 namespace PdfSharp.Fonts
 {
+    // TODO: replace platform font resolver with PortableGdi stuff
     /// <summary>
     /// Default platform specific font resolving.
     /// </summary>
