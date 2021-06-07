@@ -375,7 +375,7 @@ namespace PdfSharp.Fonts
 
         internal static string GetFontCachesState()
         {
-            StringBuilder state = new StringBuilder();
+            var state = new StringBuilder();
             string[] keys;
             int count;
 
@@ -397,16 +397,16 @@ namespace PdfSharp.Fonts
             count = fontSourceKeys.Count;
             ulong[] ulKeys = new ulong[count];
             fontSourceKeys.CopyTo(ulKeys, 0);
-            Array.Sort(ulKeys, delegate (ulong x, ulong y) { return x == y ? 0 : (x > y ? 1 : -1); });
+            Array.Sort(ulKeys, (x, y) => x == y ? 0 : (x > y ? 1 : -1));
             foreach (ulong ul in ulKeys)
-                state.AppendFormat("  {0}: {1}\n", ul, FontSourcesByKey[ul].DebuggerDisplay);
+                state.AppendFormat("  {0}: {1}\n", ul, FontSourcesByKey[ul]?.DebuggerDisplay??"");
             Dictionary<string, XFontSource>.KeyCollection fontSourceNames = FontSourcesByName.Keys;
             count = fontSourceNames.Count;
             keys = new string[count];
             fontSourceNames.CopyTo(keys, 0);
             Array.Sort(keys, StringComparer.OrdinalIgnoreCase);
             foreach (string key in keys)
-                state.AppendFormat("  {0}: {1}\n", key, FontSourcesByName[key].DebuggerDisplay);
+                state.AppendFormat("  {0}: {1}\n", key, FontSourcesByName[key]?.DebuggerDisplay??"");
             state.Append("--------------------\n\n");
 
             // FontFamilyInternal by name.

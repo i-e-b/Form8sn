@@ -27,11 +27,14 @@
 // DEALINGS IN THE SOFTWARE.
 #endregion
 
+using System;
+
 namespace PdfSharp.Drawing.BarCodes
 {
     /// <summary>
     /// Implementation of the Code 2 of 5 bar code.
     /// </summary>
+    // ReSharper disable once InconsistentNaming
     public class Code2of5Interleaved : ThickThinBarCode
     {
         /// <summary>
@@ -73,16 +76,16 @@ namespace PdfSharp.Drawing.BarCodes
         }
         static bool[][] Lines = 
         {
-            new bool[] {false, false, true, true, false},
-            new bool[] {true, false, false, false, true},
-            new bool[] {false, true, false, false, true},
-            new bool[] {true, true, false, false, false},
-            new bool[] {false, false, true, false, true},
-            new bool[] {true, false, true, false, false},
-            new bool[] {false, true, true, false, false},
-            new bool[] {false, false, false, true, true},
-            new bool[] {true, false, false, true, false},
-            new bool[] {false, true, false, true, false},
+            new[] {false, false, true, true, false},
+            new[] {true, false, false, false, true},
+            new[] {false, true, false, false, true},
+            new[] {true, true, false, false, false},
+            new[] {false, false, true, false, true},
+            new[] {true, false, true, false, false},
+            new[] {false, true, true, false, false},
+            new[] {false, false, false, true, true},
+            new[] {true, false, false, true, false},
+            new[] {false, true, false, true, false},
         };
 
         /// <summary>
@@ -172,22 +175,21 @@ namespace PdfSharp.Drawing.BarCodes
         /// <param name="text">The code to be checked.</param>
         protected override void CheckCode(string text)
         {
-#if true_
-      if (text == null)
-        throw new ArgumentNullException("text");
+            // NOTE: this was commented out in the original source
+            if (text == null)
+                throw new ArgumentNullException(nameof(text));
 
-      if (text == "")
-        throw new ArgumentException(BcgSR.Invalid2Of5Code(text));
+            if (text == "")
+                throw new ArgumentException(BcgSR.Invalid2Of5Code(text));
 
-      if (text.Length % 2 != 0)
-        throw new ArgumentException(BcgSR.Invalid2Of5Code(text));
+            if (text.Length % 2 != 0)
+                throw new ArgumentException(BcgSR.Invalid2Of5Code(text));
 
-      foreach (char ch in text)
-      {
-        if (!Char.IsDigit(ch))
-          throw new ArgumentException(BcgSR.Invalid2Of5Code(text));
-      }
-#endif
+            foreach (char ch in text)
+            {
+                if (!Char.IsDigit(ch))
+                    throw new ArgumentException(BcgSR.Invalid2Of5Code(text));
+            }
         }
     }
 }

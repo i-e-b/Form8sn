@@ -57,6 +57,7 @@ To-do:
   * [x] Portable system.drawing
   * [x] JPEG reading and writing ( `Portable.Drawing.Imaging.ImageFormats.JpegReader.Load` )
   * [x] Font reading & metrics ( `PdfSharp.Drawing.XFontSource.GetOrCreateFromFile` )
+  * [ ] Remove defunct platform specific calls in PDFsharp.
 * [ ] Handle PDFs as input
 * [ ] Decode PDF forms so we can use existing 'boxes'
 * [ ] Embed Form8sn instructions in PDF files and handle those? *(not important)*

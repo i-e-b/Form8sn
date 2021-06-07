@@ -64,6 +64,7 @@ namespace PdfSharp
 
         // The κ (kappa) for drawing a circle or an ellipse with four Bézier splines, specifying the distance of the influence point from the starting or end point of a spline.
         // Petzold: 4/3 * tan(α / 4)
+        // ReSharper disable once InconsistentNaming
         public const double κ = 0.5522847498307933984022516322796;  // := 4/3 * (1 - cos(-π/4)) / sin(π/4)) <=> 4/3 * (sqrt(2) - 1) <=> 4/3 * tan(π/8)
     }
 }
