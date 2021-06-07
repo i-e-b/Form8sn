@@ -30,7 +30,8 @@ namespace Portable.Drawing.Toolkit.Fonts
             Count = file.GetUint16();
             StringOffset = file.GetUint16();
             
-            if (Count < 1 || Count > 50) return; // safety valve
+            if (Count < 1) return;
+            if (Count > 100) Count = 100; // safety valve
 
             Names = new List<NameRecord>();
             for (int i = 0; i < Count; i++)

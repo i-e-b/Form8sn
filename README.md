@@ -53,10 +53,10 @@ To-do:
 ------
 
 * [ ] Write some documentation
-* [ ] Ensure the core PDFsharp and Form8snCore don't use GDI+ **(important)**
-  * [ ] Portable system.drawing
-  * [ ] JPEG reading and writing ( `Portable.Drawing.Imaging.ImageFormats.JpegReader.Load` )
-  * [ ] Font reading & metrics ( `PdfSharp.Drawing.XFontSource.GetOrCreateFromFile` )
+* [x] Ensure the core PDFsharp and Form8snCore don't use GDI+ **(important)**
+  * [x] Portable system.drawing
+  * [x] JPEG reading and writing ( `Portable.Drawing.Imaging.ImageFormats.JpegReader.Load` )
+  * [x] Font reading & metrics ( `PdfSharp.Drawing.XFontSource.GetOrCreateFromFile` )
 * [ ] Handle PDFs as input
 * [ ] Decode PDF forms so we can use existing 'boxes'
 * [ ] Embed Form8sn instructions in PDF files and handle those? *(not important)*

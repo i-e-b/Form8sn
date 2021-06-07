@@ -100,25 +100,38 @@ namespace PdfSharp.Drawing
         {
             var basePath = Environment.GetFolderPath(Environment.SpecialFolder.Fonts, Environment.SpecialFolderOption.DoNotVerify);
 
-            if (_fontCache.Count < 1) ReadAvailableFonts(basePath);
+            if (_fontCache.Count < 1)
+                ReadAvailableFonts(basePath);
 
             // Font file names usually bear little resemblance to the family and style names.
             // Our portable GDI will need to read the whole font library and jump into headers to find the names.
             // This is probably a mem-map one-time seek
-            var fontFileName = "DejaVuSansMono.ttf"; // gdiFont.SystemFontName?
-            var expected = Path.Combine(basePath, fontFileName);
+            var fontFileName = Path.Combine(basePath, "DejaVuSansMono.ttf");
+            var prefKey = BuildStyledName(gdiFont);
+            var fallbackKey = gdiFont.FontFamily.Name;
+            if (_fontCache.ContainsKey(prefKey)) fontFileName = _fontCache[prefKey]!;
+            else if (_fontCache.ContainsKey(fallbackKey)) fontFileName = _fontCache[fallbackKey]!;
 
-            if (!File.Exists(expected)) throw new Exception("No font found");
+            if (!File.Exists(fontFileName)) throw new Exception("No font found");
             
-            byte[] bytes = File.ReadAllBytes(expected);
+            byte[] bytes = File.ReadAllBytes(fontFileName);
             XFontSource fontSource = GetOrCreateFrom(typefaceKey, bytes);
             return fontSource;
         }
 
-        private static void ReadAvailableFonts(string? basePath)
+        private static string BuildStyledName(GdiFont gdiFont)
         {
-            //TODO: get font key from font file
+            var sb = new StringBuilder();
+            sb.Append(gdiFont.FontFamily.Name);
+            if (gdiFont.Bold) sb.Append(" Bold");
+            if (gdiFont.Italic) sb.Append(" Italic");
+            return sb.ToString();
+        }
+
+        private static void ReadAvailableFonts(string basePath)
+        {
             var allFiles = Directory.EnumerateFiles(basePath, "*.ttf").ToList();
+
             foreach (var file in allFiles)
             {
                 try
@@ -127,23 +140,50 @@ namespace PdfSharp.Drawing
                     var nameTable = ttf.GetTable("name") as TtfTableName;
                     if (nameTable?.Names == null) continue;
 
-                    // TODO: add reading version 1 name table
-                    // TODO: use the gdiFont name and styles to figure the font out
-                    var id1 = nameTable.Names.FirstOrDefault(n => n.NameId == 1); // this is the 'family name' of the font
-                    if (id1 == null) continue;
+                    var names = nameTable.Names.Where(n => n.NameId == 1 || (n.NameId == 4 && EnglishLanguage(n)) ).ToList(); // 1 = 'family name' (like "Courier New"); 4 = style name (like "Courier New Bold");
 
-                    var key = id1.PlatformId == 3 && id1.EncodingId == 1
-                        ? Encoding.BigEndianUnicode.GetString(id1.ByteStringValue)
-                        : Encoding.UTF8.GetString(id1.ByteStringValue);
+                    foreach (var name in names)
+                    {
+                        var key = name.PlatformId == 3 && name.EncodingId == 1
+                            ? Encoding.BigEndianUnicode.GetString(name.ByteStringValue)
+                            : Encoding.UTF8.GetString(name.ByteStringValue);
 
-                    if (!_fontCache.ContainsKey(key)) _fontCache.Add(key, file);
+                        if (!_fontCache.ContainsKey(key)) _fontCache.Add(key, file);
+                    }
+                }
+                catch (BadImageFormatException)
+                {
+                    Console.WriteLine($"Not a true-type file: {file}");
                 }
                 catch (Exception ex)
                 {
-                    throw;
+                    var str = ex.ToString();
+                    Console.WriteLine(str);
                     // ignoring
                 }
             }
+        }
+
+        private static bool EnglishLanguage(NameRecord name)
+        {
+            return name.LanguageId == 0 // Macintosh
+                   // Windows country-specific English variants:
+                || name.LanguageId == 0x0C09
+                || name.LanguageId == 0x2809
+                || name.LanguageId == 0x1009
+                || name.LanguageId == 0x2409
+                || name.LanguageId == 0x4009
+                || name.LanguageId == 0x1809
+                || name.LanguageId == 0x2009
+                || name.LanguageId == 0x4409
+                || name.LanguageId == 0x1409
+                || name.LanguageId == 0x3409
+                || name.LanguageId == 0x4809
+                || name.LanguageId == 0x1C09
+                || name.LanguageId == 0x2C09
+                || name.LanguageId == 0x0809
+                || name.LanguageId == 0x0409
+                || name.LanguageId == 0x3009;
         }
 
         static XFontSource GetOrCreateFrom(string typefaceKey, byte[] fontBytes)

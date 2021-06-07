@@ -202,7 +202,7 @@ namespace Portable.Drawing.Toolkit.Fonts
 
         private FontHeader ReadHeadTable()
         {
-            if ( ! _tables.ContainsKey("head")) throw new Exception("Bad font: Header table missing");
+            if ( ! _tables.ContainsKey("head")) throw new BadImageFormatException("Bad font: Header table missing");
             _file.Seek(_tables["head"].Offset);
 
             var h = new FontHeader();
@@ -249,12 +249,15 @@ namespace Portable.Drawing.Toolkit.Fonts
             for (int i = 0; i < numTables; i++)
             {
                 var tag = _file.GetString(4);
+                if (string.IsNullOrEmpty(tag)) break; // malformatted? End of file?
+                
                 var entry = new OffsetEntry{
                     Checksum = _file.GetUint32(),
                     Offset = _file.GetUint32(),
                     Length = _file.GetUint32()
                 };
-                tables.Add(tag, entry);
+                if (tables.ContainsKey(tag)) Console.WriteLine($"duplicate tag: {tag}");
+                else tables.Add(tag, entry);
 
                /* if (tag != "head") {
                     if (CalculateTableChecksum(file, tables[tag].Offset, tables[tag].Length) != tables[tag].Checksum)
