@@ -21,7 +21,6 @@
 
 using System;
 using System.Collections;
-using System.Drawing;
 
 namespace Portable.Drawing.Drawing2D
 {
@@ -48,7 +47,7 @@ public sealed class GraphicsPath : MarshalByRefObject, ICloneable, IDisposable
 				int posn;
 				for(posn = 0; posn < pts.Length; ++posn)
 				{
-					fpts[posn] = pts[posn];
+					fpts[posn] = (PointF)pts[posn];
 				}
 				return fpts;
 			}
@@ -64,7 +63,7 @@ public sealed class GraphicsPath : MarshalByRefObject, ICloneable, IDisposable
 				int posn;
 				for(posn = 0; posn < rects.Length; ++posn)
 				{
-					frects[posn] = rects[posn];
+					frects[posn] = (RectangleF)rects[posn];
 				}
 				return frects;
 			}

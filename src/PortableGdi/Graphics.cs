@@ -22,7 +22,6 @@
  */
 
 using System;
-using System.Drawing;
 using System.Runtime.InteropServices;
 using Portable.Drawing.Drawing2D;
 using Portable.Drawing.Imaging;
@@ -3284,7 +3283,7 @@ public sealed class Graphics : MarshalByRefObject, IDisposable
 				   ((size.Width >= width && width != 0.0f) || containsNL))
 				{
 					// create the layout rectangle
-					Rectangle layout = new Rectangle
+					var layout = new RectangleF
 						(0, 0, (int)width, (int)layoutArea.Height);
 
 					// declare the drawing position calculator

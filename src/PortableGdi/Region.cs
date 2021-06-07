@@ -501,7 +501,7 @@ public sealed class Region : MarshalByRefObject, IDisposable
 	{
 		rgnData.MakeEmpty() ;
 		rects = new RectangleF[0];
-		extent = Rectangle.Empty;
+		extent = RectangleF.Empty;
 	}
 
 	// Make this region infinite.
@@ -510,7 +510,7 @@ public sealed class Region : MarshalByRefObject, IDisposable
 		rgnData.MakeInfinite() ;
 		const float maxCoord = 4194304; //Math.Pow(2, 22)
 		extent = new RectangleF(-maxCoord, -maxCoord, 2 * maxCoord, 2 * maxCoord);
-		rects = new RectangleF[1] { extent };
+		rects = new[] { extent };
 	}
 
 	// Transform this region using a specified matrix.
@@ -743,8 +743,8 @@ public sealed class Region : MarshalByRefObject, IDisposable
 	private static void SubtractOverlapBands(Region regNew, ref int nextRectangle, Region reg1, int r1, int r1End, Region reg2, int r2, int r2End, float top, float bottom)
 	{
 		float left = reg1.rects[r1].Left;
-		RectangleF rect1 = Rectangle.Empty;
-		RectangleF rect2 = Rectangle.Empty;
+		RectangleF rect1 = RectangleF.Empty;
+		RectangleF rect2 = RectangleF.Empty;
 		if (r1 != r1End)
 			rect1 = reg1.rects[r1];
 		if (r2 != r2End)
