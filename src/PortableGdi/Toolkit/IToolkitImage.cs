@@ -20,12 +20,18 @@
  */
 
 using System;
+using Portable.Drawing.Imaging;
 
 namespace Portable.Drawing.Toolkit
 {
     [NonStandardExtra]
     public interface IToolkitImage : IDisposable
     {
+        /// <summary>
+        /// Get the currently active frame, if any
+        /// </summary>
+        /// <returns></returns>
+        Frame? Frame();
     }
 
 }// namespace System.Drawing.Toolkit

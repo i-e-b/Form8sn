@@ -1,6 +1,6 @@
 using System;
-using System.Drawing;
 using Portable.Drawing.Drawing2D;
+using Portable.Drawing.Imaging.ImageFormats;
 using Portable.Drawing.Text;
 
 namespace Portable.Drawing.Toolkit.Portable
@@ -13,9 +13,20 @@ namespace Portable.Drawing.Toolkit.Portable
         /// <param name="parent"></param>
         public PortableGraphics(IToolkit parent)
         {
+            Target = new PortableImage();
             Toolkit = parent;
             DpiX = DpiY = 96.0f; // default Windows-like value
         }
+
+        public PortableGraphics(PortableToolkit parent, IToolkitImage image)
+        {
+            Toolkit = parent;
+            DpiX = DpiY = 96.0f; // default Windows-like value
+            Target = image;
+        }
+
+        protected readonly IToolkitImage Target;
+
         public void Dispose()
         {
         }
@@ -32,15 +43,57 @@ namespace Portable.Drawing.Toolkit.Portable
         public int TextContrast { get; set; }
         public TextRenderingHint TextRenderingHint { get; set; }
         public PortableFont CurrentFont { get; set; }
+        
+        public IToolkitPen? Pen { get; set; }
+        public IToolkitBrush? Brush { get; set; }
+        public IToolkitFont? Font { get; set; }
+
 
         public void Clear(Color color)
         {
-            throw new NotImplementedException();
+            var frame = Target.Frame();
+            if (frame == null) return;
+            var c = color.ToArgb();
+
+            // draw the first scan the hard way, then copy it
+            for (int i = 0; i < frame.width; i++) frame.SetPixel(i, 0, c);
+            for (var i = 1; i < frame.height; i++) frame.SetScanLine(i, frame.data);
         }
 
         public void DrawLine(int x1, int y1, int x2, int y2)
         {
-            throw new NotImplementedException();
+            if (Pen == null) return;
+            var frame = Target.Frame();
+            if (frame == null) return;
+            
+            var color = Pen.Pen.Color.ToArgb();
+            
+            // Very, very stupid line drawing
+            var adx = (float)Math.Abs(x1 - x2);
+            var ady = (float)Math.Abs(y1 - y2);
+            var mad = Math.Max(adx, ady);
+
+            if (adx == 0 && ady == 0)
+            {
+                frame.SetPixel(x1, y1, color);
+                return;
+            }
+            
+            // in one direction, we will step single pixels. In the other we step fractions
+            var dx = (float)Math.Sign(x2 - x1);
+            var dy = (float)Math.Sign(y2 - y1);
+
+            if (adx < ady) dx *= adx / ady; // more vertical, sub-step x
+            if (adx > ady) dy *= ady / adx; // more horizontal, sub-step y
+
+            float x = x1;
+            float y = y1;
+            for (int i = 0; i <= mad; i++)
+            {
+                frame.SetPixel((int)x, (int)y, color);
+                x += dx;
+                y += dy;
+            }
         }
 
         public void DrawLines(Point[] points)

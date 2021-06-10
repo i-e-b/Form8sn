@@ -27,6 +27,8 @@ namespace Portable.Drawing.Toolkit
     [NonStandardExtra]
     public interface IToolkitPen : IToolkitSelectObject
     {
+        public Pen Pen { get; }
+        
         // Select a brush-based pen into a graphics object.
         void Select(IToolkitGraphics graphics, IToolkitBrush brush);
 

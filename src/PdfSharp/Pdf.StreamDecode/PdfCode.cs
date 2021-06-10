@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using PdfSharp.Pdf.Content.Objects;
 
 namespace PdfSharp.Pdf.StreamDecode
 {
@@ -12,8 +13,6 @@ namespace PdfSharp.Pdf.StreamDecode
     /// </summary>
     public class PdfCode
     {
-        public PdfTokenType TokenType { get; set; }
-
-        public Stack<string> Arguments { get; set;}
+        public CObject ContentObject { get; set; }
     }
 }

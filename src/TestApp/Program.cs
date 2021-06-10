@@ -1,13 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using PdfSharp.Drawing;
+using PdfSharp.Extensions;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Pdf.StreamDecode;
+using Portable.Drawing;
+using Portable.Drawing.Imaging;
 
 namespace TestApp
 {
@@ -75,6 +79,9 @@ namespace TestApp
                         LogPdfItem(item);
                     }
                     Console.WriteLine("==================================================");
+                    
+                    // Try recovering some of the page to an image (proper PDF rendering)
+                    AttemptToRenderPage(ePage, pageNumber);
 
                     using (var g = XGraphics.FromPdfPage(ePage))
                     {
@@ -92,7 +99,18 @@ namespace TestApp
             Console.WriteLine("Done.");
         }
 
-        
+        private static void AttemptToRenderPage(PdfPage ePage, int pageNumber)
+        {
+            var width = ePage!.Width.Point / 3;
+            var height = ePage.Height.Point / 3;
+            var bmp = new Bitmap((int) width, (int) height, PixelFormat.Format24bppRgb);
+
+            var instructionList = ePage.RecoverInstructions();
+            instructionList.RenderToImage(bmp);
+            bmp.Save($"C:\\Temp\\Page{pageNumber}.png", ImageFormat.Png);
+        }
+
+
         private static int imageCount = 1;
         private static void ExtractImages(PdfDictionary page)
         {
@@ -157,8 +175,8 @@ namespace TestApp
             int width = image.Elements.GetInteger(PdfImage.Keys.Width);
             int height = image.Elements.GetInteger(PdfImage.Keys.Height);
             int bitsPerComponent = image.Elements.GetInteger(PdfImage.Keys.BitsPerComponent);
- 
-            Console.WriteLine($"Unhandled image, not exported: w{width} h{height} {bitsPerComponent}bpp");
+            
+            Console.WriteLine($"Deflate-decode image, not exported: w{width} h{height} {bitsPerComponent}bpp; {image.Stream.Length} bytes.");
             // TODO: You can put the code here that converts vom PDF internal image format to a Windows bitmap
             // and use GDI+ to save it in PNG format.
             // It is the work of a day or two for the most important formats. Take a look at the file
@@ -176,8 +194,7 @@ namespace TestApp
             var x =  item is PdfReference reference ? reference.Value : item;
             Console.Write(" -> " + x.GetType());
             
-            if (x is PdfContent cont) LogPdfContent(cont); // content is a special dictionary
-            else if (x is PdfDictionary dict) LogPdfDict(dict);
+            if (x is PdfDictionary dict) LogPdfDict(dict);
             else Console.WriteLine($"Un-logged type {x.GetType().Name}");
         }
 
@@ -206,67 +223,6 @@ namespace TestApp
                     else Console.WriteLine($"Item: {element.Key} => {element.Value.GetType().Name}");
                 }
             }
-        }
-
-        private static void LogPdfContent(PdfContent cont)
-        {
-            foreach (var element in cont.Elements)
-            {
-                Console.WriteLine("    " + element);
-            }
-
-            Console.WriteLine("..................................................");
-            Console.WriteLine(cont.Stream.ToString());
-
-            // TODO: implement this to get re-rendering
-            // https://www.adobe.com/content/dam/acom/en/devnet/pdf/pdfs/pdf_reference_archives/PDFReference.pdf
-            // Chapters 4, 5, 9. Start at page 134 (pdf154), table 4.1 - operator categories; 156 (table 4.7) and page 163 (table 4.9 - paths)
-            var instructionList = cont.Stream.RecoverInstructions();
-            foreach (var instruction in instructionList)
-            {
-                Console.Write(instruction.ToString());
-            }
-            /*
-0.1 w                                   ; line width = 0.1
-q 56.645 56.733 728.509 481.939 re      ; push state, add rectangle to current path
-W* n                                    ; W* - Intersect clip with current path (* = using even-odd rule), n = End the path object without filling or stroking it.
-q 728.4 0 0 481.8 -1400.1 538.653 cm    ; push state, concat transform matrix
-/Im20 Do Q                              ; Named object 'Im20' (this is a reference in Resources->XObject->/Im20) Draws the image (Do = "Paint the specified XObject"), Pop state
-q 728.4 0 0 481.8 -671.7 538.653 cm     ; Set transform
-/Im20 Do Q                              ; draw the image in new location, pop state
-
-Q
-q 0 0 0 rg
-BT
-740.3 77.403 Td /F1 8 Tf<25>Tj
-ET
-
-*/
-
-
-            // https://stackoverflow.com/questions/29467539/encoding-of-pdf-text-string
-            /*             
-BT
-56.8 721.3 Td 
-/F2 12 Tf
-[<01>2<0203>2<04>-10<0503>2<04>-2<0506070809>2<0A>1<0B>]TJ
-ET
-             BT and ET indicate the beginning and end of a text showing section
-             
-             56.8 721.3 Td positions the current point to coordinates "56.8 points in horizontal, 721.3 points in vertical direction".
-             
-             12 Tf sets the font size to 12 points.
-             
-             /F1 sets the font to be use to one that is defined elsewhere in the PDF document. That font also somewhere sets a font encoding (and possibly a /ToUnicode table). The font encoding will determine which glyph shape should be drawn when a specific character code is seen in the text strings.
-             
-[<01>2<0203>2<04>-10<0503>2<04>-2<0506070809>2<0A>1<0B>]TJ
-    
-            <01>2 : <01> is the first character code. 2 is a parameter for the "individual glyph positioning" allowed when using the text show operator TJ.
-            <0203>2 : <0203> are two more character codes. 2 again is a parameter for the "individual glyph positioning" for TJ.
-            <04>-10 : <04> is the fourth character code. -10 again for the "individual glyph positioning" with TJ.
-            <0503>2 : <05> is the fifth character code, <03> is the third character code (used before). 2 is for "individual glyph positioning"...
-             
-             */
         }
     }
 }

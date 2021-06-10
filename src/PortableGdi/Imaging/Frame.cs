@@ -20,6 +20,7 @@
  */
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Portable.Drawing.Imaging.ImageFormats;
 
@@ -207,6 +208,7 @@ namespace Portable.Drawing.Imaging
 			}
 
 	// Get the pixel value at a specific location.
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public int GetPixel(int x, int y)
 			{
 				int ptr = y * stride;
@@ -372,6 +374,7 @@ namespace Portable.Drawing.Imaging
 			}
 
 	// Set the pixel value at a specific location.
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public void SetPixel(int x, int y, int color)
 			{
 				int ptr = y * stride;

@@ -42,6 +42,10 @@ public interface IToolkitGraphics : IDisposable
 	int TextContrast { get; set; }
 	TextRenderingHint TextRenderingHint { get; set; }
 
+	public IToolkitPen? Pen { get; set; }
+	public IToolkitBrush? Brush { get; set; }
+	public IToolkitFont? Font { get; set; }
+
 	// Clear the entire drawing surface.
 	void Clear(Color color);
 

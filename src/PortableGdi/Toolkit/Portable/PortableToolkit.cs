@@ -1,5 +1,4 @@
 using System;
-using System.Drawing;
 using System.Threading;
 using Portable.Drawing.Drawing2D;
 using Portable.Drawing.Imaging;
@@ -44,12 +43,12 @@ namespace Portable.Drawing.Toolkit.Portable
 
         public IToolkitGraphics CreateFromImage(IToolkitImage image)
         {
-            throw new NotImplementedException();
+            return new PortableGraphics(this, image);
         }
 
         public IToolkitBrush CreateSolidBrush(Color color)
         {
-            throw new NotImplementedException();
+            return new PortableBrush(color);
         }
 
         public IToolkitBrush CreateHatchBrush(HatchStyle style, Color foreColor, Color backColor)
@@ -79,7 +78,7 @@ namespace Portable.Drawing.Toolkit.Portable
 
         public IToolkitPen CreatePen(Pen pen)
         {
-            throw new NotImplementedException();
+            return new PortablePen(pen);
         }
 
         public IToolkitFont CreateFont(Font font, float dpi)
@@ -94,7 +93,8 @@ namespace Portable.Drawing.Toolkit.Portable
 
         public IToolkitImage CreateImage(PortableImage image, int frame)
         {
-            throw new NotImplementedException();
+            image.SetActiveFrame(frame);
+            return image;
         }
 
         public IntPtr GetHalftonePalette()

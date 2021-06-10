@@ -15,8 +15,7 @@ namespace Portable.Drawing.Toolkit.Portable
 
         public void Select(IToolkitGraphics graphics)
         {
-            if (!(graphics is PortableGraphics pg)) return;
-            pg.CurrentFont = this;
+            graphics.Font = this;
         }
 
         public IntPtr GetHfont() => IntPtr.Zero;
