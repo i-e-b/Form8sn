@@ -15,6 +15,7 @@ namespace TestApp
     {
         static void Main()
         {
+            #region Create PDF
             Console.WriteLine("Creating a PDF from scratch...");
             var document = new PdfDocument();
 
@@ -37,15 +38,28 @@ namespace TestApp
             // Save the document...
             const string filename = "HelloWorld.pdf";
             document.Save(filename);
+            #endregion
             
             Console.WriteLine("Trying to open an existing PDF");
 
             var sw = new Stopwatch();
             sw.Start();
-            using (var existing = PdfReader.Open("big_test.pdf"))
+            using (var existing = PdfReader.Open("finland.pdf"))
             {
-                Console.WriteLine($"Found {existing.FullPath}: {existing.Pages.Count} pages");
                 
+                var form = existing.AcroForm;
+                if (form == null) Console.WriteLine("No form found");
+                else
+                {
+                    Console.WriteLine($"Found {form.Fields.Count} form fields");
+                    foreach (var field in form.Fields)
+                    {
+                        Console.WriteLine("Field def:");
+                        LogPdfItem(field);
+                    }
+                }
+
+                Console.WriteLine($"Found {existing.FullPath}: {existing.Pages.Count} pages");
                 int pageNumber = 0;
                 foreach (var ePage in existing.Pages)
                 {
@@ -159,18 +173,51 @@ namespace TestApp
         {
             Console.Write("####" + item!.GetType().Name);
 
-            if (item is not PdfReference reference) return;
+            var x =  item is PdfReference reference ? reference.Value : item;
+            Console.Write(" -> " + x.GetType());
             
-            Console.Write(" -> " + reference.Value.GetType());
-            if (reference.Value is not PdfContent cont) return;
+            if (x is PdfContent cont) LogPdfContent(cont); // content is a special dictionary
+            else if (x is PdfDictionary dict) LogPdfDict(dict);
+            else Console.WriteLine($"Un-logged type {x.GetType().Name}");
+        }
 
+        private static void LogPdfDict(PdfDictionary dict)
+        {
+            Console.WriteLine($"Dictionary with {dict!.Elements.Count} elements");
+            foreach (var element in dict.Elements)
+            {
+                if (element.Key == "/Rect" && element.Value is PdfArray arr)
+                {
+                    Console.Write($"Rect: {arr.Elements.Count} items [");
+                    foreach (var ai in arr.Elements)
+                    {
+                        if (ai is PdfReal real)
+                        {
+                            Console.Write(real.Value + "; ");
+                        }
+                    }
+                    Console.WriteLine("]");
+                }
+                else
+                {
+                    if (element.Value is PdfString str) Console.WriteLine($"Item: {element.Key} => String: '{str}'");
+                    else if (element.Value is PdfName name) Console.WriteLine($"Item: {element.Key} => Name: {name.Value}");
+                    else if (element.Value is PdfInteger integer) Console.WriteLine($"Item: {element.Key} => int: {integer.Value}");
+                    else Console.WriteLine($"Item: {element.Key} => {element.Value.GetType().Name}");
+                }
+            }
+        }
+
+        private static void LogPdfContent(PdfContent cont)
+        {
             foreach (var element in cont.Elements)
             {
                 Console.WriteLine("    " + element);
             }
+
             Console.WriteLine("..................................................");
             Console.WriteLine(cont.Stream.ToString());
-            
+
             // TODO: implement this to get re-rendering
             // https://www.adobe.com/content/dam/acom/en/devnet/pdf/pdfs/pdf_reference_archives/PDFReference.pdf
             // Chapters 4, 5, 9. Start at page 134 (pdf154), table 4.1 - operator categories; 156 (table 4.7) and page 163 (table 4.9 - paths)
@@ -195,8 +242,8 @@ BT
 ET
 
 */
-            
-            
+
+
             // https://stackoverflow.com/questions/29467539/encoding-of-pdf-text-string
             /*             
 BT

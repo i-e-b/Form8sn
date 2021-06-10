@@ -735,7 +735,7 @@ namespace PdfSharp.Pdf
         /// <summary>
         /// Get the AcroForm dictionary.
         /// </summary>
-        public PdfAcroForm AcroForm
+        public PdfAcroForm? AcroForm
         {
             get { return Catalog.AcroForm; }
         }

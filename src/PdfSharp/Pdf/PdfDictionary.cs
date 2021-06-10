@@ -812,13 +812,13 @@ namespace PdfSharp.Pdf
             /// <summary>
             /// Gets the value for the specified key. If the value does not exist, it is optionally created.
             /// </summary>
-            public PdfItem GetValue(string key, VCF options)
+            public PdfItem? GetValue(string key, VCF options)
             {
                 PdfObject obj;
                 PdfDictionary dict;
                 PdfArray array;
                 PdfReference iref;
-                PdfItem value = this[key];
+                var value = this[key];
                 if (value == null ||
                     value is PdfNull ||
                     value is PdfReference && ((PdfReference)value).Value is PdfNullObject)
@@ -963,7 +963,7 @@ namespace PdfSharp.Pdf
             /// <summary>
             /// Short cut for GetValue(key, VCF.None).
             /// </summary>
-            public PdfItem GetValue(string key)
+            public PdfItem? GetValue(string key)
             {
                 return GetValue(key, VCF.None);
             }
@@ -1277,12 +1277,11 @@ namespace PdfSharp.Pdf
             /// starting with a slash '/'. This property provides full access to the elements of the
             /// PDF dictionary. Wrong use can lead to errors or corrupt PDF files.
             /// </summary>
-            public PdfItem this[string key]
+            public PdfItem? this[string key]
             {
                 get
                 {
-                    PdfItem item;
-                    _elements.TryGetValue(key, out item);
+                    _elements.TryGetValue(key, out PdfItem item);
                     return item;
                 }
                 set

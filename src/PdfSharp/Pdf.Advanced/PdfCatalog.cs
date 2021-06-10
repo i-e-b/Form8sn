@@ -178,16 +178,9 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Gets the AcroForm dictionary of this document.
         /// </summary>
-        public PdfAcroForm AcroForm
-        {
-            get
-            {
-                if (_acroForm == null)
-                    _acroForm = (PdfAcroForm)Elements.GetValue(Keys.AcroForm);
-                return _acroForm;
-            }
-        }
-        PdfAcroForm _acroForm;
+        public PdfAcroForm? AcroForm => _acroForm ??= (PdfAcroForm?) Elements.GetValue(Keys.AcroForm);
+
+        PdfAcroForm? _acroForm;
 
         /// <summary>
         /// Gets or sets the language identifier specifying the natural language for all text in the document.
