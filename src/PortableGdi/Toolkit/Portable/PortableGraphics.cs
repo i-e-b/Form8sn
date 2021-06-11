@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Portable.Drawing.Drawing2D;
 using Portable.Drawing.Imaging.ImageFormats;
 using Portable.Drawing.Text;
@@ -98,7 +99,14 @@ namespace Portable.Drawing.Toolkit.Portable
 
         public void DrawLines(Point[] points)
         {
-            throw new NotImplementedException();
+            if (points.Length < 2) return;
+            var start = points[0];
+            for (int i = 1; i < points.Length; i++)
+            {
+                var end = points[i];
+                DrawLine(start.X, start.Y, end.X, end.Y);
+                start = end;
+            }
         }
 
         public void DrawPolygon(Point[] points)
@@ -153,7 +161,36 @@ namespace Portable.Drawing.Toolkit.Portable
 
         public void DrawString(string s, int x, int y, StringFormat format)
         {
-            throw new NotImplementedException();
+            if (Font == null) throw new Exception("Tried to measure string with no font set");
+            if (!(Font is PortableFont pf)) throw new Exception($"Need to measure using font def: {Font.GetType().FullName}");
+            
+            Pen = new PortablePen(new Pen(Color.Black, 1.0f));// TODO: pick from a real parameter
+            var font = pf.BaseTrueTypeFont;
+            
+            var scale = pf.GetScale();
+            var h = pf.GetLineHeight();
+            
+            double xOff = x;
+            foreach (char c in s)
+            {
+                var gl = font.ReadGlyph(c);
+                if (gl == null) continue;
+                
+                xOff += gl.xMin * scale;
+                var yAdj = gl.yMin * scale;
+                
+                // not doing fill, just trace outline for now
+                var outline = gl.NormalisedContours(); // break into simple lines
+                foreach (var curve in outline)
+                {
+                    var points = curve.Select(p => new Point(
+                        (int)(xOff + p.X*scale),
+                        (int)(y + (0-p.Y)*scale - yAdj) // Y is flipped
+                        )).ToArray();
+                    DrawLines(points);
+                }
+                xOff += (gl.xMax - gl.xMin) * scale;
+            }
         }
 
         public void DrawString(string s, Point[] layoutRectangle, StringFormat format)
@@ -163,7 +200,31 @@ namespace Portable.Drawing.Toolkit.Portable
 
         public Size MeasureString(string s, Point[] layoutRectangle, StringFormat format, out int charactersFitted, out int linesFilled, bool ascentOnly)
         {
-            throw new NotImplementedException();
+            if (Font == null) throw new Exception("Tried to measure string with no font set");
+            if (!(Font is PortableFont pf)) throw new Exception($"Need to measure using font def: {Font.GetType().FullName}");
+            
+            var font = pf.BaseTrueTypeFont;
+            charactersFitted = 0;
+            linesFilled = 1;
+            
+            var scale = pf.GetScale();
+
+            // Really dumb way to start -- not using layout rect, just count up the character sizes.
+            // when we do implement it, make sure DrawString uses the same logic
+            var maxHeight = 0.0;
+            var width = 0.0;
+            foreach (char c in s)
+            {
+                var gl = font.ReadGlyph(c);
+                if (gl == null) continue;
+                
+                charactersFitted++;
+                var h = (gl.yMax - gl.yMin) * scale;
+                var w = (gl.xMax - gl.xMin) * scale;
+                maxHeight = Math.Max(h, maxHeight);
+                width += w;
+            }
+            return new Size((int)width, (int)maxHeight);
         }
 
         public void Flush(FlushIntention intention)
@@ -218,7 +279,7 @@ namespace Portable.Drawing.Toolkit.Portable
 
         public int GetLineSpacing()
         {
-            throw new NotImplementedException();
+            return Font is PortableFont pf ? pf.GetLineHeight() : 10;
         }
 
         public void DrawImage(IToolkitImage image, int x, int y)

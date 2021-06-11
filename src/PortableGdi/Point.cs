@@ -24,160 +24,132 @@ using System.Runtime.InteropServices;
 namespace Portable.Drawing
 {
 #if !ECMA_COMPAT
-[Serializable]
-[ComVisible(true)]
+    [Serializable]
+    [ComVisible(true)]
 #endif
-#if CONFIG_COMPONENT_MODEL
-[TypeConverter("System.Drawing.PointConverter")]
-#endif
-public struct Point
-{
-	// Internal state.
-	private int x;
-	private int y;
+    public struct Point
+    {
+        // Internal state.
+        private int _x;
+        private int _y;
 
-	// The empty point.
-	public static readonly Point Empty = new Point(0, 0);
+        // The empty point.
+        public static readonly Point Empty = new Point(0, 0);
 
-	// Constructors.
-	public Point(int dw)
-			{
-				x = (int)(short)dw;
-				y = (dw >> 16);
-			}
-	public Point(System.Drawing.Size sz)
-			{
-				x = sz.Width;
-				y = sz.Height;
-			}
-	public Point(int x, int y)
-			{
-				this.x = x;
-				this.y = y;
-			}
+        // Constructors.
+        public Point(int dw)
+        {
+            _x = (short) dw;
+            _y = (dw >> 16);
+        }
 
-	// Determine if this point is empty.
-	public bool IsEmpty
-			{
-				get
-				{
-					return (x == 0 && y == 0);
-				}
-			}
+        public Point(System.Drawing.Size sz)
+        {
+            _x = sz.Width;
+            _y = sz.Height;
+        }
 
-	// Get or set the X co-ordinate.
-	public int X
-			{
-				get
-				{
-					return x;
-				}
-				set
-				{
-					x = value;
-				}
-			}
+        public Point(int x, int y)
+        {
+            this._x = x;
+            this._y = y;
+        }
 
-	// Get or set the Y co-ordinate.
-	public int Y
-			{
-				get
-				{
-					return y;
-				}
-				set
-				{
-					y = value;
-				}
-			}
+        // Determine if this point is empty.
+        public bool IsEmpty => (_x == 0 && _y == 0);
 
-#if CONFIG_EXTENDED_NUMERICS
+        // Get or set the X co-ordinate.
+        public int X
+        {
+            get => _x;
+            set => _x = value;
+        }
 
-	// Convert a PointF object into a Point object using ceiling conversion.
-	public static Point Ceiling(PointF value)
-			{
-				return new Point((int)(Math.Ceiling(value.X)),
-								 (int)(Math.Ceiling(value.Y)));
-			}
+        // Get or set the Y co-ordinate.
+        public int Y
+        {
+            get => _y;
+            set => _y = value;
+        }
 
-#endif
+        // Convert a PointF object into a Point object using ceiling conversion.
+        public static Point Ceiling(PointF value)
+        {
+            return new Point((int) (Math.Ceiling(value.X)),
+                (int) (Math.Ceiling(value.Y)));
+        }
 
-	// Determine if two points are equal.
-	public override bool Equals(Object obj)
-			{
-				if(obj is Point)
-				{
-					Point other = (Point)obj;
-					return (x == other.x && y == other.y);
-				}
-				else
-				{
-					return false;
-				}
-			}
 
-	// Get a hash code for this object.
-	public override int GetHashCode()
-			{
-				return (x ^ y);
-			}
+        // Determine if two points are equal.
+        public override bool Equals(Object obj)
+        {
+            if (!(obj is Point other)) return false;
+            return (_x == other._x && _y == other._y);
+        }
 
-	// Offset this point by a specified amount.
-	public void Offset(int dx, int dy)
-			{
-				x += dx;
-				y += dy;
-			}
+        // Get a hash code for this object.
+        public override int GetHashCode()
+        {
+            // ReSharper disable NonReadonlyMemberInGetHashCode
+            return _x ^ _y;
+            // ReSharper restore NonReadonlyMemberInGetHashCode
+        }
 
-#if CONFIG_EXTENDED_NUMERICS
+        // Offset this point by a specified amount.
+        public void Offset(int dx, int dy)
+        {
+            _x += dx;
+            _y += dy;
+        }
 
-	// Convert a PointF object into a Point object using rounding conversion.
-	public static Point Round(PointF value)
-			{
-				return new Point((int)(Math.Round(value.X)),
-								 (int)(Math.Round(value.Y)));
-			}
+        // Convert a PointF object into a Point object using rounding conversion.
+        public static Point Round(PointF value)
+        {
+            return new Point((int) (Math.Round(value.X)),
+                (int) (Math.Round(value.Y)));
+        }
 
-#endif
+        // Convert this object into a string.
+        public override String ToString()
+        {
+            return $"{{X={_x},Y={_y}}}";
+        }
 
-	// Convert this object into a string.
-	public override String ToString()
-			{
-				return "{X=" + x.ToString() + ",Y=" + y.ToString() + "}";
-			}
+        // Convert a PointF object into a Point object using truncating conversion.
+        public static Point Truncate(System.Drawing.PointF value)
+        {
+            return new Point((int) (value.X), (int) (value.Y));
+        }
 
-	// Convert a PointF object into a Point object using truncating conversion.
-	public static Point Truncate(System.Drawing.PointF value)
-			{
-				return new Point((int)(value.X), (int)(value.Y));
-			}
+        // Overloaded operators.
+        public static Point operator +(Point pt, System.Drawing.Size sz)
+        {
+            return new Point(pt._x + sz.Width, pt._y + sz.Height);
+        }
 
-	// Overloaded operators.
-	public static Point operator+(Point pt, System.Drawing.Size sz)
-			{
-				return new Point(pt.x + sz.Width, pt.y + sz.Height);
-			}
-	public static Point operator-(Point pt, System.Drawing.Size sz)
-			{
-				return new Point(pt.x - sz.Width, pt.y - sz.Height);
-			}
-	public static bool operator==(Point left, Point right)
-			{
-				return (left.x == right.x && left.y == right.y);
-			}
-	public static bool operator!=(Point left, Point right)
-			{
-				return (left.x != right.x || left.y != right.y);
-			}
-	public static explicit operator System.Drawing.Size(Point p)
-			{
-				return new System.Drawing.Size(p.x, p.y);
-			}
-	public static implicit operator System.Drawing.PointF(Point p)
-			{
-				return new System.Drawing.PointF(p.x, p.y);
-			}
+        public static Point operator -(Point pt, System.Drawing.Size sz)
+        {
+            return new Point(pt._x - sz.Width, pt._y - sz.Height);
+        }
 
-}; // struct Point
-		
+        public static bool operator ==(Point left, Point right)
+        {
+            return (left._x == right._x && left._y == right._y);
+        }
+
+        public static bool operator !=(Point left, Point right)
+        {
+            return (left._x != right._x || left._y != right._y);
+        }
+
+        public static explicit operator System.Drawing.Size(Point p)
+        {
+            return new System.Drawing.Size(p._x, p._y);
+        }
+
+        public static implicit operator System.Drawing.PointF(Point p)
+        {
+            return new System.Drawing.PointF(p._x, p._y);
+        }
+    }; // struct Point
 }; // namespace System.Drawing

@@ -115,23 +115,7 @@ namespace Portable.Drawing
             GdiCharSet = gdiCharSet;
             GdiVerticalFont = gdiVerticalFont;
         }
-#if CONFIG_SERIALIZATION
-	internal Font(SerializationInfo info, StreamingContext context)
-			{
-				if(info == null)
-				{
-					throw new ArgumentNullException("info");
-				}
-				fontFamily = new FontFamily(info.GetString("Name"));
-				size = info.GetSingle("Size");
-				fontStyle = (FontStyle)info.GetValue
-					("Style", typeof(FontStyle));
-				unit = (GraphicsUnit)info.GetValue
-					("Unit", typeof(GraphicsUnit));
-				gdiCharSet = 1;
-				gdiVerticalFont = false;
-			}
-#endif
+        
         private Font(IToolkitFont font)
         {
             _toolkit = _toolkit;
@@ -146,37 +130,18 @@ namespace Portable.Drawing
         }
 
         // Font properties.
-#if CONFIG_COMPONENT_MODEL
-	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-#endif
         public bool Bold
         {
             get { return ((Style & FontStyle.Bold) != 0); }
         }
-#if CONFIG_COMPONENT_MODEL
-	[Browsable(false)]
-#endif
         public FontFamily FontFamily { get; }
-#if CONFIG_COMPONENT_MODEL
-	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-#endif
         public byte GdiCharSet { get; }
-#if CONFIG_COMPONENT_MODEL
-	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-#endif
         public bool GdiVerticalFont { get; }
-#if CONFIG_COMPONENT_MODEL
-	[Browsable(false)]
-#endif
         public int Height
         {
             get
             {
-#if CONFIG_EXTENDED_NUMERICS
-					return (int)(Math.Ceiling(GetHeight()));
-#else
                 return (int) (GetHeight() + 0.99f);
-#endif
             }
         }
 #if CONFIG_COMPONENT_MODEL

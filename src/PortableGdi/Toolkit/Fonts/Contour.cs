@@ -14,7 +14,7 @@ namespace Portable.Drawing.Toolkit.Fonts
         /// <summary>
         /// Pass only the points on a single contour
         /// </summary>
-        public Contour(IEnumerable<GlyphPoint> points)
+        public Contour(IEnumerable<GlyphPoint>? points)
         {
             Points = points?.ToList() ?? throw new ArgumentNullException(nameof(points));
         }

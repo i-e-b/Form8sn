@@ -56,17 +56,15 @@ namespace Portable.Drawing
         Device = 2
     };
 
-#if !ECMA_COMPAT
     [ComVisible(false)]
-#endif
     public sealed class Graphics : MarshalByRefObject, IDisposable
     {
         // Internal state.
-        private IToolkitGraphics graphics;
-        private TextLayoutManager textLayoutManager;
-        private Region clip;
-        internal Matrix transform;
-        internal GraphicsContainer stackTop;
+        private IToolkitGraphics? _graphics;
+        private TextLayoutManager? _textLayoutManager;
+        private Region? _clip;
+        internal Matrix? transform;
+        internal GraphicsContainer? stackTop;
 
         internal static Graphics defaultGraphics;
 
@@ -83,8 +81,8 @@ namespace Portable.Drawing
         // Constructor.
         internal Graphics(IToolkitGraphics graphics)
         {
-            this.graphics = graphics;
-            clip = null;
+            _graphics = graphics;
+            _clip = null;
             transform = null;
             PageScale = 1.0f;
             PageUnit = GraphicsUnit.World;
@@ -100,33 +98,33 @@ namespace Portable.Drawing
             : this(graphics)
         {
             this.baseWindow = baseWindow;
-            clip = new Region(baseWindow);
-            clip.Translate(-baseWindow.X, -baseWindow.Y);
-            Clip = clip;
+            _clip = new Region(baseWindow);
+            _clip.Translate(-baseWindow.X, -baseWindow.Y);
+            Clip = _clip;
         }
 
         // Create a Graphics that is internally offset to baseWindow
         internal Graphics(Graphics graphics, Rectangle baseWindow)
         {
             // Use the same toolkit
-            this.graphics = graphics.graphics;
-            if (graphics.clip != null)
+            this._graphics = graphics._graphics;
+            if (graphics._clip != null)
             {
-                clip = graphics.clip.Clone();
-                clip.Intersect(baseWindow);
+                _clip = graphics._clip.Clone();
+                _clip.Intersect(baseWindow);
             }
             else
-                clip = new Region(baseWindow);
+                _clip = new Region(baseWindow);
 
             // Find out what the clip is with our new Origin
-            clip.Translate(-baseWindow.X, -baseWindow.Y);
+            _clip.Translate(-baseWindow.X, -baseWindow.Y);
             this.baseWindow = baseWindow;
             if (graphics.transform != null)
                 transform = new Matrix(graphics.transform);
             PageScale = graphics.PageScale;
             PageUnit = graphics.PageUnit;
             stackTop = null;
-            Clip = clip;
+            Clip = _clip;
         }
 
 
@@ -147,16 +145,16 @@ namespace Portable.Drawing
         {
             lock (this)
             {
-                if (graphics != null)
+                if (_graphics != null)
                 {
-                    graphics.Dispose();
-                    graphics = null;
+                    _graphics.Dispose();
+                    _graphics = null;
                 }
 
-                if (clip != null)
+                if (_clip != null)
                 {
-                    clip.Dispose();
-                    clip = null;
+                    _clip.Dispose();
+                    _clip = null;
                 }
             }
         }
@@ -164,22 +162,11 @@ namespace Portable.Drawing
         // Get or set this object's properties.
         public Region Clip
         {
-            get
-            {
-                if (clip == null)
-                {
-                    clip = new Region();
-                }
-
-                return clip;
-            }
-            set { SetClip(value, CombineMode.Replace); }
+            get => _clip ??= new Region();
+            set => SetClip(value, CombineMode.Replace);
         }
 
-        public RectangleF ClipBounds
-        {
-            get { return Clip.GetBounds(this); }
-        }
+        public RectangleF ClipBounds => Clip.GetBounds(this);
 
         public CompositingMode CompositingMode
         {
@@ -187,23 +174,16 @@ namespace Portable.Drawing
             {
                 lock (this)
                 {
-                    if (graphics != null)
-                    {
-                        return graphics.CompositingMode;
-                    }
-                    else
-                    {
-                        return CompositingMode.SourceOver;
-                    }
+                    return _graphics?.CompositingMode ?? CompositingMode.SourceOver;
                 }
             }
             set
             {
                 lock (this)
                 {
-                    if (graphics != null)
+                    if (_graphics != null)
                     {
-                        graphics.CompositingMode = value;
+                        _graphics.CompositingMode = value;
                     }
                 }
             }
@@ -215,23 +195,16 @@ namespace Portable.Drawing
             {
                 lock (this)
                 {
-                    if (graphics != null)
-                    {
-                        return graphics.CompositingQuality;
-                    }
-                    else
-                    {
-                        return CompositingQuality.Default;
-                    }
+                    return _graphics?.CompositingQuality ?? CompositingQuality.Default;
                 }
             }
             set
             {
                 lock (this)
                 {
-                    if (graphics != null)
+                    if (_graphics != null)
                     {
-                        graphics.CompositingQuality = value;
+                        _graphics.CompositingQuality = value;
                     }
                 }
             }
@@ -243,14 +216,7 @@ namespace Portable.Drawing
             {
                 lock (this)
                 {
-                    if (graphics != null)
-                    {
-                        return graphics.DpiX;
-                    }
-                    else
-                    {
-                        return DefaultScreenDpi;
-                    }
+                    return _graphics != null ? _graphics.DpiX : DefaultScreenDpi;
                 }
             }
         }
@@ -261,14 +227,7 @@ namespace Portable.Drawing
             {
                 lock (this)
                 {
-                    if (graphics != null)
-                    {
-                        return graphics.DpiY;
-                    }
-                    else
-                    {
-                        return DefaultScreenDpi;
-                    }
+                    return _graphics?.DpiY ?? DefaultScreenDpi;
                 }
             }
         }
@@ -279,38 +238,28 @@ namespace Portable.Drawing
             {
                 lock (this)
                 {
-                    if (graphics != null)
-                    {
-                        return graphics.InterpolationMode;
-                    }
-                    else
-                    {
-                        return InterpolationMode.Default;
-                    }
+                    return _graphics?.InterpolationMode ?? InterpolationMode.Default;
                 }
             }
             set
             {
                 lock (this)
                 {
-                    if (graphics != null)
+                    if (_graphics != null)
                     {
-                        graphics.InterpolationMode = value;
+                        _graphics.InterpolationMode = value;
                     }
                 }
             }
         }
 
-        public bool IsClipEmpty
-        {
-            get { return (clip != null && clip.IsEmpty(this)); }
-        }
+        public bool IsClipEmpty => (_clip != null && _clip.IsEmpty(this));
 
         public bool IsVisibleClipEmpty
         {
             get
             {
-                RectangleF clip = VisibleClipBounds;
+                var clip = VisibleClipBounds;
                 return (clip.Width <= 0.0f && clip.Height <= 0.0f);
             }
         }
@@ -325,9 +274,9 @@ namespace Portable.Drawing
             {
                 lock (this)
                 {
-                    if (graphics != null)
+                    if (_graphics != null)
                     {
-                        return graphics.PixelOffsetMode;
+                        return _graphics.PixelOffsetMode;
                     }
                     else
                     {
@@ -339,9 +288,9 @@ namespace Portable.Drawing
             {
                 lock (this)
                 {
-                    if (graphics != null)
+                    if (_graphics != null)
                     {
-                        graphics.PixelOffsetMode = value;
+                        _graphics.PixelOffsetMode = value;
                     }
                 }
             }
@@ -353,9 +302,9 @@ namespace Portable.Drawing
             {
                 lock (this)
                 {
-                    if (graphics != null)
+                    if (_graphics != null)
                     {
-                        return graphics.RenderingOrigin;
+                        return _graphics.RenderingOrigin;
                     }
                     else
                     {
@@ -367,9 +316,9 @@ namespace Portable.Drawing
             {
                 lock (this)
                 {
-                    if (graphics != null)
+                    if (_graphics != null)
                     {
-                        graphics.RenderingOrigin = value;
+                        _graphics.RenderingOrigin = value;
                     }
                 }
             }
@@ -381,9 +330,9 @@ namespace Portable.Drawing
             {
                 lock (this)
                 {
-                    if (graphics != null)
+                    if (_graphics != null)
                     {
-                        return graphics.SmoothingMode;
+                        return _graphics.SmoothingMode;
                     }
                     else
                     {
@@ -395,9 +344,9 @@ namespace Portable.Drawing
             {
                 lock (this)
                 {
-                    if (graphics != null)
+                    if (_graphics != null)
                     {
-                        graphics.SmoothingMode = value;
+                        _graphics.SmoothingMode = value;
                     }
                 }
             }
@@ -409,9 +358,9 @@ namespace Portable.Drawing
             {
                 lock (this)
                 {
-                    if (graphics != null)
+                    if (_graphics != null)
                     {
-                        return graphics.TextContrast;
+                        return _graphics.TextContrast;
                     }
                     else
                     {
@@ -423,9 +372,9 @@ namespace Portable.Drawing
             {
                 lock (this)
                 {
-                    if (graphics != null)
+                    if (_graphics != null)
                     {
-                        graphics.TextContrast = value;
+                        _graphics.TextContrast = value;
                     }
                 }
             }
@@ -437,9 +386,9 @@ namespace Portable.Drawing
             {
                 lock (this)
                 {
-                    if (graphics != null)
+                    if (_graphics != null)
                     {
-                        return graphics.TextRenderingHint;
+                        return _graphics.TextRenderingHint;
                     }
                     else
                     {
@@ -451,9 +400,9 @@ namespace Portable.Drawing
             {
                 lock (this)
                 {
-                    if (graphics != null)
+                    if (_graphics != null)
                     {
-                        graphics.TextRenderingHint = value;
+                        _graphics.TextRenderingHint = value;
                     }
                 }
             }
@@ -495,7 +444,7 @@ namespace Portable.Drawing
         {
             get
             {
-                if (graphics != null)
+                if (_graphics != null)
                 {
                     PointF bottomRight = new PointF(baseWindow.Width, baseWindow.Height);
                     PointF[] coords = new PointF[] {PointF.Empty, bottomRight};
@@ -514,9 +463,9 @@ namespace Portable.Drawing
         {
             lock (this)
             {
-                if (graphics != null)
+                if (_graphics != null)
                 {
-                    graphics.AddMetafileComment(data);
+                    _graphics.AddMetafileComment(data);
                 }
             }
         }
@@ -1653,17 +1602,17 @@ namespace Portable.Drawing
             DrawString(s, font, brush, point.X, point.Y, format);
         }
 
-        public void DrawString(string s, Font font, Brush brush,
-            RectangleF layoutRectangle, StringFormat format)
+        public void DrawString(string? s, Font font, Brush brush,
+            RectangleF layoutRectangle, StringFormat? format)
         {
             // bail out now if there's nothing to draw
-            if ((brush is SolidBrush) && ((SolidBrush) brush).Color.A == 0)
+            if ((brush is SolidBrush {Color: {A: 0}}))
             {
                 return;
             }
 
             // bail out now if there's nothing to draw
-            if (((object) s) == null || s.Length == 0)
+            if (string.IsNullOrEmpty(s!))
             {
                 return;
             }
@@ -1686,20 +1635,17 @@ namespace Portable.Drawing
                 (rect[2].Y - rect[0].Y + 1));
 
             // bail out now if there's nothing to draw
-            if (clip != null &&
+            if (_clip != null &&
                 !deviceClipExtent.IntersectsWith(deviceLayout))
             {
                 return;
             }
 
             // ensure we have a text layout manager
-            if (textLayoutManager == null)
-            {
-                textLayoutManager = new TextLayoutManager();
-            }
+            _textLayoutManager ??= new TextLayoutManager();
 
             // set the default temporary clip
-            Region clipTemp = null;
+            Region? clipTemp = null;
 
             // draw the text
             lock (this)
@@ -1709,12 +1655,12 @@ namespace Portable.Drawing
                     ((format.FormatFlags & StringFormatFlags.NoClip) == 0))
                 {
                     // get the clipping region, if there is one
-                    if (clip != null)
+                    if (_clip != null)
                     {
                         // get a copy of the current clipping region
-                        clipTemp = clip.Clone();
+                        clipTemp = _clip.Clone();
 
-                        // interset the clipping region with the layout
+                        // intersect the clipping region with the layout
                         SetClip(layoutRectangle, CombineMode.Intersect);
                     }
                 }
@@ -1726,8 +1672,7 @@ namespace Portable.Drawing
                     // this does only work for scaling, not for rotation or multiply transformations
 
                     // draw the text
-                    textLayoutManager.Draw
-                        (this, s, TransformFont(font), deviceLayout, format, brush);
+                    _textLayoutManager.Draw(this, s, TransformFont(font), deviceLayout, format, brush);
                 }
                 finally
                 {
@@ -1766,7 +1711,7 @@ namespace Portable.Drawing
         }
 
         public void DrawString(string s, Font font, Brush brush,
-            float x, float y, StringFormat format)
+            float x, float y, StringFormat? format)
         {
             DrawString(s, font, brush, new RectangleF(x, y, 999999.0f, 999999.0f), format);
         }
@@ -2469,9 +2414,9 @@ namespace Portable.Drawing
         {
             lock (this)
             {
-                if (graphics != null)
+                if (_graphics != null)
                 {
-                    graphics.Flush(intention);
+                    _graphics.Flush(intention);
                 }
             }
         }
@@ -2526,9 +2471,9 @@ namespace Portable.Drawing
         {
             lock (this)
             {
-                if (graphics != null)
+                if (_graphics != null)
                 {
-                    return graphics.GetHdc();
+                    return _graphics.GetHdc();
                 }
                 else
                 {
@@ -2542,9 +2487,9 @@ namespace Portable.Drawing
         {
             lock (this)
             {
-                if (graphics != null)
+                if (_graphics != null)
                 {
-                    return graphics.GetNearestColor(color);
+                    return _graphics.GetNearestColor(color);
                 }
                 else
                 {
@@ -3561,9 +3506,9 @@ namespace Portable.Drawing
         {
             lock (this)
             {
-                if (graphics != null)
+                if (_graphics != null)
                 {
-                    graphics.ReleaseHdc(hdc);
+                    _graphics.ReleaseHdc(hdc);
                 }
             }
         }
@@ -3584,7 +3529,7 @@ namespace Portable.Drawing
         public void ResetTransform()
         {
             transform = null;
-            Clip = clip;
+            Clip = _clip;
         }
 
         // Restore to a previous save point.
@@ -3662,7 +3607,7 @@ namespace Portable.Drawing
                 throw new ArgumentNullException("g");
             }
 
-            clip = g.Clip.Clone();
+            _clip = g.Clip.Clone();
             UpdateClip();
         }
 
@@ -3677,7 +3622,7 @@ namespace Portable.Drawing
             switch (combineMode)
             {
                 case CombineMode.Replace:
-                    clip = other.Clone();
+                    _clip = other.Clone();
                     break;
 
                 case CombineMode.Intersect:
@@ -3718,7 +3663,7 @@ namespace Portable.Drawing
 
         public void SetClip(GraphicsPath path)
         {
-            clip = new Region(path);
+            _clip = new Region(path);
             UpdateClip();
         }
 
@@ -3733,7 +3678,7 @@ namespace Portable.Drawing
             {
                 case CombineMode.Replace:
                 {
-                    clip = new Region(path);
+                    _clip = new Region(path);
                 }
                     break;
 
@@ -3775,7 +3720,7 @@ namespace Portable.Drawing
 
         public void SetClip(Rectangle rect)
         {
-            clip = new Region(rect);
+            _clip = new Region(rect);
             UpdateClip();
         }
 
@@ -3785,7 +3730,7 @@ namespace Portable.Drawing
             {
                 case CombineMode.Replace:
                 {
-                    clip = new Region(rect);
+                    _clip = new Region(rect);
                 }
                     break;
 
@@ -3827,7 +3772,7 @@ namespace Portable.Drawing
 
         public void SetClip(RectangleF rect)
         {
-            clip = new Region(rect);
+            _clip = new Region(rect);
             UpdateClip();
         }
 
@@ -3837,7 +3782,7 @@ namespace Portable.Drawing
             {
                 case CombineMode.Replace:
                 {
-                    clip = new Region(rect);
+                    _clip = new Region(rect);
                 }
                     break;
 
@@ -3888,7 +3833,7 @@ namespace Portable.Drawing
             {
                 case CombineMode.Replace:
                 {
-                    clip = region.Clone();
+                    _clip = region.Clone();
                 }
                     break;
 
@@ -3930,7 +3875,7 @@ namespace Portable.Drawing
 
         internal void SetClipInternal(Region region)
         {
-            clip = region;
+            _clip = region;
         }
 
         // Transform points from one co-ordinate space to another.
@@ -4767,9 +4712,9 @@ namespace Portable.Drawing
         {
             get
             {
-                if (graphics != null)
+                if (_graphics != null)
                 {
-                    return graphics;
+                    return _graphics;
                 }
 
                 throw new ObjectDisposedException("graphics");
@@ -4803,7 +4748,7 @@ namespace Portable.Drawing
                 throw new ArgumentNullException("pen");
             }
 
-            if (graphics == null)
+            if (_graphics == null)
             {
                 throw new ObjectDisposedException("graphics");
             }
@@ -4822,15 +4767,15 @@ namespace Portable.Drawing
                 }
             }
 
-            IToolkitPen tpen = penNew.GetPen(graphics.Toolkit);
+            IToolkitPen tpen = penNew.GetPen(_graphics.Toolkit);
             if (penNew.PenType == PenType.SolidColor)
             {
-                tpen.Select(graphics);
+                tpen.Select(_graphics);
             }
             else
             {
-                IToolkitBrush tbrush = penNew.Brush.GetBrush(graphics.Toolkit);
-                tpen.Select(graphics, tbrush);
+                IToolkitBrush tbrush = penNew.Brush.GetBrush(_graphics.Toolkit);
+                tpen.Select(_graphics, tbrush);
             }
         }
 
@@ -4842,13 +4787,13 @@ namespace Portable.Drawing
                 throw new ArgumentNullException("brush");
             }
 
-            if (graphics == null)
+            if (_graphics == null)
             {
                 throw new ObjectDisposedException("graphics");
             }
 
-            IToolkitBrush tbrush = brush.GetBrush(graphics.Toolkit);
-            tbrush.Select(graphics);
+            IToolkitBrush tbrush = brush.GetBrush(_graphics.Toolkit);
+            tbrush.Select(_graphics);
         }
 
         // Select a font into the toolkit graphics object.
@@ -4859,13 +4804,13 @@ namespace Portable.Drawing
                 throw new ArgumentNullException("font");
             }
 
-            if (graphics == null)
+            if (_graphics == null)
             {
                 throw new ObjectDisposedException("graphics");
             }
 
-            IToolkitFont tfont = font.GetFont(graphics.Toolkit, DpiY);
-            tfont.Select(graphics);
+            IToolkitFont tfont = font.GetFont(_graphics.Toolkit, DpiY);
+            tfont.Select(_graphics);
         }
 
         // Update the clipping region within the IToolkitGraphics object.
@@ -4874,11 +4819,11 @@ namespace Portable.Drawing
             RectangleF[] rectsF;
             if (transform == null && PageScale == 1.0f && PageUnit == GraphicsUnit.World)
             {
-                rectsF = clip.GetRegionScansIdentity();
+                rectsF = _clip.GetRegionScansIdentity();
             }
             else
             {
-                rectsF = clip.GetRegionScans(Transform);
+                rectsF = _clip.GetRegionScans(Transform);
             }
 
             int left = int.MaxValue;
@@ -4906,7 +4851,7 @@ namespace Portable.Drawing
                     bottom = r.Bottom;
             }
 
-            graphics.SetClipRects(rects);
+            _graphics.SetClipRects(rects);
             deviceClipExtent = Rectangle.FromLTRB(left, top, right, bottom);
         }
 
@@ -5029,7 +4974,7 @@ namespace Portable.Drawing
             private int nextIndex;
             private Brush brush;
             private Font font;
-            private Font underlineFont;
+            private Font? underlineFont;
             private Graphics graphics;
             private IToolkitGraphics toolkitGraphics;
             private Rectangle layout;
@@ -5109,10 +5054,9 @@ namespace Portable.Drawing
             }
 
             // Calculate and draw the string by drawing each line.
-            public void Draw
-            (Graphics graphics, string text, Font font,
-                Rectangle drawLayout, StringFormat format, Brush brush)
+            public void Draw(Graphics graphics, string? text, Font font, Rectangle drawLayout, StringFormat? format, Brush brush)
             {
+                if (text == null) return;
                 // set the current graphics
                 this.graphics = graphics;
 
@@ -5132,10 +5076,7 @@ namespace Portable.Drawing
                 this.brush = brush;
 
                 // ensure we have a string format
-                if (format == null)
-                {
-                    format = SF_DEFAULT;
-                }
+                format ??= SF_DEFAULT;
 
                 // set the current string format
                 this.format = format;
@@ -5147,10 +5088,8 @@ namespace Portable.Drawing
                 lineHeight = font.Height;
 
                 // set the only whole lines flag
-                onlyWholeLines = (((format.FormatFlags &
-                                    StringFormatFlags.LineLimit) != 0) ||
-                                  ((format.Trimming &
-                                    StringTrimming.None) != 0));
+                onlyWholeLines = (format.FormatFlags & StringFormatFlags.LineLimit) != 0
+                                 || format.Trimming != StringTrimming.None;
 
                 // set the index of the next character
                 nextIndex = 0;
@@ -5314,9 +5253,7 @@ namespace Portable.Drawing
                         if (textWidth > 0 && y <= maxY)
                         {
                             // draw the last line
-                            DrawLine
-                            (textStart, textLength, textWidth, y,
-                                (y > lastLineY));
+                            DrawLine(textStart, textLength, textWidth, y, (y > lastLineY));
                         }
                     }
                     else
@@ -5466,15 +5403,11 @@ namespace Portable.Drawing
                 int x = 0;
 
                 // set truncate line flag
-                bool truncateLine = false;
+                bool truncateLine = (lastLine && ((start + length) < text.Length)) ||
+                                    ((width > layout.Width) &&
+                                     ((format.FormatFlags & StringFormatFlags.NoWrap) != 0));
 
                 // update the truncate line flag, as needed
-                if ((lastLine && ((start + length) < text.Length)) ||
-                    ((width > layout.Width) &&
-                     ((format.FormatFlags & StringFormatFlags.NoWrap) != 0)))
-                {
-                    truncateLine = true;
-                }
 
                 // handle no truncation case
                 if (!truncateLine)

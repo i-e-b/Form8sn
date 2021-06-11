@@ -42,7 +42,7 @@ namespace Portable.Drawing.Toolkit.Fonts
         /// <summary>
         /// Read a glyph based on a Unicode character. This will be cached.
         /// </summary>
-        public Glyph ReadGlyph(char wantedChar)
+        public Glyph? ReadGlyph(char wantedChar)
         {
             if ( ! _unicodeIndexes.ContainsKey(wantedChar)) {
                 _unicodeIndexes.Add(wantedChar,  GlyphIndexForChar(wantedChar));

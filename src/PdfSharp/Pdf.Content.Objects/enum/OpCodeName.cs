@@ -40,9 +40,9 @@ namespace PdfSharp.Pdf.Content.Objects
     {
         Dictionary,  // Name followed by dictionary.
 
-        // I know that this is not useable in VB or other languages with no case sensitivity.
+        // I know that this is not usable in VB or other languages with no case sensitivity.
 
-        // Reference: TABLE A.1  PDF content stream operators / Page 985
+        // Reference: TABLE A.1  PDF content stream operators / Page 985
         
         /// <summary>
         /// Close, fill, and stroke path using nonzero winding number rule.
@@ -89,13 +89,39 @@ namespace PdfSharp.Pdf.Content.Objects
         /// </summary>
         BX,
 
+        /// <summary>
+        /// curveto - append curved segment to path (3 control points)
+        /// </summary>
         c,
+        
+        /// <summary>
+        /// concat - concatenate matrix to current transform matrix
+        /// </summary>
         cm,
+        
+        /// <summary>
+        /// set color space - 1.1 set color space for stroking operations
+        /// </summary>
         CS,
+        /// <summary>
+        /// set color space - 1.1 set color space for non-stroking operations
+        /// </summary>
         cs,
+        /// <summary>
+        /// set line dash pattern
+        /// </summary>
         d,
+        /// <summary>
+        /// Set glyph width in Type 3 font
+        /// </summary>
         d0,
+        /// <summary>
+        /// set glyph width and bounding box in Type 3 font
+        /// </summary>
         d1,
+        /// <summary>
+        /// Invoke a named object
+        /// </summary>
         Do,
 
         /// <summary>
@@ -103,6 +129,9 @@ namespace PdfSharp.Pdf.Content.Objects
         /// </summary>
         DP,
 
+        /// <summary>
+        /// End inline image object
+        /// </summary>
         EI,
 
         /// <summary>
@@ -110,6 +139,9 @@ namespace PdfSharp.Pdf.Content.Objects
         /// </summary>
         EMC,
 
+        /// <summary>
+        /// End text object
+        /// </summary>
         ET,
 
         /// <summary>
@@ -117,21 +149,69 @@ namespace PdfSharp.Pdf.Content.Objects
         /// </summary>
         EX,
 
+        /// <summary>
+        /// Fill path using non-zero winding rule
+        /// </summary>
         f,
+        /// <summary>
+        /// (obsolete version of 'f')
+        /// </summary>
         F,
+        /// <summary>
+        /// Fill path using even-odd rule
+        /// </summary>
         fx,  // f*
+        /// <summary>
+        /// Set gray level for stroking operations
+        /// </summary>
         G,
+        /// <summary>
+        /// set gray level for non-stroking operations
+        /// </summary>
         g,
+        /// <summary>
+        /// (PDF 1.2) Set params from graphics state parameter dictionary
+        /// </summary>
         gs,
+        /// <summary>
+        /// Close sub-path
+        /// </summary>
         h,
+        /// <summary>
+        /// Set flatness tolerance
+        /// </summary>
         i,
+        /// <summary>
+        /// Begin inline image data
+        /// </summary>
         ID,
+        /// <summary>
+        /// Set line join style
+        /// </summary>
         j,
+        /// <summary>
+        /// Set line cap style
+        /// </summary>
         J,
+        /// <summary>
+        /// Set CMYK color for stroking operations
+        /// </summary>
         K,
+        /// <summary>
+        /// set CMYK color for non-stroking operations
+        /// </summary>
         k,
+        /// <summary>
+        /// line-to - append straight line segment to path
+        /// </summary>
         l,
+        /// <summary>
+        /// move-to - begin new sub path
+        /// </summary>
         m,
+        /// <summary>
+        /// Set mitre limit
+        /// </summary>
         M,
 
         /// <summary>
@@ -139,37 +219,133 @@ namespace PdfSharp.Pdf.Content.Objects
         /// </summary>
         MP,
 
+        /// <summary>
+        /// End path without filling or stroking (used for masks)
+        /// </summary>
         n,
+        /// <summary>
+        /// Push graphics state
+        /// </summary>
         q,
+        /// <summary>
+        /// Pop graphics state
+        /// </summary>
         Q,
+        /// <summary>
+        /// Add rectangle to path
+        /// </summary>
         re,
+        /// <summary>
+        /// set RGB color for stroking operations
+        /// </summary>
         RG,
+        /// <summary>
+        /// set RGB color for non-stroking operations
+        /// </summary>
         rg,
+        /// <summary>
+        /// Set color rendering intent
+        /// </summary>
         ri,
+        /// <summary>
+        /// Close path and stroke
+        /// </summary>
         s,
+        /// <summary>
+        /// Stroke path
+        /// </summary>
         S,
+        /// <summary>
+        /// (PDF 1.1) Set color for stroking operations
+        /// </summary>
         SC,
+        /// <summary>
+        /// (PDF 1.1) Set color for non-stroking operations
+        /// </summary>
         sc,
+        /// <summary>
+        /// (PDF 1.2) Set color for stroking operations - ICCBased and special color spaces
+        /// </summary>
         SCN,
+        /// <summary>
+        /// (PDF 1.2) Set color for non-stroking operations - ICCBased and special color spaces
+        /// </summary>
         scn,
+        /// <summary>
+        /// (PDF 1.3) Paint area defined by shading pattern
+        /// </summary>
         sh,
+        /// <summary>
+        /// Move to start of next text line
+        /// </summary>
         Tx,  // T*
+        /// <summary>
+        /// Set character spacing
+        /// </summary>
         Tc,
+        /// <summary>
+        /// Move text position
+        /// </summary>
         Td,
+        /// <summary>
+        /// Move text position and set leading
+        /// </summary>
         TD,
+        /// <summary>
+        /// Set font and size
+        /// </summary>
         Tf,
+        /// <summary>
+        /// Show text
+        /// </summary>
         Tj,
+        /// <summary>
+        /// Show text with glyph positioning
+        /// </summary>
         TJ,
+        /// <summary>
+        /// Set text leading
+        /// </summary>
         TL,
+        /// <summary>
+        /// Set text matrix and text line matrix
+        /// </summary>
         Tm,
+        /// <summary>
+        /// Set text render mode
+        /// </summary>
         Tr,
+        /// <summary>
+        /// Set text rise
+        /// </summary>
         Ts,
+        /// <summary>
+        /// Set word spacing
+        /// </summary>
         Tw,
+        /// <summary>
+        /// Set horizontal text scaling
+        /// </summary>
         Tz,
+        /// <summary>
+        /// Append curved segment to path (initial point replicated)
+        /// </summary>
         v,
+        /// <summary>
+        /// Set line width
+        /// </summary>
         w,
+        /// <summary>
+        /// Set clipping path using non-zero winding number rule
+        /// </summary>
         W,
+        /// <summary>
+        /// Set clipping path using even-odd rule
+        /// </summary>
         Wx,  // W*
+        /// <summary>
+        /// Append curved segment to path (final point replicated)
+        /// </summary>
         y,
 
         /// <summary>

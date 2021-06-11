@@ -23,7 +23,7 @@ namespace Portable.Drawing.Toolkit.Fonts
         /// Components if this is a compound glyph (made of transformed copies of other glyphs)
         /// Null if this is a simple glyph
         /// </summary>
-        public CompoundComponent[] Components;
+        public CompoundComponent[]? Components;
 
         /// <summary>
         /// character that was used to find this glyph
@@ -33,22 +33,22 @@ namespace Portable.Drawing.Toolkit.Fonts
         /// <summary>
         /// The font from which this glyph was loaded
         /// </summary>
-        public string SourceFont;
+        public string? SourceFont;
 
         /// <summary>
         /// All glyph points (as loaded from font file)
         /// </summary>
-        public GlyphPoint[] Points;
+        public GlyphPoint[]? Points;
 
         /// <summary>
         /// Indexes of points where contours end
         /// </summary>
-        public int[] ContourEnds;
+        public int[]? ContourEnds;
 
         /// <summary>
         /// Cache of normalised contour points
         /// </summary>
-        public List<GlyphPoint[]> ContourCache;
+        public List<GlyphPoint[]>? ContourCache;
 
         /// <summary>
         /// Reduce the glyph to a set of simple point contours.

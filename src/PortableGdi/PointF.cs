@@ -24,110 +24,92 @@ using System.Runtime.InteropServices;
 namespace Portable.Drawing
 {
 #if !ECMA_COMPAT
-[Serializable]
-[ComVisible(true)]
+    [Serializable]
+    [ComVisible(true)]
 #endif
-public struct PointF
-{
-	// Internal state.
-	private float x;
-	private float y;
+    public struct PointF
+    {
+        // Internal state.
+        private float x;
+        private float y;
 
-	// The empty point.
-	public static readonly PointF Empty = new PointF(0.0f, 0.0f);
-	
-	public static explicit operator PointF(Point other) => new PointF(other.X, other.Y);
+        // The empty point.
+        public static readonly PointF Empty = new PointF(0.0f, 0.0f);
 
-	// Constructor.
-	public PointF(float x, float y)
-			{
-				this.x = x;
-				this.y = y;
-			}
+        public static explicit operator PointF(Point other) => new PointF(other.X, other.Y);
 
-	// Determine if this point is empty.
-	public bool IsEmpty
-			{
-				get
-				{
-					return (x == 0.0f && y == 0.0f);
-				}
-			}
+        // Constructor.
+        public PointF(float x, float y)
+        {
+            this.x = x;
+            this.y = y;
+        }
 
-	// Get or set the X co-ordinate.
-	public float X
-			{
-				get
-				{
-					return x;
-				}
-				set
-				{
-					x = value;
-				}
-			}
+        // Determine if this point is empty.
+        public bool IsEmpty
+        {
+            get { return (x == 0.0f && y == 0.0f); }
+        }
 
-	// Get or set the Y co-ordinate.
-	public float Y
-			{
-				get
-				{
-					return y;
-				}
-				set
-				{
-					y = value;
-				}
-			}
+        // Get or set the X co-ordinate.
+        public float X
+        {
+            get { return x; }
+            set { x = value; }
+        }
 
-	// Determine if two points are equal.
-	public override bool Equals(Object obj)
-			{
-				if(obj is PointF)
-				{
-					PointF other = (PointF)obj;
-					return (x == other.x && y == other.y);
-				}
-				else
-				{
-					return false;
-				}
-			}
+        // Get or set the Y co-ordinate.
+        public float Y
+        {
+            get { return y; }
+            set { y = value; }
+        }
 
-	// Get a hash code for this object.
-	public override int GetHashCode()
-			{
-				return base.GetHashCode();
-			}
+        // Determine if two points are equal.
+        public override bool Equals(Object obj)
+        {
+            if (obj is PointF)
+            {
+                PointF other = (PointF) obj;
+                return (x == other.x && y == other.y);
+            }
+            else
+            {
+                return false;
+            }
+        }
 
-#if CONFIG_EXTENDED_NUMERICS
+        // Get a hash code for this object.
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
 
-	// Convert this object into a string.
-	public override String ToString()
-			{
-				return "{X=" + x.ToString() + ",Y=" + y.ToString() + "}";
-			}
+        // Convert this object into a string.
+        public override String ToString()
+        {
+            return $"{{X={x},Y={y}}}";
+        }
 
-#endif
+        // Overloaded operators.
+        public static PointF operator +(PointF pt, System.Drawing.Size sz)
+        {
+            return new PointF(pt.x + sz.Width, pt.y + sz.Height);
+        }
 
-	// Overloaded operators.
-	public static PointF operator+(PointF pt, System.Drawing.Size sz)
-			{
-				return new PointF(pt.x + sz.Width, pt.y + sz.Height);
-			}
-	public static PointF operator-(PointF pt, System.Drawing.Size sz)
-			{
-				return new PointF(pt.x - sz.Width, pt.y - sz.Height);
-			}
-	public static bool operator==(PointF left, PointF right)
-			{
-				return (left.x == right.x && left.y == right.y);
-			}
-	public static bool operator!=(PointF left, PointF right)
-			{
-				return (left.x != right.x || left.y != right.y);
-			}
+        public static PointF operator -(PointF pt, System.Drawing.Size sz)
+        {
+            return new PointF(pt.x - sz.Width, pt.y - sz.Height);
+        }
 
-}; // struct PointF
-		
+        public static bool operator ==(PointF left, PointF right)
+        {
+            return (left.x == right.x && left.y == right.y);
+        }
+
+        public static bool operator !=(PointF left, PointF right)
+        {
+            return (left.x != right.x || left.y != right.y);
+        }
+    }; // struct PointF
 }; // namespace System.Drawing

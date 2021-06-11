@@ -101,8 +101,8 @@ namespace TestApp
 
         private static void AttemptToRenderPage(PdfPage ePage, int pageNumber)
         {
-            var width = ePage!.Width.Point / 3;
-            var height = ePage.Height.Point / 3;
+            var width = ePage!.Width.Point;
+            var height = ePage.Height.Point;
             var bmp = new Bitmap((int) width, (int) height, PixelFormat.Format24bppRgb);
 
             var instructionList = ePage.RecoverInstructions();
