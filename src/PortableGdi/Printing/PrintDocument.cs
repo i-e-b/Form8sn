@@ -29,15 +29,7 @@ public delegate void PrintPageEventHandler(object sender, PrintPageEventArgs e);
 
 
 
-#if CONFIG_COMPONENT_MODEL
-[DefaultEvent("PrintPage")]
-[DefaultProperty("DocumentName")]
-[ToolboxItemFilter("System.Drawing.Printing")]
-#endif
 public class PrintDocument
-#if CONFIG_COMPONENT_MODEL
-	: Component
-#endif
 {
 	// Internal state.
 	internal IToolkitPrintSession session;

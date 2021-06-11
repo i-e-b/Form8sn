@@ -20,7 +20,6 @@
  */
 
 using System;
-using System.Drawing;
 using Portable.Drawing.Text;
 
 namespace Portable.Drawing.Drawing2D

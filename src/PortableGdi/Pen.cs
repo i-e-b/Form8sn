@@ -391,11 +391,14 @@ public sealed class Pen : MarshalByRefObject, ICloneable, IDisposable
 				}
 			}
 
+	private bool _disposed;
 	// Dispose of this pen.
 	public void Dispose()
 			{
+				if (_disposed) return;
 				lock(this)
 				{
+					_disposed = true;
 					if(toolkitPen != null)
 					{
 						toolkitPen.Dispose();

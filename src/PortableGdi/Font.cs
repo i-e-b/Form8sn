@@ -29,20 +29,9 @@ namespace Portable.Drawing
     // enum GraphicsUnit
 
 
-#if CONFIG_COMPONENT_MODEL_DESIGN
-[Editor("System.Drawing.Design.FontEditor, System.Drawing.Design",
-		typeof(UITypeEditor))]
-[TypeConverter(typeof(FontConverter))]
-#endif
-#if !ECMA_COMPAT
     [Serializable]
     [ComVisible(true)]
-#endif
-    public sealed class Font
-        : MarshalByRefObject, ICloneable, IDisposable
-#if CONFIG_SERIALIZATION
-	, ISerializable
-#endif
+    public sealed class Font : MarshalByRefObject, ICloneable, IDisposable
     {
         // Internal state.
         private IToolkit? _toolkit;
@@ -115,7 +104,7 @@ namespace Portable.Drawing
             GdiCharSet = gdiCharSet;
             GdiVerticalFont = gdiVerticalFont;
         }
-        
+
         private Font(IToolkitFont font)
         {
             _toolkit = _toolkit;
@@ -134,40 +123,23 @@ namespace Portable.Drawing
         {
             get { return ((Style & FontStyle.Bold) != 0); }
         }
+
         public FontFamily FontFamily { get; }
         public byte GdiCharSet { get; }
         public bool GdiVerticalFont { get; }
-        public int Height
-        {
-            get
-            {
-                return (int) (GetHeight() + 0.99f);
-            }
-        }
-#if CONFIG_COMPONENT_MODEL
-	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-#endif
+        public int Height => (int) (GetHeight() + 0.99f);
+
         public bool Italic
         {
             get { return ((Style & FontStyle.Italic) != 0); }
         }
-#if CONFIG_COMPONENT_MODEL
-	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-	[TypeConverter(typeof(FontConverter.FontNameConverter))]
-#endif
-#if CONFIG_COMPONENT_MODEL_DESIGN
-	[Editor("System.Drawing.Design.FontNameEditor, System.Drawing.Design",
-			typeof(UITypeEditor))]
-#endif
+
         public string Name
         {
             get { return FontFamily.Name; }
         }
 
         public float Size { get; }
-#if CONFIG_COMPONENT_MODEL
-	[Browsable(false)]
-#endif
         public float SizeInPoints
         {
             get
@@ -351,25 +323,25 @@ namespace Portable.Drawing
         {
             if (graphics == null)
             {
-                throw new ArgumentNullException("graphics");
+                throw new ArgumentNullException(nameof(graphics));
             }
 
             // Get the font size in raw pixels.
-            if (_pixelHeight == 0)
+            if (_pixelHeight < 1)
                 _pixelHeight = graphics.GetLineSpacing(this);
 
             // If the graphics object uses pixels (the most common case),
             // then return the pixel value directly.
             if (graphics.IsPixelUnits())
             {
-                return (float) _pixelHeight;
+                return _pixelHeight;
             }
 
             // Get the dpi of the screen for the y axis.
             float dpiY = graphics.DpiY;
 
             // Convert the pixel value back into points.
-            float points = ((float) _pixelHeight) / (dpiY / 72.0f);
+            float points = _pixelHeight / (dpiY / 72.0f);
 
             // Convert the points into the graphics object's unit.
             switch (graphics.PageUnit)

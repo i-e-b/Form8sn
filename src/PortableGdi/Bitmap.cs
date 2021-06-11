@@ -19,7 +19,6 @@
  */
 
 using System;
-using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security;
@@ -38,14 +37,8 @@ namespace Portable.Drawing
 
 	};
 
-#if !ECMA_COMPAT
 [Serializable]
 [ComVisible(true)]
-#endif
-#if CONFIG_COMPONENT_MODEL_DESIGN
-[Editor("System.Drawing.Design.BitmapEditor, System.Drawing.Design",
-		typeof(UITypeEditor))]
-#endif
 public sealed class Bitmap : Image
 {
 	// Constructors.

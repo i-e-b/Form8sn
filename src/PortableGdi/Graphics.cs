@@ -82,6 +82,7 @@ namespace Portable.Drawing
         internal Graphics(IToolkitGraphics graphics)
         {
             _graphics = graphics;
+            _graphics.BindTo(this);
             _clip = null;
             transform = null;
             PageScale = 1.0f;
@@ -98,6 +99,9 @@ namespace Portable.Drawing
             : this(graphics)
         {
             this.baseWindow = baseWindow;
+            _graphics = graphics;
+            _graphics.BindTo(this);
+            
             _clip = new Region(baseWindow);
             _clip.Translate(-baseWindow.X, -baseWindow.Y);
             Clip = _clip;
@@ -107,7 +111,8 @@ namespace Portable.Drawing
         internal Graphics(Graphics graphics, Rectangle baseWindow)
         {
             // Use the same toolkit
-            this._graphics = graphics._graphics;
+            _graphics = graphics._graphics;
+            _graphics?.BindTo(this);
             if (graphics._clip != null)
             {
                 _clip = graphics._clip.Clone();
@@ -216,7 +221,7 @@ namespace Portable.Drawing
             {
                 lock (this)
                 {
-                    return _graphics != null ? _graphics.DpiX : DefaultScreenDpi;
+                    return _graphics?.DpiX ?? DefaultScreenDpi;
                 }
             }
         }
@@ -1672,7 +1677,7 @@ namespace Portable.Drawing
                     // this does only work for scaling, not for rotation or multiply transformations
 
                     // draw the text
-                    _textLayoutManager.Draw(this, s, TransformFont(font), deviceLayout, format, brush);
+                    _textLayoutManager.Draw(this, s, font/*TransformFont(font)*/, deviceLayout, format, brush);
                 }
                 finally
                 {
@@ -4851,7 +4856,7 @@ namespace Portable.Drawing
                     bottom = r.Bottom;
             }
 
-            _graphics.SetClipRects(rects);
+            _graphics?.SetClipRects(rects);
             deviceClipExtent = Rectangle.FromLTRB(left, top, right, bottom);
         }
 
@@ -5086,6 +5091,7 @@ namespace Portable.Drawing
 
                 // set the current line height
                 lineHeight = font.Height;
+                if (lineHeight < 1) throw new Exception("Invalid line height");
 
                 // set the only whole lines flag
                 onlyWholeLines = (format.FormatFlags & StringFormatFlags.LineLimit) != 0

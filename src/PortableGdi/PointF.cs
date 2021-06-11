@@ -36,8 +36,6 @@ namespace Portable.Drawing
         // The empty point.
         public static readonly PointF Empty = new PointF(0.0f, 0.0f);
 
-        public static explicit operator PointF(Point other) => new PointF(other.X, other.Y);
-
         // Constructor.
         public PointF(float x, float y)
         {
@@ -92,12 +90,12 @@ namespace Portable.Drawing
         }
 
         // Overloaded operators.
-        public static PointF operator +(PointF pt, System.Drawing.Size sz)
+        public static PointF operator +(PointF pt, Size sz)
         {
             return new PointF(pt.x + sz.Width, pt.y + sz.Height);
         }
 
-        public static PointF operator -(PointF pt, System.Drawing.Size sz)
+        public static PointF operator -(PointF pt, Size sz)
         {
             return new PointF(pt.x - sz.Width, pt.y - sz.Height);
         }

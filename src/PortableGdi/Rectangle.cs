@@ -19,18 +19,12 @@
  */
 
 using System;
-using System.Drawing;
 using System.Runtime.InteropServices;
 
 namespace Portable.Drawing
 {
-#if !ECMA_COMPAT
 [Serializable]
 [ComVisible(true)]
-#endif
-#if CONFIG_COMPONENT_MODEL
-[TypeConverter("System.Drawing.RectangleConverter")]
-#endif
 public struct Rectangle
 {
 	// Internal state.
@@ -43,7 +37,7 @@ public struct Rectangle
 	public static readonly Rectangle Empty = new Rectangle(0, 0, 0, 0);
 
 	// Constructors.
-	public Rectangle(Point location, System.Drawing.Size size)
+	public Rectangle(Point location, Size size)
 			{
 				x = location.X;
 				y = location.Y;
@@ -170,12 +164,9 @@ public struct Rectangle
 			}
 
 	// Get or set the size of the rectangle.
-	public System.Drawing.Size Size
+	public Size Size
 			{
-				get
-				{
-					return new System.Drawing.Size(width, height);
-				}
+				get => new Size(width, height);
 				set
 				{
 					width = value.Width;
@@ -258,7 +249,7 @@ public struct Rectangle
 				this.width += width * 2;
 				this.height += height * 2;
 			}
-	public void Inflate(System.Drawing.Size size)
+	public void Inflate(Size size)
 			{
 				Inflate(size.Width, size.Height);
 			}

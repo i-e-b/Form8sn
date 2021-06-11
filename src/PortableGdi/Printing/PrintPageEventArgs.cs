@@ -20,7 +20,6 @@
  */
 
 using System;
-using System.Drawing;
 
 namespace Portable.Drawing.Printing
 {

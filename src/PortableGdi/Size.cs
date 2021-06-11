@@ -19,18 +19,12 @@
  */
 
 using System;
-using System.Drawing;
 using System.Runtime.InteropServices;
 
 namespace Portable.Drawing
 {
-#if !ECMA_COMPAT
 [Serializable]
 [ComVisible(true)]
-#endif
-#if CONFIG_COMPONENT_MODEL
-[TypeConverter("System.Drawing.SizeConverter")]
-#endif
 public struct Size
 {
 	// Internal state.

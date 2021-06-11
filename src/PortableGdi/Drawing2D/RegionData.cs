@@ -22,7 +22,6 @@
 
 using System;
 using System.Collections;
-using System.Drawing;
 
 namespace Portable.Drawing.Drawing2D
 {
@@ -31,7 +30,7 @@ public sealed class RegionData
 {
 
 	// Public interface
-	public byte[] Data { get; set; }
+	public byte[]? Data { get; set; }
 
 	public RegionData Clone() 
 	{

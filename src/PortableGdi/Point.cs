@@ -43,7 +43,7 @@ namespace Portable.Drawing
             _y = (dw >> 16);
         }
 
-        public Point(System.Drawing.Size sz)
+        public Point(Size sz)
         {
             _x = sz.Width;
             _y = sz.Height;
@@ -116,18 +116,18 @@ namespace Portable.Drawing
         }
 
         // Convert a PointF object into a Point object using truncating conversion.
-        public static Point Truncate(System.Drawing.PointF value)
+        public static Point Truncate(PointF value)
         {
             return new Point((int) (value.X), (int) (value.Y));
         }
 
         // Overloaded operators.
-        public static Point operator +(Point pt, System.Drawing.Size sz)
+        public static Point operator +(Point pt, Size sz)
         {
             return new Point(pt._x + sz.Width, pt._y + sz.Height);
         }
 
-        public static Point operator -(Point pt, System.Drawing.Size sz)
+        public static Point operator -(Point pt, Size sz)
         {
             return new Point(pt._x - sz.Width, pt._y - sz.Height);
         }
@@ -142,14 +142,14 @@ namespace Portable.Drawing
             return (left._x != right._x || left._y != right._y);
         }
 
-        public static explicit operator System.Drawing.Size(Point p)
+        public static explicit operator Size(Point p)
         {
-            return new System.Drawing.Size(p._x, p._y);
+            return new Size(p._x, p._y);
         }
 
-        public static implicit operator System.Drawing.PointF(Point p)
+        public static implicit operator PointF(Point p)
         {
-            return new System.Drawing.PointF(p._x, p._y);
+            return new PointF(p._x, p._y);
         }
     }; // struct Point
 }; // namespace System.Drawing

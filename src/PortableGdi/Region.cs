@@ -86,15 +86,12 @@
  */
 
 using System;
-using System.Drawing;
 using System.Runtime.InteropServices;
 using Portable.Drawing.Drawing2D;
 
 namespace Portable.Drawing
 {
-#if !ECMA_COMPAT
 [ComVisible(false)]
-#endif
 public sealed class Region : MarshalByRefObject, IDisposable
 {
 	// Internal byte representation of the region

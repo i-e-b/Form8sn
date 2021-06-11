@@ -382,10 +382,6 @@ public struct RectangleF
 						left.width != right.width ||
 						left.height != right.height);
 			}
-	public static implicit operator RectangleF(System.Drawing.Rectangle r)
-			{
-				return new RectangleF(r.X, r.Y, r.Width, r.Height);
-			}
 
 }; // struct RectangleF
 		

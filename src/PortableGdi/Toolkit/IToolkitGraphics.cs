@@ -20,7 +20,6 @@
  */
 
 using System;
-using System.Drawing;
 using Portable.Drawing.Drawing2D;
 using Portable.Drawing.Text;
 
@@ -147,6 +146,10 @@ public interface IToolkitGraphics : IDisposable
 				   byte[] bits, int bitsWidth, int bitsHeight,
 				   Color color);
 
+	/// <summary>
+	/// Bind to base System.Drawing.Graphics -- to capture Transforms etc
+	/// </summary>
+	void BindTo(Graphics graphics);
 }; // interface IToolkitGraphics
 
 }; // namespace System.Drawing.Toolkit

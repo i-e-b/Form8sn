@@ -24,139 +24,122 @@ using System.Runtime.InteropServices;
 namespace Portable.Drawing
 {
 #if !ECMA_COMPAT
-[Serializable]
-[ComVisible(true)]
+    [Serializable]
+    [ComVisible(true)]
 #endif
-public struct SizeF
-{
-	// Internal state.
-	private float width;
-	private float height;
+    public struct SizeF
+    {
+        // Internal state.
+        private float width;
+        private float height;
 
-	// The empty size.
-	public static readonly SizeF Empty = new SizeF(0.0f, 0.0f);
+        // The empty size.
+        public static readonly SizeF Empty = new SizeF(0.0f, 0.0f);
 
-	// Constructors.
-	public SizeF(System.Drawing.PointF pt)
-			{
-				width = pt.X;
-				height = pt.Y;
-			}
-	public SizeF(SizeF size)
-			{
-				width = size.width;
-				height = size.height;
-			}
-	public SizeF(float width, float height)
-			{
-				this.width = width;
-				this.height = height;
-			}
+        // Constructors.
+        public SizeF(PointF pt)
+        {
+            width = pt.X;
+            height = pt.Y;
+        }
 
-	// Determine if this size is empty.
-	public bool IsEmpty
-			{
-				get
-				{
-					return (width == 0.0f && height == 0.0f);
-				}
-			}
+        public SizeF(SizeF size)
+        {
+            width = size.width;
+            height = size.height;
+        }
 
-	// Get or set the width.
-	public float Width
-			{
-				get
-				{
-					return width;
-				}
-				set
-				{
-					width = value;
-				}
-			}
+        public SizeF(float width, float height)
+        {
+            this.width = width;
+            this.height = height;
+        }
 
-	// Get or set the height.
-	public float Height
-			{
-				get
-				{
-					return height;
-				}
-				set
-				{
-					height = value;
-				}
-			}
+        // Determine if this size is empty.
+        public bool IsEmpty
+        {
+            get { return (width == 0.0f && height == 0.0f); }
+        }
 
-	// Determine if two sizes are equal.
-	public override bool Equals(Object obj)
-			{
-				if(obj is SizeF)
-				{
-					SizeF other = (SizeF)obj;
-					return (width == other.width && height == other.height);
-				}
-				else
-				{
-					return false;
-				}
-			}
+        // Get or set the width.
+        public float Width
+        {
+            get { return width; }
+            set { width = value; }
+        }
 
-	// Get a hash code for this object.
-	public override int GetHashCode()
-			{
-				return base.GetHashCode();
-			}
+        // Get or set the height.
+        public float Height
+        {
+            get { return height; }
+            set { height = value; }
+        }
 
-	// Convert this size into a point.
-	public System.Drawing.PointF ToPointF()
-			{
-				return new System.Drawing.PointF(width, height);
-			}
+        // Determine if two sizes are equal.
+        public override bool Equals(Object obj)
+        {
+            if (obj is SizeF)
+            {
+                SizeF other = (SizeF) obj;
+                return (width == other.width && height == other.height);
+            }
+            else
+            {
+                return false;
+            }
+        }
 
-	// Convert this size into its integer form.
-	public System.Drawing.Size ToSize()
-			{
-				return new System.Drawing.Size((int)width, (int)height);
-			}
+        // Get a hash code for this object.
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
 
-#if CONFIG_EXTENDED_NUMERICS
+        // Convert this size into a point.
+        public PointF ToPointF()
+        {
+            return new PointF(width, height);
+        }
 
-	// Convert this object into a string.
-	public override String ToString()
-			{
-				return "{Width=" + width.ToString() +
-					   ", Height=" + height.ToString() + "}";
-			}
+        // Convert this size into its integer form.
+        public Size ToSize()
+        {
+            return new Size((int) width, (int) height);
+        }
 
-#endif
 
-	// Overloaded operators.
-	public static SizeF operator+(SizeF sz1, SizeF sz2)
-			{
-				return new SizeF(sz1.width + sz2.width,
-								 sz1.height + sz2.height);
-			}
-	public static SizeF operator-(SizeF sz1, SizeF sz2)
-			{
-				return new SizeF(sz1.width - sz2.width,
-								 sz1.height - sz2.height);
-			}
-	public static bool operator==(SizeF left, SizeF right)
-			{
-				return (left.width == right.width &&
-						left.height == right.height);
-			}
-	public static bool operator!=(SizeF left, SizeF right)
-			{
-				return (left.width != right.width ||
-						left.height != right.height);
-			}
-	public static explicit operator System.Drawing.PointF(SizeF size)
-			{
-				return new System.Drawing.PointF(size.width, size.height);
-			}
+        // Convert this object into a string.
+        public override String ToString() => $"{{Width={width}, Height={height}}}";
 
-}; // struct SizeF
-		
+
+        // Overloaded operators.
+        public static SizeF operator +(SizeF sz1, SizeF sz2)
+        {
+            return new SizeF(sz1.width + sz2.width,
+                sz1.height + sz2.height);
+        }
+
+        public static SizeF operator -(SizeF sz1, SizeF sz2)
+        {
+            return new SizeF(sz1.width - sz2.width,
+                sz1.height - sz2.height);
+        }
+
+        public static bool operator ==(SizeF left, SizeF right)
+        {
+            return (left.width == right.width &&
+                    left.height == right.height);
+        }
+
+        public static bool operator !=(SizeF left, SizeF right)
+        {
+            return (left.width != right.width ||
+                    left.height != right.height);
+        }
+
+        public static explicit operator PointF(SizeF size)
+        {
+            return new PointF(size.width, size.height);
+        }
+    }; // struct SizeF
 }; // namespace System.Drawing

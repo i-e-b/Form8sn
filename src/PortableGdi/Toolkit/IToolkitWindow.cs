@@ -20,7 +20,6 @@
  */
 
 using System;
-using System.Drawing;
 using Portable.Drawing.Imaging;
 
 namespace Portable.Drawing.Toolkit

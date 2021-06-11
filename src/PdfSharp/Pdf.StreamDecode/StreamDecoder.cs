@@ -5,6 +5,8 @@ using System.Linq;
 using PdfSharp.Pdf.Content;
 using PdfSharp.Pdf.Content.Objects;
 using Portable.Drawing;
+using Portable.Drawing.Drawing2D;
+using Portable.Drawing.Toolkit.Portable;
 
 namespace PdfSharp.Pdf.StreamDecode
 {
@@ -70,6 +72,9 @@ namespace PdfSharp.Pdf.StreamDecode
             // These will need wrapped in a state object...
             PointF textPoint = new PointF();
             Font defaultFont = new("Arial", 8);
+            var pf = new PortableFont(defaultFont, g.DpiX);
+            
+            g.RotateTransform(-10.0f); // Just for testing -- demo that we affect fonts
 
             foreach (var c in _content)
             {
@@ -103,7 +108,7 @@ namespace PdfSharp.Pdf.StreamDecode
                         break;
                     case OpCodeName.BT:// Begin text object.
                         // TODO: need the position
-                        //textPoint = new PointF(10,10); // ?
+                        //textPoint = new PointF(0,0); // ?
                         break;
                     case OpCodeName.BX:// (PDF 1.1) Begin compatibility section.
                         break;
@@ -175,9 +180,11 @@ namespace PdfSharp.Pdf.StreamDecode
                         break;
                     case OpCodeName.n:
                         break;
-                    case OpCodeName.q:
+                    case OpCodeName.q:// Push graphics state
+                        Console.Write("q; ");
                         break;
-                    case OpCodeName.Q:
+                    case OpCodeName.Q:// Pop graphics state
+                        Console.Write("Q; ");
                         break;
                     case OpCodeName.re:// Add rectangle to path
                         // TODO: this
@@ -211,27 +218,42 @@ namespace PdfSharp.Pdf.StreamDecode
                     case OpCodeName.Tc:
                         break;
                     case OpCodeName.Td:// Move text position: Move to the start of the next line, offset by [0],[1]
+                        Console.Write("Td; ");
                         if (op.Operands.Count != 2) throw new Exception("Unexpected op length in Td");
                         var x = GetNumber(op, 0);
                         var y = GetNumber(op, 1);
-                        //textPoint = new PointF(textPoint.X + (float)x, textPoint.Y + (float)y); // TODO: scale, newline, add
+                        textPoint = new PointF((float)x, textPoint.Y + (float)y + pf.GetLineHeight());
                         break;
                     case OpCodeName.TD:// Move text position and set leading
+                        Console.Write("TD; ");
                         break;
                     case OpCodeName.Tf:
                         break;
-                    case OpCodeName.Tj:
+                    case OpCodeName.Tj:// Show text
                         if (op.Operands.Count != 1) throw new Exception("Unexpected op length in Tj");
-                        var str = GetString(op, 0);//op.Operands[0] as CString;
+                        var str = GetString(op, 0);
                         var adv = g.MeasureString(str, defaultFont);
                         g.DrawString(str, defaultFont, Brushes.Black, textPoint);
-                        textPoint = new PointF(textPoint.X, textPoint.Y + 15); // this is *NOT* correct, it's for testing
+                        textPoint = new PointF(textPoint.X + adv.Width, textPoint.Y);
                         break;
-                    case OpCodeName.TJ:
+                    case OpCodeName.TJ:// Show text with glyph positioning
+                        
+                        var m = GetFloatArray(op, 6);
+                        /*
+                         [ [0] [1] 0
+                           [2] [3] 0
+                           [4] [5] 1 ]
+                         */
+                        //This replaces (rather that concatenating) the existing matrix
+                        
+                        //g.MultiplyTransform(new Matrix(m[0],m[1], m[2],m[3], m[4],m[5])); // pretty sure this is wrong
+                        textPoint = new PointF(textPoint.X + m[0], textPoint.Y + m[1]); // this is just for testing
+                        Console.WriteLine($"TJ - {string.Join(",",m)} would be x={m[0]}, y={m[1]} ? ; ");
                         break;
                     case OpCodeName.TL:
                         break;
-                    case OpCodeName.Tm:
+                    case OpCodeName.Tm:// Set text matrix and text line matrix
+                        Console.Write("Tm; ");
                         break;
                     case OpCodeName.Tr:
                         break;
@@ -266,6 +288,54 @@ namespace PdfSharp.Pdf.StreamDecode
             
         }
 
+        private float[] GetFloatArray(COperator op, int count)
+        {
+            var outp = new float[count];
+            
+            if (op.Operands[0] is CArray arr && arr.Count != 1)
+            {
+                var least = Math.Min(arr.Count, count); // anything not supplied should be zero?
+                for (int i = 0; i < least; i++)
+                {
+                    if (arr[i] is CReal real) outp[i] = (float)real.Value;
+                    else if (arr[i] is CInteger integer) outp[i] = integer.Value;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    outp[i] = (float)GetNumber(op, i);
+                }
+            }
+
+            return outp;
+        }
+
+        private double[] GetNumberArray(COperator op, int count)
+        {
+            var outp = new double[count];
+            
+            if (op.Operands[0] is CArray arr && arr.Count != 1)
+            {
+                var least = Math.Min(arr.Count, count); // anything not supplied should be zero?
+                for (int i = 0; i < least; i++)
+                {
+                    if (arr[i] is CReal real) outp[i] = real.Value;
+                    else if (arr[i] is CInteger integer) outp[i] = integer.Value;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    outp[i] = GetNumber(op, i);
+                }
+            }
+
+            return outp;
+        }
+
         private string GetString(COperator op, int i)
         {
             if (op.Operands[i] is CString str) return str.Value; // TODO: needs decoding
@@ -276,6 +346,15 @@ namespace PdfSharp.Pdf.StreamDecode
         {
             if (op.Operands[i] is CReal real) return real.Value;
             if (op.Operands[i] is CInteger integer) return integer.Value;
+            if (op.Operands[i] is CArray arr)
+            {
+                if (arr.Count < 0) throw new Exception("Unexpected empty array when looking for a number");
+                if (arr.Count > 1) throw new Exception("Unexpected long array when looking for a number");
+                var v = arr[0];
+                if (v is CReal vReal) return vReal.Value;
+                if (v is CInteger vInteger) return vInteger.Value;
+            }
+
             throw new Exception($"Expected numeric, got {op.Operands[i].GetType().FullName}");
         }
 

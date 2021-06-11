@@ -9,7 +9,12 @@ namespace Portable.Drawing.Toolkit.Portable
             Pen = pen;
         }
 
-        public void Dispose() { Pen.Dispose(); }
+        private bool _disposed;
+        public void Dispose() { 
+            if (_disposed) return;
+            _disposed = true;
+            Pen.Dispose();
+        }
 
         public void Select(IToolkitGraphics graphics)
         {

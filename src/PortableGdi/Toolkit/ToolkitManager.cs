@@ -20,7 +20,6 @@
  */
 
 using System;
-using System.Drawing;
 using Portable.Drawing.Imaging;
 using Portable.Drawing.Printing;
 using Portable.Drawing.Toolkit.Portable;

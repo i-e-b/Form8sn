@@ -27,6 +27,7 @@ namespace Portable.Drawing.Toolkit.Portable
         }
 
         protected readonly IToolkitImage Target;
+        private Graphics? _baseGraphics;
 
         public void Dispose()
         {
@@ -43,6 +44,7 @@ namespace Portable.Drawing.Toolkit.Portable
         public SmoothingMode SmoothingMode { get; set; }
         public int TextContrast { get; set; }
         public TextRenderingHint TextRenderingHint { get; set; }
+        
         public PortableFont CurrentFont { get; set; }
         
         public IToolkitPen? Pen { get; set; }
@@ -168,7 +170,6 @@ namespace Portable.Drawing.Toolkit.Portable
             var font = pf.BaseTrueTypeFont;
             
             var scale = pf.GetScale();
-            var h = pf.GetLineHeight();
             
             double xOff = x;
             foreach (char c in s)
@@ -187,7 +188,9 @@ namespace Portable.Drawing.Toolkit.Portable
                         (int)(xOff + p.X*scale),
                         (int)(y + (0-p.Y)*scale - yAdj) // Y is flipped
                         )).ToArray();
-                    DrawLines(points);
+                    
+                    if (_baseGraphics != null) _baseGraphics?.DrawLines(Pen.Pen, points); // this applies the transform before dropping back here to draw
+                    else DrawLines(points);
                 }
                 xOff += (gl.xMax - gl.xMin) * scale;
             }
@@ -295,6 +298,11 @@ namespace Portable.Drawing.Toolkit.Portable
         public void DrawGlyph(int x, int y, byte[] bits, int bitsWidth, int bitsHeight, Color color)
         {
             throw new NotImplementedException();
+        }
+
+        public void BindTo(Graphics graphics)
+        {
+            _baseGraphics = graphics;
         }
     }
 }

@@ -19,7 +19,6 @@
  */
 
 using System;
-using System.Drawing;
 using System.Threading;
 using Portable.Drawing.Drawing2D;
 using Portable.Drawing.Imaging;

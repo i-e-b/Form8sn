@@ -28,21 +28,9 @@ using Portable.Drawing.Toolkit;
 
 namespace Portable.Drawing
 {
-#if !ECMA_COMPAT
 [Serializable]
 [ComVisible(false)]
-#endif
-#if CONFIG_COMPONENT_MODEL
-[TypeConverter(typeof(IconConverter))]
-#endif
-#if CONFIG_COMPONENT_MODEL_DESIGN
-[Editor("System.Drawing.Design.IconEditor, System.Drawing.Design",
-		typeof(UITypeEditor))]
-#endif
 public sealed class Icon : MarshalByRefObject, ICloneable, IDisposable
-#if CONFIG_SERIALIZATION
-	, ISerializable
-#endif
 {
 	// Internal state.
 	private PortableImage image;

@@ -23,53 +23,22 @@ namespace Portable.Drawing.Drawing2D
 {
 	public sealed class ColorBlend
     {
-        private System.Drawing.Color[] colors;
-#if CONFIG_EXTENDED_NUMERICS
-		private float[] positions;
-#endif
+        private Color[] colors;
 
-        public System.Drawing.Color[] Colors
+        public Color[] Colors
         {
-            get
-            {
-                return colors;
-            }
-
-            set
-            {
-                colors = value;
-            }
+            get => colors;
+            set => colors = value;
         }
-
-#if CONFIG_EXTENDED_NUMERICS
-		public float[] Positions
-		{
-			get
-			{
-				return positions;
-			}
-
-			set
-			{
-				positions = value;
-			}
-		}
-#endif
 
         public ColorBlend()
         {
-            colors = new System.Drawing.Color[1];
-#if CONFIG_EXTENDED_NUMERICS
-			positions = new float[1];
-#endif
+            colors = new Color[1];
         }
 
         public ColorBlend(int count)
         {
-            colors = new System.Drawing.Color[count];
-#if CONFIG_EXTENDED_NUMERICS
-			positions = new float[count];
-#endif
+            colors = new Color[count];
         }
     }
 
