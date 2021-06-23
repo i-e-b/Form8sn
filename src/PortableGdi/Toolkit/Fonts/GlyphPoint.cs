@@ -11,5 +11,10 @@
         {
             return $"({X}, {Y})";
         }
+
+        public PointF ToGdiPoint()
+        {
+            return new PointF((float)X, (float)Y);
+        }
     }
 }

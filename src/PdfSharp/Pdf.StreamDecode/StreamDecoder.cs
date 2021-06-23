@@ -6,6 +6,7 @@ using PdfSharp.Pdf.Content;
 using PdfSharp.Pdf.Content.Objects;
 using Portable.Drawing;
 using Portable.Drawing.Drawing2D;
+using Portable.Drawing.Toolkit.Fonts;
 using Portable.Drawing.Toolkit.Portable;
 
 namespace PdfSharp.Pdf.StreamDecode
@@ -73,8 +74,17 @@ namespace PdfSharp.Pdf.StreamDecode
             PointF textPoint = new PointF();
             Font defaultFont = new("Arial", 8);
             var pf = new PortableFont(defaultFont, g.DpiX);
+            var skipText = false;
             
-            g.RotateTransform(-10.0f); // Just for testing -- demo that we affect fonts
+            //g.RenderingOrigin = new Point(0, targetHeight);
+            //g.Transform = new Matrix(1,0,0,-1, 0, targetHeight);
+            //g.ScaleTransform(2,2);
+            //g.RotateTransform(45f); // Just for testing -- demo that we affect fonts
+            
+            // NOTE TO SELF: try flipping order of params -- it may be stack re-ordered.
+            
+            var currentCurve = new EditGlyph();
+            float mx=0,my=0;
 
             foreach (var c in _content)
             {
@@ -89,16 +99,26 @@ namespace PdfSharp.Pdf.StreamDecode
                     case OpCodeName.Dictionary:
                         break;
                     case OpCodeName.b://Close, fill, and stroke path using nonzero winding number rule.
-                        // TODO: this
+                        currentCurve.ClosePath();
+                        FillCurve(g, currentCurve, FillMode.Winding);
+                        DrawCurve(g, currentCurve);
+                        currentCurve.Clear();
                         break;
                     case OpCodeName.B:// Fill and stroke path using nonzero winding number rule.
-                        // TODO: this
+                        FillCurve(g, currentCurve, FillMode.Winding);
+                        DrawCurve(g, currentCurve);
+                        currentCurve.Clear();
                         break;
                     case OpCodeName.bx:// Close, fill, and stroke path using even-odd rule.
-                        // TODO: this
+                        currentCurve.ClosePath();
+                        FillCurve(g, currentCurve, FillMode.Alternate);
+                        DrawCurve(g, currentCurve);
+                        currentCurve.Clear();
                         break;
                     case OpCodeName.Bx:// Fill and stroke path using even-odd rule.
-                        // TODO: this
+                        FillCurve(g, currentCurve, FillMode.Alternate);
+                        DrawCurve(g, currentCurve);
+                        currentCurve.Clear();
                         break;
                     case OpCodeName.BDC:// (PDF 1.2) Begin marked-content sequence with property list.
                         break;
@@ -107,15 +127,35 @@ namespace PdfSharp.Pdf.StreamDecode
                     case OpCodeName.BMC:// (PDF 1.2) Begin marked-content sequence.
                         break;
                     case OpCodeName.BT:// Begin text object.
-                        // TODO: need the position
-                        //textPoint = new PointF(0,0); // ?
+                        textPoint = new PointF(mx, my); // ?
                         break;
                     case OpCodeName.BX:// (PDF 1.1) Begin compatibility section.
                         break;
-                    case OpCodeName.c:// append curved segment to path (3 control points)
-                        // TODO: this
+                    case OpCodeName.c: // append curved segment to path (3 control points)
+                    {
+                        //currentCurve.GetOffset(out var x, out var y);
+                        var p = GetFloatArray(op, 6);
+                        currentCurve.AddPoint(mx+p[0], my+p[1], onCurve:false);
+                        currentCurve.AddPoint(mx+p[2], my+p[3], false);// this isn't exactly right as Contour uses TrueType logic.
+                        currentCurve.AddPoint(mx+p[4], my+p[5], true);
+                    }
                         break;
-                    case OpCodeName.cm:
+                    case OpCodeName.v: // Append curved segment to path (initial point replicated)
+                    case OpCodeName.y: // Append curved segment to path (final point replicated)
+                    {
+                        // These cases should be different, but we're treating them as the same while we are using the TrueType curve logic
+                        var p = GetFloatArray(op, 4);
+                        currentCurve.AddPoint(mx+p[0], my+p[1], onCurve:false);
+                        currentCurve.AddPoint(mx+p[2], my+p[3], true);
+                    }
+                        break;
+                    case OpCodeName.cm: // concatenate matrix to current transform matrix
+                        // TODO: this
+                    {
+                        var m = GetFloatArray(op, 6);
+                        mx = m[4];
+                        my = m[5];
+                    }
                         break;
                     case OpCodeName.CS:
                         break;
@@ -141,7 +181,8 @@ namespace PdfSharp.Pdf.StreamDecode
                         break;
                     case OpCodeName.f:// Fill path using non-zero winding rule
                     case OpCodeName.F:
-                        // TODO: this
+                        FillCurve(g, currentCurve, FillMode.Winding);
+                        currentCurve.Clear();
                         break;
                     case OpCodeName.fx:
                         break;
@@ -152,7 +193,7 @@ namespace PdfSharp.Pdf.StreamDecode
                     case OpCodeName.gs:
                         break;
                     case OpCodeName.h:// Close sub-path
-                        // TODO: this
+                        currentCurve.ClosePath();
                         break;
                     case OpCodeName.i:
                         break;
@@ -169,25 +210,40 @@ namespace PdfSharp.Pdf.StreamDecode
                         // TODO: this
                         break;
                     case OpCodeName.l:// line-to - append straight line segment to path
-                        // TODO: this
+                    {
+                        var x = GetNumber(op, 0) + mx;
+                        var y = GetNumber(op, 1) + my;
+                        currentCurve.AddPoint(x,y,true);
+                    }
                         break;
-                    case OpCodeName.m:// move-to - begin new sub path
-                        // TODO: this
+                    case OpCodeName.m: // move-to - begin new sub path
+                    {
+                        var x = GetNumber(op, 0) + mx;
+                        var y = GetNumber(op, 1) + my;
+                        currentCurve.StartCurve();
+                        currentCurve.AddPoint(x,y,true); // ignore sub-paths
+                    }
                         break;
                     case OpCodeName.M:
                         break;
                     case OpCodeName.MP:
                         break;
-                    case OpCodeName.n:
+                    case OpCodeName.n: // End path without filling or stroking (used for masks)
+                        currentCurve.ClosePath();
                         break;
                     case OpCodeName.q:// Push graphics state
                         Console.Write("q; ");
                         break;
                     case OpCodeName.Q:// Pop graphics state
                         Console.Write("Q; ");
+                        currentCurve.Clear();
                         break;
-                    case OpCodeName.re:// Add rectangle to path
-                        // TODO: this
+                    case OpCodeName.re: // Add rectangle to path
+                    {
+                        var r = GetFloatArray(op, 4); // x y width height
+                        
+                        g.DrawRectangle(Pens.Black, r[0], r[1], r[2], r[3]);
+                    }
                         break;
                     case OpCodeName.RG:// set RGB color for stroking operations
                         // TODO: this
@@ -198,10 +254,13 @@ namespace PdfSharp.Pdf.StreamDecode
                     case OpCodeName.ri:
                         break;
                     case OpCodeName.s:// Close path and stroke
-                        // TODO: this
+                        currentCurve.ClosePath();
+                        DrawCurve(g, currentCurve);
+                        currentCurve.Clear();
                         break;
                     case OpCodeName.S:// Stroke path
-                        // TODO: this
+                        DrawCurve(g, currentCurve);
+                        currentCurve.Clear();
                         break;
                     case OpCodeName.SC:
                         break;
@@ -217,12 +276,14 @@ namespace PdfSharp.Pdf.StreamDecode
                         break;
                     case OpCodeName.Tc:
                         break;
-                    case OpCodeName.Td:// Move text position: Move to the start of the next line, offset by [0],[1]
+                    case OpCodeName.Td: // Move text position: Move to the start of the next line, offset by [0],[1]
+                    {
                         Console.Write("Td; ");
                         if (op.Operands.Count != 2) throw new Exception("Unexpected op length in Td");
                         var x = GetNumber(op, 0);
                         var y = GetNumber(op, 1);
-                        textPoint = new PointF((float)x, textPoint.Y + (float)y + pf.GetLineHeight());
+                        textPoint = new PointF((float) x, textPoint.Y + (float) y + pf.GetLineHeight());
+                    }
                         break;
                     case OpCodeName.TD:// Move text position and set leading
                         Console.Write("TD; ");
@@ -230,6 +291,7 @@ namespace PdfSharp.Pdf.StreamDecode
                     case OpCodeName.Tf:
                         break;
                     case OpCodeName.Tj:// Show text
+                        //if (skipText) break;
                         if (op.Operands.Count != 1) throw new Exception("Unexpected op length in Tj");
                         var str = GetString(op, 0);
                         var adv = g.MeasureString(str, defaultFont);
@@ -237,7 +299,11 @@ namespace PdfSharp.Pdf.StreamDecode
                         textPoint = new PointF(textPoint.X + adv.Width, textPoint.Y);
                         break;
                     case OpCodeName.TJ:// Show text with glyph positioning
-                        
+                        break;
+                    case OpCodeName.TL:
+                        break;
+                    case OpCodeName.Tm: // Set text matrix and text line matrix
+                    {
                         var m = GetFloatArray(op, 6);
                         /*
                          [ [0] [1] 0
@@ -245,17 +311,18 @@ namespace PdfSharp.Pdf.StreamDecode
                            [4] [5] 1 ]
                          */
                         //This replaces (rather that concatenating) the existing matrix
-                        
-                        //g.MultiplyTransform(new Matrix(m[0],m[1], m[2],m[3], m[4],m[5])); // pretty sure this is wrong
-                        textPoint = new PointF(textPoint.X + m[0], textPoint.Y + m[1]); // this is just for testing
-                        Console.WriteLine($"TJ - {string.Join(",",m)} would be x={m[0]}, y={m[1]} ? ; ");
-                        break;
-                    case OpCodeName.TL:
-                        break;
-                    case OpCodeName.Tm:// Set text matrix and text line matrix
+
+                        //g.MultiplyTransform(new Matrix(m[0],m[1], m[2],m[3], m[4],m[5]));
+                        textPoint = new PointF(m[4]+mx, m[5]+my); // this is just for testing
+                        //g.Transform = new Matrix(1,0,0,1, m[4], m[5]);
+                        //g.Transform = new Matrix(m[0],m[1], m[2],m[3], m[4],m[5]);
+                        Console.WriteLine($"Tm - {string.Join(",", m)} would be x={m[4]}, y={m[5]} ? ; ");
                         Console.Write("Tm; ");
+                    }
                         break;
                     case OpCodeName.Tr:
+                        var mode = GetNumber(op, 0);
+                        //skipText = mode == 3;
                         break;
                     case OpCodeName.Ts:
                         break;
@@ -263,15 +330,11 @@ namespace PdfSharp.Pdf.StreamDecode
                         break;
                     case OpCodeName.Tz:
                         break;
-                    case OpCodeName.v:
-                        break;
                     case OpCodeName.w:
                         break;
                     case OpCodeName.W:
                         break;
                     case OpCodeName.Wx:
-                        break;
-                    case OpCodeName.y:
                         break;
                     case OpCodeName.QuoteSingle:
                         break;
@@ -286,6 +349,25 @@ namespace PdfSharp.Pdf.StreamDecode
             g.DrawLine(Pens.Red, 0,0, 150,100);
             g.DrawLine(Pens.DarkCyan, 0,0, 150,150);
             
+        }
+
+        private void DrawCurve(Graphics g, EditGlyph curves)
+        {
+            foreach (var contour in curves.Curves)
+            {
+                var points = contour.Render().Select(p=>p.ToGdiPoint()).ToArray();
+                g.DrawPolygon(Pens.Black, points);
+            }
+        }
+
+        private void FillCurve(Graphics g, EditGlyph curves, FillMode fillMode)
+        {
+            foreach (var contour in curves.Curves)
+            {
+                var points = contour.Render().Select(p=>p.ToGdiPoint()).ToArray();
+                
+                g.FillPolygon(Brushes.Black, points, fillMode);
+            }
         }
 
         private float[] GetFloatArray(COperator op, int count)

@@ -1369,10 +1369,8 @@ namespace Portable.Drawing
         public void DrawLines(Pen pen, Point[] points)
         {
             // Bail out now if there's nothing to draw.
-            if (pen.PenType == PenType.SolidColor && pen.Color.A == 0)
-            {
-                return;
-            }
+            if (pen.PenType == PenType.SolidColor && pen.Color.A == 0) return;
+            if (points.Length < 2) return;
 
             points = ConvertPoints(points, 2, PageUnit);
             BaseOffsetPoints(points);
@@ -4459,7 +4457,7 @@ namespace Portable.Drawing
 
             if (points.Length < minPoints)
             {
-                throw new ArgumentException("Arg_NeedsAtLeastNPoints");
+                return Array.Empty<Point>();
             }
 
             // Convert the "points" array.

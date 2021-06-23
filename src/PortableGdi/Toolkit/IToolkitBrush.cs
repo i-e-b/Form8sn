@@ -27,6 +27,7 @@ namespace Portable.Drawing.Toolkit
     [NonStandardExtra]
     public interface IToolkitBrush : IToolkitSelectObject
     {
+        Color Color { get; }
     }; // interface IToolkitBrush
 
 }; // namespace System.Drawing.Toolkit

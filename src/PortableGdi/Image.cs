@@ -355,7 +355,7 @@ namespace Portable.Drawing
         {
             dgImage.Save(filename);
         }
-#if !ECMA_COMPAT
+
         public void Save(string filename, ImageFormat format)
         {
             dgImage.Save(filename, ImageFormatToDG(format));
@@ -413,7 +413,7 @@ namespace Portable.Drawing
         {
             // TODO
         }
-#endif
+
 
         // Set a property on this image.
         [TODO]
@@ -422,16 +422,6 @@ namespace Portable.Drawing
             // TODO
         }
 
-#if CONFIG_SERIALIZATION
-	// Implement the ISerializable interface.
-	[TODO]
-	void ISerializable.GetObjectData(SerializationInfo info,
-									 StreamingContext context)
-			{
-				// TODO
-			}
-
-#endif
 
         // Set the dgImage field within this object.
         internal void SetDGImage(PortableImage dgImage)

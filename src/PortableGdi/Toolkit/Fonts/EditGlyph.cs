@@ -9,7 +9,9 @@ namespace Portable.Drawing.Toolkit.Fonts
     /// </summary>
     public class EditGlyph
     {
-        public List<Contour> Curves { get; }
+        public List<Contour> Curves { get; private set; }
+
+        public EditGlyph() { Curves = new List<Contour>(); }
 
         public EditGlyph(Glyph source)
         {
@@ -43,6 +45,49 @@ namespace Portable.Drawing.Toolkit.Fonts
                 p++;
             }
             
+        }
+
+        public void ClosePath()
+        {
+            if (Curves.Count < 1) return;
+            Curves[Curves.Count - 1]!.Closed = true;
+        }
+
+        public void Clear()
+        {
+            Curves = new List<Contour>();
+        }
+
+        public void AddPoint(float x, float y, bool onCurve)
+        {
+            if (Curves.Count < 1) Curves.Add(new Contour());
+            var head = Curves[Curves.Count - 1];
+            head!.Points.Add(new GlyphPoint{X = x, Y=y, OnCurve = onCurve});
+        }
+
+        public void AddPoint(double x, double y, bool onCurve)
+        {
+            if (Curves.Count < 1) Curves.Add(new Contour());
+            var head = Curves[Curves.Count - 1];
+            head!.Points.Add(new GlyphPoint{X = x, Y=y, OnCurve = onCurve});
+        }
+
+        public void StartCurve()
+        {
+            Curves.Add(new Contour());
+        }
+
+        public void GetOffset(out double x, out double y)
+        {
+            x=0;y=0;
+            if (Curves.Count < 1) return;
+            var head = Curves[Curves.Count - 1];
+            var c = head!.Points.Count;
+            if (c < 1) return;
+            
+            var p = head.Points[c-1];
+            x = p.X;
+            y = p.Y;
         }
     }
 }

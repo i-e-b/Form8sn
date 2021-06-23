@@ -142,7 +142,7 @@ namespace Portable.Drawing.Toolkit.Portable
         }
         
         // ReSharper disable once InconsistentNaming
-        const double FUDGE_FACTOR = 1.5; // This is used to scale the fonts. Set to 1.0 to get the real size
+        const double FUDGE_FACTOR = 2.0; // This is used to scale the fonts. Set to 1.0 to get the real size
 
         public int GetLineHeight()
         {
@@ -155,7 +155,10 @@ namespace Portable.Drawing.Toolkit.Portable
         public double GetScale()
         {
             // DPI is normally 96 in the Windows world and 72 in the Mac world.
-            return (_fontSpec.Size * FUDGE_FACTOR * (_dpi/72.0)) / BaseTrueTypeFont.Height();
+            //var dpiAdjust = _dpi/72.0;
+            // Should be: pointSize * resolution / (72 points per inch * units_per_em)
+            // see: https://developer.apple.com/fonts/TrueType-Reference-Manual/RM02/Chap2.html#converting
+            return (_fontSpec.Size * _dpi) / (72 * BaseTrueTypeFont.Height());
         }
     }
 }

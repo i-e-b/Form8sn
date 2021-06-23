@@ -12,6 +12,12 @@ namespace Portable.Drawing.Toolkit.Fonts
         public List<GlyphPoint> Points { get; }
 
         /// <summary>
+        /// For outline drawing. If true, the segment between the last and first
+        /// point should be drawn. No effect on filled shapes.
+        /// </summary>
+        public bool Closed { get; set; }
+
+        /// <summary>
         /// Pass only the points on a single contour
         /// </summary>
         public Contour(IEnumerable<GlyphPoint>? points)
@@ -20,20 +26,29 @@ namespace Portable.Drawing.Toolkit.Fonts
         }
         
         /// <summary>
+        /// Pass only the points on a single contour
+        /// </summary>
+        public Contour()
+        {
+            Points = new List<GlyphPoint>();
+        }
+        
+        /// <summary>
         /// Curve reduces to straight-line components for drawing
         /// </summary>
         public List<GlyphPoint> Render()
         {
-            return NormaliseContour(Points).ToList();
+            return NormaliseContour(Points, Closed, 2.0).ToList();
         }
         
         
         /// <summary>
         /// break curves into segments where needed
         /// </summary>
-        public static GlyphPoint[] NormaliseContour(IReadOnlyList<GlyphPoint> contour)
+        public static GlyphPoint[] NormaliseContour(IReadOnlyList<GlyphPoint> contour, bool closeForm, double resolution)
         {
             var len = contour.Count;
+            if (len < 2) return Array.Empty<GlyphPoint>();
             var final = new List<GlyphPoint>(len * 4);
             var offs = len - 1;
 
@@ -58,7 +73,7 @@ namespace Portable.Drawing.Toolkit.Fonts
                 }
                 else if (next.OnCurve && prev.OnCurve) // simple curve
                 {
-                    final.AddRange(InterpolateCurve(prev, current, next));
+                    final.AddRange(InterpolateCurve(resolution, prev, current, next));
                 }
                 else if (prev.OnCurve) // single virtual curve forward
                 {
@@ -67,7 +82,7 @@ namespace Portable.Drawing.Toolkit.Fonts
                         X = (current.X + next.X) / 2.0,
                         Y = (current.Y + next.Y) / 2.0
                     };
-                    final.AddRange(InterpolateCurve(prev, current, virt));
+                    final.AddRange(InterpolateCurve(resolution, prev, current, virt));
                 }
                 else if (next.OnCurve) // single virtual curve behind
                 {
@@ -76,7 +91,7 @@ namespace Portable.Drawing.Toolkit.Fonts
                         X = (current.X + prev.X) / 2.0,
                         Y = (current.Y + prev.Y) / 2.0
                     };
-                    final.AddRange(InterpolateCurve(virt, current, next));
+                    final.AddRange(InterpolateCurve(resolution, virt, current, next));
                 }
                 else // double virtual curve
                 {
@@ -90,7 +105,7 @@ namespace Portable.Drawing.Toolkit.Fonts
                         X = (current.X + next.X) / 2.0,
                         Y = (current.Y + next.Y) / 2.0
                     };
-                    final.AddRange(InterpolateCurve(virtPrev, current, virtNext));
+                    final.AddRange(InterpolateCurve(resolution, virtPrev, current, virtNext));
                 }
             }
 
@@ -100,7 +115,7 @@ namespace Portable.Drawing.Toolkit.Fonts
         /// <summary>
         /// A more refined curve breaker for larger sizes
         /// </summary>
-        private static IEnumerable<GlyphPoint> InterpolateCurve(GlyphPoint start, GlyphPoint ctrl, GlyphPoint end)
+        private static IEnumerable<GlyphPoint> InterpolateCurve(double resolution, GlyphPoint start, GlyphPoint ctrl, GlyphPoint end)
         {
             // Estimate a step size
             var dx1 = start.X - ctrl.X;
@@ -113,7 +128,7 @@ namespace Portable.Drawing.Toolkit.Fonts
                 yield break;
             }
 
-            var minStep = 20.0d;   // larger = less refined curve, but faster
+            var minStep = resolution;   // larger = less refined curve, but faster
             var inv = minStep / dist; // estimated step size. Refined by 'minStep' checks in the main loop
 
             for (double t = 0; t < 1; t+= inv)

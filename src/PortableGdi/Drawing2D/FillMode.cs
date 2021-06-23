@@ -24,7 +24,14 @@ namespace Portable.Drawing.Drawing2D
 
     public enum FillMode
     {
+        /// <summary>
+        /// 'Alternate' will be treated as Odd-Even rule
+        /// </summary>
         Alternate	= 0,
+        
+        /// <summary>
+        /// 'Winding' will be treated as Non-zero Winding Rule
+        /// </summary>
         Winding		= 1
 
     }; // enum FillMode

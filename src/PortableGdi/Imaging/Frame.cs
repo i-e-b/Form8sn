@@ -30,7 +30,7 @@ namespace Portable.Drawing.Imaging
     {
         // Internal state.
         private PortableImage image;
-        internal int width;
+        internal int width, widthMinusOne;
         internal int height;
         internal int stride;
         internal PixelFormat pixelFormat;
@@ -43,6 +43,7 @@ namespace Portable.Drawing.Imaging
         {
             this.image = image;
             this.width = width;
+            widthMinusOne = width - 1;
             this.height = height;
             stride = Utils.FormatToStride(pixelFormat, width);
             MaskStride = (((width + 7) / 8) + 3) & ~3;
@@ -63,6 +64,7 @@ namespace Portable.Drawing.Imaging
             // Clone from the other frame.
             image = newImage;
             width = newWidth;
+            widthMinusOne = newWidth - 1;
             height = newHeight;
             pixelFormat = format;
             stride = Utils.FormatToStride(pixelFormat, width);
@@ -379,53 +381,155 @@ namespace Portable.Drawing.Imaging
             return BmpResizer.Resize(this, 0, 0, Width, Height, newWidth, newHeight);
         }
 
-        // Set the pixel value at a specific location.
+        /// <summary>
+        /// Set the pixel value at a specific location, mixed with the existing color given a blend value.
+        /// Only works on Format24bppRgb.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="color"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetPixel(int x, int y, int color)
+        public void BlendPixel(int x, int y, int color, byte blend)
         {
             // bounds check
             if (x < 0 || x >= width || y < 0 || y >= height) return; // ignore off-frame
             
+            var ub = 255 - blend;
+            var c1 = (color & 0xff) * blend;
+            var c2 = ((color >> 8) & 0xff) * blend;
+            var c3 = ((color >> 16) & 0xff) * blend;
+            int z = 0; // blended color
             int ptr = y * stride;
             switch (pixelFormat)
             {
                 case (PixelFormat.Format24bppRgb):
                     ptr += 3 * x;
-                    data[ptr++] = (byte) color;
-                    data[ptr++] = (byte) (color >> 8);
-                    data[ptr] = (byte) (color >> 16);
+                    
+                    z = (data[ptr] * ub) + c1;
+                    data[ptr] = (byte) (z >> 8);
+                    ptr++;
+                    
+                    z = (data[ptr] * ub) + c2;
+                    data[ptr] = (byte) (z >> 8);
+                    ptr++;
+                    
+                    z = (data[ptr] * ub) + c3;
+                    data[ptr] = (byte) (z >> 8);
+                    break;
+                    
+                default: return; // not supported
+            }
+        }
+        
+        /// <summary>
+        /// Set the pixel value at a specific location.
+        /// </summary>
+        /// <param name="x">X co-ordinate, 0 is left</param>
+        /// <param name="y">Y co-ordinate, 0 is top</param>
+        /// <param name="color">8 bit per channel ARGB</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetPixel(int x, int y, int color)
+        {
+            SetSpan(y, x, x, color);
+        }
+        
+        /// <summary>
+        /// Set multiple contiguous pixels on a scan line
+        /// </summary>
+        /// <param name="left">X co-ordinate, 0 is left-most edge</param>
+        /// <param name="right">X co-ordinate, 0 is left-most edge</param>
+        /// <param name="y">Y co-ordinate, 0 is top</param>
+        /// <param name="color">8 bit per channel ARGB</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetSpan(int y, int left, int right, int color)
+        {
+            // bounds check
+            if (y < 0 || y >= height || right < 0 || left >= width) return; // ignore off-frame
+            
+            if (left < 0) left = 0;
+            if (right >= width) right = widthMinusOne;
+            
+            int ptr = y * stride;
+            switch (pixelFormat)
+            {
+                case (PixelFormat.Format24bppRgb):
+                {
+                    var c1 = (byte)color;
+                    var c2 = (byte) (color >> 8);
+                    var c3 = (byte) (color >> 16);
+                    ptr += 3 * left;
+                    for (int x = left; x <= right; x++)
+                    {
+                        data[ptr++] = c1;
+                        data[ptr++] = c2;
+                        data[ptr++] = c3;
+                    }
+                }
                     break;
                 case (PixelFormat.Format16bppRgb565):
-                    ptr += 2 * x;
-                    data[ptr++] = (byte) ((color >> 5 & 0xE0) | (color >> 3 & 0x1F));
-                    data[ptr] = (byte) ((color >> 16 & 0xF8) | (color >> 13 & 0x07));
+                {
+                    var c1 = (byte) ((color >> 5 & 0xE0) | (color >> 3 & 0x1F));
+                    var c2 = (byte) ((color >> 5 & 0xE0) | (color >> 3 & 0x1F));
+                    ptr += 2 * left;
+                    for (int x = left; x <= right; x++)
+                    {
+                        data[ptr++] = c1;
+                        data[ptr++] = c2;
+                    }
+                }
                     break;
                 case (PixelFormat.Format16bppRgb555):
-                    ptr += 2 * x;
-                    data[ptr++] = (byte) ((color >> 6 & 0xE0) | (color >> 3 & 0x1F));
-                    data[ptr] = (byte) ((color >> 17 & 0x7C) | (color >> 14 & 0x03));
+                {
+                    var c1 = (byte) ((color >> 6 & 0xE0) | (color >> 3 & 0x1F));
+                    var c2 = (byte) ((color >> 17 & 0x7C) | (color >> 14 & 0x03));
+                    ptr += 2 * left;
+                    for (int x = left; x <= right; x++)
+                    {
+                        data[ptr++] = c1;
+                        data[ptr++] = c2;
+                    }
+                }
                     break;
                 case (PixelFormat.Format8bppIndexed):
-                    ptr += x;
-                    data[ptr] = (byte) Utils.BestPaletteColor(Palette, color);
+                {
+                    ptr += left;
+                    var c1 = (byte) Utils.BestPaletteColor(Palette, color);
+
+                    for (int x = left; x <= right; x++)
+                    {
+                        data[ptr++] = c1;
+                    }
+                }
                     break;
                 case (PixelFormat.Format4bppIndexed):
-                    ptr += x / 2;
-                    if ((x & 0x01) == 0)
-                        data[ptr] = (byte) (Utils.BestPaletteColor(Palette, color) << 4 | data[ptr] & 0x0F);
-                    else
-                        data[ptr] = (byte) (Utils.BestPaletteColor(Palette, color) & 0x0F | data[ptr] & 0xF0);
+                {
+                    var c1 = (byte) (Utils.BestPaletteColor(Palette, color) << 4 | data[ptr] & 0x0F);
+                    var c2 = (byte) (Utils.BestPaletteColor(Palette, color) & 0x0F | data[ptr] & 0xF0);
+                    for (int x = left; x <= right; x++)
+                    {
+                        var pixPtr = ptr + x / 2;
+                        if ((x & 0x01) == 0)
+                            data[pixPtr] = c1;
+                        else
+                            data[pixPtr] = c2;
+                    }
+                }
                     break;
                 case (PixelFormat.Format1bppIndexed):
-                    ptr += x / 8;
-                    if (Utils.BestPaletteColor(Palette, color) == 0)
-                        data[ptr] &= (byte) (~(1 << 7 - (x & 0x07)));
-                    else
-                        data[ptr] |= (byte) (1 << 7 - (x & 0x07));
+                {
+                    for (int x = left; x <= right; x++)
+                    {
+                        ptr += x / 8;
+                        if (Utils.BestPaletteColor(Palette, color) == 0)
+                            data[ptr] &= (byte) (~(1 << 7 - (x & 0x07)));
+                        else
+                            data[ptr] |= (byte) (1 << 7 - (x & 0x07));
+                    }
+                }
                     break;
             }
         }
-
+        
         // Set the mask value at a specific location.
         public void SetMask(int x, int y, int value)
         {

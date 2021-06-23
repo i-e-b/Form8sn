@@ -45,7 +45,7 @@ namespace Portable.Drawing.Toolkit.Portable
         public int TextContrast { get; set; }
         public TextRenderingHint TextRenderingHint { get; set; }
         
-        public PortableFont CurrentFont { get; set; }
+        public PortableFont? CurrentFont { get; set; }
         
         public IToolkitPen? Pen { get; set; }
         public IToolkitBrush? Brush { get; set; }
@@ -93,7 +93,14 @@ namespace Portable.Drawing.Toolkit.Portable
             float y = y1;
             for (int i = 0; i <= mad; i++)
             {
-                frame.SetPixel((int)x, (int)y, color);
+                // world's jankiest anti-aliasing
+                var fx = (byte)((x - (int)x) * 255);
+                var fy = (byte)((y - (int)y) * 255);
+                
+                frame.BlendPixel((int)x, (int)y, color, (byte)(255-(fx+fy)));
+                frame.BlendPixel((int)x+1, (int)y, color, fx);
+                frame.BlendPixel((int)x, (int)y+1, color, fy);
+                
                 x += dx;
                 y += dy;
             }
@@ -110,15 +117,43 @@ namespace Portable.Drawing.Toolkit.Portable
                 start = end;
             }
         }
+        
+        public void DrawLinesF(PointF[] points)
+        {
+            if (points.Length < 2) return;
+            var start = points[0];
+            for (int i = 1; i < points.Length; i++)
+            {
+                var end = points[i];
+                DrawLine((int)start.X, (int)start.Y, (int)end.X, (int)end.Y);
+                start = end;
+            }
+        }
 
         public void DrawPolygon(Point[] points)
         {
-            throw new NotImplementedException();
+            DrawLines(points);
+            if (points.Length > 2) // draw 'closing' stroke
+            {
+                var end = points[points.Length-1];
+                DrawLine(points[0].X, points[0].Y, end.X, end.Y);
+            }
         }
 
         public void FillPolygon(Point[] points, FillMode fillMode)
         {
-            throw new NotImplementedException();
+            if (Brush == null) return;
+            var frame = Target.Frame();
+            if (frame == null) return;
+            
+            var color = Brush.Color.ToArgb();
+            
+            var spans = fillMode == FillMode.Winding ? PortableRasteriser.GetNonZeroWindingSpans(points) : PortableRasteriser.GetEvenOddSpans(points);
+
+            foreach (var span in spans)
+            {
+                frame.SetSpan(span.Y, span.Left, span.Right, color);
+            }
         }
 
         public void DrawBezier(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
@@ -163,8 +198,8 @@ namespace Portable.Drawing.Toolkit.Portable
 
         public void DrawString(string s, int x, int y, StringFormat format)
         {
-            if (Font == null) throw new Exception("Tried to measure string with no font set");
-            if (!(Font is PortableFont pf)) throw new Exception($"Need to measure using font def: {Font.GetType().FullName}");
+            if (Font == null) throw new Exception("Tried to draw string with no font set");
+            if (!(Font is PortableFont pf)) throw new Exception($"Need to draw using font def: {Font.GetType().FullName}");
             
             Pen = new PortablePen(new Pen(Color.Black, 1.0f));// TODO: pick from a real parameter
             var font = pf.BaseTrueTypeFont;
@@ -184,13 +219,16 @@ namespace Portable.Drawing.Toolkit.Portable
                 var outline = gl.NormalisedContours(); // break into simple lines
                 foreach (var curve in outline)
                 {
-                    var points = curve.Select(p => new Point(
-                        (int)(xOff + p.X*scale),
-                        (int)(y + (0-p.Y)*scale - yAdj) // Y is flipped
+                    var points = curve.Select(p => new PointF(
+                        (float)(xOff + p.X*scale),
+                        (float)(y    + p.Y*scale + yAdj)
+                        //(int)(y + (0-p.Y)*scale - yAdj) // Y is flipped
                         )).ToArray();
                     
                     if (_baseGraphics != null) _baseGraphics?.DrawLines(Pen.Pen, points); // this applies the transform before dropping back here to draw
-                    else DrawLines(points);
+                    else DrawLinesF(points);
+                    
+                    //break; // just the first contour?
                 }
                 xOff += (gl.xMax - gl.xMin) * scale;
             }

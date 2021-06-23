@@ -81,7 +81,7 @@ namespace Portable.Drawing.Toolkit.Fonts
 
                 if (p == ContourEnds[c])
                 {
-                    outp.Add(Contour.NormaliseContour(contour));
+                    outp.Add(Contour.NormaliseContour(contour, true, 20.0));
                     contour.Clear();
                     c++;
                 }

@@ -213,7 +213,8 @@ namespace Portable.Drawing.Imaging.ImageFormats
 				scanlineWriter = new ScanlineWriter
 					(compressor, frame.Width, frame.PixelFormat);
 				func = GetOutputFunc(frame.PixelFormat);
-				for(y = 0; y < frame.Height; ++y)
+				//for(y = 0; y < frame.Height; ++y)
+				for(y = frame.Height - 1; y >= 0; y--) // frames seem to come out up-side-down. Hacky compensation here.
 				{
 					func(frame, y, scanlineWriter.Buffer);
 					scanlineWriter.FlushScanline();
