@@ -26,7 +26,7 @@ using Portable.Drawing.Imaging.ImageFormats;
 
 namespace Portable.Drawing.Imaging
 {
-    public class Frame : MarshalByRefObject, IDisposable
+    public class Frame : MarshalByRefObject, IDisposable, IBitmapProxy
     {
         // Internal state.
         private PortableImage image;
@@ -385,9 +385,6 @@ namespace Portable.Drawing.Imaging
         /// Set the pixel value at a specific location, mixed with the existing color given a blend value.
         /// Only works on Format24bppRgb.
         /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="color"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void BlendPixel(int x, int y, int color, byte blend)
         {
@@ -420,7 +417,52 @@ namespace Portable.Drawing.Imaging
                 default: return; // not supported
             }
         }
-        
+
+
+        /// <summary>
+        /// Set the pixel value at a specific location, mixed with the existing color given a blend value.
+        /// Allows adjustment of color channels for sub-pixel hinting
+        /// Only works on Format24bppRgb.
+        /// </summary>
+        /// <remarks>Sub pixel hints currently assume RGB ordering.</remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void BlendSubPixel(int x, int y, byte left, byte middle, byte right, int color)
+        {
+            // TODO: support BGR and non-striped sub pixels
+            // bounds check
+            if (x < 0 || x >= width || y < 0 || y >= height) return; // ignore off-frame
+            
+            var c1 = (color & 0xff) * left;
+            var u1 = 255 - left;
+            
+            var c2 = ((color >> 8) & 0xff) * middle;
+            var u2 = 255 - middle;
+            
+            var c3 = ((color >> 16) & 0xff) * right;
+            var u3 = 255 - right;
+
+            int ptr = y * stride;
+            switch (pixelFormat)
+            {
+                case (PixelFormat.Format24bppRgb):
+                    ptr += 3 * x;
+                    
+                    var z = (data[ptr] * u1) + c1; // blended color
+                    data[ptr] = (byte) (z >> 8);
+                    ptr++;
+                    
+                    z = (data[ptr] * u2) + c2;
+                    data[ptr] = (byte) (z >> 8);
+                    ptr++;
+                    
+                    z = (data[ptr] * u3) + c3;
+                    data[ptr] = (byte) (z >> 8);
+                    break;
+                    
+                default: return; // not supported
+            }
+        }
+
         /// <summary>
         /// Set the pixel value at a specific location.
         /// </summary>
@@ -999,5 +1041,12 @@ namespace Portable.Drawing.Imaging
         {
             return "Frame [" + width + "," + height + "], " + pixelFormat;
         }
-    }; // class Frame
+    };
+
+    public interface IBitmapProxy
+    {
+        void BlendPixel(int x, int y, int color, byte blend);
+        void BlendSubPixel(int x, int y, byte left, byte middle, byte right, int color);
+    }
+    // class Frame
 }; // namespace DotGNU.Images

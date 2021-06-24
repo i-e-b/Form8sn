@@ -6,7 +6,13 @@ namespace Portable.Drawing.Toolkit.Portable
 {
     public class PortableRasteriser
     {
-        public static IEnumerable<PixelSpan> GetNonZeroWindingSpans(Point[] points)
+        public static IEnumerable<PixelSpan> GetNonZeroWindingSpans(Point[] intPoints)
+        {
+            var points = intPoints.Select(p=>(PointF)p).ToArray();
+            return GetNonZeroWindingSpans(points);
+        }
+
+        public static IEnumerable<PixelSpan> GetNonZeroWindingSpans(PointF[] points)
         {
             var segments = ToLineSegments(points);
             var spans = new List<PixelSpan>();
@@ -38,7 +44,6 @@ namespace Portable.Drawing.Toolkit.Portable
             }
             return spans;
         }
-
         public static IEnumerable<PixelSpan> GetEvenOddSpans(Point[] points)
         {
             throw new NotImplementedException();
@@ -46,7 +51,7 @@ namespace Portable.Drawing.Toolkit.Portable
         
         
         
-        private static List<Segment> ToLineSegments(Point[] points)
+        private static List<Segment> ToLineSegments(PointF[] points)
         {
             var outp = new List<Segment>();
             if (points.Length < 2) return outp;
@@ -78,9 +83,9 @@ namespace Portable.Drawing.Toolkit.Portable
         
         public double Pos;
 
-        public Segment(Point a, Point b)
+        public Segment(PointF a, PointF b)
         {
-            if (a.Y == b.Y) Clockwise = a.X < b.X;
+            if (Math.Abs(a.Y - b.Y) < 0.0001) Clockwise = a.X < b.X;
             else Clockwise = a.Y > b.Y;
 
             if (a.Y < b.Y)

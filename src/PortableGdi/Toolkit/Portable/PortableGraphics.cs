@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Portable.Drawing.Drawing2D;
 using Portable.Drawing.Imaging.ImageFormats;
 using Portable.Drawing.Text;
+using Portable.Drawing.Toolkit.Fonts;
+using Portable.Drawing.Toolkit.Fonts.Rendering;
 
 namespace Portable.Drawing.Toolkit.Portable
 {
@@ -139,6 +142,24 @@ namespace Portable.Drawing.Toolkit.Portable
                 DrawLine(points[0].X, points[0].Y, end.X, end.Y);
             }
         }
+        
+        public void FillPolygon(PointF[] points, FillMode fillMode)
+        {
+            if (Brush == null) return;
+            var frame = Target.Frame();
+            if (frame == null) return;
+            
+            var color = Brush.Color.ToArgb();
+            
+            var spans = fillMode == FillMode.Winding
+                ? PortableRasteriser.GetNonZeroWindingSpans(points.Select(Point.Truncate).ToArray())
+                : PortableRasteriser.GetEvenOddSpans(points.Select(Point.Truncate).ToArray());
+
+            foreach (var span in spans)
+            {
+                frame.SetSpan(span.Y, span.Left, span.Right, color);
+            }
+        }
 
         public void FillPolygon(Point[] points, FillMode fillMode)
         {
@@ -201,8 +222,13 @@ namespace Portable.Drawing.Toolkit.Portable
             if (Font == null) throw new Exception("Tried to draw string with no font set");
             if (!(Font is PortableFont pf)) throw new Exception($"Need to draw using font def: {Font.GetType().FullName}");
             
+            var frame = Target.Frame();
+            if (frame == null) return;
+            
             Pen = new PortablePen(new Pen(Color.Black, 1.0f));// TODO: pick from a real parameter
             var font = pf.BaseTrueTypeFont;
+            
+            // TODO: Render from the proper drawing library.
             
             var scale = pf.GetScale();
             
@@ -214,23 +240,49 @@ namespace Portable.Drawing.Toolkit.Portable
                 
                 xOff += gl.xMin * scale;
                 var yAdj = gl.yMin * scale;
+                var outline = gl.NormalisedContours(); // break into simple lines
                 
                 // not doing fill, just trace outline for now
-                var outline = gl.NormalisedContours(); // break into simple lines
-                foreach (var curve in outline)
-                {
-                    var points = curve.Select(p => new PointF(
-                        (float)(xOff + p.X*scale),
-                        (float)(y    + p.Y*scale + yAdj)
-                        //(int)(y + (0-p.Y)*scale - yAdj) // Y is flipped
-                        )).ToArray();
-                    
-                    if (_baseGraphics != null) _baseGraphics?.DrawLines(Pen.Pen, points); // this applies the transform before dropping back here to draw
-                    else DrawLinesF(points);
-                    
-                    //break; // just the first contour?
-                }
+                //OutlineGlyph(y, outline, xOff, scale, yAdj);
+                
+                FillGlyph(y, outline, xOff, scale, yAdj);
+                
+                // TODO: apply transforms to this? Or allow passing of pre-converted contours?
+                //GlyphRenderer.DrawGlyph(frame, (float)xOff, y, (float)scale, gl, 0);
                 xOff += (gl.xMax - gl.xMin) * scale;
+            }
+        }
+        
+        private void FillGlyph(int y, List<GlyphPoint[]> outline, double xOff, double scale, double yAdj)
+        {
+            var points = new List<PointF>();
+            foreach (var curve in outline)
+            {
+                points.AddRange(curve.Select(p => new PointF(
+                    (float) (xOff + p.X * scale),
+                    (float) (y + p.Y * scale + yAdj)
+                )));
+            }
+
+            
+            if (_baseGraphics != null) _baseGraphics?.FillPolygon(Pen.Pen.Brush, points.ToArray(), FillMode.Winding); // this applies the transform before dropping back here to draw
+            else FillPolygon(points.ToArray(), FillMode.Winding);
+        }
+
+        private void OutlineGlyph(int y, List<GlyphPoint[]> outline, double xOff, double scale, double yAdj)
+        {
+            foreach (var curve in outline)
+            {
+                var points = curve.Select(p => new PointF(
+                    (float) (xOff + p.X * scale),
+                    (float) (y + p.Y * scale + yAdj)
+                    //(int)(y + (0-p.Y)*scale - yAdj) // Y is flipped
+                )).ToArray();
+
+                if (_baseGraphics != null) _baseGraphics?.DrawLines(Pen.Pen, points); // this applies the transform before dropping back here to draw
+                else DrawLinesF(points);
+
+                //break; // just the first contour?
             }
         }
 

@@ -2284,10 +2284,7 @@ namespace Portable.Drawing
         public void FillPolygon(Brush brush, Point[] points, FillMode fillMode)
         {
             // Bail out now if there's nothing to draw.
-            if ((brush is SolidBrush) && ((SolidBrush) brush).Color.A == 0)
-            {
-                return;
-            }
+            if (brush is SolidBrush {Color: {A: 0}}) return;
 
             points = ConvertPoints(points, 2, PageUnit);
             BaseOffsetPoints(points);
@@ -2301,10 +2298,7 @@ namespace Portable.Drawing
         public void FillPolygon(Brush brush, PointF[] points, FillMode fillMode)
         {
             // Bail out now if there's nothing to draw.
-            if ((brush is SolidBrush) && ((SolidBrush) brush).Color.A == 0)
-            {
-                return;
-            }
+            if (brush is SolidBrush {Color: {A: 0}}) return;
 
             Point[] dpoints = ConvertPoints(points, 2, PageUnit);
             BaseOffsetPoints(dpoints);
