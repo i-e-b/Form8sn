@@ -48,7 +48,7 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\PdfSharp\root\VersionInfo.cs">
+    <Compile Include="..\PdfSharpStd\root\VersionInfo.cs">
       <Link>root\VersionInfo.cs</Link>
     </Compile>
     <Compile Include="Charting.Renderers\AreaChartRenderer.cs" />
@@ -149,9 +149,9 @@
     <None Include="StrongnameKey.snk" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PdfSharp\PDFsharp.csproj">
-      <Project>{5a6055bc-bf86-4fdd-9f62-0109db7a303b}</Project>
-      <Name>PDFsharp</Name>
+    <ProjectReference Include="..\PdfSharpStd\PdfSharpStd.csproj">
+      <Project>{799b94eb-a7a8-42ff-b8ec-563cb4a2fd03}</Project>
+      <Name>PdfSharpStd</Name>
     </ProjectReference>
     <ProjectReference Include="..\PortableGdi\PortableGdi.csproj">
       <Project>{92d29a92-a957-4648-a877-2ab398a2c910}</Project>
