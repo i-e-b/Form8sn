@@ -4,6 +4,15 @@
         <TargetFramework>netstandard2.0</TargetFramework>
         <LangVersion>9</LangVersion>
         <Nullable>enable</Nullable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageId>PortablePdfSharpStd</PackageId>
+        <Title>Portable PdfSharp</Title>
+        <Authors>ieb</Authors>
+        <Description>A highly modified version of PDF-Sharp that has no external or system-library dependencies.</Description>
+        <PackageProjectUrl>https://github.com/i-e-b/Form8sn</PackageProjectUrl>
+        <PackageLicenseUrl>https://raw.githubusercontent.com/i-e-b/Form8sn/main/LICENSE</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/i-e-b/Form8sn</RepositoryUrl>
+        <PackageReleaseNotes>Initial release</PackageReleaseNotes>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
