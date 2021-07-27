@@ -316,7 +316,7 @@ namespace PdfSharp.Fonts.OpenType
                     if (value <= cmap.endCount[seg])
                         break;
                 }
-                Debug.Assert(seg < segCount);
+                Debug.Assert(seg <= segCount);
 
                 if (value < cmap.startCount[seg])
                     return 0;

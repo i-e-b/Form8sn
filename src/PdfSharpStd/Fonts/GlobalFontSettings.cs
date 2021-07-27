@@ -112,5 +112,6 @@ namespace PdfSharp.Fonts
         }
         static PdfFontEncoding _fontEncoding;
         static bool _fontEncodingInitialized;
+        public const string FallbackFontResourceName = "PdfSharpStd.Resources.easycode.ttf";
     }
 }

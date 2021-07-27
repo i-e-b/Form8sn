@@ -29,6 +29,7 @@
 
 using System;
 using System.Diagnostics;
+using PdfSharp.Drawing;
 
 //using Fixed = System.Int32;
 //using FWord = System.Int16;
@@ -46,14 +47,14 @@ namespace PdfSharp.Fonts.OpenType
     /// </summary>
     internal class OpenTypeFontTable : ICloneable
     {
-        public OpenTypeFontTable(OpenTypeFontface fontData, string tag)
+        public OpenTypeFontTable(OpenTypeFontface? fontData, string tag)
         {
             _fontData = fontData;
             if (fontData != null && fontData.TableDictionary.ContainsKey(tag))
-                DirectoryEntry = fontData.TableDictionary[tag];
+                DirectoryEntry = fontData.TableDictionary[tag] ?? throw new Exception("Invalid font table data");
             else
                 DirectoryEntry = new TableDirectoryEntry(tag);
-            DirectoryEntry.FontTable = this;
+            DirectoryEntry!.FontTable = this;
         }
 
         /// <summary>
@@ -75,11 +76,9 @@ namespace PdfSharp.Fonts.OpenType
         /// <summary>
         /// Gets the font image the table belongs to.
         /// </summary>
-        public OpenTypeFontface FontData
-        {
-            get { return _fontData; }
-        }
-        internal OpenTypeFontface _fontData;
+        public OpenTypeFontface? FontData => _fontData;
+
+        internal OpenTypeFontface? _fontData;
 
         public TableDirectoryEntry DirectoryEntry;
 

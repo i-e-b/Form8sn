@@ -81,8 +81,7 @@ namespace PdfSharp.Fonts.OpenType
             try
             {
                 Lock.EnterFontFactory();
-                OpenTypeFontface fontfaceCheck;
-                if (TryGetFontface(fontface.FullFaceName, out fontfaceCheck))
+                if (TryGetFontface(fontface.FullFaceName, out OpenTypeFontface fontfaceCheck))
                 {
                     if (fontfaceCheck.CheckSum != fontface.CheckSum)
                         throw new InvalidOperationException("OpenTypeFontface with same signature but different bytes.");

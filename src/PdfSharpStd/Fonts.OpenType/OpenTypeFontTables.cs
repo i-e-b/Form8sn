@@ -32,7 +32,7 @@
 using System;
 using System.Diagnostics;
 using System.Text;
-
+using PdfSharp.Drawing;
 using Fixed = System.Int32;
 using FWord = System.Int16;
 using UFWord = System.UInt16;
@@ -801,7 +801,7 @@ namespace PdfSharp.Fonts.OpenType
         {
             Read();
         }
-
+        
         public void Read()
         {
             try

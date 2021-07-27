@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using PdfSharp.Drawing;
-using PdfSharp.Extensions;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.IO;
@@ -34,7 +32,8 @@ namespace TestApp
                 var gfx = XGraphics.FromPdfPage(page);
 
                 // Create a font
-                font = new XFont("Verdana", 20, XFontStyle.BoldItalic);
+                //font = new XFont("Courier", 20, XFontStyle.BoldItalic);
+                font = XFont.Default(20); // this should short-cut all the loading and caching, just let the PDF renderer guess
 
                 // Draw the text
                 gfx.DrawString("Hello, World!", font, XBrushes.Black,
@@ -55,7 +54,8 @@ namespace TestApp
 
             var sw = new Stopwatch();
             sw.Start();
-            using (var existing = PdfReader.Open("finland.pdf"))
+            var targetFile = "finland";
+            using (var existing = PdfReader.Open($"{targetFile}.pdf"))
             {
                 var form = existing.AcroForm;
                 if (form == null) Console.WriteLine("No form found");
@@ -88,7 +88,7 @@ namespace TestApp
                     Console.WriteLine("==================================================");
 
                     // Try recovering some of the page to an image (proper PDF rendering)
-                    AttemptToRenderPage(ePage, pageNumber);
+                    AttemptToRenderPage(ePage, pageNumber); // TODO: implement properly. This is *REALLY* not working yet
 
                     using (var g = XGraphics.FromPdfPage(ePage))
                     {
@@ -98,7 +98,7 @@ namespace TestApp
                     }
                 }
 
-                existing.Save("big_test_edited.pdf");
+                existing.Save($"{targetFile}-edited.pdf");
             }
 
             sw.Stop();

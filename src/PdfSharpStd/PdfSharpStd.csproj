@@ -12,8 +12,9 @@
         <PackageProjectUrl>https://github.com/i-e-b/Form8sn</PackageProjectUrl>
         <PackageLicenseUrl>https://raw.githubusercontent.com/i-e-b/Form8sn/main/LICENSE</PackageLicenseUrl>
         <RepositoryUrl>https://github.com/i-e-b/Form8sn</RepositoryUrl>
-        <PackageReleaseNotes>Initial release</PackageReleaseNotes>
+        <PackageReleaseNotes>Adding fall-back font for ultra-lightweight systems</PackageReleaseNotes>
         <PackageIconUrl>https://github.com/i-e-b/Form8sn/raw/main/src/PdfSharpStd/Resources/images/logo.png</PackageIconUrl>
+        <PackageVersion>0.0.2</PackageVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -41,6 +42,8 @@
         <Generator>ResGen</Generator>
       </EmbeddedResource>
       <EmbeddedResource Include="Resources\Messages.restext" />
+      <None Remove="Resources\easycode.ttf" />
+      <EmbeddedResource Include="Resources\easycode.ttf" />
     </ItemGroup>
 
     <ItemGroup>

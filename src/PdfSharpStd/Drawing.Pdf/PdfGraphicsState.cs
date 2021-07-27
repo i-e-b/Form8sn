@@ -332,7 +332,7 @@ namespace PdfSharp.Drawing.Pdf
 
         #region Text
 
-        internal PdfFont _realizedFont;
+        internal PdfFont? _realizedFont;
         string _realizedFontName = String.Empty;
         double _realizedFontSize;
         int _realizedRenderingMode;  // Reference: TABLE 5.2  Text state operators / Page 398

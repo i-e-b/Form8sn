@@ -33,6 +33,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using PdfSharp.Fonts;
@@ -89,7 +90,7 @@ namespace PdfSharp.Drawing
             if (!FontFactory.TryGetFontSourceByKey(key, out fontSource))
             {
                 fontSource = new XFontSource(bytes, key);
-                // Theoretically the font source could be created by a differend thread in the meantime.
+                // Theoretically the font source could be created by a different thread in the meantime.
                 fontSource = FontFactory.CacheFontSource(fontSource);
             }
             return fontSource;
@@ -98,23 +99,36 @@ namespace PdfSharp.Drawing
         
         public static XFontSource GetOrCreateFromFile(string typefaceKey, GdiFont gdiFont)
         {
-            var basePath = Environment.GetFolderPath(Environment.SpecialFolder.Fonts, Environment.SpecialFolderOption.DoNotVerify);
+            byte[] bytes;
+            if (gdiFont.Name == GlobalFontSettings.DefaultFontName)
+            {
+                // Load our special 'fall-back' font from resources and load that
+                bytes = LoadFallbackFont();
+            }
+            else
+            {
+                bytes = PortableFont.ReadFontFileBytes(gdiFont);
+            }
 
-            
-            byte[] bytes = PortableFont.ReadFontFileBytes(gdiFont);
-
-            //if (!File.Exists(fontFileName)) throw new Exception("No font found");
-            
-            //byte[] bytes = File.ReadAllBytes(fontFileName);
             XFontSource fontSource = GetOrCreateFrom(typefaceKey, bytes);
             return fontSource;
         }
 
+        private static byte[] LoadFallbackFont()
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            using var ms = new MemoryStream();
+            using var stream = assembly.GetManifestResourceStream(GlobalFontSettings.FallbackFontResourceName);
+            stream?.CopyTo(ms);
+            
+            ms.Seek(0, SeekOrigin.Begin);
+            return ms.ToArray();
+        }
+
         static XFontSource GetOrCreateFrom(string typefaceKey, byte[] fontBytes)
         {
-            XFontSource fontSource;
-            ulong key = FontHelper.CalcChecksum(fontBytes);
-            if (FontFactory.TryGetFontSourceByKey(key, out fontSource))
+            var key = FontHelper.CalcChecksum(fontBytes);
+            if (FontFactory.TryGetFontSourceByKey(key, out XFontSource fontSource))
             {
                 // The font source already exists, but is not yet cached under the specified typeface key.
                 FontFactory.CacheExistingFontSourceWithNewTypefaceKey(typefaceKey, fontSource);
@@ -130,7 +144,7 @@ namespace PdfSharp.Drawing
 
         public static XFontSource CreateCompiledFont(byte[] bytes)
         {
-            XFontSource fontSource = new XFontSource(bytes, 0);
+            XFontSource fontSource = new(bytes, 0);
             return fontSource;
         }
 
@@ -139,7 +153,7 @@ namespace PdfSharp.Drawing
         /// </summary>
         internal OpenTypeFontface Fontface
         {
-            get { return _fontface; }
+            get => _fontface;
             set
             {
                 _fontface = value;
@@ -172,19 +186,13 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Gets the name of the font's name table.
         /// </summary>
-        public string FontName
-        {
-            get { return _fontName; }
-        }
-        string _fontName;
+        public string? FontName => _fontName;
+        string? _fontName;
 
         /// <summary>
         /// Gets the bytes of the font.
         /// </summary>
-        public byte[] Bytes
-        {
-            get { return _bytes; }
-        }
+        public byte[] Bytes => _bytes;
         readonly byte[] _bytes;
 
         public override int GetHashCode()
@@ -203,12 +211,8 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Gets the DebuggerDisplayAttribute text.
         /// </summary>
-        // ReSha rper disable UnusedMember.Local
-        internal string DebuggerDisplay
-        // ReShar per restore UnusedMember.Local
-        {
-            // The key is converted to a value a human can remember during debugging.
-            get { return String.Format(CultureInfo.InvariantCulture, "XFontSource: '{0}', keyhash={1}", FontName, Key % 99991 /* largest prime number less than 100000 */); }
-        }
+        // ReSharper disable UnusedMember.Local
+        // The key is converted to a value a human can remember during debugging.
+        internal string DebuggerDisplay => string.Format(CultureInfo.InvariantCulture, "XFontSource: '{0}', keyhash={1}", FontName, Key % 99991 /* largest prime number less than 100000 */); // ReShar per restore UnusedMember.Local
     }
 }

@@ -69,7 +69,7 @@ namespace PdfSharp.Fonts.OpenType
     /// Represents an OpenType fontface in memory.
     /// </summary>
     [DebuggerDisplay("{DebuggerDisplay}")]
-    internal sealed class OpenTypeFontface
+    internal class OpenTypeFontface
     {
         // Implementation Notes
         // OpenTypeFontface represents a 'decompiled' font file in memory.
@@ -102,20 +102,21 @@ namespace PdfSharp.Fonts.OpenType
             int length = data.Length;
             //FontSource = new XFontSource(faceName, new byte[length]);
             Array.Copy(data, FontSource.Bytes, length);
+            // ReSharper disable once VirtualMemberCallInConstructor
             Read();
         }
 
         public OpenTypeFontface(XFontSource fontSource)
         {
             FontSource = fontSource;
+            // ReSharper disable once VirtualMemberCallInConstructor
             Read();
             _fullFaceName = name.FullFontName;
         }
 
-        public static OpenTypeFontface CetOrCreateFrom(XFontSource fontSource)
+        public static OpenTypeFontface GetOrCreateFrom(XFontSource fontSource)
         {
-            OpenTypeFontface fontface;
-            if (OpenTypeFontfaceCache.TryGetFontface(fontSource.Key, out fontface))
+            if (OpenTypeFontfaceCache.TryGetFontface(fontSource.Key, out OpenTypeFontface fontface))
             {
                 return fontface;
             }
@@ -291,7 +292,7 @@ namespace PdfSharp.Fonts.OpenType
         /// <summary>
         /// Reads all required tables from the font data.
         /// </summary>
-        internal void Read()
+        protected virtual void Read()
         {
             // Determine font technology
             // ReSharper disable InconsistentNaming
