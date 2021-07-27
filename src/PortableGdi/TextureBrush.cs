@@ -31,10 +31,10 @@ namespace Portable.Drawing
 	private RectangleF dstRect;
 	private WrapMode wrapMode;
 	private ImageAttributes imageAttr;
-	private Matrix transform;
+	private Matrix? transform;
 
 	// Constructors.
-	public TextureBrush(Image image)
+	public TextureBrush(Image? image)
 			{
 				if(image == null)
 				{
@@ -42,7 +42,7 @@ namespace Portable.Drawing
 				}
 				Image = image;
 			}
-	public TextureBrush(Image image, Rectangle dstRect)
+	public TextureBrush(Image? image, Rectangle dstRect)
 			{
 				if(image == null)
 				{
@@ -51,7 +51,7 @@ namespace Portable.Drawing
 				Image = image;
 				this.dstRect = (RectangleF)dstRect;
 			}
-	public TextureBrush(Image image, RectangleF dstRect)
+	public TextureBrush(Image? image, RectangleF dstRect)
 			{
 				if(image == null)
 				{
@@ -265,15 +265,18 @@ namespace Portable.Drawing
 			}
 
 	// Create this brush for a specific toolkit.  Inner part of "GetBrush()".
-	protected override IToolkitBrush CreateBrush(IToolkit toolkit)
-			{
-				if(Image.toolkitImage == null)
-				{
-					Image.toolkitImage = toolkit.CreateImage(Image.dgImage, 0);
-				}
-				return toolkit.CreateTextureBrush(this, Image.toolkitImage,
-												  dstRect, imageAttr);
-			}
+	protected override IToolkitBrush CreateBrush(IToolkit? toolkit)
+	{
+		if (toolkit == null) throw new Exception("Invalid toolkit");
+		if (Image.toolkitImage == null)
+		{
+			if (Image.dgImage == null) throw new Exception("No valid images on brush");
+			Image.toolkitImage = toolkit.CreateImage(Image.dgImage, 0);
+		}
+
+		return toolkit.CreateTextureBrush(this, Image.toolkitImage,
+			dstRect, imageAttr);
+	}
 
 }; // class TextureBrush
 

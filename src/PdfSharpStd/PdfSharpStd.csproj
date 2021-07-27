@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>9</LangVersion>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DefineConstants>TRACE;DEBUG;CORE;CORE_WITH_GDI;</DefineConstants>
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DefineConstants>TRACE;CORE;CORE_WITH_GDI;</DefineConstants>
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Update="Pdf\PdfOutlineCollection.cs">
+        <SubType>Code</SubType>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Resources\images" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="Resources\Messages.de.restext">
+        <Generator>ResGen</Generator>
+      </EmbeddedResource>
+      <EmbeddedResource Include="Resources\Messages.restext" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\PortableGdi\PortableGdi.csproj" />
+      <ProjectReference Include="..\SharpZipLib\SharpZipLib.csproj" />
+    </ItemGroup>
+
+</Project>

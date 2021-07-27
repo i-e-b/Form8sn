@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\PdfSharp\PDFsharp.csproj" />
+      <ProjectReference Include="..\PdfSharpStd\PdfSharpStd.csproj" />
     </ItemGroup>
 
 </Project>

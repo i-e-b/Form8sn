@@ -18,6 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+using System;
 using Portable.Drawing.Toolkit;
 
 namespace Portable.Drawing
@@ -57,9 +58,9 @@ namespace Portable.Drawing
         }
 
         // Create this brush for a specific toolkit.  Inner part of "GetBrush()".
-        protected override IToolkitBrush CreateBrush(IToolkit toolkit)
+        protected override IToolkitBrush CreateBrush(IToolkit? toolkit)
         {
-            return toolkit.CreateSolidBrush(color);
+            return toolkit?.CreateSolidBrush(color) ?? throw new Exception("Invalid toolkit");
         }
 
     }; // class SolidBrush

@@ -58,7 +58,7 @@ namespace SharpZipLib.Zip.Compression.Streams
     /// <remarks>
     /// The buffer supports decryption of incoming data.
     /// </remarks>
-    internal class InflaterInputBuffer
+    public class InflaterInputBuffer
     {
         #region Constructors
         /// <summary>
@@ -372,7 +372,7 @@ namespace SharpZipLib.Zip.Compression.Streams
     ///
     /// Author of the original java version: John Leuner.
     /// </summary>
-    internal class InflaterInputStream : Stream
+    public class InflaterInputStream : Stream
     {
         #region Constructors
         /// <summary>
