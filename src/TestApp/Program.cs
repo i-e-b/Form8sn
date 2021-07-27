@@ -20,37 +20,43 @@ namespace TestApp
         static void Main()
         {
             #region Create PDF
+
             Console.WriteLine("Creating a PDF from scratch...");
-            var document = new PdfDocument();
+            PdfPage page;
+            XFont font;
+            using (var document = new PdfDocument())
+            {
+                document.Info.Title = "Created with PDFsharp";
+                // Create an empty page
+                page = document.AddPage();
 
-            document.Info.Title = "Created with PDFsharp";
-            // Create an empty page
-            var page = document.AddPage();
+                // Get an XGraphics object for drawing
+                var gfx = XGraphics.FromPdfPage(page);
 
-            // Get an XGraphics object for drawing
-            var gfx = XGraphics.FromPdfPage(page);
+                // Create a font
+                font = new XFont("Verdana", 20, XFontStyle.BoldItalic);
 
-            // Create a font
-            var font = new XFont("Verdana", 20, XFontStyle.BoldItalic);
+                // Draw the text
+                gfx.DrawString("Hello, World!", font, XBrushes.Black,
+                    new XRect(0, 0, page.Width, page.Height),
+                    XStringFormats.Center);
 
-            // Draw the text
-            gfx.DrawString("Hello, World!", font, XBrushes.Black,
-                new XRect(0, 0, page.Width, page.Height),
-                XStringFormats.Center);
+                Console.WriteLine("Saving...");
+                // Save the document...
+                const string filename = "HelloWorld.pdf";
+                document.Save(filename);
+            }
 
-            Console.WriteLine("Saving...");
-            // Save the document...
-            const string filename = "HelloWorld.pdf";
-            document.Save(filename);
             #endregion
-            
+
+            #region Open, interpret, and edit an existing PDF
+
             Console.WriteLine("Trying to open an existing PDF");
 
             var sw = new Stopwatch();
             sw.Start();
             using (var existing = PdfReader.Open("finland.pdf"))
             {
-                
                 var form = existing.AcroForm;
                 if (form == null) Console.WriteLine("No form found");
                 else
@@ -68,18 +74,19 @@ namespace TestApp
                 foreach (var ePage in existing.Pages)
                 {
                     pageNumber++;
-    
+
                     ExtractImages(ePage);
-                    
+
                     var bits = ePage!.Contents.ToList();
                     foreach (var item in bits)
                     {
                         Console.WriteLine("------------");
-                        
+
                         LogPdfItem(item);
                     }
+
                     Console.WriteLine("==================================================");
-                    
+
                     // Try recovering some of the page to an image (proper PDF rendering)
                     AttemptToRenderPage(ePage, pageNumber);
 
@@ -90,11 +97,54 @@ namespace TestApp
                             XStringFormats.Center);
                     }
                 }
-                
+
                 existing.Save("big_test_edited.pdf");
             }
+
             sw.Stop();
             Console.WriteLine($"Opening editing and writing PDF took {sw.Elapsed}");
+
+            #endregion
+
+            #region Concatenate two existing PDFs into a new document
+
+            Console.WriteLine("Trying to concat documents");
+
+            using (var concatOut = new PdfDocument())
+            {
+                concatOut.Info.Title = "Joined with PdfSharpStd";
+
+                Console.WriteLine("    Reading first document");
+                using (var first = PdfReader.Open("finland.pdf", PdfDocumentOpenMode.Import)) // Must use import mode to copy pages across
+                {
+                    var p = 0;
+                    foreach (var pdfPage in first.Pages)
+                    {
+                        p++;
+                        if (pdfPage is null) continue;
+                        concatOut.AddPage(pdfPage);
+                        Console.WriteLine($"        copied page {p}");
+                    }
+                }
+
+                Console.WriteLine("    Reading second document");
+                using (var second = PdfReader.Open("big_test.pdf", PdfDocumentOpenMode.Import))
+                {
+                    var p = 0;
+                    foreach (var pdfPage in second.Pages)
+                    {
+                        p++;
+                        if (pdfPage is null) continue;
+                        concatOut.AddPage(pdfPage);
+                        Console.WriteLine($"        copied page {p}");
+                    }
+                }
+
+                Console.WriteLine("    Saving result");
+                concatOut.Save("Concatenated.pdf");
+            }
+
+            #endregion
 
             Console.WriteLine("Done.");
         }
@@ -112,14 +162,15 @@ namespace TestApp
 
 
         private static int imageCount = 1;
+
         private static void ExtractImages(PdfDictionary page)
         {
             var resources = page.Elements.GetDictionary("/Resources");
             if (resources == null) return;
-            
+
             var xObjects = resources.Elements.GetDictionary("/XObject");
             if (xObjects == null) return;
-            
+
             foreach (var key in xObjects.Elements.Keys)
             {
                 var item = xObjects.Elements[key];
@@ -133,7 +184,7 @@ namespace TestApp
                 }
             }
         }
-        
+
         static void ExportImage(PdfDictionary image, string name, ref int count)
         {
             var filter = image?.Elements.GetName("/Filter");
@@ -142,12 +193,13 @@ namespace TestApp
                 case "/DCTDecode":
                     ExportJpegImage(image, name, ref count);
                     break;
- 
+
                 case "/FlateDecode":
                     ExportAsPngImage(image, name, ref count);
                     break;
             }
         }
+
         static void ExportJpegImage(PdfDictionary image, string name, ref int count)
         {
             // Fortunately JPEG has native support in PDF and exporting an image is just writing the stream to a file.
@@ -164,9 +216,18 @@ namespace TestApp
             bool lost = false;
             foreach (var c in name)
             {
-                if (char.IsLetterOrDigit(c)) { sb.Append(c); lost = false; }
-                else if (!lost) { sb.Append('_'); lost = true; }
+                if (char.IsLetterOrDigit(c))
+                {
+                    sb.Append(c);
+                    lost = false;
+                }
+                else if (!lost)
+                {
+                    sb.Append('_');
+                    lost = true;
+                }
             }
+
             return sb.ToString();
         }
 
@@ -175,7 +236,7 @@ namespace TestApp
             int width = image.Elements.GetInteger(PdfImage.Keys.Width);
             int height = image.Elements.GetInteger(PdfImage.Keys.Height);
             int bitsPerComponent = image.Elements.GetInteger(PdfImage.Keys.BitsPerComponent);
-            
+
             Console.WriteLine($"Deflate-decode image, not exported: w{width} h{height} {bitsPerComponent}bpp; {image.Stream.Length} bytes.");
             // TODO: You can put the code here that converts vom PDF internal image format to a Windows bitmap
             // and use GDI+ to save it in PNG format.
@@ -185,15 +246,15 @@ namespace TestApp
             // If you write the code for exporting images I would be pleased to publish it in a future release
             // of PDFsharp.
         }
-        
+
 
         private static void LogPdfItem(PdfItem item)
         {
             Console.Write("####" + item!.GetType().Name);
 
-            var x =  item is PdfReference reference ? reference.Value : item;
+            var x = item is PdfReference reference ? reference.Value : item;
             Console.Write(" -> " + x.GetType());
-            
+
             if (x is PdfDictionary dict) LogPdfDict(dict);
             else Console.WriteLine($"Un-logged type {x.GetType().Name}");
         }
@@ -213,6 +274,7 @@ namespace TestApp
                             Console.Write(real.Value + "; ");
                         }
                     }
+
                     Console.WriteLine("]");
                 }
                 else

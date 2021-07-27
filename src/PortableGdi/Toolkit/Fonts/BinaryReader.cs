@@ -20,7 +20,7 @@ namespace Portable.Drawing.Toolkit.Fonts
         public BinaryReader(string? filename)
         {
             if (filename == null || !File.Exists(filename)) throw new Exception("Could not read font file");
-            _data = File.ReadAllBytes(filename);
+            _data = File.ReadAllBytes(filename); // TODO: change this to an on-demand file reader so we don't load everything into managed memory.
             if (_data == null) throw new Exception("Failed to read file");
 
             _pos = 0;

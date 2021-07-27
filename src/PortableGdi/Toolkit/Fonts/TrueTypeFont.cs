@@ -25,7 +25,7 @@ namespace Portable.Drawing.Toolkit.Fonts
         public TrueTypeFont(string filename)
         {
             _filename = filename;
-            _file = new BinaryReader(filename);
+            _file = new BinaryReader(filename); // loads the whole font into managed memory, and can be quite slow
             _unicodeIndexes = new Dictionary<char, int>();
             _glyphCache = new Dictionary<int, Glyph>();
 

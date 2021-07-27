@@ -7,12 +7,13 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageId>PortablePdfSharpStd</PackageId>
         <Title>Portable PdfSharp</Title>
-        <Authors>ieb</Authors>
+        <Authors>i-e-b</Authors>
         <Description>A highly modified version of PDF-Sharp that has no external or system-library dependencies.</Description>
         <PackageProjectUrl>https://github.com/i-e-b/Form8sn</PackageProjectUrl>
         <PackageLicenseUrl>https://raw.githubusercontent.com/i-e-b/Form8sn/main/LICENSE</PackageLicenseUrl>
         <RepositoryUrl>https://github.com/i-e-b/Form8sn</RepositoryUrl>
         <PackageReleaseNotes>Initial release</PackageReleaseNotes>
+        <PackageIconUrl>https://github.com/i-e-b/Form8sn/raw/main/src/PdfSharpStd/Resources/images/logo.png</PackageIconUrl>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
