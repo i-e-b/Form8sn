@@ -36,7 +36,7 @@ namespace TestApp
                 font = XFont.Default(20); // this should short-cut all the loading and caching, just let the PDF renderer guess
 
                 // Draw the text
-                gfx.DrawString("Hello, World!", font, XBrushes.Black,
+                gfx.DrawString("Hello, World! ©®£¥§", font, XBrushes.Black, // the end characters aren't in the fall-back font
                     new XRect(0, 0, page.Width, page.Height),
                     XStringFormats.Center);
 
