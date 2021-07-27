@@ -116,22 +116,22 @@ namespace BasicImageFormFiller.ModuleScreens
                     RenderPageInfoAndCommands(templatePage, index)
                 ],
                 T.g("div", "style", "float:left;width:50%;height:60%;overflow-y:scroll")[
-                    RenderBackgroundPreview(templatePage)
+                    RenderBackgroundPreview(templatePage, index)
                 ],
                 clearLine
             );
         }
 
-        private TagContent RenderBackgroundPreview(TemplatePage templatePage)
+        private TagContent RenderBackgroundPreview(TemplatePage templatePage, int index)
         {
             var bg = string.IsNullOrWhiteSpace(templatePage.BackgroundImage)
                 ? T.g()[
                     "no background | ",
-                    T.g("a", "href", EditBackgroundCommand)["Pick background image"]
+                    T.g("a", "href", $"{EditBackgroundCommand}?index={index}")["Pick background image"]
                 ]
                 : T.g()[
                     templatePage.BackgroundImage, " | ",
-                    T.g("a", "href", EditBackgroundCommand)["Pick background image"],
+                    T.g("a", "href", $"{EditBackgroundCommand}?index={index}")["Pick background image"],
                     T.g("br/"),
                     T.g("img", "src", templatePage.GetBackgroundPreviewUrl(_project), "width", "100%")
                 ];

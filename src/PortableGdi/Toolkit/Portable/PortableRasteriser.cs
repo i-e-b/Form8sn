@@ -44,7 +44,14 @@ namespace Portable.Drawing.Toolkit.Portable
             }
             return spans;
         }
-        public static IEnumerable<PixelSpan> GetEvenOddSpans(Point[] points)
+        
+        public static IEnumerable<PixelSpan> GetEvenOddSpans(Point[] intPoints)
+        {
+            var points = intPoints.Select(p=>(PointF)p).ToArray();
+            return GetEvenOddSpans(points);
+        }
+        
+        public static IEnumerable<PixelSpan> GetEvenOddSpans(PointF[] points)
         {
             throw new NotImplementedException();
         }

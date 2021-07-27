@@ -152,8 +152,8 @@ namespace Portable.Drawing.Toolkit.Portable
             var color = Brush.Color.ToArgb();
             
             var spans = fillMode == FillMode.Winding
-                ? PortableRasteriser.GetNonZeroWindingSpans(points.Select(Point.Truncate).ToArray())
-                : PortableRasteriser.GetEvenOddSpans(points.Select(Point.Truncate).ToArray());
+                ? PortableRasteriser.GetNonZeroWindingSpans(points)
+                : PortableRasteriser.GetEvenOddSpans(points);
 
             foreach (var span in spans)
             {
