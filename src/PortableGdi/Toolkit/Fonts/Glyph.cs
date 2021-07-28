@@ -83,7 +83,10 @@ namespace Portable.Drawing.Toolkit.Fonts
 
                 if (p == ContourEnds[c])
                 {
-                    outp.Add(Contour.NormaliseContour(contour, true, 20.0));
+                    // Coarseness has a big impact on render speed AND quality
+                    // 800.0 is ok for 12pt and under; 200.0 is good for under 20pt; 20.0 is good enough for 300pt
+                    var coarseness = /*20.0*/ 100.0; // TODO: allow this based on size, and evict cache if significantly different?
+                    outp.Add(Contour.NormaliseContour(contour, true, coarseness));
                     contour.Clear();
                     c++;
                 }

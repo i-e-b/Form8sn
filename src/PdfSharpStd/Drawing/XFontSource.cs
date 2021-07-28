@@ -27,15 +27,10 @@
 // DEALINGS IN THE SOFTWARE.
 #endregion
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text;
 using PdfSharp.Fonts;
 #if CORE || GDI
 using GdiFont = Portable.Drawing.Font;
@@ -49,9 +44,7 @@ using WpfFontFamily = System.Windows.Media.FontFamily;
 using WpfTypeface = System.Windows.Media.Typeface;
 using WpfGlyphTypeface = System.Windows.Media.GlyphTypeface;
 #endif
-using PdfSharp.Internal;
 using PdfSharp.Fonts.OpenType;
-using Portable.Drawing.Toolkit.Fonts;
 using Portable.Drawing.Toolkit.Portable;
 
 namespace PdfSharp.Drawing

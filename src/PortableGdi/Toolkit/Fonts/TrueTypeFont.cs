@@ -25,7 +25,7 @@ namespace Portable.Drawing.Toolkit.Fonts
         public TrueTypeFont(string filename)
         {
             /*
-            TODO: Big refactor
+            TODO: Big refactor needed!
             
             We have a huge over-lap between "PortableGdi/Toolkit/Fonts/..."
             and "PdfSharpStd/Fonts.OpenType/OpenTypeFontface.cs".
@@ -34,11 +34,13 @@ namespace Portable.Drawing.Toolkit.Fonts
             However, we still need the separation of GDI and PdfSharp to be the current way
             around, and we still need all the glyph outline logic in "Toolkit/Fonts".
             
+            The "Fonts.OpenType" classes also load the entire file into managed memory,
+            which the "Toolkit/Fonts" no longer does.
             */
             
             
             _filename = filename;
-            _file = new BinaryReader(filename); // loads the whole font into managed memory, and can be quite slow
+            _file = new BinaryReader(filename);
             _unicodeIndexes = new Dictionary<char, int>();
             _glyphCache = new Dictionary<int, Glyph>();
 
