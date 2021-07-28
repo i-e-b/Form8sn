@@ -204,13 +204,13 @@ namespace Portable.Drawing.Toolkit.Portable
                 var gl = font.ReadGlyph(c);
                 if (gl == null) continue;
                 
-                xOff += gl.xMin * scale;
+                var bearing = gl.LeftBearing * scale;
                 var yAdj = gl.yMin * scale;
                 var outline = gl.NormalisedContours(); // break into simple lines
+
+                FillGlyph(ry, outline, xOff + bearing, scale, yAdj);
                 
-                FillGlyph(ry, outline, xOff, scale, yAdj);
-                
-                xOff += (gl.xMax - gl.xMin) * scale; // this is wrong, and makes every font proportional.
+                xOff += gl.Advance * scale;
             }
         }
         

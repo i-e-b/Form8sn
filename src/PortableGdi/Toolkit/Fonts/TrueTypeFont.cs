@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Portable.Drawing.Toolkit.Fonts
@@ -21,7 +22,8 @@ namespace Portable.Drawing.Toolkit.Fonts
         private ushort _entrySelector;
         private ushort _rangeShift;
         private int _length;
-        
+        private Ttf_HorizontalMetricsTable? _horzMetrics;
+
         public TrueTypeFont(string filename)
         {
             /*
@@ -36,6 +38,9 @@ namespace Portable.Drawing.Toolkit.Fonts
             
             The "Fonts.OpenType" classes also load the entire file into managed memory,
             which the "Toolkit/Fonts" no longer does.
+            
+            The Fonts.OpenType classes are very tied into the reading & writing required for
+            PDF generation.
             */
             
             
@@ -60,7 +65,7 @@ namespace Portable.Drawing.Toolkit.Fonts
         public Glyph? ReadGlyph(char wantedChar)
         {
             if ( ! _unicodeIndexes.ContainsKey(wantedChar)) {
-                _unicodeIndexes.Add(wantedChar,  GlyphIndexForChar(wantedChar));
+                _unicodeIndexes.Add(wantedChar, GlyphIndexForChar(wantedChar));
             }
 
             var offset = _unicodeIndexes[wantedChar]; // we do it this way, because multiple characters could map to the same glyph
@@ -88,15 +93,23 @@ namespace Portable.Drawing.Toolkit.Fonts
             return (float)yMax * 2.0f;
         }
         
+        [SuppressMessage("ReSharper", "StringLiteralTypo")]
         private Glyph ReadGlyphByIndex(int index, bool forceEmpty)
         {
             var offset = GetGlyphOffset(index);
 
             if (offset >= _tables["glyf"].Offset + _tables["glyf"].Length) throw new Exception("Bad font: Invalid glyph offset (too high) at index " + index);
             if (offset < _tables["glyf"].Offset) throw new Exception("Bad font: Invalid glyph offset (too low) at index" + index);
-
+            
+            if (_horzMetrics == null) _horzMetrics = GetTable("hmtx") as Ttf_HorizontalMetricsTable;
+            
             _file.Seek(offset);
             var glyph = new Glyph{
+                ParentFont = this,
+                
+                LeftSideBearing = _horzMetrics?.GlyphLeftSideBearing(index),
+                GlyphAdvance = _horzMetrics?.GlyphWidth(index),
+                
                 NumberOfContours = _file.GetInt16(),
                 xMin = _file.GetFWord(),
                 yMin = _file.GetFWord(),
@@ -147,7 +160,7 @@ namespace Portable.Drawing.Toolkit.Fonts
             if (offset < _file.Position()) {_file.Seek(_tables["cmap"].Offset + offset); } // guessing
             else { _file.Seek(offset); }
 
-            var subtableFmt = _file.GetUint16();
+            var subTableFmt = _file.GetUint16();
 
             var byteLength = _file.GetUint16();
             var res1 = _file.GetUint16(); // should be 0
@@ -156,7 +169,7 @@ namespace Portable.Drawing.Toolkit.Fonts
             var entrySelector = _file.GetUint16();
             var rangeShift = _file.GetUint16();
 
-            if (subtableFmt != 4) throw new Exception("Invalid font: Unicode BMP table with non- format 4 subtable");
+            if (subTableFmt != 4) throw new Exception("Invalid font: Unicode BMP table with non- format 4 subtable");
             
             // read the parallel arrays
             var segs = segCountX2 / 2;
@@ -410,18 +423,33 @@ namespace Portable.Drawing.Toolkit.Fonts
             return _tables.Keys.ToList();
         }
 
-        public object GetTable(string name)
+        [SuppressMessage("ReSharper", "StringLiteralTypo")]
+        public object? GetTable(string name)
         {
             // References:
             // http://pfaedit.org/non-standard.html#FFTM
-            //
+            
+            if (!_tables.ContainsKey(name)) return null;
+            
             switch (name)
             {
                 case "OS/2": return new TtfTableOS2(_file, _tables[name]);
                 case "name": return new TtfTableName(_file, _tables[name]);
+                case "hhea": return new Ttf_HorizontalHeaderTable(_file, _tables[name]);
+                case "maxp": return new Ttf_MaximumProfileTable(_file, _tables[name]);
+
+                case "hmtx":
+                {
+                    if (!_tables.ContainsKey("hhea") || !_tables.ContainsKey("maxp")) return null;
+                    return new Ttf_HorizontalMetricsTable(_file, _tables[name],
+                        new Ttf_HorizontalHeaderTable(_file, _tables["hhea"]),
+                        new Ttf_MaximumProfileTable(_file, _tables["maxp"])
+                        ); // this one is quite complex!
+                }
 
                 default: return null;
             }
         }
+        
     }
 }

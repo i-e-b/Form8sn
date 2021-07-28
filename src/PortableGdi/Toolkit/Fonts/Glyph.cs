@@ -50,6 +50,14 @@ namespace Portable.Drawing.Toolkit.Fonts
         /// </summary>
         public List<GlyphPoint[]>? ContourCache;
 
+        public double Advance => GlyphAdvance ?? xMax - xMin;
+
+        public double LeftBearing => LeftSideBearing ?? xMin;
+
+        public TrueTypeFont ParentFont { get; set; }
+        public int? GlyphAdvance { get; set; }
+        public int? LeftSideBearing { get; set; }
+
         /// <summary>
         /// Reduce the glyph to a set of simple point contours.
         /// Curves will be re-drawn as segments.

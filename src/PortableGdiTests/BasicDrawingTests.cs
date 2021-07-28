@@ -3,7 +3,6 @@ using System.Diagnostics;
 using NUnit.Framework;
 
 using Real = System.Drawing;
-
 using Port = Portable.Drawing;
 
 namespace PortableGdiTests
@@ -24,6 +23,11 @@ namespace PortableGdiTests
             using (var bmp = new Real.Bitmap(800, 600, Real.Imaging.PixelFormat.Format24bppRgb))
             {
                 using var g = Real.Graphics.FromImage(bmp);
+                
+                g.InterpolationMode = Real.Drawing2D.InterpolationMode.High;
+                g.SmoothingMode = Real.Drawing2D.SmoothingMode.HighQuality;
+                g.TextRenderingHint = Real.Text.TextRenderingHint.AntiAlias;
+                
                 g.Clear(Real.Color.Lavender);
                 g.DrawLine(Real.Pens.Chocolate, 10,10,100,100);
                 g.FillPolygon(Real.Brushes.Black, new Real.PointF[]{new (150, 10), new (250, 10), new (200, 100)});
@@ -39,6 +43,11 @@ namespace PortableGdiTests
             using (var bmp = new Port.Bitmap(800, 600, Port.Imaging.PixelFormat.Format24bppRgb))
             {
                 using var g = Port.Graphics.FromImage(bmp);
+                
+                g.InterpolationMode = Port.Drawing2D.InterpolationMode.High;
+                g.SmoothingMode = Port.Drawing2D.SmoothingMode.HighQuality;
+                g.TextRenderingHint = Port.Text.TextRenderingHint.AntiAlias;
+                
                 g.Clear(Port.Color.Lavender);
                 g.DrawLine(Port.Pens.Chocolate, 10,10,100,100);
                 g.FillPolygon(Port.Brushes.Black, new Port.PointF[]{new (150, 10), new (250, 10), new (200, 100)});

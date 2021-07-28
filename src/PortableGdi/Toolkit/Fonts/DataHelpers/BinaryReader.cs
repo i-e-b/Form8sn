@@ -7,33 +7,6 @@ using System.Text;
 namespace Portable.Drawing.Toolkit.Fonts
 {
     /// <summary>
-    /// Helper to treat a file stream like a byte array
-    /// </summary>
-    internal class StreamAsByteArray
-    {
-        private readonly FileStream _stream;
-        private readonly object _lock = new object();
-
-        public StreamAsByteArray(FileStream stream)
-        {
-            _stream = stream;
-        }
-
-        public int this[long pos]
-        {
-            get {
-                lock (_lock)
-                {
-                    if (pos == _stream.Position) return _stream.ReadByte();
-
-                    _stream.Seek(pos, SeekOrigin.Begin);
-                    return _stream.ReadByte();
-                }
-            }
-        }
-    }
-
-    /// <summary>
     /// Byte reader for TTF / OpenType files
     /// </summary>
     public class BinaryReader : IDisposable {
@@ -52,7 +25,6 @@ namespace Portable.Drawing.Toolkit.Fonts
             
             _dataStream = File.OpenRead(filename);
             
-            //_data = File.ReadAllBytes(filename); // TODO: change this to an on-demand file reader so we don't load everything into managed memory.
             if (_dataStream == null) throw new Exception("Failed to read file");
 
             _data = new StreamAsByteArray(_dataStream);
