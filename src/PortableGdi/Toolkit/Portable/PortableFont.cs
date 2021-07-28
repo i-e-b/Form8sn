@@ -18,6 +18,8 @@ namespace Portable.Drawing.Toolkit.Portable
         private static readonly Dictionary<string,string> _fontCache = new Dictionary<string, string>();
         private readonly Font _fontSpec;
         private readonly float _dpi;
+        
+        public TrueTypeFont BaseTrueTypeFont { get; }
 
         public PortableFont(Font fontSpec, float dpi)
         {
@@ -29,7 +31,6 @@ namespace Portable.Drawing.Toolkit.Portable
             BaseTrueTypeFont = new TrueTypeFont(GetFontFilePath(fontSpec));
         }
 
-        public TrueTypeFont BaseTrueTypeFont { get; }
 
         private static void EnsureFontCache()
         {
@@ -141,17 +142,17 @@ namespace Portable.Drawing.Toolkit.Portable
             EnsureFontCache();
             return File.ReadAllBytes(GetFontFilePath(gdiFont));
         }
-        
-        // ReSharper disable once InconsistentNaming
-        const double FUDGE_FACTOR = 2.0; // This is used to scale the fonts. Set to 1.0 to get the real size
 
         public int GetLineHeight()
         {
             // TODO: cache this out
             var scale = GetScale();
             var g1 = BaseTrueTypeFont.ReadGlyph('|') ?? BaseTrueTypeFont.ReadGlyph('$') ?? throw new Exception("Couldn't read sample glyph");
-            return (int) ((g1.yMax - g1.yMin) * scale * 1.5 * FUDGE_FACTOR);
+            var fudge = 2.0;
+            return (int) ((g1.yMax - g1.yMin) * scale * fudge * EmScale);
         }
+        
+        public double EmScale => 1000.0 / BaseTrueTypeFont.Header.UnitsPerEm;
 
         public double GetScale()
         {
@@ -159,7 +160,7 @@ namespace Portable.Drawing.Toolkit.Portable
             //var dpiAdjust = _dpi/72.0;
             // Should be: pointSize * resolution / (72 points per inch * units_per_em)
             // see: https://developer.apple.com/fonts/TrueType-Reference-Manual/RM02/Chap2.html#converting
-            return (_fontSpec.Size * _dpi) / (72 * BaseTrueTypeFont.Height());
+            return (_fontSpec.Size * _dpi) / (72 * BaseTrueTypeFont.Header.UnitsPerEm);
         }
     }
 }

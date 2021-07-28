@@ -194,7 +194,11 @@ namespace Portable.Drawing.Toolkit.Portable
             
             var scale = pf.GetScale();
             
-            double xOff = x;
+            // adjustment to have (x,y) be the top-left, rather than baseline-left
+            //var ry = y + font.Height() * scale;
+            var ry = y + pf.GetLineHeight();
+            
+            double xOff = x; // advance for each character (not correct yet)
             foreach (char c in s)
             {
                 var gl = font.ReadGlyph(c);
@@ -204,13 +208,13 @@ namespace Portable.Drawing.Toolkit.Portable
                 var yAdj = gl.yMin * scale;
                 var outline = gl.NormalisedContours(); // break into simple lines
                 
-                FillGlyph(y, outline, xOff, scale, yAdj);
+                FillGlyph(ry, outline, xOff, scale, yAdj);
                 
-                xOff += (gl.xMax - gl.xMin) * scale;
+                xOff += (gl.xMax - gl.xMin) * scale; // this is wrong, and makes every font proportional.
             }
         }
         
-        private void FillGlyph(int y, List<GlyphPoint[]> outline, double xOff, double scale, double yAdj)
+        private void FillGlyph(double y, List<GlyphPoint[]> outline, double xOff, double scale, double yAdj)
         {
             if (Brush == null) return;
             var frame = Target.Frame();
@@ -226,7 +230,6 @@ namespace Portable.Drawing.Toolkit.Portable
                     curve.Select(p =>
                         new Vector2(
                             xOff + p.X * scale,
-                            //y + p.Y * scale + yAdj
                             y + (0-p.Y) * scale - yAdj
                         )
                     )
@@ -235,23 +238,6 @@ namespace Portable.Drawing.Toolkit.Portable
             }
             
             SdfDraw.FillPolygon(frame, points.ToArray(), color, FillMode.Winding);
-        }
-
-        private void OutlineGlyph(int y, List<GlyphPoint[]> outline, double xOff, double scale, double yAdj)
-        {
-            foreach (var curve in outline)
-            {
-                var points = curve.Select(p => new PointF(
-                    (float) (xOff + p.X * scale),
-                    //(float) (y + p.Y * scale + yAdj)
-                    (int)(y + (0-p.Y)*scale - yAdj) // Y is flipped
-                )).ToArray();
-
-                if (_baseGraphics != null) _baseGraphics?.DrawLines(Pen.Pen, points); // this applies the transform before dropping back here to draw
-                else DrawLinesF(points);
-
-                //break; // just the first contour?
-            }
         }
 
         public void DrawString(string s, Point[] layoutRectangle, StringFormat format)

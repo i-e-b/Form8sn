@@ -14,7 +14,7 @@ namespace Portable.Drawing.Toolkit.Fonts
         private readonly Dictionary<char, int> _unicodeIndexes;
         private readonly Dictionary<int, Glyph> _glyphCache;
 
-        private readonly FontHeader _header;
+        public readonly FontHeader Header;
 
         private uint _scalarType;
         private ushort _searchRange;
@@ -24,6 +24,19 @@ namespace Portable.Drawing.Toolkit.Fonts
         
         public TrueTypeFont(string filename)
         {
+            /*
+            TODO: Big refactor
+            
+            We have a huge over-lap between "PortableGdi/Toolkit/Fonts/..."
+            and "PdfSharpStd/Fonts.OpenType/OpenTypeFontface.cs".
+            
+            The majority of "PdfSharpStd/Fonts.OpenType" is the better and more complete code.
+            However, we still need the separation of GDI and PdfSharp to be the current way
+            around, and we still need all the glyph outline logic in "Toolkit/Fonts".
+            
+            */
+            
+            
             _filename = filename;
             _file = new BinaryReader(filename); // loads the whole font into managed memory, and can be quite slow
             _unicodeIndexes = new Dictionary<char, int>();
@@ -32,7 +45,7 @@ namespace Portable.Drawing.Toolkit.Fonts
             // The order that things are read below is important
             // DO NOT REARRANGE CALLS!
             _tables = ReadOffsetTables();
-            _header = ReadHeadTable();
+            Header = ReadHeadTable();
             _length = GlyphCount();
 
             if ( ! _tables.ContainsKey("glyf")) throw new Exception("Bad font: glyf table missing");
@@ -374,7 +387,7 @@ namespace Portable.Drawing.Toolkit.Fonts
             var size = table.Offset + table.Length;
             long offset, old;
 
-            if (_header.IndexToLocFormat == 1) {
+            if (Header.IndexToLocFormat == 1) {
                 var target = table.Offset + index * 4;
                 if (target + 4 > size) throw new Exception("Glyph index out of range");
                 old = _file.Seek(target);
