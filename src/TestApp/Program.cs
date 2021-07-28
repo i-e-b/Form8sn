@@ -160,7 +160,6 @@ namespace TestApp
             bmp.Save($"C:\\Temp\\Page{pageNumber}.png", ImageFormat.Png);
         }
 
-
         private static int imageCount = 1;
 
         private static void ExtractImages(PdfDictionary page)

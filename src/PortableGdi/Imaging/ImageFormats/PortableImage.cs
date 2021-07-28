@@ -21,6 +21,7 @@
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using Portable.Drawing.Imaging.ImageFormats.Jpeg;
 using Portable.Drawing.Toolkit;
 
 namespace Portable.Drawing.Imaging.ImageFormats

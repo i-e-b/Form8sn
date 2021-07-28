@@ -43,7 +43,8 @@ namespace Portable.Drawing.Toolkit.Fonts
         
         
         /// <summary>
-        /// break curves into segments where needed
+        /// Break curves into segments where needed.
+        /// Any zero-length segments should be removed by this function.
         /// </summary>
         public static GlyphPoint[] NormaliseContour(IReadOnlyList<GlyphPoint> contour, bool closeForm, double resolution)
         {
@@ -69,11 +70,12 @@ namespace Portable.Drawing.Toolkit.Fonts
 
                 if (current.OnCurve) // simple corner point
                 {
-                    final.Add(current);
+                    AddIfNonZeroDistance(final, current);
                 }
                 else if (next.OnCurve && prev.OnCurve) // simple curve
                 {
-                    final.AddRange(InterpolateCurve(resolution, prev, current, next));
+                    var set = InterpolateCurve(resolution, prev, current, next);
+                    foreach (var point in set) { AddIfNonZeroDistance(final, point); }
                 }
                 else if (prev.OnCurve) // single virtual curve forward
                 {
@@ -82,7 +84,8 @@ namespace Portable.Drawing.Toolkit.Fonts
                         X = (current.X + next.X) / 2.0,
                         Y = (current.Y + next.Y) / 2.0
                     };
-                    final.AddRange(InterpolateCurve(resolution, prev, current, virt));
+                    var set = InterpolateCurve(resolution, prev, current, virt);
+                    foreach (var point in set) { AddIfNonZeroDistance(final, point); }
                 }
                 else if (next.OnCurve) // single virtual curve behind
                 {
@@ -91,7 +94,8 @@ namespace Portable.Drawing.Toolkit.Fonts
                         X = (current.X + prev.X) / 2.0,
                         Y = (current.Y + prev.Y) / 2.0
                     };
-                    final.AddRange(InterpolateCurve(resolution, virt, current, next));
+                    var set = InterpolateCurve(resolution, virt, current, next);
+                    foreach (var point in set) { AddIfNonZeroDistance(final, point); }
                 }
                 else // double virtual curve
                 {
@@ -105,11 +109,42 @@ namespace Portable.Drawing.Toolkit.Fonts
                         X = (current.X + next.X) / 2.0,
                         Y = (current.Y + next.Y) / 2.0
                     };
-                    final.AddRange(InterpolateCurve(resolution, virtPrev, current, virtNext));
+                    var set = InterpolateCurve(resolution, virtPrev, current, virtNext);
+                    foreach (var point in set) { AddIfNonZeroDistance(final, point); }
                 }
             }
 
+            // Final check: if start and end points are the same, remove the end
+            if (final.Count > 1)
+            {
+                var start = final[0];
+                var end = final[final.Count-1];
+                var dx = end.X - start.X;
+                var dy = end.Y - start.Y;
+                var sqrDist = (dx*dx)+(dy*dy);
+            
+                if (sqrDist < 0.0001) final.RemoveAt(final.Count-1);
+            }
+
             return final.ToArray();
+        }
+
+        private static void AddIfNonZeroDistance(List<GlyphPoint> target, GlyphPoint point)
+        {
+            if (target.Count < 1)
+            {
+                target.Add(point);
+                return;
+            }
+
+            var prev = target[target.Count-1];
+            var dx = point.X - prev.X;
+            var dy = point.Y - prev.Y;
+            var sqrDist = (dx*dx)+(dy*dy);
+            
+            if (sqrDist < 0.0001) return; // too small, ignore
+            
+            target.Add(point);
         }
 
         /// <summary>

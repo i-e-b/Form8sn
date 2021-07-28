@@ -53,6 +53,8 @@ namespace Portable.Drawing.Toolkit.Fonts
         /// <summary>
         /// Reduce the glyph to a set of simple point contours.
         /// Curves will be re-drawn as segments.
+        /// Any zero-length segments will be elided
+        /// 
         /// This list will be cached, so do NOT directly edit the output
         /// </summary>
         public List<GlyphPoint[]> NormalisedContours() {

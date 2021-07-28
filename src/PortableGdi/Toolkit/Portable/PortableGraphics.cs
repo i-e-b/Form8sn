@@ -5,7 +5,7 @@ using Portable.Drawing.Drawing2D;
 using Portable.Drawing.Imaging.ImageFormats;
 using Portable.Drawing.Text;
 using Portable.Drawing.Toolkit.Fonts;
-using Portable.Drawing.Toolkit.Fonts.Rendering;
+using Portable.Drawing.Toolkit.Portable.Rasteriser;
 
 namespace Portable.Drawing.Toolkit.Portable
 {
@@ -72,41 +72,24 @@ namespace Portable.Drawing.Toolkit.Portable
             var frame = Target.Frame();
             if (frame == null) return;
             
+            var thickness = Pen.Pen.Width;
             var color = Pen.Pen.Color.ToArgb();
             
             // Very, very stupid line drawing
-            var adx = (float)Math.Abs(x1 - x2);
-            var ady = (float)Math.Abs(y1 - y2);
-            var mad = Math.Max(adx, ady);
-
-            if (adx == 0 && ady == 0)
-            {
-                frame.SetPixel(x1, y1, color);
-                return;
-            }
+            SdfDraw.DrawLine(frame, thickness, x1, y1, x2, y2, color);
+        }
+        
+        public void DrawLine(float x1, float y1, float x2, float y2)
+        {
+            if (Pen == null) return;
+            var frame = Target.Frame();
+            if (frame == null) return;
             
-            // in one direction, we will step single pixels. In the other we step fractions
-            var dx = (float)Math.Sign(x2 - x1);
-            var dy = (float)Math.Sign(y2 - y1);
-
-            if (adx < ady) dx *= adx / ady; // more vertical, sub-step x
-            if (adx > ady) dy *= ady / adx; // more horizontal, sub-step y
-
-            float x = x1;
-            float y = y1;
-            for (int i = 0; i <= mad; i++)
-            {
-                // world's jankiest anti-aliasing
-                var fx = (byte)((x - (int)x) * 255);
-                var fy = (byte)((y - (int)y) * 255);
-                
-                frame.BlendPixel((int)x, (int)y, color, (byte)(255-(fx+fy)));
-                frame.BlendPixel((int)x+1, (int)y, color, fx);
-                frame.BlendPixel((int)x, (int)y+1, color, fy);
-                
-                x += dx;
-                y += dy;
-            }
+            var thickness = Pen.Pen.Width;
+            var color = Pen.Pen.Color.ToArgb();
+            
+            // Very, very stupid line drawing
+            SdfDraw.DrawLine(frame, thickness, x1, y1, x2, y2, color);
         }
 
         public void DrawLines(Point[] points)
@@ -128,7 +111,7 @@ namespace Portable.Drawing.Toolkit.Portable
             for (int i = 1; i < points.Length; i++)
             {
                 var end = points[i];
-                DrawLine((int)start.X, (int)start.Y, (int)end.X, (int)end.Y);
+                DrawLine(start.X, start.Y, end.X, end.Y);
                 start = end;
             }
         }
@@ -151,30 +134,12 @@ namespace Portable.Drawing.Toolkit.Portable
             
             var color = Brush.Color.ToArgb();
             
-            var spans = fillMode == FillMode.Winding
-                ? PortableRasteriser.GetNonZeroWindingSpans(points)
-                : PortableRasteriser.GetEvenOddSpans(points);
-
-            foreach (var span in spans)
-            {
-                frame.SetSpan(span.Y, span.Left, span.Right, color);
-            }
+            SdfDraw.FillPolygon(frame, points, color, fillMode);
         }
 
         public void FillPolygon(Point[] points, FillMode fillMode)
         {
-            if (Brush == null) return;
-            var frame = Target.Frame();
-            if (frame == null) return;
-            
-            var color = Brush.Color.ToArgb();
-            
-            var spans = fillMode == FillMode.Winding ? PortableRasteriser.GetNonZeroWindingSpans(points) : PortableRasteriser.GetEvenOddSpans(points);
-
-            foreach (var span in spans)
-            {
-                frame.SetSpan(span.Y, span.Left, span.Right, color);
-            }
+            FillPolygon(points.Select(p=>(PointF)p).ToArray(), fillMode);
         }
 
         public void DrawBezier(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4)
@@ -225,10 +190,7 @@ namespace Portable.Drawing.Toolkit.Portable
             var frame = Target.Frame();
             if (frame == null) return;
             
-            Pen = new PortablePen(new Pen(Color.Black, 1.0f));// TODO: pick from a real parameter
             var font = pf.BaseTrueTypeFont;
-            
-            // TODO: Render from the proper drawing library.
             
             var scale = pf.GetScale();
             
@@ -242,31 +204,37 @@ namespace Portable.Drawing.Toolkit.Portable
                 var yAdj = gl.yMin * scale;
                 var outline = gl.NormalisedContours(); // break into simple lines
                 
-                // not doing fill, just trace outline for now
-                //OutlineGlyph(y, outline, xOff, scale, yAdj);
-                
                 FillGlyph(y, outline, xOff, scale, yAdj);
                 
-                // TODO: apply transforms to this? Or allow passing of pre-converted contours?
-                //GlyphRenderer.DrawGlyph(frame, (float)xOff, y, (float)scale, gl, 0);
                 xOff += (gl.xMax - gl.xMin) * scale;
             }
         }
         
         private void FillGlyph(int y, List<GlyphPoint[]> outline, double xOff, double scale, double yAdj)
         {
-            var points = new List<PointF>();
+            if (Brush == null) return;
+            var frame = Target.Frame();
+            if (frame == null) return;
+            
+            var color = Brush.Color.ToArgb();
+            if (outline.Count < 1) return;
+            
+            var points = new List<RasterContour>();
             foreach (var curve in outline)
             {
-                points.AddRange(curve.Select(p => new PointF(
-                    (float) (xOff + p.X * scale),
-                    (float) (y + p.Y * scale + yAdj)
-                )));
+                var contour = new RasterContour(
+                    curve.Select(p =>
+                        new Vector2(
+                            xOff + p.X * scale,
+                            //y + p.Y * scale + yAdj
+                            y + (0-p.Y) * scale - yAdj
+                        )
+                    )
+                );
+                points.Add(contour);
             }
-
             
-            if (_baseGraphics != null) _baseGraphics?.FillPolygon(Pen.Pen.Brush, points.ToArray(), FillMode.Winding); // this applies the transform before dropping back here to draw
-            else FillPolygon(points.ToArray(), FillMode.Winding);
+            SdfDraw.FillPolygon(frame, points.ToArray(), color, FillMode.Winding);
         }
 
         private void OutlineGlyph(int y, List<GlyphPoint[]> outline, double xOff, double scale, double yAdj)
@@ -275,8 +243,8 @@ namespace Portable.Drawing.Toolkit.Portable
             {
                 var points = curve.Select(p => new PointF(
                     (float) (xOff + p.X * scale),
-                    (float) (y + p.Y * scale + yAdj)
-                    //(int)(y + (0-p.Y)*scale - yAdj) // Y is flipped
+                    //(float) (y + p.Y * scale + yAdj)
+                    (int)(y + (0-p.Y)*scale - yAdj) // Y is flipped
                 )).ToArray();
 
                 if (_baseGraphics != null) _baseGraphics?.DrawLines(Pen.Pen, points); // this applies the transform before dropping back here to draw
