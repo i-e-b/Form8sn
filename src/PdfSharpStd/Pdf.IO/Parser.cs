@@ -1031,12 +1031,21 @@ namespace PdfSharp.Pdf.IO
                 throw new Exception("The StartXRef table could not be found, the file cannot be opened.");
 
             ReadSymbol(Symbol.StartXRef);
-            _lexer.Position = ReadInteger();
+            _lexer.Position = ReadInteger(); // BUG: We are sometimes writing this incorrectly, and ending up in a comment.
 
             // Read all trailers.
             while (true)
             {
-                PdfTrailer trailer = ReadXRefTableAndTrailer(_document._irefTable);
+                PdfTrailer trailer;
+                try
+                {
+                    trailer = ReadXRefTableAndTrailer(_document._irefTable);
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Invalid xref or trailer", ex);
+                }
+
                 // 1st trailer seems to be the best.
                 if (_document._trailer == null)
                     _document._trailer = trailer;
@@ -1149,7 +1158,7 @@ namespace PdfSharp.Pdf.IO
             try
             {
                 _lexer.Position = position;
-                idChecked = ReadInteger();
+                idChecked = ReadInteger(); // BUG: this is the next place we blow up
                 generationChecked = ReadInteger();
                 //// TODO Should we use ScanKeyword here?
                 //ReadKSymbol(Symbol.Keyword);

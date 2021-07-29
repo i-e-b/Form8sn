@@ -145,6 +145,17 @@ namespace TestApp
             }
 
             #endregion
+         
+            #region Read-back a file made from a concatenated set of sources
+
+            Console.WriteLine("Trying to read previously merged pdf");
+            //using (var concatSrc = PdfReader.Open("merged.pdf")) // BUG: this is hand adjusted
+            using (var concatSrc = PdfReader.Open("Concatenated.pdf")) // TODO: reinstate this, to check we're writing correctly
+            {
+                Console.WriteLine($"Concat doc has {concatSrc.Pages.Count} pages");
+            }
+
+            #endregion
 
             Console.WriteLine("Done.");
         }

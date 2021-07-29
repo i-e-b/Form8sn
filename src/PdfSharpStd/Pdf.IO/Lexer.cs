@@ -303,9 +303,16 @@ namespace PdfSharp.Pdf.IO
                 ch = ScanNextChar(true);
             }
 
-            if (period)
-                return Symbol.Real;
-            long l = Int64.Parse(_token.ToString(), CultureInfo.InvariantCulture);
+            if (period) return Symbol.Real;
+            
+            
+            //_lexer.SurroundingsOfCurrentPosition()
+            if (!Int64.TryParse(_token.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var l))
+            {
+                throw new Exception($"Unexpected non-integer around {SurroundingsOfCurrentPosition(false)}");
+            }
+
+            //long l = Int64.Parse(_token.ToString(), CultureInfo.InvariantCulture);
             if (l >= Int32.MinValue && l <= Int32.MaxValue)
                 return Symbol.Integer;
             if (l > 0 && l <= UInt32.MaxValue)
@@ -706,7 +713,37 @@ namespace PdfSharp.Pdf.IO
             _token.Append(_currChar);
             return ScanNextChar(true);
         }
+        /// <summary>
+        /// If the current character is not a white space, the function immediately returns it.
+        /// Otherwise the PDF cursor is moved forward to the first non-white space or EOF.
+        /// White spaces are NUL, HT, LF, FF, CR, and SP.
+        /// </summary>
+        public char MoveToAnyWhiteSpace()
+        {
+            while (_currChar != Chars.EOF)
+            {
+                switch (_currChar)
+                {
+                    case Chars.NUL:
+                    case Chars.HT:
+                    case Chars.LF:
+                    case Chars.FF:
+                    case Chars.CR:
+                    case Chars.SP:
+                        return _currChar;
 
+                    case (char)11:
+                    case (char)173:
+                        return _currChar;
+
+                    default:
+                        ScanNextChar(true);
+                        break;
+                }
+            }
+            return _currChar;
+        }
+        
         /// <summary>
         /// If the current character is not a white space, the function immediately returns it.
         /// Otherwise the PDF cursor is moved forward to the first non-white space or EOF.

@@ -916,9 +916,9 @@ namespace PdfSharp.Pdf
             get { return _trailer.SecurityHandler; }
         }
 
-        internal PdfTrailer _trailer;
-        internal PdfCrossReferenceTable _irefTable;
-        internal Stream _outStream;
+        internal PdfTrailer? _trailer;
+        internal PdfCrossReferenceTable? _irefTable;
+        internal Stream? _outStream;
 
         // Imported Document
         internal Lexer _lexer;

@@ -50,7 +50,8 @@ namespace PdfSharp.Pdf.IO
             _securityHandler = securityHandler;
             //System.Xml.XmlTextWriter
 #if DEBUG
-            _layout = PdfWriterLayout.Verbose;
+            // BUG: PdfWriterLayout.Verbose setting causes all the XREF locations to be broken
+            //_layout = PdfWriterLayout.Verbose;
 #endif
         }
 
