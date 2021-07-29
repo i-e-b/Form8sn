@@ -5,14 +5,25 @@
         <RootNamespace>Portable.Drawing</RootNamespace>
         <Nullable>enable</Nullable>
         <LangVersion>9</LangVersion>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageVersion>0.0.1</PackageVersion>
+        <Title>PortableGdi</Title>
+        <Authors>i-e-b</Authors>
+        <Description>This project is an attempt to produce a library that fulfills the System.Drawing namespace in DotNetStandard without any external dependencies (including having no system library dependencies)</Description>
+        <Copyright>2021 Many open source authors</Copyright>
+        <PackageProjectUrl>https://github.com/i-e-b/Form8sn/tree/main/src/PortableGdi</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/i-e-b/Form8sn</RepositoryUrl>
+        <PackageReleaseNotes>Initial NuGet pre-releas</PackageReleaseNotes>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
       <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+      <DocumentationFile>bin\Debug\PortableGdi.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
       <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+      <DocumentationFile>bin\Release\PortableGdi.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
