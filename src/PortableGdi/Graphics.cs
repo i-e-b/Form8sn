@@ -3398,12 +3398,12 @@ namespace Portable.Drawing
                 out linesFilled);
         }
 
-        public SizeF MeasureString(string text, Font font, SizeF layoutArea,
-            StringFormat format, out int charactersFitted,
+        public SizeF MeasureString(string? text, Font font, SizeF layoutArea,
+            StringFormat? format, out int charactersFitted,
             out int linesFilled)
         {
             // bail out now if there's nothing to measure
-            if (((object) text) == null || text.Length == 0)
+            if (text is null || text.Length == 0)
             {
                 charactersFitted = 0;
                 linesFilled = 0;
@@ -3471,7 +3471,7 @@ namespace Portable.Drawing
                 linesFilled = 1;
 
                 // return the size of the text
-                return new SizeF(size.Width + font.SizeInPoints * DpiX / 184.8592f, font.Height);
+                return new SizeF(size.Width + font.SizeInPoints * DpiX / 184.8592f, /*font.Height*/ size.Height);
             }
         }
 

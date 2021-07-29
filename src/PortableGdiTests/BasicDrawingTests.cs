@@ -16,6 +16,9 @@ namespace PortableGdiTests
             // We get fonts outside of the timing, as the OS has pre-cached font descriptors
             var portFont = new Port.Font("Consolas", 24.5f);
             var realFont = new Real.Font("Consolas", 24.5f);
+            
+            var portFontSmall = new Port.Font("Calibri", 6);
+            var realFontSmall = new Real.Font("Calibri", 6);
             var sw = new Stopwatch();
             
             // Normal GDI
@@ -32,6 +35,8 @@ namespace PortableGdiTests
                 g.DrawLine(Real.Pens.Chocolate, 10,10,100,100);
                 g.FillPolygon(Real.Brushes.Black, new Real.PointF[]{new (150, 10), new (250, 10), new (200, 100)});
                 g.DrawString("Hello, Graphics!", realFont, Real.Brushes.Brown, 10, 250);
+                var sz = g.MeasureString("Hello, Graphics!", realFont);
+                g.DrawString("This should be tricky to render %$&@ 日本人 (にほんじん) ", realFontSmall, Real.Brushes.Maroon, 10, 250+sz.Height);
                 
                 bmp.Save("Z_simple_real.png", Real.Imaging.ImageFormat.Png);
             }
@@ -52,6 +57,11 @@ namespace PortableGdiTests
                 g.DrawLine(Port.Pens.Chocolate, 10,10,100,100);
                 g.FillPolygon(Port.Brushes.Black, new Port.PointF[]{new (150, 10), new (250, 10), new (200, 100)});
                 g.DrawString("Hello, Graphics!", portFont, Port.Brushes.Brown, 10, 250);
+                
+                var sz = g.MeasureString("Hello, Graphics!", portFont); // TODO: not really working. Gives too small height
+                g.DrawString("This should be tricky to render %$&@ 日本人 (にほんじん) ", // TODO: not using any fall-back fonts or glyphs
+                                                                                         // TODO: not rendering compound glyphs ('%' in Calibri)
+                    portFontSmall, Port.Brushes.Maroon, 10, 250+sz.Height);
                 
                 bmp.Save("Z_simple_portable.png", Port.Imaging.ImageFormat.Png);
             }

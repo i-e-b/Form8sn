@@ -95,8 +95,8 @@ public interface IToolkitGraphics : IDisposable
 	void DrawString(string s, Point[] layoutRectangle, StringFormat format);
 
 	// Measure a string using the current font and a given layout rectangle.
-	Size MeasureString(string s, Point[] layoutRectangle,
-					   StringFormat format, out int charactersFitted,
+	Size MeasureString(string s, Point[]? layoutRectangle,
+					   StringFormat? format, out int charactersFitted,
 					   out int linesFilled, bool ascentOnly);
 
 	// Flush the graphics subsystem

@@ -5,6 +5,8 @@ namespace Portable.Drawing.Toolkit.Fonts
     /// <summary>
     /// Horizontal metrics are quite complex. See
     /// https://docs.microsoft.com/en-us/typography/opentype/spec/hmtx
+    /// and
+    /// https://www.freetype.org/freetype2/docs/glyphs/glyphs-3.html
     /// </summary>
     public class Ttf_HorizontalMetricsTable
     {

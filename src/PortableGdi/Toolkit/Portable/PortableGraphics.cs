@@ -245,7 +245,7 @@ namespace Portable.Drawing.Toolkit.Portable
             throw new NotImplementedException();
         }
 
-        public Size MeasureString(string s, Point[] layoutRectangle, StringFormat format, out int charactersFitted, out int linesFilled, bool ascentOnly)
+        public Size MeasureString(string s, Point[]? layoutRectangle, StringFormat? format, out int charactersFitted, out int linesFilled, bool ascentOnly)
         {
             if (Font == null) throw new Exception("Tried to measure string with no font set");
             if (!(Font is PortableFont pf)) throw new Exception($"Need to measure using font def: {Font.GetType().FullName}");
@@ -265,13 +265,15 @@ namespace Portable.Drawing.Toolkit.Portable
                 var gl = font.ReadGlyph(c);
                 if (gl == null) continue;
                 
+                // TODO: need vertical advance in Glyph
+                
                 charactersFitted++;
                 var h = (gl.yMax - gl.yMin) * scale;
                 var w = (gl.xMax - gl.xMin) * scale;
                 maxHeight = Math.Max(h, maxHeight);
                 width += w;
             }
-            return new Size((int)width, (int)maxHeight);
+            return new Size((int)width, (int)(maxHeight*1.8)); // 1.8 is a fudge until we have vertical metrics
         }
 
         public void Flush(FlushIntention intention)

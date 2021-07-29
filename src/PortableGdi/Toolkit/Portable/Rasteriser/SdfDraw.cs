@@ -277,29 +277,32 @@ namespace Portable.Drawing.Toolkit.Portable.Rasteriser
 
             return s * Math.Sqrt(d);
         }
+        
+        // cached data to reduce allocations
+        private static readonly FlexArray<Vector2> _e = new();
+        private static readonly FlexArray<Vector2> _v = new();
+        private static readonly FlexArray<Vector2> _v2 = new();
+        private static readonly FlexArray<Vector2> _pq = new();
 
         // https://www.shadertoy.com/view/WdSGRd
         private static double PolygonDistanceWinding(Vector2 p, Vector2[] poly)
         {
             var length = poly!.Length;
-            var e = new Vector2[length]; // TODO: cache these to save lots of allocations
-            var v = new Vector2[length];
-            var pq = new Vector2[length];
             
             // data
             for (int i = 0; i < length; i++)
             {
                 int i2 = (int) ((float) (i + 1) % length); //i+1
-                e[i] = poly[i2] - poly[i];
-                v[i] = p - poly[i];
-                pq[i] = v[i] - e[i] * Clamp(Vector2.Dot(v[i], e[i]) / Vector2.Dot(e[i], e[i]), 0.0, 1.0);
+                _e[i] = poly[i2] - poly[i];
+                _v[i] = p - poly[i];
+                _pq[i] = _v[i] - _e[i] * Clamp(Vector2.Dot(_v[i], _e[i]) / Vector2.Dot(_e[i], _e[i]), 0.0, 1.0);
             }
 
             //distance
-            var d = Vector2.Dot(pq[0], pq[0]);
+            var d = Vector2.Dot(_pq[0], _pq[0]);
             for (int i = 1; i < length; i++)
             {
-                var dt=Vector2.Dot(pq[i], pq[i]);
+                var dt=Vector2.Dot(_pq[i], _pq[i]);
                 d = Math.Min(d, dt);
             }
 
@@ -309,9 +312,9 @@ namespace Portable.Drawing.Toolkit.Portable.Rasteriser
             for (var i = 0; i < length; i++)
             {
                 var i2 = (int) ((float) (i + 1) % length);
-                var cond1 = 0.0 <= v[i].Y;
-                var cond2 = 0.0 > v[i2].Y;
-                var val3 = Vector2.Cross(e[i], v[i]); //isLeft
+                var cond1 = 0.0 <= _v[i].Y;
+                var cond2 = 0.0 > _v[i2].Y;
+                var val3 = Vector2.Cross(_e[i], _v[i]); //isLeft
                 wn += cond1 && cond2 && val3 > 0.0 ? 1 : 0; // have  a valid up intersect
                 wn -= !cond1 && !cond2 && val3 < 0.0 ? 1 : 0; // have  a valid down intersect
             }
@@ -324,25 +327,21 @@ namespace Portable.Drawing.Toolkit.Portable.Rasteriser
         private static double PolygonDistanceWinding(Vector2 p, VecSegment2[] poly)
         {
             var length = poly!.Length;
-            var e = new Vector2[length];
-            var v = new Vector2[length];
-            var v2 = new Vector2[length];
-            var pq = new Vector2[length];
             
             // data
             for (int i = 0; i < length; i++)
             {
-                e[i] = poly[i]!.B - poly[i].A;
-                v[i] = p - poly[i].A;
-                v2[i] = p - poly[i].B;
-                pq[i] = v[i] - e[i] * Clamp(Vector2.Dot(v[i], e[i]) / Vector2.Dot(e[i], e[i]), 0.0, 1.0);
+                _e[i] = poly[i]!.B - poly[i].A;
+                _v[i] = p - poly[i].A;
+                _v2[i] = p - poly[i].B;
+                _pq[i] = _v[i] - _e[i] * Clamp(Vector2.Dot(_v[i], _e[i]) / Vector2.Dot(_e[i], _e[i]), 0.0, 1.0);
             }
 
             //distance
-            var d = Vector2.Dot(pq[0], pq[0]);
+            var d = Vector2.Dot(_pq[0], _pq[0]);
             for (int i = 1; i < length; i++)
             {
-                d = Math.Min(d, Vector2.Dot(pq[i], pq[i]));
+                d = Math.Min(d, Vector2.Dot(_pq[i], _pq[i]));
             }
 
             //winding number
@@ -350,9 +349,9 @@ namespace Portable.Drawing.Toolkit.Portable.Rasteriser
             var wn = 0;
             for (int i = 0; i < length; i++)
             {
-                var cond1 = 0.0 <= v[i].Y;
-                var cond2 = 0.0 > v2[i].Y;
-                var val3 = Vector2.Cross(e[i], v[i]); //isLeft
+                var cond1 = 0.0 <= _v[i].Y;
+                var cond2 = 0.0 > _v2[i].Y;
+                var val3 = Vector2.Cross(_e[i], _v[i]); //isLeft
                 wn += cond1 && cond2 && val3 > 0.0 ? 1 : 0; // have  a valid up intersect
                 wn -= !cond1 && !cond2 && val3 < 0.0 ? 1 : 0; // have  a valid down intersect
             }
