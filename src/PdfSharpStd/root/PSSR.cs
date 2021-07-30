@@ -356,13 +356,7 @@ namespace PdfSharp
                             // Force the English language.
                             System.Threading.Thread.CurrentThread.CurrentUICulture = System.Globalization.CultureInfo.InvariantCulture;
 #endif
-#if !NETFX_CORE && !UWP
-                            _resmngr = new ResourceManager("PdfSharp.Resources.Messages",
-                                Assembly.GetExecutingAssembly());
-#else
-                            _resmngr = new ResourceManager("PdfSharp.Resources.Messages",
-                                typeof(PSSR).GetTypeInfo().Assembly);
-#endif
+                            _resmngr = new ResourceManager("PdfSharpStd.Resources.Messages", Assembly.GetExecutingAssembly());
                         }
                     }
                     finally { Lock.ExitFontFactory(); }
@@ -372,13 +366,13 @@ namespace PdfSharp
         }
         static ResourceManager _resmngr;
 
+#if TEST_MODE
         /// <summary>
         /// Writes all messages defined by PSMsgID.
         /// </summary>
         [Conditional("DEBUG")]
         public static void TestResourceMessages()
         {
-#if !SILVERLIGHT
             string[] names = Enum.GetNames(typeof(PSMsgID));
             foreach (string name in names)
             {
@@ -386,14 +380,13 @@ namespace PdfSharp
                 Debug.Assert(message != null);
                 Debug.WriteLine(message);
             }
-#else
-#endif
         }
 
         static PSSR()
         {
             TestResourceMessages();
         }
+#endif
 
         #endregion
     }

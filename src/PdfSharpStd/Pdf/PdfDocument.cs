@@ -253,7 +253,6 @@ namespace PdfSharp.Pdf
             }
         }
 
-#if true //!NETFX_CORE
         /// <summary>
         /// Saves the document to the specified path. If a file already exists, it will be overwritten.
         /// </summary>
@@ -262,53 +261,11 @@ namespace PdfSharp.Pdf
             if (!CanModify)
                 throw new InvalidOperationException(PSSR.CannotModify);
 
-#if !NETFX_CORE
             using (Stream stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None))
             {
                 Save(stream);
             }
-#else
-            var task = SaveAsync(path, true);
-
-            ////var file = await Windows.Storage.ApplicationData.Current.LocalFolder.CreateFileAsync("MyWav.wav", Windows.Storage.CreationCollisionOption.ReplaceExisting);
-            ////var stream = file.OpenStreamForWriteAsync();
-            ////var writer = new StreamWriter(stream);
-            ////Save(stream);
-
-            //var ms = new MemoryStream();
-            //Save(ms, false);
-            //byte[] pdf = ms.ToArray();
-            //ms.Close();
-#endif
         }
-#endif
-
-#if NETFX_CORE
-        /// <summary>
-        /// Saves the document to the specified path. If a file already exists, it will be overwritten.
-        /// </summary>
-        public async Task SaveAsync(string path, bool closeStream)
-        {
-            if (!CanModify)
-                throw new InvalidOperationException(PSSR.CannotModify);
-
-            // Just march through...
-
-            var file = await Windows.Storage.ApplicationData.Current.LocalFolder.CreateFileAsync("My1st.pdf", Windows.Storage.CreationCollisionOption.ReplaceExisting);
-            var stream = await file.OpenStreamForWriteAsync();
-            using (var writer = new StreamWriter(stream))
-            {
-                Save(stream, false);
-            }
-
-            //var ms = new MemoryStream();
-            //Save(ms, false);
-            //byte[] pdf = ms.ToArray();
-            //ms.Close();
-            //await stream.WriteAsync(pdf, 0, pdf.Length);
-            //stream.Close();
-        }
-#endif
 
         /// <summary>
         /// Saves the document to the specified stream.
@@ -336,22 +293,7 @@ namespace PdfSharp.Pdf
             }
             finally
             {
-                if (stream != null)
-                {
-                    if (closeStream)
-#if UWP
-                        stream.Dispose();
-#else
-                        stream.Close();
-#endif
-                    else
-                    {
-                        if (stream.CanRead && stream.CanSeek)
-                            stream.Position = 0; // Reset the stream position if the stream is kept open.
-                    }
-                }
-                if (writer != null)
-                    writer.Close(closeStream);
+                if (writer != null) writer.Close(closeStream);
             }
         }
 
@@ -415,14 +357,13 @@ namespace PdfSharp.Pdf
                 for (int idx = 0; idx < count; idx++)
                 {
                     PdfReference iref = irefs[idx];
-#if DEBUG_
-                    if (iref.ObjectNumber == 378)
-                        GetType();
-#endif
                     iref.Position = writer.Position;
                     iref.Value.WriteObject(writer);
                 }
-                int startxref = writer.Position;
+                
+                var startxref = writer.Position;
+                
+                
                 _irefTable.WriteObject(writer);
                 writer.WriteRaw("trailer\n");
                 _trailer.Elements.SetInteger("/Size", count + 1);
@@ -439,9 +380,7 @@ namespace PdfSharp.Pdf
             {
                 if (writer != null)
                 {
-                    writer.Stream.Flush();
-                    // DO NOT CLOSE WRITER HERE
-                    //writer.Close();
+                    writer.Flush();
                 }
             }
         }

@@ -12,19 +12,21 @@
         <PackageProjectUrl>https://github.com/i-e-b/Form8sn</PackageProjectUrl>
         <PackageLicenseUrl>https://raw.githubusercontent.com/i-e-b/Form8sn/main/LICENSE</PackageLicenseUrl>
         <RepositoryUrl>https://github.com/i-e-b/Form8sn</RepositoryUrl>
-        <PackageReleaseNotes>Adding fall-back font for ultra-lightweight systems</PackageReleaseNotes>
+        <PackageReleaseNotes>Temporary fix for verbose-mode bug</PackageReleaseNotes>
         <PackageIconUrl>https://github.com/i-e-b/Form8sn/raw/main/src/PdfSharpStd/Resources/images/logo.png</PackageIconUrl>
-        <PackageVersion>0.0.2</PackageVersion>
+        <PackageVersion>0.0.3</PackageVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
       <DefineConstants>TRACE;DEBUG;CORE;CORE_WITH_GDI;</DefineConstants>
       <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+      <DocumentationFile>bin\Debug\PdfSharpStd.xml</DocumentationFile>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
       <DefineConstants>TRACE;CORE;CORE_WITH_GDI;</DefineConstants>
       <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+      <DocumentationFile>bin\Release\PdfSharpStd.xml</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>

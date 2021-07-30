@@ -296,7 +296,7 @@ namespace PdfSharp.Pdf.IO
                     throw new InvalidOperationException(PSSR.InvalidPdf);
 
                 document._irefTable.IsUnderConstruction = true;
-                Parser parser = new Parser(document);
+                Parser parser = new(document);
                 // Read all trailers or cross-reference streams, but no objects.
                 document._trailer = parser.ReadTrailer();
                 

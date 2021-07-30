@@ -39,6 +39,11 @@ using PdfSharp.Pdf.Internal;
 
 namespace PdfSharp.Pdf.IO
 {
+    public static class PdfWriterDefaults
+    {
+        public static PdfWriterLayout WriterLayout { get; set; } = PdfWriterLayout.Verbose;
+    }
+
     /// <summary>
     /// Represents a writer for generation of PDF streams. 
     /// </summary>
@@ -46,24 +51,16 @@ namespace PdfSharp.Pdf.IO
     {
         public PdfWriter(Stream pdfStream, PdfStandardSecurityHandler securityHandler)
         {
-            _stream = pdfStream;
+            _stream = new ForwardOnlyStream(pdfStream);
             _securityHandler = securityHandler;
-            //System.Xml.XmlTextWriter
-#if DEBUG
-            // BUG: PdfWriterLayout.Verbose setting causes all the XREF locations to be broken
-            //_layout = PdfWriterLayout.Verbose;
-#endif
+            _layout = PdfWriterDefaults.WriterLayout;
         }
 
         public void Close(bool closeUnderlyingStream)
         {
             if (_stream != null && closeUnderlyingStream)
             {
-#if UWP
-                _stream.Dispose();
-#else
                 _stream.Close();
-#endif
             }
             _stream = null;
         }
@@ -73,27 +70,19 @@ namespace PdfSharp.Pdf.IO
             Close(true);
         }
 
-        public int Position
-        {
-            get { return (int)_stream.Position; }
-        }
+        public long Position => _stream!.Position;
 
         /// <summary>
         /// Gets or sets the kind of layout.
         /// </summary>
         public PdfWriterLayout Layout
         {
-            get { return _layout; }
-            set { _layout = value; }
+            get => _layout;
+            set => _layout = value;
         }
         PdfWriterLayout _layout;
 
-        public PdfWriterOptions Options
-        {
-            get { return _options; }
-            set { _options = value; }
-        }
-        PdfWriterOptions _options;
+        public PdfWriterOptions Options { get; set; }
 
         // -----------------------------------------------------------
 
@@ -103,7 +92,7 @@ namespace PdfSharp.Pdf.IO
         public void Write(bool value)
         {
             WriteSeparator(CharCat.Character);
-            WriteRaw(value ? bool.TrueString : bool.FalseString);
+            WriteRaw(((value) ? bool.TrueString : bool.FalseString)!);
             _lastCat = CharCat.Character;
         }
 
@@ -402,8 +391,8 @@ namespace PdfSharp.Pdf.IO
             {
                 NewLine();
                 WriteRaw("endobj\n");
-                if (_layout == PdfWriterLayout.Verbose)
-                    WriteRaw("%--------------------------------------------------------------------------------------------------\n");
+                if (_layout == PdfWriterLayout.Verbose) WriteRaw($"%---- End of indirect object {Position} -------------------------\n");
+                Flush();
             }
         }
 
@@ -450,6 +439,12 @@ namespace PdfSharp.Pdf.IO
             _stream.Write(bytes, 0, bytes.Length);
             _lastCat = GetCategory((char)bytes[bytes.Length - 1]);
         }
+        
+
+        public void AddComment(string comment)
+        {
+            WriteRaw("%"+comment+"\n");
+        }
 
         public void WriteRaw(char ch)
         {
@@ -471,24 +466,23 @@ namespace PdfSharp.Pdf.IO
         void WriteObjectAddress(PdfObject value)
         {
             if (_layout == PdfWriterLayout.Verbose)
-                WriteRaw(String.Format("{0} {1} obj   % {2}\n",
-                    value.ObjectID.ObjectNumber, value.ObjectID.GenerationNumber,
-                    value.GetType().FullName));
+                WriteRaw($"{value.ObjectID.ObjectNumber} {value.ObjectID.GenerationNumber} obj   % {value.GetType().FullName}\n");
             else
-                WriteRaw(String.Format("{0} {1} obj\n", value.ObjectID.ObjectNumber, value.ObjectID.GenerationNumber));
+                WriteRaw($"{value.ObjectID.ObjectNumber} {value.ObjectID.GenerationNumber} obj\n");
         }
 
         public void WriteFileHeader(PdfDocument document)
         {
-            StringBuilder header = new StringBuilder("%PDF-");
+            StringBuilder header = new("%PDF-");
             int version = document._version;
             header.Append((version / 10).ToString(CultureInfo.InvariantCulture) + "." +
               (version % 10).ToString(CultureInfo.InvariantCulture) + "\n%\xD3\xF4\xCC\xE1\n");
             WriteRaw(header.ToString());
 
+            /*
             if (_layout == PdfWriterLayout.Verbose)
             {
-                WriteRaw(String.Format("% PDFsharp Version {0} (verbose mode)\n", VersionInfo.Version));
+                WriteRaw($"% PDFsharp Version {VersionInfo.Version} (verbose mode)\n");
                 // Keep some space for later fix-up.
                 _commentPosition = (int)_stream.Position + 2;
                 WriteRaw("%                                                \n");
@@ -496,16 +490,17 @@ namespace PdfSharp.Pdf.IO
                 WriteRaw("%                                                \n");
                 WriteRaw("%                                                \n");
                 WriteRaw("%                                                \n");
-                WriteRaw("%--------------------------------------------------------------------------------------------------\n");
-            }
+                WriteRaw("%------------------------------------------------\n");
+            }*/
         }
 
-        public void WriteEof(PdfDocument document, int startxref)
+        public void WriteEof(PdfDocument document, long startxref)
         {
             WriteRaw("startxref\n");
             WriteRaw(startxref.ToString(CultureInfo.InvariantCulture));
             WriteRaw("\n%%EOF\n");
-            int fileSize = (int)_stream.Position;
+               /*var fileSize = _stream.Position;
+         
             if (_layout == PdfWriterLayout.Verbose)
             {
                 TimeSpan duration = DateTime.Now - document._creation;
@@ -523,7 +518,7 @@ namespace PdfSharp.Pdf.IO
                 WriteRaw("Pages: " + document.Pages.Count.ToString(CultureInfo.InvariantCulture));
                 _stream.Position = _commentPosition + 200;
                 WriteRaw("Objects: " + document._irefTable.ObjectTable.Count.ToString(CultureInfo.InvariantCulture));
-            }
+            }*/
         }
 
         /// <summary>
@@ -629,19 +624,12 @@ namespace PdfSharp.Pdf.IO
         }
         CharCat _lastCat;
 
-        /// <summary>
-        /// Gets the underlying stream.
-        /// </summary>
-        internal Stream Stream
-        {
-            get { return _stream; }
-        }
-        Stream _stream;
+        ForwardOnlyStream? _stream;
 
         internal PdfStandardSecurityHandler SecurityHandler
         {
-            get { return _securityHandler; }
-            set { _securityHandler = value; }
+            get => _securityHandler;
+            set => _securityHandler = value;
         }
         PdfStandardSecurityHandler _securityHandler;
 
@@ -656,7 +644,9 @@ namespace PdfSharp.Pdf.IO
             public bool HasStream;
         }
 
-        readonly List<StackItem> _stack = new List<StackItem>();
+        readonly List<StackItem> _stack = new();
         int _commentPosition;
+
+        public void Flush() => _stream?.Flush();
     }
 }

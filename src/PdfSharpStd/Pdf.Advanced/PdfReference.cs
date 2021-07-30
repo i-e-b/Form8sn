@@ -152,12 +152,12 @@ namespace PdfSharp.Pdf.Advanced
         /// <summary>
         /// Gets or sets the file position of the related PdfObject.
         /// </summary>
-        public int Position
+        public long Position
         {
-            get { return _position; }
-            set { _position = value; }
+            get => _position;
+            set => _position = value;
         }
-        int _position;  // I know it should be long, but I have never seen a 2GB PDF file.
+        long _position;
 
         //public bool InUse
         //{

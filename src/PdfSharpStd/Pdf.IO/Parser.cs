@@ -74,16 +74,14 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Sets PDF input stream position to the specified object.
         /// </summary>
-        public int MoveToObject(PdfObjectID objectID)
+        public long MoveToObject(PdfObjectID objectID)
         {
-            int position = _document._irefTable[objectID].Position;
-            return _lexer.Position = position;
+            var position = _document._irefTable[objectID].Position;
+            _lexer.Position = position;
+            return _lexer.Position;
         }
 
-        public Symbol Symbol
-        {
-            get { return _lexer.Symbol; }
-        }
+        public Symbol Symbol => _lexer.Symbol;
 
         public PdfObjectID ReadObjectNumber(int position)
         {
@@ -744,7 +742,7 @@ namespace PdfSharp.Pdf.IO
 
             if (symbol == Symbol.R)
             {
-                int position = _lexer.Position;
+                var position = _lexer.Position;
                 //        MoveToObject(lexer.Token);
                 ReadObjectID(null);
                 int n = ReadInteger();
@@ -999,7 +997,7 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         internal PdfTrailer ReadTrailer()
         {
-            int length = _lexer.PdfLength;
+            var length = _lexer.PdfLength;
 
             // Implementation note 18 Appendix  H:
             // Acrobat viewers require only that the %%EOF marker appear somewhere within the last 1024 bytes of the file.
@@ -1023,15 +1021,16 @@ namespace PdfSharp.Pdf.IO
             if (idx == -1)
             {
                 // If "startxref" was still not found yet, read the file completely.
-                string trail = _lexer.ReadRawString(0, length);
+                string trail = _lexer.ReadRawString(0, (int)length);
                 idx = trail.LastIndexOf("startxref", StringComparison.Ordinal);
                 _lexer.Position = idx;
             }
             if (idx == -1)
                 throw new Exception("The StartXRef table could not be found, the file cannot be opened.");
 
-            ReadSymbol(Symbol.StartXRef);
-            _lexer.Position = ReadInteger(); // BUG: We are sometimes writing this incorrectly, and ending up in a comment.
+            var symbol = ReadSymbol(Symbol.StartXRef);
+            if (symbol != Symbol.StartXRef) throw new Exception("Invalid StartXRef");
+            _lexer.Position = ReadInteger();
 
             // Read all trailers.
             while (true)
@@ -1047,11 +1046,14 @@ namespace PdfSharp.Pdf.IO
                 }
 
                 // 1st trailer seems to be the best.
-                if (_document._trailer == null)
-                    _document._trailer = trailer;
-                int prev = trailer != null ? trailer.Elements.GetInteger(PdfTrailer.Keys.Prev) : 0;
-                if (prev == 0)
-                    break;
+                if (_document._trailer == null) _document._trailer = trailer;
+                
+                int prev = trailer != null
+                    ? trailer.Elements.GetInteger(PdfTrailer.Keys.Prev)
+                    : 0;
+                
+                if (prev == 0) break;
+                
                 //if (prev > lexer.PdfLength)
                 //  break;
                 _lexer.Position = prev;
@@ -1152,13 +1154,13 @@ namespace PdfSharp.Pdf.IO
         /// <returns></returns>
         private bool CheckXRefTableEntry(int position, int id, int generation, out int idChecked, out int generationChecked)
         {
-            int origin = _lexer.Position;
+            var origin = _lexer.Position;
             idChecked = -1;
             generationChecked = -1;
             try
             {
                 _lexer.Position = position;
-                idChecked = ReadInteger(); // BUG: this is the next place we blow up
+                idChecked = ReadInteger();
                 generationChecked = ReadInteger();
                 //// TODO Should we use ScanKeyword here?
                 //ReadKSymbol(Symbol.Keyword);
@@ -1757,7 +1759,7 @@ namespace PdfSharp.Pdf.IO
 
         private class ParserState
         {
-            public int Position;
+            public long Position;
             public Symbol Symbol;
         }
 
@@ -1765,7 +1767,7 @@ namespace PdfSharp.Pdf.IO
         {
             int size = bytes.Length;
             if (predictor < 10 || predictor > 15)
-                throw new ArgumentException("Invalid predictor.", "predictor");
+                throw new ArgumentException("Invalid predictor.", nameof(predictor));
 
             int rowSizeRaw = columns + 1;
 
@@ -1775,10 +1777,6 @@ namespace PdfSharp.Pdf.IO
             int rows = size / rowSizeRaw;
 
             byte[] result = new byte[rows * columns];
-#if DEBUG
-            for (int i = 0; i < result.Length; ++i)
-                result[i] = 88;
-#endif
 
             for (int row = 0; row < rows; ++row)
             {

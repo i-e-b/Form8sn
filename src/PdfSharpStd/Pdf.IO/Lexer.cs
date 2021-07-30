@@ -62,9 +62,9 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Gets or sets the position within the PDF stream.
         /// </summary>
-        public int Position
+        public long Position
         {
-            get { return _idxChar; }
+            get => _idxChar;
             set
             {
                 _idxChar = value;
@@ -173,7 +173,7 @@ namespace PdfSharp.Pdf.IO
         /// </summary>
         public byte[] ReadStream(int length)
         {
-            int pos;
+            long pos;
 
             // Skip illegal blanks behind «stream».
             while (_currChar == Chars.SP)
@@ -208,7 +208,7 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Reads a string in raw encoding.
         /// </summary>
-        public String ReadRawString(int position, int length)
+        public String ReadRawString(long position, int length)
         {
             _pdfSteam.Position = position;
             byte[] bytes = new byte[length];
@@ -329,7 +329,7 @@ namespace PdfSharp.Pdf.IO
             Symbol result = ScanNumber();
             if (result == Symbol.Integer)
             {
-                int pos = Position;
+                var pos = Position;
                 string objectNumber = Token;
             }
             return result;
@@ -659,7 +659,7 @@ namespace PdfSharp.Pdf.IO
             // A Reference has the form "nnn mmm R". The implementation of the parser used a
             // reduce/shift algorithm in the first place. But this case is the only one we need to
             // look ahead 3 tokens. 
-            int positon = Position;
+            var positon = Position;
 
             // Skip digits.
             while (char.IsDigit(_currChar))
@@ -781,12 +781,12 @@ namespace PdfSharp.Pdf.IO
         public string SurroundingsOfCurrentPosition(bool hex)
         {
             const int range = 20;
-            int start = Math.Max(Position - range, 0);
-            int length = Math.Min(2 * range, PdfLength - start);
+            var start = Math.Max(Position - range, 0);
+            var length = Math.Min(2 * range, PdfLength - start);
             long posOld = _pdfSteam.Position;
             _pdfSteam.Position = start;
             byte[] bytes = new byte[length];
-            _pdfSteam.Read(bytes, 0, length);
+            _pdfSteam.Read(bytes, 0, (int)length);
             _pdfSteam.Position = posOld;
             string result = "";
             if (hex)
@@ -922,13 +922,13 @@ namespace PdfSharp.Pdf.IO
         /// <summary>
         /// Gets the length of the PDF output.
         /// </summary>
-        public int PdfLength
+        public long PdfLength
         {
             get { return _pdfLength; }
         }
 
-        readonly int _pdfLength;
-        int _idxChar;
+        readonly long _pdfLength;
+        long _idxChar;
         char _currChar;
         char _nextChar;
         StringBuilder _token;
