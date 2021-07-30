@@ -12,9 +12,9 @@
         <PackageProjectUrl>https://github.com/i-e-b/Form8sn</PackageProjectUrl>
         <PackageLicenseUrl>https://raw.githubusercontent.com/i-e-b/Form8sn/main/LICENSE</PackageLicenseUrl>
         <RepositoryUrl>https://github.com/i-e-b/Form8sn</RepositoryUrl>
-        <PackageReleaseNotes>Temporary fix for verbose-mode bug</PackageReleaseNotes>
+        <PackageReleaseNotes>Fix for localisation bug</PackageReleaseNotes>
         <PackageIconUrl>https://github.com/i-e-b/Form8sn/raw/main/src/PdfSharpStd/Resources/images/logo.png</PackageIconUrl>
-        <PackageVersion>0.0.3</PackageVersion>
+        <PackageVersion>0.0.4</PackageVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
