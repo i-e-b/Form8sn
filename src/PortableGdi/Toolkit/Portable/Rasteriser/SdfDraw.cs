@@ -70,6 +70,9 @@ namespace Portable.Drawing.Toolkit.Portable.Rasteriser
             RenderDistanceFunction(img, minY, maxY, minX, maxX, distanceFunc, color);
         }
 
+        /// <summary>
+        /// Distance based fill of polygon
+        /// </summary>
         public static void FillPolygon(Frame img, RasterContour[] contours, int color, FillMode mode)
         {
             // basic setup

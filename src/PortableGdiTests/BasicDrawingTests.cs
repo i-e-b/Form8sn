@@ -34,9 +34,19 @@ namespace PortableGdiTests
                 g.Clear(Real.Color.Lavender);
                 g.DrawLine(Real.Pens.Chocolate, 10,10,100,100);
                 g.FillPolygon(Real.Brushes.Black, new Real.PointF[]{new (150, 10), new (250, 10), new (200, 100)});
-                g.DrawString("Hello, Graphics!", realFont, Real.Brushes.Brown, 10, 250);
+                
                 var sz = g.MeasureString("Hello, Graphics!", realFont);
+                g.FillRectangle(Real.Brushes.Ivory, 10, 250, sz.Width, sz.Height);
+                g.DrawString("Hello, Graphics!", realFont, Real.Brushes.Brown, 10, 250);
                 g.DrawString("This should be tricky to render %$&@ 日本人 (にほんじん) ", realFontSmall, Real.Brushes.Maroon, 10, 250+sz.Height);
+                
+                var tf = g.Transform;
+                tf.Translate(sz.Width + 50, 250);
+                tf.Rotate(10);
+                tf.Shear(0.1f, 0);
+                g.Transform = tf;
+                g.DrawString("transforms", realFont, Real.Brushes.Sienna, 0, 0);
+                g.ResetTransform();
                 
                 bmp.Save("Z_simple_real.png", Real.Imaging.ImageFormat.Png);
             }
@@ -56,13 +66,19 @@ namespace PortableGdiTests
                 g.Clear(Port.Color.Lavender);
                 g.DrawLine(Port.Pens.Chocolate, 10,10,100,100);
                 g.FillPolygon(Port.Brushes.Black, new Port.PointF[]{new (150, 10), new (250, 10), new (200, 100)});
+                
+                var sz = g.MeasureString("Hello, Graphics!", portFont);
+                g.FillRectangle(Port.Brushes.Ivory, 10, 250, sz.Width, sz.Height);
                 g.DrawString("Hello, Graphics!", portFont, Port.Brushes.Brown, 10, 250);
+                g.DrawString("This should be tricky to render %$&@ 日本人 (にほんじん) ", portFontSmall, Port.Brushes.Maroon, 10, 250+sz.Height);
                 
-                var sz = g.MeasureString("Hello, Graphics!", portFont); // TODO: not really working. Gives too small height
-                g.DrawString("This should be tricky to render %$&@ 日本人 (にほんじん) ", // TODO: not using any fall-back fonts or glyphs
-                                                                                         // TODO: not rendering compound glyphs ('%' in Calibri)
-                    portFontSmall, Port.Brushes.Maroon, 10, 250+sz.Height);
-                
+                var tf = g.Transform;
+                tf.Translate(sz.Width + 50, 250);
+                tf.Rotate(10);
+                tf.Shear(0.1f, 0);
+                g.Transform = tf;
+                g.DrawString("transforms", portFont, Port.Brushes.Sienna, 0, 0);
+                g.ResetTransform();
                 bmp.Save("Z_simple_portable.png", Port.Imaging.ImageFormat.Png);
             }
             sw.Stop();

@@ -291,21 +291,7 @@ namespace Portable.Drawing.Drawing2D
         // Perform a rotation on this matrix.
         public void Rotate(float angle)
         {
-            float m11, m12, m21, m22;
-
-            double radians = (angle * (Math.PI / 180.0));
-            float cos = (float) (Math.Cos(radians));
-            float sin = (float) (Math.Sin(radians));
-
-            m11 = cos * this.m11 + sin * this.m21;
-            m12 = cos * this.m12 + sin * this.m22;
-            m21 = cos * this.m21 - sin * this.m11;
-            m22 = cos * this.m22 - sin * this.m12;
-
-            this.m11 = m11;
-            this.m12 = m12;
-            this.m21 = m21;
-            this.m22 = m22;
+            Rotate(angle, MatrixOrder.Prepend);
         }
 
         public void Rotate(float angle, MatrixOrder order)

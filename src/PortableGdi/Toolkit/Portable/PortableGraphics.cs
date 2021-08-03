@@ -198,6 +198,7 @@ namespace Portable.Drawing.Toolkit.Portable
             //var ry = y + font.Height() * scale;
             var ry = y + pf.GetLineHeight();
             
+            // TODO: need to move measurements up, so that the transform matrix is correctly applied
             double xOff = x; // advance for each character (not correct yet)
             foreach (char c in s)
             {
