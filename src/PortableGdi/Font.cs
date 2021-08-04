@@ -493,6 +493,16 @@ namespace Portable.Drawing
 
 #endif
 
+        /// <summary>
+        /// Get the concrete 'toolkit' font
+        /// </summary>
+        internal IToolkitFont? GetToolkitFont()
+        {
+            if (_toolkitFont != null) return _toolkitFont;
+            if (_toolkit == null) return null;
+            return GetFont(_toolkit, 96);
+        }
+
         // Get the toolkit version of this font for a specific toolkit.
         internal IToolkitFont GetFont(IToolkit toolkit, float dpi)
         {
@@ -505,24 +515,23 @@ namespace Portable.Drawing
                     _toolkit = toolkit;
                     return _toolkitFont;
                 }
-                else if (_toolkit == toolkit)
+
+                if (_toolkit == toolkit)
                 {
                     // Same toolkit - return the cached font.
                     return _toolkitFont;
                 }
-                else
-                {
-                    // We have a font object for another toolkit,
-                    // so dispose it and create for this toolkit.
-                    // We null out "toolkitFont" before calling
-                    // "CreateFont()" just in case an exception
-                    // is thrown while creating the toolkit font.
-                    _toolkitFont.Dispose();
-                    _toolkitFont = null;
-                    _toolkitFont = toolkit.CreateFont(this, dpi);
-                    _toolkit = toolkit;
-                    return _toolkitFont;
-                }
+
+                // We have a font object for another toolkit,
+                // so dispose it and create for this toolkit.
+                // We null out "toolkitFont" before calling
+                // "CreateFont()" just in case an exception
+                // is thrown while creating the toolkit font.
+                _toolkitFont.Dispose();
+                _toolkitFont = null;
+                _toolkitFont = toolkit.CreateFont(this, dpi);
+                _toolkit = toolkit;
+                return _toolkitFont;
             }
         }
     }; // class Font

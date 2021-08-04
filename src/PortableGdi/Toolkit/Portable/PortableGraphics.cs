@@ -184,6 +184,8 @@ namespace Portable.Drawing.Toolkit.Portable
 
         public void DrawString(string s, int x, int y, StringFormat format)
         {
+            throw new NotImplementedException($"{nameof(Graphics)} should be calling more specific call: {nameof(FillGlyphs)}");
+            /*
             if (Font == null) throw new Exception("Tried to draw string with no font set");
             if (!(Font is PortableFont pf)) throw new Exception($"Need to draw using font def: {Font.GetType().FullName}");
             
@@ -212,6 +214,19 @@ namespace Portable.Drawing.Toolkit.Portable
                 FillGlyph(ry, outline, xOff + bearing, scale, yAdj);
                 
                 xOff += gl.Advance * scale;
+            }*/
+        }
+        
+        public void FillGlyphs(IEnumerable<RenderableGlyph> positionedGlyphs, Brush brush)
+        {
+            if (Brush == null) return;
+            var frame = Target.Frame();
+            if (frame == null) return;
+            var color = brush.GetBrush(Toolkit).Color.ToArgb();
+            
+            foreach (var glyph in positionedGlyphs)
+            {
+                SdfDraw.FillPolygon(frame, glyph.ToArray(), color, FillMode.Winding);
             }
         }
         
@@ -248,6 +263,7 @@ namespace Portable.Drawing.Toolkit.Portable
 
         public Size MeasureString(string s, Point[]? layoutRectangle, StringFormat? format, out int charactersFitted, out int linesFilled, bool ascentOnly)
         {
+            // TODO: IEB: Merge this with `TextLayoutManager`?
             if (Font == null) throw new Exception("Tried to measure string with no font set");
             if (!(Font is PortableFont pf)) throw new Exception($"Need to measure using font def: {Font.GetType().FullName}");
             

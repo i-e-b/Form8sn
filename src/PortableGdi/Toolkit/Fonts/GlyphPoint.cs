@@ -1,5 +1,11 @@
-﻿namespace Portable.Drawing.Toolkit.Fonts
+﻿using System.Collections.Generic;
+using Portable.Drawing.Toolkit.Portable.Rasteriser;
+
+namespace Portable.Drawing.Toolkit.Fonts
 {
+    /// <summary>
+    /// Data for a point on a glyph contour
+    /// </summary>
     public class GlyphPoint
     {
         public bool OnCurve;

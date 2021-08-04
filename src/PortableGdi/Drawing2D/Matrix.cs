@@ -19,6 +19,7 @@
  */
 
 using System;
+using Portable.Drawing.Toolkit.Portable.Rasteriser;
 
 namespace Portable.Drawing.Drawing2D
 {
@@ -456,31 +457,42 @@ namespace Portable.Drawing.Drawing2D
             }
         }
 
+        /// <summary>
+        /// Apply this transform in-place to an array of PointF
+        /// </summary>
         public void TransformPoints(PointF[] pts)
         {
-            if (pts == null)
-            {
-                throw new ArgumentNullException("pts");
-            }
+            if (pts == null) throw new ArgumentNullException(nameof(pts));
 
-            int posn;
-            float x, y;
-            for (posn = pts.Length - 1; posn >= 0; --posn)
+            for (int i = pts.Length - 1; i >= 0; --i)
             {
-                x = pts[posn].X;
-                y = pts[posn].Y;
-                pts[posn].X = x * m11 + y * m21 + OffsetX;
-                pts[posn].Y = x * m12 + y * m22 + OffsetY;
+                var x = pts[i].X;
+                var y = pts[i].Y;
+                pts[i].X = x * m11 + y * m21 + OffsetX;
+                pts[i].Y = x * m12 + y * m22 + OffsetY;
+            }
+        }
+        
+        /// <summary>
+        /// Apply this transform in-place to an array of Vec2
+        /// </summary>
+        public void TransformPoints(Vector2[]? pts)
+        {
+            if (pts == null) throw new ArgumentNullException(nameof(pts));
+
+            for (int i = pts.Length - 1; i >= 0; --i)
+            {
+                var x = pts[i].X;
+                var y = pts[i].Y;
+                pts[i].X = x * m11 + y * m21 + OffsetX;
+                pts[i].Y = x * m12 + y * m22 + OffsetY;
             }
         }
 
         // Transform a list of vectors.
         public void TransformVectors(Point[] pts)
         {
-            if (pts == null)
-            {
-                throw new ArgumentNullException("pts");
-            }
+            if (pts == null) throw new ArgumentNullException(nameof(pts));
 
             int posn;
             float x, y;

@@ -34,7 +34,7 @@ namespace Portable.Drawing
         private float height;
 
         // The empty size.
-        public static readonly SizeF Empty = new SizeF(0.0f, 0.0f);
+        public static readonly SizeF Empty = new(0.0f, 0.0f);
 
         // Constructors.
         public SizeF(PointF pt)

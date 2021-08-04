@@ -1,5 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Portable.Drawing.Text;
+using Portable.Drawing.Toolkit.Fonts;
+using Portable.Drawing.Toolkit.Portable;
+using Portable.Drawing.Toolkit.Portable.Rasteriser;
 
 namespace Portable.Drawing.Toolkit.TextLayout
 {
@@ -14,14 +19,18 @@ namespace Portable.Drawing.Toolkit.TextLayout
         private int hotkeyIndex;
         private int lineHeight;
         private int lineNumber;
+        private int glyphNumber;
         private int lineSpaceUsedUp;
+        private int maxLineSpaceUsed;
         private int nextIndex;
         private Rectangle layout;
+
+        public int LinesFitted => lineNumber + (glyphNumber>0?1:0);
+        public int CharactersFitted => glyphNumber;
         
+        public SizeF SizeFilled => new SizeF(maxLineSpaceUsed, lineHeight+LinesFitted); // IEB: need to get max width and total height
+
         private Font? _underlineFont;
-        private IToolkitGraphics? _toolkitGraphics;
-        
-        //private Brush? _brush;
         private Font? _font;
         private Graphics? _graphics;
         private string? _text;
@@ -29,18 +38,14 @@ namespace Portable.Drawing.Toolkit.TextLayout
 
         private static readonly StringFormat _defaultStringFormat = StringFormat.GenericDefault;
         private static readonly Point[] _measureLayoutRect = new Point[0];
-
-        // Calculate and draw the string by drawing each line.
-        // TODO: IEB: this needs a pretty major re-write to correctly support transforms and layout.
-        public void Draw(Graphics graphics, string? text, Font font, Rectangle drawLayout, StringFormat? format, Brush brush)
+            
+        public List<RenderableGlyph> LayoutText(Graphics graphics, string? text, Font font, Rectangle drawLayout, StringFormat? format)
         {
-            if (text == null) return;
+            var output = new List<RenderableGlyph>();
+            if (text == null) return output;
             
             // set the current graphics
             _graphics = graphics;
-
-            // set the current toolkit graphics
-            _toolkitGraphics = graphics.ToolkitGraphics;
 
             // set the current text
             _text = text;
@@ -51,14 +56,8 @@ namespace Portable.Drawing.Toolkit.TextLayout
             // set the current layout rectangle
             layout = drawLayout;
 
-            // set the current brush
-            //_brush = brush;
-
-            // ensure we have a string format
-            format ??= _defaultStringFormat;
-
             // set the current string format
-            _format = format;
+            _format = format ?? _defaultStringFormat;
 
             // set the default hotkey index
             hotkeyIndex = -1;
@@ -68,26 +67,20 @@ namespace Portable.Drawing.Toolkit.TextLayout
             if (lineHeight < 1) throw new Exception("Invalid line height");
 
             // set the only whole lines flag
-            onlyWholeLines = (format.FormatFlags & StringFormatFlags.LineLimit) != 0
-                             || format.Trimming != StringTrimming.None;
+            onlyWholeLines = (_format.FormatFlags & StringFormatFlags.LineLimit) != 0
+                             || _format.Trimming != StringTrimming.None;
 
-            // set the index of the next character
+            
             nextIndex = 0;
-
-            // set the current line space usage
             lineSpaceUsedUp = 0;
-
-            // set the current line number
             lineNumber = 0;
+            glyphNumber = 0;
 
             // set the previous span ended in new line flag
             prevIsNewLine = false;
 
             // select the current font into the graphics context
             graphics.SelectFont(font);
-
-            // select the current brush into the graphics context
-            graphics.SelectBrush(brush);
 
             // set the current text start
             int textStart = 0;
@@ -99,7 +92,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
             int textWidth = 0;
 
             // get the actual hotkey index, if needed
-            if (format.HotkeyPrefix != HotkeyPrefix.None)
+            if (_format.HotkeyPrefix != HotkeyPrefix.None)
             {
                 // get the hotkey index
                 hotkeyIndex = text.IndexOf('&');
@@ -123,7 +116,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
                         _text = text;
 
                         // prepare to show or hide the underline
-                        if (format.HotkeyPrefix == HotkeyPrefix.Show)
+                        if (_format.HotkeyPrefix == HotkeyPrefix.Show)
                         {
                             // get the underline font
                             _underlineFont = new Font
@@ -138,11 +131,11 @@ namespace Portable.Drawing.Toolkit.TextLayout
                 }
             }
 
-            // draw the text
+            // layout the text
             try
             {
                 // handle drawing based on line alignment
-                if (format.LineAlignment == StringAlignment.Near)
+                if (_format.LineAlignment == StringAlignment.Near)
                 {
                     // set the current y position
                     int y = layout.Top;
@@ -160,8 +153,8 @@ namespace Portable.Drawing.Toolkit.TextLayout
                     int lastLineY = maxY - lineHeight;
 
                     // create character spans
-                    CharSpan span = new CharSpan();
-                    CharSpan prev = new CharSpan();
+                    CharSpan span = new();
+                    CharSpan prev = new();
 
                     // set the first span flag
                     bool firstSpan = true;
@@ -189,9 +182,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
                                 }
 
                                 // draw the line
-                                DrawLine
-                                (textStart, textLength, textWidth,
-                                    y, (y > lastLineY));
+                                DrawLine (output, textStart, textLength, textWidth, y, (y > lastLineY));
                             }
 
                             // update the y position
@@ -233,7 +224,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
                     if (textWidth > 0 && y <= maxY)
                     {
                         // draw the last line
-                        DrawLine(textStart, textLength, textWidth, y, (y > lastLineY));
+                        DrawLine(output, textStart, textLength, textWidth, y, (y > lastLineY));
                     }
                 }
                 else
@@ -255,8 +246,8 @@ namespace Portable.Drawing.Toolkit.TextLayout
                     LineSpan[] lines = new LineSpan[linesToDraw];
 
                     // create character spans
-                    CharSpan span = new CharSpan();
-                    CharSpan prev = new CharSpan();
+                    CharSpan span = new();
+                    CharSpan prev = new();
 
                     // set the first span flag
                     bool firstSpan = true;
@@ -329,7 +320,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
                     int y = (layout.Height - (linePos * lineHeight));
 
                     // adjust y for center alignment, if needed
-                    if (format.LineAlignment == StringAlignment.Center)
+                    if (_format.LineAlignment == StringAlignment.Center)
                     {
                         y /= 2;
                     }
@@ -347,18 +338,14 @@ namespace Portable.Drawing.Toolkit.TextLayout
                         LineSpan line = lines[i];
 
                         // draw the current line
-                        DrawLine
-                        (line.start, line.length, line.pixelWidth,
-                            y, false);
+                        DrawLine (output, line.start, line.length, line.pixelWidth, y, false);
 
                         // update the y position
                         y += lineHeight;
                     }
 
                     // draw the last line
-                    DrawLine
-                    (lines[linePos].start, lines[linePos].length,
-                        lines[linePos].pixelWidth, y, true);
+                    DrawLine (output, lines[linePos].start, lines[linePos].length, lines[linePos].pixelWidth, y, true);
                 }
             }
             finally
@@ -373,6 +360,8 @@ namespace Portable.Drawing.Toolkit.TextLayout
                     _underlineFont = null;
                 }
             }
+            
+            return output;
         }
 
 
@@ -383,7 +372,11 @@ namespace Portable.Drawing.Toolkit.TextLayout
             if (span.length == 0 || _text == null || _format == null) return;
 
             // reset the line space usage, if needed
-            if (span.newline) lineSpaceUsedUp = 0;
+            if (span.newline)
+            {
+                maxLineSpaceUsed = Math.Max(maxLineSpaceUsed, lineSpaceUsedUp);
+                lineSpaceUsedUp = 0;
+            }
 
             // get the first character of the span
             char c = _text[span.start];
@@ -428,13 +421,13 @@ namespace Portable.Drawing.Toolkit.TextLayout
 
             // update line space usage
             lineSpaceUsedUp += GetSpanWidth(span);
+            maxLineSpaceUsed = Math.Max(maxLineSpaceUsed, lineSpaceUsedUp);
         }
         
         // Draw a line.
-        private void DrawLine
-            (int start, int length, int width, int y, bool lastLine)
+        private void DrawLine (List<RenderableGlyph> output, int start, int length, int width, int y, bool lastLine)
         {
-            if (_text == null || _format == null || _toolkitGraphics == null) throw new InvalidOperationException("Text layout manager has invalid arguments");
+            if (_text == null || _format == null) throw new InvalidOperationException("Text layout manager has invalid arguments");
             
             // set default x position
             int x;
@@ -457,11 +450,11 @@ namespace Portable.Drawing.Toolkit.TextLayout
                     hotkeyIndex >= (start + length))
                 {
                     string s = _text.Substring(start, length);
-                    _toolkitGraphics.DrawString(s, x, y, _format);
+                    AddGlyphs(output, s, x, y, _format);
                 }
                 else
                 {
-                    DrawLineWithHotKey(_text, start, length, x, y);
+                    DrawLineWithHotKey(output, _text, start, length, x, y);
                 }
 
                 // we're done here
@@ -486,9 +479,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
                 if (_format.Trimming != StringTrimming.EllipsisPath)
                 {
                     // update the maximum width
-                    maxWidth -= _toolkitGraphics.MeasureString
-                    (ellipsis, _measureLayoutRect, _format,
-                        out _, out _, false).Width;
+                    maxWidth -= MeasureStringWidth(ellipsis, _measureLayoutRect, _format);
                 }
             }
 
@@ -527,12 +518,12 @@ namespace Portable.Drawing.Toolkit.TextLayout
                         hotkeyIndex >= (start + length))
                     {
                         // draw the line
-                        _toolkitGraphics.DrawString(drawS, x, y, _format);
+                        AddGlyphs(output, drawS, x, y, _format);
                     }
                     else
                     {
                         // draw the line with hotkey underlining
-                        DrawLineWithHotKey(drawS, 0, drawS.Length, x, y);
+                        DrawLineWithHotKey(output, drawS, 0, drawS.Length, x, y);
                     }
                 }
                     break;
@@ -560,12 +551,12 @@ namespace Portable.Drawing.Toolkit.TextLayout
                         hotkeyIndex >= (start + length))
                     {
                         // draw the line
-                        _toolkitGraphics.DrawString(drawS, x, y, _format);
+                        AddGlyphs(output, drawS, x, y, _format);
                     }
                     else
                     {
                         // draw the line with hotkey underlining
-                        DrawLineWithHotKey(drawS, 0, drawS.Length, x, y);
+                        DrawLineWithHotKey(output, drawS, 0, drawS.Length, x, y);
                     }
                 }
                     break;
@@ -586,23 +577,104 @@ namespace Portable.Drawing.Toolkit.TextLayout
                         hotkeyIndex >= (start + length))
                     {
                         // draw the line
-                        _toolkitGraphics.DrawString(drawS, x, y, _format);
+                        AddGlyphs(output, drawS, x, y, _format);
                     }
                     else
                     {
                         // draw the line with hotkey underlining
-                        DrawLineWithHotKey(drawS, 0, drawS.Length, x, y);
+                        DrawLineWithHotKey(output, drawS, 0, drawS.Length, x, y);
                     }
                 }
                     break;
             }
         }
 
-        // Draw a line containing hotkey text.
-        private void DrawLineWithHotKey
-            (string text, int start, int length, int x, int y)
+        /// <summary>
+        /// Measure the string width
+        /// TODO: we currently ignore layout-rect and format
+        /// </summary>
+        private int MeasureStringWidth(string str, Point[] measureLayoutRect, StringFormat format)
         {
-            if (_graphics == null || _toolkitGraphics == null || _format == null) return;
+            var tkf = _font?.GetToolkitFont();
+            if (!(tkf is PortableFont pf)) throw new Exception($"Tried to measure using font def: {tkf?.GetType().FullName ?? "<null>"}");
+            
+            var font = pf.BaseTrueTypeFont;
+            
+            var scale = pf.GetScale();
+
+            // Really dumb way to start -- not using layout rect, just count up the character sizes.
+            // when we do implement it, make sure DrawString uses the same logic
+            var width = 0.0;
+            foreach (char c in str)
+            {
+                var gl = font.ReadGlyph(c);
+                if (gl == null) continue;
+                var w = (gl.xMax - gl.xMin) * scale;
+                width += w;
+            }
+            return (int)Math.Round(width);
+        }
+
+        /// <summary>
+        /// Position font glyphs and add them to the output. This does no rendering
+        /// </summary>
+        private void AddGlyphs(List<RenderableGlyph> output, string str, int x, int y, StringFormat format)
+        {
+            var tkf = _font?.GetToolkitFont();
+            if (!(tkf is PortableFont pf)) throw new Exception($"Tried to measure using font def: {tkf?.GetType().FullName ?? "<null>"}");
+            
+            var font = pf.BaseTrueTypeFont;
+            
+            var scale = pf.GetScale();
+            
+            // adjustment to have (x,y) be the top-left, rather than baseline-left
+            //var ry = y + font.Height() * scale;
+            var ry = y + pf.GetLineHeight();
+            
+            double xOff = x; // advance for each character (not correct yet)
+            foreach (char c in str)
+            {
+                glyphNumber++; // number of glyphs attempted, regardless of whitespace
+                
+                var gl = font.ReadGlyph(c);
+                if (gl == null) continue;
+                
+                var bearing = gl.LeftBearing * scale;
+                var yAdj = gl.yMin * scale;
+                var outline = gl.NormalisedContours(); // break into simple lines
+
+                var glyph = PositionGlyph(ry, outline, xOff + bearing, scale, yAdj);
+                if (glyph != null) output.Add(glyph);
+                
+                xOff += gl.Advance * scale;
+            }
+        }
+        
+        private RenderableGlyph? PositionGlyph(double y, List<GlyphPoint[]> outline, double xOff, double scale, double yAdj)
+        {
+            if (outline.Count < 1) return null;
+            
+            var points = new RenderableGlyph();
+            foreach (var curve in outline)
+            {
+                var contour = new RasterContour(
+                    curve.Select(p =>
+                        new Vector2(
+                            xOff + p.X * scale,
+                            y + (0-p.Y) * scale - yAdj
+                        )
+                    )
+                );
+                points.Add(contour);
+            }
+            return points;
+        }
+
+
+        // Draw a line containing hotkey text.
+        private void DrawLineWithHotKey(List<RenderableGlyph> output, string text, int start, int length, int x, int y)
+        {
+            if (_graphics == null || _format == null) return;
             
             // set the default text
             string? s;
@@ -614,12 +686,10 @@ namespace Portable.Drawing.Toolkit.TextLayout
                 s = text.Substring(start, (hotkeyIndex - start));
 
                 // draw the pre-hotkey text
-                _toolkitGraphics.DrawString(s, x, y, _format);
+                AddGlyphs(output, s, x, y, _format);
 
                 // update the x position
-                x += _toolkitGraphics.MeasureString
-                (s, _measureLayoutRect, _format, out _, out _,
-                    false).Width;
+                x += MeasureStringWidth(s, _measureLayoutRect, _format);
             }
 
             // get the hotkey text
@@ -629,15 +699,13 @@ namespace Portable.Drawing.Toolkit.TextLayout
             if (_underlineFont != null) _graphics.SelectFont(_underlineFont);
 
             // draw the hotkey text
-            _toolkitGraphics.DrawString(s, x, y, _format);
+            AddGlyphs(output, s, x, y, _format);
 
             // revert to the regular font
             if (_font != null) _graphics.SelectFont(_font);
 
             // update the x position
-            x += _toolkitGraphics.MeasureString
-            (s, _measureLayoutRect, _format, out _, out _,
-                false).Width;
+            x += MeasureStringWidth(s, _measureLayoutRect, _format);
 
             // draw the post-hotkey text
             if (hotkeyIndex < ((start + length) - 1))
@@ -652,7 +720,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
                 s = text.Substring(index, length);
 
                 // draw the post-hotkey text
-                _toolkitGraphics.DrawString(s, x, y, _format);
+                AddGlyphs(output, s, x, y, _format);
             }
         }
 
@@ -666,9 +734,6 @@ namespace Portable.Drawing.Toolkit.TextLayout
         {
             // set the current graphics
             _graphics = graphics;
-
-            // set the current toolkit graphics
-            _toolkitGraphics = graphics.ToolkitGraphics;
 
             // set the current text
             _text = text;
@@ -693,11 +758,9 @@ namespace Portable.Drawing.Toolkit.TextLayout
             onlyWholeLines = (format.FormatFlags & StringFormatFlags.LineLimit) != 0
                              || format.Trimming == StringTrimming.None;
 
-            // set the index of the next character
             nextIndex = 0;
-
-            // set the current line space usage
             lineSpaceUsedUp = 0;
+            maxLineSpaceUsed = 0;
 
             // set the previous span ended in new line flag
             prevIsNewLine = false;
@@ -746,8 +809,8 @@ namespace Portable.Drawing.Toolkit.TextLayout
             }
 
             // create character spans
-            CharSpan span = new CharSpan();
-            CharSpan prev = new CharSpan();
+            CharSpan span = new();
+            CharSpan prev = new();
 
             // set the first span flag
             bool firstSpan = true;
@@ -915,7 +978,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
         // Get the width of the span in pixels.
         private int GetSpanWidth(CharSpan span)
         {
-            if (_text == null || _toolkitGraphics == null) throw new InvalidOperationException();
+            if (_text == null || _format == null) throw new InvalidOperationException();
             
             // set the width of the span, if needed
             if (span.pixelWidth != -1) return span.pixelWidth;
@@ -924,9 +987,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
             string s = _text.Substring(span.start, span.length);
 
             // set the width of the span
-            span.pixelWidth = _toolkitGraphics.MeasureString
-            (s, _measureLayoutRect, _format, out _, out _,
-                false).Width;
+            span.pixelWidth = MeasureStringWidth(s, _measureLayoutRect, _format);
 
             // return the width of the span
             return span.pixelWidth;
@@ -964,19 +1025,16 @@ namespace Portable.Drawing.Toolkit.TextLayout
         //
         // Returns the length of characters from the string once it is trimmed.
         // The "width" variable returns the pixel width of the trimmed string.
-        private int TrimTextToChar
-            (int start, int length, int maxWidth, out int width)
+        private int TrimTextToChar (int start, int length, int maxWidth, out int width)
         {
-            if (_text == null || _toolkitGraphics == null) throw new InvalidOperationException();
+            if (_text == null || _format == null) throw new InvalidOperationException();
             
             // set default width
             width = 0;
 
             // get the current width
-            int currWidth = _toolkitGraphics.MeasureString
-            (_text.Substring(start, length), _measureLayoutRect,
-                _format, out _, out _, false).Width;
-
+            int currWidth = MeasureStringWidth(_text.Substring(start, length), _measureLayoutRect, _format);
+            
             // handle trivial case first
             if (currWidth <= maxWidth)
             {
@@ -1003,10 +1061,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
                 int middle = ((left + right) / 2);
 
                 // get the current width
-                currWidth = _toolkitGraphics.MeasureString
-                (_text.Substring(start, middle),
-                    _measureLayoutRect, _format,
-                    out _, out _, false).Width;
+                currWidth = MeasureStringWidth(_text.Substring(start, middle), _measureLayoutRect, _format);
 
                 // continue search or return depending on comparison
                 if (currWidth > maxWidth)
@@ -1049,15 +1104,13 @@ namespace Portable.Drawing.Toolkit.TextLayout
         (int start, int length, int maxWidth, out int width,
             string ellipsis)
         {
-            if (_text == null || _toolkitGraphics == null) throw new InvalidOperationException();
+            if (_text == null || _format == null) throw new InvalidOperationException();
             
             // set the default return value
             System.Text.StringBuilder outcome = new(_text.Substring(start, length));
 
             // measure the width of the return value
-            width = _toolkitGraphics.MeasureString
-            (outcome.ToString(), _measureLayoutRect,
-                _format, out _, out _, false).Width;
+            width = MeasureStringWidth (outcome.ToString(), _measureLayoutRect, _format);
 
             // return the text if it fits
             if (width < maxWidth) return outcome.ToString();
@@ -1120,10 +1173,8 @@ namespace Portable.Drawing.Toolkit.TextLayout
                         (removePos, ((start + length) - removePos)));
 
                     // measure the width of the return value
-                    width = _toolkitGraphics.MeasureString
-                    (outcome.ToString(), _measureLayoutRect, _format,
-                        out _, out _, false).Width;
-
+                    width = MeasureStringWidth(outcome.ToString(), _measureLayoutRect, _format);
+                    
                     // return the text if it fits
                     if (width < maxWidth)
                     {
@@ -1138,10 +1189,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
                 if (removeStart > start)
                 {
                     // measure the width of the text
-                    width -= _toolkitGraphics.MeasureString
-                    (_text.Substring(removeStart--, 1),
-                        _measureLayoutRect, _format, out _, out _,
-                        false).Width;
+                    width -= MeasureStringWidth(_text.Substring(removeStart--, 1), _measureLayoutRect, _format);
 
                     // continue if no reduction is needed
                     if (width < maxWidth)
@@ -1157,10 +1205,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
                 if (removePos < (start + length))
                 {
                     // measure the width of the text
-                    width -= _toolkitGraphics.MeasureString
-                    (_text.Substring(removePos++, 1),
-                        _measureLayoutRect, _format, out _, out _,
-                        false).Width;
+                    width -= MeasureStringWidth(_text.Substring(removePos++, 1), _measureLayoutRect, _format);
 
                     // continue if no reduction is needed
                     if (width < maxWidth)
@@ -1176,9 +1221,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
                 if (!reduced)
                 {
                     // measure the width of the ellipsis
-                    width = _toolkitGraphics.MeasureString
-                    (ellipsis, _measureLayoutRect, _format,
-                        out _, out _, false).Width;
+                    width = MeasureStringWidth(ellipsis, _measureLayoutRect, _format);
 
                     // return the ellipsis
                     return ellipsis;
@@ -1195,7 +1238,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
         private int TrimTextToWord
             (int start, int length, int maxWidth, out int width)
         {
-            if (_toolkitGraphics == null || _text == null) throw new InvalidOperationException();
+            if (_text == null || _format == null) throw new InvalidOperationException();
             
             // set the default width
             width = 0;
@@ -1235,10 +1278,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
                 }
 
                 // get the width of the text
-                int stringWidth = _toolkitGraphics.MeasureString
-                (_text.Substring(prevPos, (pos - prevPos)),
-                    _measureLayoutRect, _format, out _, out _,
-                    false).Width;
+                int stringWidth = MeasureStringWidth(_text.Substring(prevPos, (pos - prevPos)), _measureLayoutRect, _format);
 
                 // return the characters fitted, if max width exceeded
                 if ((width + stringWidth) > maxWidth)

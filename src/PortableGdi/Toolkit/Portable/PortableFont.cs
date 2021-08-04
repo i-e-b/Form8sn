@@ -145,11 +145,12 @@ namespace Portable.Drawing.Toolkit.Portable
 
         public int GetLineHeight()
         {
-            // TODO: cache this out
+            // IEB: Need to read font's vertical offsets tables
             var scale = GetScale();
             var g1 = BaseTrueTypeFont.ReadGlyph('|') ?? BaseTrueTypeFont.ReadGlyph('$') ?? throw new Exception("Couldn't read sample glyph");
-            var fudge = 2.0;
-            return (int) ((g1.yMax - g1.yMin) * scale * fudge * EmScale);
+            var g2 = BaseTrueTypeFont.ReadGlyph('y') ?? BaseTrueTypeFont.ReadGlyph('g') ?? throw new Exception("Couldn't read sample glyph");
+            var fudge = 3.0;
+            return (int) ((g1.yMax - g2.yMin) * scale * fudge * EmScale);
         }
         
         public double EmScale => 1000.0 / BaseTrueTypeFont.Header.UnitsPerEm;

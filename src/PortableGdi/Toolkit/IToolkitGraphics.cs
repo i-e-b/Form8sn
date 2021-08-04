@@ -20,8 +20,10 @@
  */
 
 using System;
+using System.Collections.Generic;
 using Portable.Drawing.Drawing2D;
 using Portable.Drawing.Text;
+using Portable.Drawing.Toolkit.Portable.Rasteriser;
 
 namespace Portable.Drawing.Toolkit
 {
@@ -150,6 +152,12 @@ public interface IToolkitGraphics : IDisposable
 	/// Bind to base System.Drawing.Graphics -- to capture Transforms etc
 	/// </summary>
 	void BindTo(Graphics graphics);
+
+	/// <summary>
+	/// Render a set of pre-positioned and transformed glyphs
+	/// </summary>
+	void FillGlyphs(IEnumerable<RenderableGlyph> positionedGlyphs, Brush brush);
+	
 }; // interface IToolkitGraphics
 
 }; // namespace System.Drawing.Toolkit

@@ -22,11 +22,13 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Portable.Drawing.Drawing2D;
 using Portable.Drawing.Imaging;
 using Portable.Drawing.Text;
 using Portable.Drawing.Toolkit;
+using Portable.Drawing.Toolkit.Portable.Rasteriser;
 using Portable.Drawing.Toolkit.TextLayout;
 
 namespace Portable.Drawing
@@ -36,7 +38,6 @@ namespace Portable.Drawing
     {
         // Internal state.
         private IToolkitGraphics? _graphics;
-        private TextLayoutManager? _textLayoutManager;
         private Region? _clip;
         internal Matrix? transform;
         internal GraphicsContainer? stackTop;
@@ -1587,32 +1588,14 @@ namespace Portable.Drawing
             if (brush is SolidBrush {Color: {A: 0}}) return;
             if (string.IsNullOrEmpty(s!)) return;
 
-            // make a little inset around the text dependent of the font size
-            layoutRectangle.Inflate((int) (-font.SizeInPoints * DpiX / 369.7184), 0);
-
-            // convert the layout into device coordinates
-            Point[] rect = ConvertRectangle
-            ((layoutRectangle.X + baseWindow.X),
-                (layoutRectangle.Y + baseWindow.Y),
-                (layoutRectangle.Width - 1),
-                (layoutRectangle.Height - 1),
-                PageUnit);
-
-            // create a layout rectangle from the device coordinates
-            Rectangle deviceLayout = new Rectangle
-            (rect[0].X, rect[0].Y,
-                (rect[1].X - rect[0].X + 1),
-                (rect[2].Y - rect[0].Y + 1));
-
-            // bail out now if there's nothing to draw
-            if (_clip != null &&
-                !deviceClipExtent.IntersectsWith(deviceLayout))
+            var layout = new TextLayoutManager();
+            var positionedGlyphs = PrepareStringForDrawOrMeasure(layout, s, font, layoutRectangle, format);
+            if (positionedGlyphs == null) return; // nothing to draw
+            
+            foreach (var glyph in positionedGlyphs)
             {
-                return;
+                glyph.ApplyTransform(transform);
             }
-
-            // ensure we have a text layout manager
-            _textLayoutManager ??= new TextLayoutManager();
 
             // set the default temporary clip
             Region? clipTemp = null;
@@ -1621,8 +1604,7 @@ namespace Portable.Drawing
             lock (this)
             {
                 // get the clipping region, if needed
-                if (format == null ||
-                    ((format.FormatFlags & StringFormatFlags.NoClip) == 0))
+                if (format == null || (format.FormatFlags & StringFormatFlags.NoClip) == 0)
                 {
                     // get the clipping region, if there is one
                     if (_clip != null)
@@ -1638,11 +1620,7 @@ namespace Portable.Drawing
                 // attempt to draw the text
                 try
                 {
-                    // Workaround for calculation new font size, if a transformation is set
-                    // this does only work for scaling, not for rotation or multiply transformations
-
-                    // draw the text
-                    _textLayoutManager.Draw(this, s, font, deviceLayout, format, brush);
+                    ToolkitGraphics.FillGlyphs(positionedGlyphs, brush);
                 }
                 finally
                 {
@@ -1653,6 +1631,34 @@ namespace Portable.Drawing
                     }
                 }
             }
+        }
+
+        private int FontLayoutInflation(Font font)
+        {
+            return (int) (-font.SizeInPoints * DpiX / 369.7184);
+        }
+
+        private List<RenderableGlyph>? PrepareStringForDrawOrMeasure(TextLayoutManager layout, string? s, Font font, RectangleF layoutRectangle, StringFormat? format)
+        {
+            // make a little inset around the text dependent of the font size
+            layoutRectangle.Inflate(FontLayoutInflation(font), 0);
+
+            // convert the layout into device coordinates
+            Point[] rect = ConvertRectangle(layoutRectangle.X + baseWindow.X, layoutRectangle.Y + baseWindow.Y, layoutRectangle.Width - 1, layoutRectangle.Height - 1, PageUnit);
+
+            // create a layout rectangle from the device coordinates
+            var deviceLayout = new Rectangle(rect[0].X, rect[0].Y, (rect[1].X - rect[0].X + 1), (rect[2].Y - rect[0].Y + 1));
+
+            // bail out now if there's nothing to draw
+            if (_clip != null && !deviceClipExtent.IntersectsWith(deviceLayout)) return null;
+
+            // The 'deviceLayout' rectangle has world transform applied, but we need to re-apply it here
+            // So as a hack, we remove just the offset from our layout rect.
+            if (transform != null) deviceLayout.Offset((int) -transform.OffsetX, (int) -transform.OffsetY);
+
+            // Prepare all the glyphs ready for transform and render
+            var positionedGlyphs = layout.LayoutText(this, s, font, deviceLayout, format);
+            return positionedGlyphs;
         }
 
         public void DrawString(string s, Font font, Brush brush, float x, float y)
@@ -3294,21 +3300,21 @@ namespace Portable.Drawing
         // Measure the character ranges for a string.
         public Region[] MeasureCharacterRanges(string text, Font font, RectangleF layoutRect, StringFormat stringFormat)
         {
-            StringMeasurePositionCalculator calculator = new StringMeasurePositionCalculator(this, text, font, Rectangle.Truncate(layoutRect), stringFormat);
+            var calculator = new StringMeasurePositionCalculator(this, text, font, Rectangle.Truncate(layoutRect), stringFormat);
             return calculator.GetRegions();
         }
 
         // Non Microsoft
         public Rectangle[] MeasureCharacters(string text, Font font, RectangleF layoutRect, StringFormat stringFormat)
         {
-            StringMeasurePositionCalculator calculator = new StringMeasurePositionCalculator(this, text, font, Rectangle.Truncate(layoutRect), stringFormat);
+            var calculator = new StringMeasurePositionCalculator(this, text, font, Rectangle.Truncate(layoutRect), stringFormat);
             return calculator.GetCharBounds();
         }
 
         // Measure the size of a string.
         public SizeF MeasureString(string text, Font font)
         {
-            return MeasureString(text, font, new SizeF(0.0f, 0.0f), null);
+            return MeasureString(text, font, new SizeF(999999.0f, 999999.0f), null);
         }
 
         public SizeF MeasureString(string text, Font font, int width)
@@ -3356,70 +3362,48 @@ namespace Portable.Drawing
                 linesFilled = 0;
                 return new SizeF(0.0f, 0.0f);
             }
+            
+            var layoutMgr = new TextLayoutManager();
+            var layoutRectangle = new RectangleF(0,0, layoutArea.Width, layoutArea.Height);
+            var glyphs = PrepareStringForDrawOrMeasure(layoutMgr, text, font, layoutRectangle, format);
+            linesFilled = layoutMgr.LinesFitted;
+            charactersFitted = layoutMgr.CharactersFitted;
+            
+            var measured = FindBoundSize(glyphs);
+            
+            measured.Width -= FontLayoutInflation(font)*2;
+            measured.Height = Math.Max(measured.Height, GetLineSpacing(font));
+            
+            // IEB: need to add a bit to the box, like draw string does
+            return measured;
+        }
 
-            // ensure we have a string format
-            if (format == null)
+        private SizeF FindBoundSize(List<RenderableGlyph>? glyphs)
+        {
+            if (glyphs == null) return SizeF.Empty;
+
+            bool ever = false;
+            var minX = double.MaxValue;
+            var minY = double.MaxValue;
+            var maxX = double.MinValue;
+            var maxY = double.MinValue;
+            
+            foreach (var glyph in glyphs)
             {
-                format = new StringFormat();
+                foreach (var contour in glyph)
+                {
+                    ever = true;
+                    if (!contour.Bounds(out var gMinX, out var gMaxX, out var gMinY, out var gMaxY)) continue;
+                    
+                    minX = Math.Min(gMinX, minX);
+                    minY = Math.Min(gMinY, minY);
+                    maxX = Math.Max(gMaxX, maxX);
+                    maxY = Math.Max(gMaxY, maxY);
+                }
             }
-
-            // select the font
-            SelectFont(font);
-
-            // measure the string
-            Size size = ToolkitGraphics.MeasureString
-            (text, null, null, out charactersFitted,
-                out linesFilled, false);
-
-            // determine if the string contains a new line
-            bool containsNL =
-                (text.IndexOfAny(new char[] {'\r', '\n'}) >= 0);
-
-            // get the layout width
-            float width = layoutArea.Width;
-
-            // return the size information based on wrapping behavior
-            if ((format.FormatFlags & StringFormatFlags.NoWrap) == 0 &&
-                ((size.Width >= width && width != 0.0f) || containsNL))
-            {
-                // create the layout rectangle
-                var layout = new RectangleF
-                    (0, 0, (int) width, (int) layoutArea.Height);
-
-                // declare the drawing position calculator
-                StringDrawPositionCalculator calculator;
-
-                // create the drawing position calculator
-                calculator = new StringDrawPositionCalculator
-                    (text, this, font, layout, format);
-
-                // calculate the layout of the text
-                calculator.LayoutByWords();
-
-                // calculate and return the bounds of the text
-                SizeF s = calculator.GetBounds
-                    (out charactersFitted, out linesFilled);
-                s.Width += font.SizeInPoints * DpiX / 184.8592F;
-                return s;
-            }
-            else
-            {
-                // NOTE: we use the font height here, rather than
-                //       the height returned by the toolkit, since
-                //       the toolkit returns the actual height of
-                //       the text but the expected behavior is that
-                //       the height be the font height and the width
-                //       is all that is actually measured
-
-                // set the number of characters fitted
-                charactersFitted = text.Length;
-
-                // set the number of lines filled
-                linesFilled = 1;
-
-                // return the size of the text
-                return new SizeF(size.Width + font.SizeInPoints * DpiX / 184.8592f, /*font.Height*/ size.Height);
-            }
+            
+            if (!ever) return SizeF.Empty;
+            return new SizeF((float)(maxX - minX), (float)(maxY - minY));
         }
 
         // Multiply the transformation matrix by a specific amount.
@@ -4836,11 +4820,5 @@ namespace Portable.Drawing
                     bits, bitsWidth, bitsHeight, color);
             }
         }
-
-        #region /* TextLayoutManager */
-
-
-
-        #endregion /* TextLayoutManager */
     }; // class Graphics
 }; // namespace System.Drawing

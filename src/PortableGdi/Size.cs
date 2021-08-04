@@ -158,6 +158,10 @@ public struct Size
 				return new SizeF(size._width, size._height);
 			}
 
+	public SizeF AsSizeF()
+	{
+		return new(_width, _height);
+	}
 }; // struct Size
 		
 }; // namespace System.Drawing
