@@ -230,32 +230,6 @@ namespace Portable.Drawing.Toolkit.Portable
             }
         }
         
-        private void FillGlyph(double y, List<GlyphPoint[]> outline, double xOff, double scale, double yAdj)
-        {
-            if (Brush == null) return;
-            var frame = Target.Frame();
-            if (frame == null) return;
-            
-            var color = Brush.Color.ToArgb();
-            if (outline.Count < 1) return;
-            
-            var points = new List<RasterContour>();
-            foreach (var curve in outline)
-            {
-                var contour = new RasterContour(
-                    curve.Select(p =>
-                        new Vector2(
-                            xOff + p.X * scale,
-                            y + (0-p.Y) * scale - yAdj
-                        )
-                    )
-                );
-                points.Add(contour);
-            }
-            
-            SdfDraw.FillPolygon(frame, points.ToArray(), color, FillMode.Winding);
-        }
-
         public void DrawString(string s, Point[] layoutRectangle, StringFormat format)
         {
             throw new NotImplementedException();

@@ -27,6 +27,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
 
         public int LinesFitted => lineNumber + (glyphNumber>0?1:0);
         public int CharactersFitted => glyphNumber;
+        public double LastAdvance { get; private set; }
         
         public SizeF SizeFilled => new SizeF(maxLineSpaceUsed, lineHeight+LinesFitted); // IEB: need to get max width and total height
 
@@ -628,8 +629,8 @@ namespace Portable.Drawing.Toolkit.TextLayout
             var scale = pf.GetScale();
             
             // adjustment to have (x,y) be the top-left, rather than baseline-left
-            //var ry = y + font.Height() * scale;
-            var ry = y + pf.GetLineHeight();
+            var ry = y + font.Height() * scale;
+            //var ry = y + pf.GetLineHeight();
             
             double xOff = x; // advance for each character (not correct yet)
             foreach (char c in str)
@@ -644,12 +645,14 @@ namespace Portable.Drawing.Toolkit.TextLayout
                 var outline = gl.NormalisedContours(); // break into simple lines
 
                 var glyph = PositionGlyph(ry, outline, xOff + bearing, scale, yAdj);
-                if (glyph != null) output.Add(glyph);
+                LastAdvance = gl.Advance * scale;
+                if (glyph != null) output.Add(glyph); // IEB: need to add advance details for measuring
                 
                 xOff += gl.Advance * scale;
             }
         }
-        
+
+
         private RenderableGlyph? PositionGlyph(double y, List<GlyphPoint[]> outline, double xOff, double scale, double yAdj)
         {
             if (outline.Count < 1) return null;

@@ -3369,12 +3369,15 @@ namespace Portable.Drawing
             linesFilled = layoutMgr.LinesFitted;
             charactersFitted = layoutMgr.CharactersFitted;
             
+            if (glyphs is null) return SizeF.Empty;
+            
             var measured = FindBoundSize(glyphs);
             
             measured.Width -= FontLayoutInflation(font)*2;
-            measured.Height = Math.Max(measured.Height, GetLineSpacing(font));
+            measured.Width += (int)layoutMgr.LastAdvance;
             
-            // IEB: need to add a bit to the box, like draw string does
+            measured.Height = Math.Max(measured.Height, GetLineSpacing(font));
+
             return measured;
         }
 

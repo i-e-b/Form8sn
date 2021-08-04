@@ -29,6 +29,7 @@ namespace Portable.Drawing.Toolkit.Portable.Rasteriser
             }
         }
 
+        #region ICollection
         public IEnumerator<RasterContour> GetEnumerator() => _store.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         public void Add(RasterContour item) => _store.Add(item);
@@ -38,6 +39,7 @@ namespace Portable.Drawing.Toolkit.Portable.Rasteriser
         public bool Remove(RasterContour item) => _store.Remove(item);
         public int Count => _store.Count;
         public bool IsReadOnly => false;
+        #endregion
     }
     
     /// <summary>
