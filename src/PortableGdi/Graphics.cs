@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Portable.Drawing.Drawing2D;
 using Portable.Drawing.Imaging;
@@ -33,6 +34,12 @@ using Portable.Drawing.Toolkit.TextLayout;
 
 namespace Portable.Drawing
 {
+    internal enum Transforms
+    {
+        None = 0,
+        Apply = 1
+    }
+
     [ComVisible(false)]
     public sealed class Graphics : MarshalByRefObject, IDisposable
     {
@@ -414,7 +421,7 @@ namespace Portable.Drawing
                     }
                     else
                     {
-                        // Copy the given Matric, do not work on it directly
+                        // Copy the given Matrix, do not work on it directly
                         transform = new Matrix(value);
                     }
                 }
@@ -1590,8 +1597,9 @@ namespace Portable.Drawing
 
             var layout = new TextLayoutManager();
             var positionedGlyphs = PrepareStringForDrawOrMeasure(layout, s, font, layoutRectangle, format);
-            if (positionedGlyphs == null) return; // nothing to draw
+            if (positionedGlyphs == null || positionedGlyphs.Count < 1) return; // nothing to draw
             
+            // Our 'position' is a bit off here when the points are setup
             foreach (var glyph in positionedGlyphs)
             {
                 glyph.ApplyTransform(transform);
@@ -1633,6 +1641,35 @@ namespace Portable.Drawing
             }
         }
 
+        private static void BoundsOfStringGraphics(List<RenderableGlyph>? positionedGlyphs, out double minX, out double maxX, out double minY, out double maxY)
+        {
+            minX = double.MaxValue;
+            maxX = double.MinValue;
+            minY = double.MaxValue;
+            maxY = double.MinValue;
+            var c = 0;
+            foreach (var glyph in positionedGlyphs)
+            {
+                foreach (var contour in glyph)
+                {
+                    c++;
+                    if (!contour.Bounds(out var mx, out var Mx, out var my, out var My)) continue;
+                    minX = Math.Min(mx, minX);
+                    minY = Math.Min(my, minY);
+                    maxX = Math.Max(Mx, maxX);
+                    maxY = Math.Max(My, maxY);
+                }
+            }
+
+            if (c < 1)
+            {
+                minX = 0;
+                maxX = 0;
+                minY = 0;
+                maxY = 0;
+            }
+        }
+
         private int FontLayoutInflation(Font font)
         {
             return (int) (-font.SizeInPoints * DpiX / 369.7184);
@@ -1644,7 +1681,7 @@ namespace Portable.Drawing
             layoutRectangle.Inflate(FontLayoutInflation(font), 0);
 
             // convert the layout into device coordinates
-            Point[] rect = ConvertRectangle(layoutRectangle.X + baseWindow.X, layoutRectangle.Y + baseWindow.Y, layoutRectangle.Width - 1, layoutRectangle.Height - 1, PageUnit);
+            var rect = ConvertRectangle(layoutRectangle.X + baseWindow.X, layoutRectangle.Y + baseWindow.Y, layoutRectangle.Width - 1, layoutRectangle.Height - 1, PageUnit);
 
             // create a layout rectangle from the device coordinates
             var deviceLayout = new Rectangle(rect[0].X, rect[0].Y, (rect[1].X - rect[0].X + 1), (rect[2].Y - rect[0].Y + 1));
@@ -1652,12 +1689,8 @@ namespace Portable.Drawing
             // bail out now if there's nothing to draw
             if (_clip != null && !deviceClipExtent.IntersectsWith(deviceLayout)) return null;
 
-            // The 'deviceLayout' rectangle has world transform applied, but we need to re-apply it here
-            // So as a hack, we remove just the offset from our layout rect.
-            if (transform != null) deviceLayout.Offset((int) -transform.OffsetX, (int) -transform.OffsetY);
-
             // Prepare all the glyphs ready for transform and render
-            var positionedGlyphs = layout.LayoutText(this, s, font, deviceLayout, format);
+            var positionedGlyphs = layout.LayoutText(this, s, font, layoutRectangle, format);
             return positionedGlyphs;
         }
 
@@ -3478,24 +3511,16 @@ namespace Portable.Drawing
         // Apply a rotation to the transformation matrix.
         public void RotateTransform(float angle)
         {
-            // Do not use the property Transform directly, because Transform should return a Copy
-            transform = new Matrix(Transform);
-            transform.Rotate(angle);
-            if (transform.IsIdentity)
-            {
-                transform = null;
-            }
+            transform ??= new Matrix();
+            transform.Rotate(angle, MatrixOrder.Prepend);
+            if (transform.IsIdentity) { transform = null; }
         }
 
         public void RotateTransform(float angle, MatrixOrder order)
         {
-            // Do not use the property Transform directly, because Transform should return a Copy
-            transform = new Matrix(Transform);
+            transform ??= new Matrix();
             transform.Rotate(angle, order);
-            if (transform.IsIdentity)
-            {
-                transform = null;
-            }
+            if (transform.IsIdentity) { transform = null; }
         }
 
         // Save the current graphics state.
@@ -4199,13 +4224,13 @@ namespace Portable.Drawing
         }
 
         // Convert a point into device pixels.
-        private void ConvertPoint(ref int x, ref int y, GraphicsUnit graphicsUnit)
+        private void ConvertPoint(ref int x, ref int y, GraphicsUnit graphicsUnit, Transforms transforms = Transforms.Apply)
         {
             float newX, newY;
             float adjustX, adjustY;
 
             // Apply the world transform first.
-            if (transform != null)
+            if (transform != null && transforms == Transforms.Apply)
             {
                 transform.TransformPoint(x, y, out newX, out newY);
             }
@@ -4276,13 +4301,13 @@ namespace Portable.Drawing
             y = (int) (newY * adjustY);
         }
 
-        private void ConvertPoint(float x, float y, out int dx, out int dy, GraphicsUnit graphicsUnit)
+        private void ConvertPoint(float x, float y, out int dx, out int dy, GraphicsUnit graphicsUnit, Transforms transforms = Transforms.Apply)
         {
             float newX, newY;
             float adjustX, adjustY;
 
             // Apply the world transform first.
-            if (transform != null)
+            if (transform != null && transforms == Transforms.Apply)
             {
                 transform.TransformPoint(x, y, out newX, out newY);
             }
@@ -4354,18 +4379,11 @@ namespace Portable.Drawing
         }
 
         // Convert a list of points into device pixels.
-        private Point[] ConvertPoints(Point[] points, int minPoints, GraphicsUnit unit)
+        private Point[] ConvertPoints(Point[] points, int minPoints, GraphicsUnit unit, Transforms transforms = Transforms.Apply)
         {
             // Validate the parameter.
-            if (points == null)
-            {
-                throw new ArgumentNullException("points");
-            }
-
-            if (points.Length < minPoints)
-            {
-                throw new ArgumentException("Arg_NeedsAtLeastNPoints");
-            }
+            if (points == null) throw new ArgumentNullException(nameof(points));
+            if (points.Length < minPoints) throw new ArgumentException("Arg_NeedsAtLeastNPoints");
 
             // Convert the "points" array.
             Point[] newPoints = new Point [points.Length];
@@ -4375,25 +4393,18 @@ namespace Portable.Drawing
             {
                 x = points[posn].X;
                 y = points[posn].Y;
-                ConvertPoint(ref x, ref y, unit);
+                ConvertPoint(ref x, ref y, unit, transforms);
                 newPoints[posn] = new Point(x, y);
             }
 
             return newPoints;
         }
 
-        private Point[] ConvertPoints(PointF[] points, int minPoints, GraphicsUnit unit)
+        private Point[] ConvertPoints(PointF[] points, int minPoints, GraphicsUnit unit, Transforms transforms = Transforms.Apply)
         {
             // Validate the parameter.
-            if (points == null)
-            {
-                throw new ArgumentNullException("points");
-            }
-
-            if (points.Length < minPoints)
-            {
-                return Array.Empty<Point>();
-            }
+            if (points == null) throw new ArgumentNullException(nameof(points));
+            if (points.Length < minPoints) return Array.Empty<Point>();
 
             // Convert the "points" array.
             Point[] newPoints = new Point [points.Length];
@@ -4401,7 +4412,7 @@ namespace Portable.Drawing
             int posn;
             for (posn = 0; posn < points.Length; ++posn)
             {
-                ConvertPoint(points[posn].X, points[posn].Y, out x, out y, unit);
+                ConvertPoint(points[posn].X, points[posn].Y, out x, out y, unit, transforms);
                 newPoints[posn] = new Point(x, y);
             }
 
@@ -4450,25 +4461,27 @@ namespace Portable.Drawing
         // Convert a rectangle into a set of 4 device co-ordinates.
         // The result may be a parallelogram, not a rectangle.
         private Point[] ConvertRectangle(int x, int y,
-            int width, int height, GraphicsUnit unit)
+            int width, int height, GraphicsUnit unit,
+            Transforms transforms = Transforms.Apply)
         {
             Point[] points = new Point[4];
             points[0] = new Point(x, y);
             points[1] = new Point(x + width, y);
             points[2] = new Point(x + width, y + height);
             points[3] = new Point(x, y + height);
-            return ConvertPoints(points, 4, unit);
+            return ConvertPoints(points, 4, unit, transforms);
         }
 
         private Point[] ConvertRectangle(float x, float y,
-            float width, float height, GraphicsUnit unit)
+            float width, float height, GraphicsUnit unit,
+            Transforms transforms = Transforms.Apply)
         {
             PointF[] points = new PointF[4];
             points[0] = new PointF(x, y);
             points[1] = new PointF(x + width, y);
             points[2] = new PointF(x + width, y + height);
             points[3] = new PointF(x, y + height);
-            return ConvertPoints(points, 4, unit);
+            return ConvertPoints(points, 4, unit, transforms);
         }
 
         // Convert a size value from device co-ordinates to graphics units.

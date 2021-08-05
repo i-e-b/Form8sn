@@ -23,7 +23,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
         private int lineSpaceUsedUp;
         private int maxLineSpaceUsed;
         private int nextIndex;
-        private Rectangle layout;
+        private RectangleF layout;
 
         public int LinesFitted => lineNumber + (glyphNumber>0?1:0);
         public int CharactersFitted => glyphNumber;
@@ -40,7 +40,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
         private static readonly StringFormat _defaultStringFormat = StringFormat.GenericDefault;
         private static readonly Point[] _measureLayoutRect = new Point[0];
             
-        public List<RenderableGlyph> LayoutText(Graphics graphics, string? text, Font font, Rectangle drawLayout, StringFormat? format)
+        public List<RenderableGlyph> LayoutText(Graphics graphics, string? text, Font font, RectangleF drawLayout, StringFormat? format)
         {
             var output = new List<RenderableGlyph>();
             if (text == null) return output;
@@ -139,10 +139,10 @@ namespace Portable.Drawing.Toolkit.TextLayout
                 if (_format.LineAlignment == StringAlignment.Near)
                 {
                     // set the current y position
-                    int y = layout.Top;
+                    var y = layout.Top;
 
                     // get the maximum y position
-                    int maxY = layout.Bottom;
+                    var maxY = layout.Bottom;
 
                     // adjust for whole lines, if needed
                     if (onlyWholeLines)
@@ -151,7 +151,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
                     }
 
                     // get the last line y position
-                    int lastLineY = maxY - lineHeight;
+                    var lastLineY = maxY - lineHeight;
 
                     // create character spans
                     CharSpan span = new();
@@ -236,7 +236,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
                     // calculate lines to draw
                     if (onlyWholeLines)
                     {
-                        linesToDraw = layout.Height / lineHeight;
+                        linesToDraw = (int) Math.Floor((double) layout.Height / lineHeight);
                     }
                     else
                     {
@@ -318,7 +318,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
                     }
 
                     // calculate the top line y
-                    int y = (layout.Height - (linePos * lineHeight));
+                    var y = (layout.Height - (linePos * lineHeight));
 
                     // adjust y for center alignment, if needed
                     if (_format.LineAlignment == StringAlignment.Center)
@@ -426,12 +426,12 @@ namespace Portable.Drawing.Toolkit.TextLayout
         }
         
         // Draw a line.
-        private void DrawLine (List<RenderableGlyph> output, int start, int length, int width, int y, bool lastLine)
+        private void DrawLine (List<RenderableGlyph> output, int start, int length, int width, float y, bool lastLine)
         {
             if (_text == null || _format == null) throw new InvalidOperationException("Text layout manager has invalid arguments");
             
             // set default x position
-            int x;
+            float x;
 
             // set truncate line flag
             bool truncateLine = (lastLine && ((start + length) < _text.Length)) ||
@@ -466,7 +466,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
             string? ellipsis = null;
 
             // set the maximum width
-            int maxWidth = layout.Width;
+            var maxWidth = layout.Width;
 
             // 
             if (_format.Trimming == StringTrimming.EllipsisCharacter ||
@@ -619,7 +619,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
         /// <summary>
         /// Position font glyphs and add them to the output. This does no rendering
         /// </summary>
-        private void AddGlyphs(List<RenderableGlyph> output, string str, int x, int y, StringFormat format)
+        private void AddGlyphs(List<RenderableGlyph> output, string str, float x, float y, StringFormat format)
         {
             var tkf = _font?.GetToolkitFont();
             if (!(tkf is PortableFont pf)) throw new Exception($"Tried to measure using font def: {tkf?.GetType().FullName ?? "<null>"}");
@@ -675,7 +675,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
 
 
         // Draw a line containing hotkey text.
-        private void DrawLineWithHotKey(List<RenderableGlyph> output, string text, int start, int length, int x, int y)
+        private void DrawLineWithHotKey(List<RenderableGlyph> output, string text, int start, int length, float x, float y)
         {
             if (_graphics == null || _format == null) return;
             
@@ -730,7 +730,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
         // Calculate text metrics information.
         //
         // Note that this is currently broken. Turn this on at your own risk.
-        public Size GetBounds
+        public SizeF GetBounds
         (Graphics graphics, string text, Font font,
             SizeF layoutSize, StringFormat? format,
             out int charactersFitted, out int linesFilled)
@@ -775,7 +775,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
             int textWidth = 0;
 
             // set the maximum width
-            int maxWidth = 0;
+            float maxWidth = 0;
 
             // set the default characters fitted
             charactersFitted = 0;
@@ -877,7 +877,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
             }
 
             // calculate the height
-            int height = (lineHeight * linesFilled);
+            float height = (lineHeight * linesFilled);
 
             // update the height, if needed
             if (height > layout.Height)
@@ -886,7 +886,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
             }
 
             // return the size of the text
-            return new Size(maxWidth, height);
+            return new SizeF(maxWidth, height);
         }
 
         // Get the next span of characters.
@@ -997,7 +997,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
         }
 
         // Calculate the position of the line based on the formatting and width.
-        private int GetXPosition(int width)
+        private float GetXPosition(int width)
         {
             if (_format == null) throw new InvalidOperationException();
             
@@ -1028,7 +1028,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
         //
         // Returns the length of characters from the string once it is trimmed.
         // The "width" variable returns the pixel width of the trimmed string.
-        private int TrimTextToChar (int start, int length, int maxWidth, out int width)
+        private int TrimTextToChar (int start, int length, float maxWidth, out int width)
         {
             if (_text == null || _format == null) throw new InvalidOperationException();
             
@@ -1104,7 +1104,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
         // the characters removed in the center of the string but also tries
         // to guarantee that the last path separator character is shown.
         private string TrimToPath
-        (int start, int length, int maxWidth, out int width,
+        (int start, int length, float maxWidth, out int width,
             string ellipsis)
         {
             if (_text == null || _format == null) throw new InvalidOperationException();
@@ -1239,7 +1239,7 @@ namespace Portable.Drawing.Toolkit.TextLayout
         // If the string has no words then it is trimmed to the nearest
         // character.
         private int TrimTextToWord
-            (int start, int length, int maxWidth, out int width)
+            (int start, int length, float maxWidth, out int width)
         {
             if (_text == null || _format == null) throw new InvalidOperationException();
             

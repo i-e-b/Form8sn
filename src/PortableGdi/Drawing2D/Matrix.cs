@@ -34,6 +34,11 @@ namespace Portable.Drawing.Drawing2D
     {
         // Internal state.
         private float m11, m12, m21, m22;
+        private float _offsetX;
+        private float _offsetY;
+
+        public float OffsetX => _offsetX;
+        public float OffsetY => _offsetY;
 
         // Constructors.
         public Matrix()
@@ -42,8 +47,8 @@ namespace Portable.Drawing.Drawing2D
             m12 = 0.0f;
             m21 = 0.0f;
             m22 = 1.0f;
-            OffsetX = 0.0f;
-            OffsetY = 0.0f;
+            _offsetX = 0.0f;
+            _offsetY = 0.0f;
         }
 
         public Matrix(Rectangle rect, Point[] plgpts)
@@ -93,8 +98,8 @@ namespace Portable.Drawing.Drawing2D
                 plgpts[2].X - plgpts[0].X,
                 plgpts[2].Y - plgpts[0].Y
             );
-            OffsetX = plgpts[0].X - rect.X / rect.Width * v1.X - rect.Y / rect.Height * v2.X;
-            OffsetY = plgpts[0].Y - rect.X / rect.Width * v1.Y - rect.Y / rect.Height * v2.Y;
+            _offsetX = plgpts[0].X - rect.X / rect.Width * v1.X - rect.Y / rect.Height * v2.X;
+            _offsetY = plgpts[0].Y - rect.X / rect.Width * v1.Y - rect.Y / rect.Height * v2.Y;
             m11 = v1.X / rect.Width;
             m12 = v1.Y / rect.Width;
             m21 = v2.X / rect.Height;
@@ -113,8 +118,8 @@ namespace Portable.Drawing.Drawing2D
             this.m12 = m12;
             this.m21 = m21;
             this.m22 = m22;
-            OffsetX = dx;
-            OffsetY = dy;
+            _offsetX = dx;
+            _offsetY = dy;
         }
 
         internal Matrix(Matrix matrix)
@@ -123,8 +128,8 @@ namespace Portable.Drawing.Drawing2D
             m12 = matrix.m12;
             m21 = matrix.m21;
             m22 = matrix.m22;
-            OffsetX = matrix.OffsetX;
-            OffsetY = matrix.OffsetY;
+            _offsetX = matrix._offsetX;
+            _offsetY = matrix._offsetY;
         }
 
 
@@ -133,7 +138,7 @@ namespace Portable.Drawing.Drawing2D
         {
             get
             {
-					return new float[] {m11, m12, m21, m22, OffsetX, OffsetY};
+					return new float[] {m11, m12, m21, m22, _offsetX, _offsetY};
             }
         }
 
@@ -144,7 +149,7 @@ namespace Portable.Drawing.Drawing2D
             {
                 return (m11 == 1.0f && m12 == 0.0f &&
                         m21 == 0.0f && m22 == 1.0f &&
-                        OffsetX == 0.0f && OffsetY == 0.0f);
+                        _offsetX == 0.0f && _offsetY == 0.0f);
             }
         }
 
@@ -153,12 +158,6 @@ namespace Portable.Drawing.Drawing2D
         {
             get { return (Determinant() != 0.0f); }
         }
-
-        // Get the X offset value.
-        public float OffsetX { get; private set; }
-
-        // Get the Y offset value.
-        public float OffsetY { get; private set; }
 
         // Dispose of this matrix.
         public void Dispose()
@@ -174,7 +173,7 @@ namespace Portable.Drawing.Drawing2D
             {
                 return (other.m11 == m11 && other.m12 == m12 &&
                         other.m21 == m21 && other.m22 == m22 &&
-                        other.OffsetX == OffsetX && other.OffsetY == OffsetY);
+                        other._offsetX == _offsetX && other._offsetY == _offsetY);
             }
             else
             {
@@ -185,7 +184,7 @@ namespace Portable.Drawing.Drawing2D
         // Get a hash code for this object.
         public override int GetHashCode()
         {
-            return (int) (m11 + m12 + m21 + m22 + OffsetX + OffsetY);
+            return (int) (m11 + m12 + m21 + m22 + _offsetX + _offsetY);
         }
 
         // Invert this matrix.
@@ -203,9 +202,9 @@ namespace Portable.Drawing.Drawing2D
                 m12 = -(this.m12 / determinant);
                 m21 = -(this.m21 / determinant);
                 m22 = this.m11 / determinant;
-                dx = (this.m21 * OffsetY - this.m22 * OffsetX)
+                dx = (this.m21 * _offsetY - this.m22 * _offsetX)
                      / determinant;
-                dy = (this.m12 * OffsetX - this.m11 * OffsetY)
+                dy = (this.m12 * _offsetX - this.m11 * _offsetY)
                      / determinant;
 
                 // Write the temporary variables back to the matrix.
@@ -213,8 +212,8 @@ namespace Portable.Drawing.Drawing2D
                 this.m12 = m12;
                 this.m21 = m21;
                 this.m22 = m22;
-                OffsetX = dx;
-                OffsetY = dy;
+                _offsetX = dx;
+                _offsetY = dy;
             }
         }
 
@@ -234,20 +233,20 @@ namespace Portable.Drawing.Drawing2D
                   matrix1.m22 * matrix2.m21;
             m22 = matrix1.m21 * matrix2.m12 +
                   matrix1.m22 * matrix2.m22;
-            dx = matrix1.OffsetX * matrix2.m11 +
-                 matrix1.OffsetY * matrix2.m21 +
-                 matrix2.OffsetX;
-            dy = matrix1.OffsetX * matrix2.m12 +
-                 matrix1.OffsetY * matrix2.m22 +
-                 matrix2.OffsetY;
+            dx = matrix1._offsetX * matrix2.m11 +
+                 matrix1._offsetY * matrix2.m21 +
+                 matrix2._offsetX;
+            dy = matrix1._offsetX * matrix2.m12 +
+                 matrix1._offsetY * matrix2.m22 +
+                 matrix2._offsetY;
 
             // Write the result back into the "this" object.
             this.m11 = m11;
             this.m12 = m12;
             this.m21 = m21;
             this.m22 = m22;
-            OffsetX = dx;
-            OffsetY = dy;
+            _offsetX = dx;
+            _offsetY = dy;
         }
 
         // Multiply two matrices.
@@ -285,8 +284,8 @@ namespace Portable.Drawing.Drawing2D
             m12 = 0.0f;
             m21 = 0.0f;
             m22 = 1.0f;
-            OffsetX = 0.0f;
-            OffsetY = 0.0f;
+            _offsetX = 0.0f;
+            _offsetY = 0.0f;
         }
 
         // Perform a rotation on this matrix.
@@ -321,15 +320,15 @@ namespace Portable.Drawing.Drawing2D
                 m12 = this.m11 * sin + this.m12 * cos;
                 m21 = this.m21 * cos - this.m22 * sin;
                 m22 = this.m21 * sin + this.m22 * cos;
-                dx = this.OffsetX * cos - this.OffsetY * sin;
-                dy = this.OffsetX * sin + this.OffsetY * cos;
+                dx = this._offsetX * cos - this._offsetY * sin;
+                dy = this._offsetX * sin + this._offsetY * cos;
 
                 this.m11 = m11;
                 this.m12 = m12;
                 this.m21 = m21;
                 this.m22 = m22;
-                this.OffsetX = dx;
-                this.OffsetY = dy;
+                this._offsetX = dx;
+                this._offsetY = dy;
             }
         }
 
@@ -381,8 +380,8 @@ namespace Portable.Drawing.Drawing2D
                 m12 *= scaleY;
                 m21 *= scaleX;
                 m22 *= scaleY;
-                OffsetX *= scaleX;
-                OffsetY *= scaleY;
+                _offsetX *= scaleX;
+                _offsetY *= scaleY;
             }
         }
 
@@ -426,15 +425,15 @@ namespace Portable.Drawing.Drawing2D
                 m12 = this.m11 * shearY + this.m12;
                 m21 = this.m21 + this.m22 * shearX;
                 m22 = this.m21 * shearY + this.m22;
-                dx = OffsetX + OffsetY * shearX;
-                dy = OffsetX * shearY + OffsetY;
+                dx = _offsetX + _offsetY * shearX;
+                dy = _offsetX * shearY + _offsetY;
 
                 this.m11 = m11;
                 this.m12 = m12;
                 this.m21 = m21;
                 this.m22 = m22;
-                OffsetX = dx;
-                OffsetY = dy;
+                _offsetX = dx;
+                _offsetY = dy;
             }
         }
 
@@ -452,8 +451,8 @@ namespace Portable.Drawing.Drawing2D
             {
                 x = (float) (pts[posn].X);
                 y = (float) (pts[posn].Y);
-                pts[posn].X = (int) (x * m11 + y * m21 + OffsetX);
-                pts[posn].Y = (int) (x * m12 + y * m22 + OffsetY);
+                pts[posn].X = (int) (x * m11 + y * m21 + _offsetX);
+                pts[posn].Y = (int) (x * m12 + y * m22 + _offsetY);
             }
         }
 
@@ -468,8 +467,8 @@ namespace Portable.Drawing.Drawing2D
             {
                 var x = pts[i].X;
                 var y = pts[i].Y;
-                pts[i].X = x * m11 + y * m21 + OffsetX;
-                pts[i].Y = x * m12 + y * m22 + OffsetY;
+                pts[i].X = x * m11 + y * m21 + _offsetX;
+                pts[i].Y = x * m12 + y * m22 + _offsetY;
             }
         }
         
@@ -484,8 +483,8 @@ namespace Portable.Drawing.Drawing2D
             {
                 var x = pts[i].X;
                 var y = pts[i].Y;
-                pts[i].X = x * m11 + y * m21 + OffsetX;
-                pts[i].Y = x * m12 + y * m22 + OffsetY;
+                pts[i].X = x * m11 + y * m21 + _offsetX;
+                pts[i].Y = x * m12 + y * m22 + _offsetY;
             }
         }
 
@@ -526,21 +525,21 @@ namespace Portable.Drawing.Drawing2D
         // Translate the matrix.
         public void Translate(float offsetX, float offsetY)
         {
-            OffsetX += offsetX * m11 + offsetY * m21;
-            OffsetY += offsetX * m12 + offsetY * m22;
+            _offsetX += offsetX * m11 + offsetY * m21;
+            _offsetY += offsetX * m12 + offsetY * m22;
         }
 
         public void Translate(float offsetX, float offsetY, MatrixOrder order)
         {
             if (order == MatrixOrder.Prepend)
             {
-                OffsetX += offsetX * m11 + offsetY * m21;
-                OffsetY += offsetX * m12 + offsetY * m22;
+                _offsetX += offsetX * m11 + offsetY * m21;
+                _offsetY += offsetX * m12 + offsetY * m22;
             }
             else
             {
-                OffsetX += offsetX;
-                OffsetY += offsetY;
+                _offsetX += offsetX;
+                _offsetY += offsetY;
             }
         }
 
@@ -551,7 +550,7 @@ namespace Portable.Drawing.Drawing2D
             {
                 return new Matrix(matrix.m11, matrix.m12,
                     matrix.m21, matrix.m22,
-                    matrix.OffsetX, matrix.OffsetY);
+                    matrix._offsetX, matrix._offsetY);
             }
             else
             {
@@ -562,8 +561,8 @@ namespace Portable.Drawing.Drawing2D
         // Transform a particular point - faster version for only one point.
         internal void TransformPoint(float x, float y, out float ox, out float oy)
         {
-            ox = x * m11 + y * m21 + OffsetX;
-            oy = x * m12 + y * m22 + OffsetY;
+            ox = x * m11 + y * m21 + _offsetX;
+            oy = x * m12 + y * m22 + _offsetY;
         }
 
         // Transform a size value according to the inverse transformation.
@@ -607,6 +606,13 @@ namespace Portable.Drawing.Drawing2D
         internal float TransformFontSize(float fIn)
         {
             return Math.Abs(Math.Min(m11, m22) * fIn);
+        }
+
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"[{m11},{m12}\r\n,{m21},{m22}\r\n,{_offsetX},{_offsetY}]";
         }
     }; // class Matrix
 }; // namespace System.Drawing.Drawing2D

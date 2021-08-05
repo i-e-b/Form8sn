@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using NUnit.Framework;
-
 using Real = System.Drawing;
 using Port = Portable.Drawing;
 
@@ -10,6 +9,13 @@ namespace PortableGdiTests
     [TestFixture]
     public class BasicDrawingTests
     {
+        /*
+        TODO:
+            * Other draw operations
+            * Clip & mask (especially around text)
+            * Other brush types (esp. textures)
+            * Other pen types (width etc)
+        */
         [Test]
         public void portable_gdi_can_draw_to_an_image_like_real_gdi()
         {
@@ -41,11 +47,11 @@ namespace PortableGdiTests
                 g.DrawString("This should be tricky to render %$&@ 日本人 (にほんじん) ", realFontSmall, Real.Brushes.Maroon, 10, 250+sz.Height);
                 
                 var tf = g.Transform;
-                tf.Translate(sz.Width + 50, 250);
-                tf.Rotate(10);
-                tf.Shear(0.1f, 0);
-                g.Transform = tf;
-                g.DrawString("transforms", realFont, Real.Brushes.Sienna, 0, 0);
+                var sz2 = g.MeasureString("transforms", realFont);
+                tf.Translate(sz.Width + sz2.Width/2, 250); tf.Rotate(10); tf.Shear(0.1f, 0); g.Transform = tf;
+                g.DrawString("transforms", realFont, Real.Brushes.Sienna, -sz2.Width/2, 0);
+                g.RotateTransform(180);
+                g.DrawString("transforms", realFont, Real.Brushes.Sienna, -sz2.Width/2, 0);
                 g.ResetTransform();
                 
                 bmp.Save("Z_simple_real.png", Real.Imaging.ImageFormat.Png);
@@ -54,6 +60,7 @@ namespace PortableGdiTests
             Console.WriteLine($"Real GDI took {sw.ElapsedMilliseconds}ms");
             
             // Portable GDI
+            // This should be a copy&paste of above with 'Real'->'Port'
             sw.Restart();
             using (var bmp = new Port.Bitmap(800, 600, Port.Imaging.PixelFormat.Format24bppRgb))
             {
@@ -73,12 +80,13 @@ namespace PortableGdiTests
                 g.DrawString("This should be tricky to render %$&@ 日本人 (にほんじん) ", portFontSmall, Port.Brushes.Maroon, 10, 250+sz.Height);
                 
                 var tf = g.Transform;
-                tf.Translate(sz.Width + 50, 250);
-                tf.Rotate(10);
-                tf.Shear(0.1f, 0);
-                g.Transform = tf;
-                g.DrawString("transforms", portFont, Port.Brushes.Sienna, 0, 0);
+                var sz2 = g.MeasureString("transforms", portFont);
+                tf.Translate(sz.Width + sz2.Width/2, 250); tf.Rotate(10); tf.Shear(0.1f, 0); g.Transform = tf;
+                g.DrawString("transforms", portFont, Port.Brushes.Sienna, -sz2.Width/2, 0);
+                g.RotateTransform(180);
+                g.DrawString("transforms", portFont, Port.Brushes.Sienna, -sz2.Width/2, 0);
                 g.ResetTransform();
+                
                 bmp.Save("Z_simple_portable.png", Port.Imaging.ImageFormat.Png);
             }
             sw.Stop();
