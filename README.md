@@ -1,22 +1,6 @@
 # Form8sn
 Generate PDF based templates, and fill them in from data objects
 
-Here's a big pile of links for when I get around to this:
-
-* https://www.codeproject.com/Articles/10157/Gios-PDF-NET-library
-* https://github.com/libharu/libharu
-* http://podofo.sourceforge.net/
-* https://github.com/galkahana/PDF-Writer
-* http://www.jagpdf.org/downloads.htm
-* https://github.com/sumatrapdfreader/sumatrapdf
-* https://github.com/diegomura/react-pdf   &    https://github.com/wojtekmaj/react-pdf
-* https://github.com/prawnpdf/prawn
-* https://github.com/empira/PDFsharp
-* https://github.com/LibrePDF/OpenPDF
-* https://pdfbox.apache.org/
-* https://github.com/UglyToad/PdfPig/
-
-
 The general plan:
 -----------------
 
