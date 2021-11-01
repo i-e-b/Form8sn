@@ -13,6 +13,12 @@ namespace WebFormFiller.Controllers
     {
         public IActionResult Index()
         {
+            // TODO: list out documents, option to create/delete
+            return View();
+        }
+
+        public IActionResult BoxEditor(int docId)
+        {
             return View();
         }
     }

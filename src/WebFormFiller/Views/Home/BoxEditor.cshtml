@@ -1,0 +1,195 @@
+﻿@model DocumentTemplateViewModel
+
+@{
+    ViewBag!.Title = "Document editor";
+    Layout = "_Layout";
+    var pdfWorkerSource = Url!.Content("~/js/pdf.worker.js");
+}
+
+@* PAGE CONTROLS *@
+<div>
+    <button id="prev">Previous</button>
+    <button id="next">Next</button>
+    &nbsp; &nbsp;
+    <span>Page: <span id="page_num"></span> / <span id="page_count"></span></span>
+</div>
+
+@* PAGE RENDERING *@
+<div id="container">
+    <canvas id="pdf-render" class="subCanvas"></canvas>
+    <canvas id="box-render" class="subCanvas"></canvas>
+</div>
+
+@* Taken from https://mozilla.github.io/pdf.js/build/pdf.js *@
+<script src="~/js/pdf.js" asp-append-version="true"></script>
+
+<script>
+// Load a sample PDF with complex elements and multiple pages
+var url = 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf';
+
+// Read PDF.js exports from the ~/js/pdf.js file
+var pdfjsLib = window['pdfjs-dist/build/pdf'];
+
+// Setup the workerSrc property. Originally from https://mozilla.github.io/pdf.js/build/pdf.worker.js
+pdfjsLib.GlobalWorkerOptions.workerSrc = "@pdfWorkerSource";
+
+// PDF rendering bits
+var pdfDoc = null,
+    pageNum = 1,
+    pageRendering = false,
+    pageNumPending = null,
+    scale = 2.8, // zoom level of the PDF
+    // TODO: ability to change the scale level and update the rendering
+    pdfCanvas = document.getElementById('pdf-render'),
+    pdfCtx = pdfCanvas.getContext('2d');
+
+// Box rendering bits
+var outerContainer = document.getElementById("container");
+var boxCanvas = document.getElementById("box-render");
+var boxCtx = boxCanvas.getContext("2d");
+
+
+/**
+ * Get page info from document, resize canvas accordingly, and render page.
+ * num is Page number.
+ */
+function renderPage(num) {
+  pageRendering = true;
+  // Using promise to fetch the page
+  pdfDoc.getPage(num).then(function(page) {
+    var viewport = page.getViewport({scale: scale});
+    console.dir(viewport);
+    console.log(`Native PDF page size is ${viewport.height}x${viewport.width}`);
+    outerContainer.style.width = viewport.width+'px'; 
+    outerContainer.style.height = viewport.height+'px'; 
+    
+    pdfCanvas.height = viewport.height;
+    pdfCanvas.width = viewport.width;
+    
+    boxCanvas.height = viewport.height;
+    boxCanvas.width = viewport.width;
+    
+    // Render PDF page into canvas context
+    var renderContext = {
+      canvasContext: pdfCtx,
+      viewport: viewport
+    };
+    var renderTask = page.render(renderContext);
+
+    // Wait for rendering to finish
+    renderTask.promise.then(function() {
+      pageRendering = false;
+      if (pageNumPending !== null) {
+        // New page rendering is pending
+        renderPage(pageNumPending);
+        pageNumPending = null;
+      }
+    });
+  });
+
+  // Update page counters
+  document.getElementById('page_num').textContent = num;
+}
+
+/**
+ * If another page rendering in progress, waits until the rendering is
+ * finished. Otherwise, executes rendering immediately.
+ */
+function queueRenderPage(num) {
+  if (pageRendering) {
+    pageNumPending = num;
+  } else {
+    renderPage(num);
+  }
+}
+
+
+// Click event for loading previous page
+function onPrevPage() {
+  if (pageNum <= 1) { return; }
+  pageNum--;
+  queueRenderPage(pageNum);
+}
+document.getElementById('prev').addEventListener('click', onPrevPage); // bind event to button
+
+// Click event for loading next page
+function onNextPage() {
+  if (pageNum >= pdfDoc.numPages) { return; }
+  pageNum++;
+  queueRenderPage(pageNum);
+}
+document.getElementById('next').addEventListener('click', onNextPage); // bind event to button
+
+</script>
+
+@* BOX DRAW SCRIPTS *@
+<script>
+(function() {
+	
+	// TODO: NEXT STEP:
+	// Need to work out the proportion of the canvas we are at, based on the HTML viewport
+	// Then work that back onto canvas co-ords and draw.
+	
+	var canvas = document.querySelector('#box-render');
+	var ctx = canvas.getContext('2d');
+	
+	var sketch = document.querySelector('#container');
+	var sketch_style = getComputedStyle(sketch);
+	//canvas.width = parseInt(sketch_style.getPropertyValue('width'));
+	//canvas.height = parseInt(sketch_style.getPropertyValue('height'));
+
+	var mouse = {x: 0, y: 0};
+	var last_mouse = {x: 0, y: 0};
+	
+	/* Mouse Capturing Work */
+	canvas.addEventListener('mousemove', function(e) {
+		last_mouse.x = mouse.x;
+		last_mouse.y = mouse.y;
+		
+		//console.log(`div left = ${sketch.offsetLeft}, canvas left = ${canvas.offsetLeft}, test = ${canvas.scrollLeft}`);
+		
+		//mouse.x = e.pageX; - sketch.offsetLeft;
+		//mouse.y = e.pageY; - sketch.offsetTop;
+		
+		mouse.x = e.offsetX; - sketch.offsetLeft;
+		mouse.y = e.offsetY; - sketch.offsetTop;
+	}, false);
+	
+	
+	/* Drawing on Paint App */
+	ctx.lineWidth = 5;
+	ctx.lineJoin = 'round';
+	ctx.lineCap = 'round';
+	ctx.strokeStyle = 'blue';
+	
+	canvas.addEventListener('mousedown', function(e) {
+		canvas.addEventListener('mousemove', onPaint, false);
+	}, false);
+	
+	canvas.addEventListener('mouseup', function() {
+		canvas.removeEventListener('mousemove', onPaint, false);
+	}, false);
+	
+	var onPaint = function() {
+		ctx.beginPath();
+		ctx.moveTo(last_mouse.x, last_mouse.y);
+		ctx.lineTo(mouse.x, mouse.y);
+		ctx.closePath();
+		ctx.stroke();
+	};
+	
+}());
+</script>
+
+@* PDF LOAD SCRIPTS *@
+<script>
+// Actually load the PDF (async then call our page render)
+// This requires a modern web browser that supports promises.
+pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
+  pdfDoc = pdfDoc_;
+  document.getElementById('page_count').textContent = pdfDoc.numPages;
+
+  // Initial/first page rendering
+  renderPage(pageNum);
+});
+</script>
