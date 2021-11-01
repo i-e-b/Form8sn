@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
@@ -38,6 +39,15 @@
       <_ContentIncludedByDefault Remove="wwwroot\lib\jquery\dist\jquery.min.js" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\jquery\dist\jquery.min.map" />
       <_ContentIncludedByDefault Remove="wwwroot\lib\jquery\LICENSE.txt" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Form8snCore\Form8snCore.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="SkinnyJson" Version="2.0.2" />
+      <PackageReference Include="Sync" Version="1.0.1" />
     </ItemGroup>
 
 </Project>

@@ -1,0 +1,14 @@
+﻿@model NewTemplateViewModel
+
+@{
+    ViewBag!.Title = "Create new template";
+    Layout = "_Layout";
+}
+
+<h2>Create new template</h2>
+<form asp-action="StartNewTemplate" method="post" enctype="multipart/form-data">
+    <input asp-for="@Model!.Title" type="text" value="@Model!.Title"/>
+    <input asp-for="@Model!.Upload" type="file"/>
+    
+    <button type="submit">Submit</button>
+</form>

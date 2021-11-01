@@ -1,8 +1,17 @@
-﻿@{
+﻿@model TemplateListViewModel
+
+@{
     ViewData!["Title"] = "Home Page";
 }
 
 <div class="text-center">
-    The view engine goes here
+    Template editor
 </div>
-<a asp-action="BoxEditor">Sample box editor</a>
+<a asp-action="StartNewTemplate">Upload new form</a>
+
+<ul>
+    @foreach (var item in Model!.Templates)
+    {
+        <li><a asp-action="BoxEditor" asp-route-docId="@item">@item</a></li>
+    }
+</ul>
