@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using Form8snCore.FileFormats;
+using Form8snCore.UiHelpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WebFormFiller.Models;
@@ -9,10 +11,30 @@ namespace WebFormFiller.Controllers
 {
     public class HomeController : Controller
     {
+        [HttpGet]
         public IActionResult Index()
         {
             // TODO: list out documents, option to create/delete
-            return View(new TemplateListViewModel{Templates = FileDatabaseStub.ListDocumentTemplates()})!;
+            return View(new TemplateListViewModel{
+                Templates = FileDatabaseStub.ListDocumentTemplates()
+            })!;
+        }
+
+        [HttpGet]
+        public IActionResult TreeTableSample()
+        {
+            // TEMP: this should be supplied by caller, or is part of the template?
+            var sampleData = SkinnyJson.Json.Defrost(System.IO.File.ReadAllText(@"C:\Temp\ExpectedResponse.json")!); 
+            // END TEMP
+            
+            var tree = JsonDataReader.ReadObjectIntoNodeTree(sampleData, "", "Data");
+            var list = JsonDataReader.FlattenTree(tree);
+            
+            var model = new DataSourceViewModel{
+                Nodes = list
+            };
+            
+            return View(model)!;
         }
 
         [HttpGet]
@@ -34,7 +56,9 @@ namespace WebFormFiller.Controllers
                 throw new Exception("No file!");
             }
             
-            var id = FileDatabaseStub.SaveDocumentTemplate(new IndexFile(model.Title), null);
+            var id = FileDatabaseStub.SaveDocumentTemplate(new IndexFile(model.Title){
+                BasePdfFile = model.Title 
+            }, null);
 
             using (var stream = model.Upload.OpenReadStream())
             {
@@ -46,7 +70,14 @@ namespace WebFormFiller.Controllers
 
         public IActionResult BoxEditor([FromQuery]int docId)
         {
-            return View()!;
+            var document = FileDatabaseStub.GetDocumentById(docId);
+            
+            var model = new TemplateEditViewModel{
+                Document = document,
+                PdfUrl = Url!.Action("Load", "File", new{name = document.BasePdfFile})!
+            };
+            
+            return View(model)!;
         }
     }
 }

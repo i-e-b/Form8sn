@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using WebFormFiller.ServiceStubs;
@@ -14,6 +15,7 @@ namespace WebFormFiller.Controllers
         public IActionResult Load(string? name)
         {
             if (!Directory.Exists(FileDatabaseStub.StorageDirectory)) { Directory.CreateDirectory(FileDatabaseStub.StorageDirectory); }
+            if (string.IsNullOrWhiteSpace(name)) throw new Exception("File name is required");
             
             var bytes = System.IO.File.ReadAllBytes(Path.Combine(FileDatabaseStub.StorageDirectory, name + ".pdf"));
             return File(bytes, "application/pdf")!;

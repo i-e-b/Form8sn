@@ -12,8 +12,25 @@ namespace Form8snCore.FileFormats
             DataFilters = new Dictionary<string, MappingInfo>();
         }
 
+        /// <summary>
+        /// Optional: file path for a sample input file
+        /// </summary>
         public string? SampleFileName { get; set; }
+
+        /// <summary>
+        /// Optional: Path for the source PDF to be filled in.
+        /// If this is not supplied, each rendered page will use a background image.
+        /// </summary>
+        public string? BasePdfFile { get; set; }
+        
+        /// <summary>
+        /// Notes for the template maintainer. Not used for generating files
+        /// </summary>
         public string Notes { get; set; }
+        
+        /// <summary>
+        /// Title embedded into the PDF file
+        /// </summary>
         public string Name { get; set; }
         
         /// <summary>
@@ -26,7 +43,14 @@ namespace Form8snCore.FileFormats
         /// </summary>
         public string? FontName { get; set; }
         
+        /// <summary>
+        /// List of page templates
+        /// </summary>
         public List<TemplatePage> Pages { get; set; }
+        
+        /// <summary>
+        /// Mapping configuration for this template
+        /// </summary>
         public Dictionary<string, MappingInfo> DataFilters { get; set; }
     }
 }

@@ -5,6 +5,7 @@ using SkinnyJson;
 
 namespace Form8snCore.FileFormats
 {
+    // TODO: this is very file-system centric. Pull out an interface so users can replace it.
     public class Project
     {
         private readonly string _indexPath;

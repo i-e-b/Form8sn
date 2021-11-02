@@ -7,11 +7,12 @@
 <div class="text-center">
     Template editor
 </div>
-<a asp-action="StartNewTemplate">Upload new form</a>
+<a asp-action="StartNewTemplate">Upload new form</a><br/>
+<a asp-action="TreeTableSample">Tree-table test</a>
 
 <ul>
     @foreach (var item in Model!.Templates)
     {
-        <li><a asp-action="BoxEditor" asp-route-docId="@item">@item</a></li>
+        <li><a asp-action="BoxEditor" asp-route-docId="@item.Key.ToString()">@item.Value</a></li>
     }
 </ul>

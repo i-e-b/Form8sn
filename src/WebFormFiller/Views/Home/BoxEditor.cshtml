@@ -1,9 +1,9 @@
-﻿@model DocumentTemplateViewModel
+﻿@model TemplateEditViewModel
 
 @{
     ViewBag!.Title = "Document editor";
     Layout = "_Layout";
-    var pdfWorkerSource = Url!.Content("~/js/pdf.worker.js");
+    var pdfWorkerSource = Url!.Content("~/js/pdf.worker.js")!;
 }
 
 @* PAGE CONTROLS *@
@@ -25,7 +25,7 @@
 
 <script>
 // Load a sample PDF with complex elements and multiple pages
-var url = 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf';
+var url = "@Model!.PdfUrl";//'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf';
 
 // Read PDF.js exports from the ~/js/pdf.js file
 var pdfjsLib = window['pdfjs-dist/build/pdf'];
@@ -134,9 +134,6 @@ document.getElementById('next').addEventListener('click', onNextPage); // bind e
 	var ctx = canvas.getContext('2d');
 	
 	var sketch = document.querySelector('#container');
-	var sketch_style = getComputedStyle(sketch);
-	//canvas.width = parseInt(sketch_style.getPropertyValue('width'));
-	//canvas.height = parseInt(sketch_style.getPropertyValue('height'));
 
 	var mouse = {x: 0, y: 0};
 	var last_mouse = {x: 0, y: 0};
@@ -146,23 +143,16 @@ document.getElementById('next').addEventListener('click', onNextPage); // bind e
 		last_mouse.x = mouse.x;
 		last_mouse.y = mouse.y;
 		
-		//console.log(`div left = ${sketch.offsetLeft}, canvas left = ${canvas.offsetLeft}, test = ${canvas.scrollLeft}`);
-		
-		//mouse.x = e.pageX; - sketch.offsetLeft;
-		//mouse.y = e.pageY; - sketch.offsetTop;
-		
 		mouse.x = e.offsetX; - sketch.offsetLeft;
 		mouse.y = e.offsetY; - sketch.offsetTop;
 	}, false);
 	
 	
-	/* Drawing on Paint App */
 	ctx.lineWidth = 5;
-	ctx.lineJoin = 'round';
-	ctx.lineCap = 'round';
 	ctx.strokeStyle = 'blue';
 	
 	canvas.addEventListener('mousedown', function(e) {
+		// TODO: handle initial click (right or left?)
 		canvas.addEventListener('mousemove', onPaint, false);
 	}, false);
 	

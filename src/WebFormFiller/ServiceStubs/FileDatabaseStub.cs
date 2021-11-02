@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Form8snCore.FileFormats;
@@ -14,12 +15,21 @@ namespace WebFormFiller.ServiceStubs
     {
         public const string StorageDirectory = @"C:\Temp\WebFormFiller";
 
-        public static List<string> ListDocumentTemplates()
+        public static IDictionary<int, string> ListDocumentTemplates()
         {
             if (!Directory.Exists(StorageDirectory)) { Directory.CreateDirectory(StorageDirectory); }
             
             var files = Directory.EnumerateFiles(StorageDirectory, "*.json", SearchOption.TopDirectoryOnly);
-            return files.Select(Path.GetFileNameWithoutExtension).ToList()!;
+            var names = files.Select(Path.GetFileNameWithoutExtension).ToList();
+            
+            var result = new Dictionary<int, string>();
+            foreach (var name in names)
+            {
+                if (name is null) continue;
+                var id = IdFromFileName(name, out var displayName);
+                if (id > 0 && !result.ContainsKey(id)) result.Add(id, displayName);
+            }
+            return result;
         }
 
         public static int SaveDocumentTemplate(IndexFile file, int? id)
@@ -28,24 +38,40 @@ namespace WebFormFiller.ServiceStubs
             
             if (id == null) id = GetNextId();
             
-            File.WriteAllText(Path.Combine(StorageDirectory, file.Name + ".json"), Json.Freeze(file)!);
+            File.WriteAllText(Path.Combine(StorageDirectory, id+"_"+file.Name + ".json"), Json.Freeze(file));
             return id.Value;
         }
-
-        private static int IdFromFileName(string name)
+        
+        public static IndexFile GetDocumentById(int docId)
         {
+            if (!Directory.Exists(StorageDirectory)) { Directory.CreateDirectory(StorageDirectory); }
+            
+            var files = Directory.EnumerateFiles(StorageDirectory, docId+"_*.json", SearchOption.TopDirectoryOnly).ToList();
+            if (files.Count > 1) throw new Exception("Ambiguous file");
+            if (files.Count < 1) throw new Exception("File not found");
+            
+            return Json.Defrost<IndexFile>(File.ReadAllText(files[0]));
+        }
+
+        private static int IdFromFileName(string name, out string restOfName)
+        {
+            restOfName = "";
             if (string.IsNullOrEmpty(name)) return 0;
             var bits = name.Split('_');
             
             if (bits.Length < 2) return 0;
             if (!int.TryParse(bits[0], out var result)) return 0;
             
+            restOfName = string.Join("_", bits.Skip(1));
             return result;
         }
 
         private static int GetNextId()
         {
-           return ListDocumentTemplates().Select(IdFromFileName).Max() + 1; 
+            var usedIds =ListDocumentTemplates().Keys.ToList();
+            if (usedIds.Count < 1) return 1;
+            return ListDocumentTemplates().Keys.Max() + 1; 
         }
+
     }
 }

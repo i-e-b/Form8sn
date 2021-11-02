@@ -55,7 +55,7 @@ namespace TestApp
 
             var sw = new Stopwatch();
             sw.Start();
-            var targetFile = "finland";
+            var targetFile = "big_test";
             using (var existing = PdfReader.Open($"{targetFile}.pdf"))
             {
                 var form = existing.AcroForm;

@@ -4,15 +4,14 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>@ViewData?["Title"] - WebFormFiller</title>
-    <link rel="stylesheet" href="~/css/site.css"/>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
 </head>
 <body>
+<div><a asp-action="Index" asp-controller="Home">Home</a></div>
 <div class="container">
     <main role="main" class="pb-3">
         @RenderBody()
     </main>
 </div>
-
-<script src="~/js/site.js" asp-append-version="true"></script>
 </body>
 </html>
