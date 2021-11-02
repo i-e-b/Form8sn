@@ -10,7 +10,7 @@
 <div>
     <button id="prev">Previous</button>
     <button id="next">Next</button>
-    &nbsp; &nbsp;
+	
     <span>Page: <span id="page_num"></span> / <span id="page_count"></span></span>
 </div>
 
@@ -25,28 +25,27 @@
 
 <script>
 // Load a sample PDF with complex elements and multiple pages
-var url = "@Model!.PdfUrl";//'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf';
+const url = "@Model!.PdfUrl";//'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf';
 
 // Read PDF.js exports from the ~/js/pdf.js file
-var pdfjsLib = window['pdfjs-dist/build/pdf'];
+const pdfJsLib = window['pdfjs-dist/build/pdf'];
 
 // Setup the workerSrc property. Originally from https://mozilla.github.io/pdf.js/build/pdf.worker.js
-pdfjsLib.GlobalWorkerOptions.workerSrc = "@pdfWorkerSource";
+pdfJsLib.GlobalWorkerOptions.workerSrc = "@pdfWorkerSource";
 
 // PDF rendering bits
-var pdfDoc = null,
+let pdfDoc = null,
     pageNum = 1,
     pageRendering = false,
-    pageNumPending = null,
-    scale = 2.8, // zoom level of the PDF
+    pageNumPending = null; const scale = 2.8, // zoom level of the PDF
     // TODO: ability to change the scale level and update the rendering
     pdfCanvas = document.getElementById('pdf-render'),
     pdfCtx = pdfCanvas.getContext('2d');
 
 // Box rendering bits
-var outerContainer = document.getElementById("container");
-var boxCanvas = document.getElementById("box-render");
-var boxCtx = boxCanvas.getContext("2d");
+const outerContainer = document.getElementById("container");
+const boxCanvas = document.getElementById("box-render");
+const boxCtx = boxCanvas.getContext("2d");
 
 
 /**
@@ -57,7 +56,7 @@ function renderPage(num) {
   pageRendering = true;
   // Using promise to fetch the page
   pdfDoc.getPage(num).then(function(page) {
-    var viewport = page.getViewport({scale: scale});
+    const viewport = page.getViewport({scale: scale});
     console.dir(viewport);
     console.log(`Native PDF page size is ${viewport.height}x${viewport.width}`);
     outerContainer.style.width = viewport.width+'px'; 
@@ -70,11 +69,11 @@ function renderPage(num) {
     boxCanvas.width = viewport.width;
     
     // Render PDF page into canvas context
-    var renderContext = {
+    const renderContext = {
       canvasContext: pdfCtx,
       viewport: viewport
     };
-    var renderTask = page.render(renderContext);
+    const renderTask = page.render(renderContext);
 
     // Wait for rendering to finish
     renderTask.promise.then(function() {
@@ -124,49 +123,76 @@ document.getElementById('next').addEventListener('click', onNextPage); // bind e
 
 @* BOX DRAW SCRIPTS *@
 <script>
-(function() {
-	
-	// TODO: NEXT STEP:
-	// Need to work out the proportion of the canvas we are at, based on the HTML viewport
-	// Then work that back onto canvas co-ords and draw.
-	
-	var canvas = document.querySelector('#box-render');
-	var ctx = canvas.getContext('2d');
-	
-	var sketch = document.querySelector('#container');
+(function() { // Activate the overlay canvas with mouse event handlers
+	const canvas = document.querySelector('#box-render');
+	const ctx = canvas.getContext('2d');
 
-	var mouse = {x: 0, y: 0};
-	var last_mouse = {x: 0, y: 0};
-	
-	/* Mouse Capturing Work */
-	canvas.addEventListener('mousemove', function(e) {
-		last_mouse.x = mouse.x;
-		last_mouse.y = mouse.y;
-		
-		mouse.x = e.offsetX; - sketch.offsetLeft;
-		mouse.y = e.offsetY; - sketch.offsetTop;
-	}, false);
+	let box = {top:0, left:0, right:0, bottom:0};
+	let mouse = {x: 0, y: 0, buttons:0};
+    let last_mouse = {x: 0, y: 0};
+
 	
 	
 	ctx.lineWidth = 5;
 	ctx.strokeStyle = 'blue';
 	
-	canvas.addEventListener('mousedown', function(e) {
-		// TODO: handle initial click (right or left?)
-		canvas.addEventListener('mousemove', onPaint, false);
-	}, false);
+	// mouseleave, mouseenter, * mouseout, * mouseover
 	
-	canvas.addEventListener('mouseup', function() {
-		canvas.removeEventListener('mousemove', onPaint, false);
-	}, false);
 	
-	var onPaint = function() {
-		ctx.beginPath();
-		ctx.moveTo(last_mouse.x, last_mouse.y);
-		ctx.lineTo(mouse.x, mouse.y);
-		ctx.closePath();
-		ctx.stroke();
+	//////////////////////////////////////////////////////////////////////////////////////////////////// PAINT ALL
+	const onPaint = function() {
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		ctx.fillStyle = "rgba(255, 80, 80, 0.3)";
+		ctx.strokeStyle = "#F00";
+		ctx.lineWidth = 3;
+		
+		ctx.fillRect(box.left, box.top, box.right-box.left, box.bottom-box.top);
+		ctx.strokeRect(box.left, box.top, box.right-box.left, box.bottom-box.top);
 	};
+	
+	
+	//////////////////////////////////////////////////////////////////////////////////////////////////// MOUSE DOWN
+	canvas.addEventListener('mouseout', function(){ mouse.buttons = 0; }); // prevent drag-lock
+	canvas.addEventListener('mousedown', function(e) {
+		box.top = 0|e.offsetY;
+		box.left = 0|e.offsetX;
+		
+		// TODO: handle initial click (right or left?) -- might want to pop up the details modal
+	}, false);
+	
+	//////////////////////////////////////////////////////////////////////////////////////////////////// MOUSE UP
+	canvas.addEventListener('mouseup', function(e) {
+		box.right = 0|e.offsetX;
+		box.bottom = 0|e.offsetY;
+		
+		onPaint();
+		
+		// TODO: handle release. We might want to send changes back to the server
+	}, false);
+		
+	//////////////////////////////////////////////////////////////////////////////////////////////////// MOUSE MOVE
+	canvas.addEventListener('mousemove', function(e) {
+		let newX = e.offsetX;
+		let newY = e.offsetY;
+		if (mouse.buttons !== 0) { // mouse is dragging
+			last_mouse.x = mouse.x;
+			last_mouse.y = mouse.y;
+		} else { // mouse is hovering
+			last_mouse.x = newX;
+			last_mouse.y = newY;
+		}
+		
+		mouse.buttons = e.buttons;
+		mouse.x = newX;
+		mouse.y = newY;
+		
+		box.right = 0|e.offsetX;
+		box.bottom = 0|e.offsetY;
+		
+		if (mouse.buttons !== 0) {
+			onPaint();
+		}
+	}, false);
 	
 }());
 </script>
@@ -175,7 +201,7 @@ document.getElementById('next').addEventListener('click', onNextPage); // bind e
 <script>
 // Actually load the PDF (async then call our page render)
 // This requires a modern web browser that supports promises.
-pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
+pdfJsLib.getDocument(url).promise.then(function(pdfDoc_) {
   pdfDoc = pdfDoc_;
   document.getElementById('page_count').textContent = pdfDoc.numPages;
 

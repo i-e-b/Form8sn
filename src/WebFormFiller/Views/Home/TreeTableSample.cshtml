@@ -6,12 +6,13 @@
 }
 
 <script src="~/js/propertyInspector.js" asp-append-version="true"></script>
+<link rel="stylesheet" href="~/css/formFillerStyles.css" asp-append-version="true"/>
 
 <h2>Sample</h2>
 
 
 @* TODO: generate this from expando data, like in the BasicImageFormFiller *@
-<table class="cell">
+<table class="cell" style="min-width:400px">
   <caption>Pick a data source</caption>
   <thead>
     <tr>
@@ -36,7 +37,7 @@
           </button>
         }
       </td>
-      <td style="padding-left:@(node.Depth.ToString())em">@node.Text</td>
+      <td style="padding-left:@(node.Depth.ToString())em;color:@(node.ForeColor)">@node.Text</td>
       <td>
         @if (node.CanBePicked)
         {

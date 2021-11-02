@@ -44,7 +44,6 @@ td[colspan] {
 }
 
 tr.shown, tr.hidden {
-    background-color: #eee;
     display: table-row;
 }
 
@@ -52,37 +51,8 @@ tr.hidden {
     display: none;
 }
 
-.row button {
-    background-color: transparent;
-    border: .1em solid transparent;
-    font: inherit;
-    padding: 0.25em 0.5em 0.25em .25em;
-    width: 100%;
-    text-align: left;
-}
-
-.row button:focus, .row button:hover {
-    background-color: #ddd;
-    outline: .2em solid #00f;
-}
-
-.row button svg {
-    width: .8em;
-    height: .8em;
-    margin: 0 0 -.05em 0;
-    fill: #66f;
-    transition: transform 0.25s ease-in;
-    transform-origin: center 45%;
-}
-
-.row button:hover svg,
-.row button:focus svg {
-    fill: #00c;
-}
-
-/* Lean on programmatic state for styling */
-.row button[aria-expanded="true"] svg {
-    transform: rotate(180deg);
+tr:hover {
+    background-color:#eee;
 }
 
 button.expando {
@@ -105,14 +75,10 @@ button.expando {
     transform-origin: center 45%;
 }
 
-
-/* rotate expando button */
 .cell button[aria-expanded="true"] svg {
     transform: rotate(90deg);
 }
 
-/* Proven method to visually hide something but */
-/* still make it available to assistive technology */
 .visually-hidden {
     position: absolute;
     top: auto;
