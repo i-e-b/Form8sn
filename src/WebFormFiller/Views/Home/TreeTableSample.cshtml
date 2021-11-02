@@ -16,7 +16,8 @@
   <thead>
     <tr>
       <th><span class="visually-hidden">Toggle</span></th>
-      <th>Data</th>
+      <th>Text</th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
@@ -24,119 +25,25 @@
   Note - For anything that's not expanded, we need to set an expansion id, 
   and set class=hidden; We also want a toggle button with the on-click to expand it.
 *@
-  @foreach (var node in Model.Nodes)
+  @foreach (var node in Model!.Nodes)
   {
-    <tr>
-      <td>
-        <button type="button" id="btnMSb" aria-expanded="false" onclick="toggle(this.id,'#MS01b,#MS02b,#MS03b');" aria-controls="MS01b MS02b MS03b" aria-label="3 more from" aria-labelledby="btnMSb lblMSb">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" focusable="false"><path d="M70.3 13.8L40 66.3 9.7 13.8z"></path></svg>
-        </button>
+    <tr id="@node.HtmlId" class="@(node.Depth>0?"hidden":"")"  >
+      <td style="padding-left:@(node.Depth.ToString())em">
+        @if (node.HasChildren)
+        {
+          <button type="button" id="btn-@node.HtmlId" class="expando" aria-expanded="false" childIds="@node.ChildIds" onclick="toggle('btn-@node.HtmlId')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" focusable="false"><path d="M70.3 13.8L40 66.3 9.7 13.8z"></path></svg>
+          </button>
+        }
       </td>
-      <td id="lblMSb">@node.Text</td>
-      <td style="color:@node.ForeColor">@node.DataPath</td>
+      <td style="padding-left:@(node.Depth.ToString())em">@node.Text</td>
+      <td>
+        @if (node.CanBePicked)
+        {
+          <button onclick="alert('You picked node @node.Name from path @node.DataPath')">Pick</button>
+        }
+      </td>
     </tr>
   }
-  @*
-  <tr id="MS01b" class="hidden">
-    <td></td>
-    <td>Mary Shelley</td>
-    <td>Valperga: Or, the Life and Adventures of Castruccio, Prince of Lucca</td>
-    <td>1823</td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr id="MS02b" class="hidden">
-    <td></td>
-    <td>Mary Shelley</td>
-    <td>The Last Man</td>
-    <td>1826</td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr id="MS03b" class="hidden">
-    <td></td>
-    <td>Mary Shelley</td>
-    <td>The Fortunes of Perkin Warbeck, A Romance</td>
-    <td>1830</td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td></td>
-    <td>Herman Melville</td>
-    <td>Moby-Dick; or, The Whale</td>
-    <td>1851</td>
-    <td>9781530697908</td>
-    <td>1530697905</td>
-  </tr>
-  <tr>
-    <td>
-      <button type="button" id="btnEDENSb" aria-expanded="false" onclick="toggle(this.id,'#EDENS01b,#EDENS02b,#EDENS03b,#EDENS04b,#EDENS05b');" aria-controls="EDENS01b EDENS02b EDENS03b EDENS04b EDENS05b" aria-label="5 more from" aria-labelledby="btnEDENSb lblEDENSb">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" focusable="false"><path d="M70.3 13.8L40 66.3 9.7 13.8z"></path></svg>
-      </button>
-    </td>
-    <td id="lblEDENSb">Emma Dorothy Eliza Nevitte Southworth</td>
-    <td>The Hidden Hand</td>
-    <td>1888</td>
-    <td>9780813512969</td>
-    <td>0813512964</td>
-  </tr>
-  <tr id="EDENS01b" class="hidden">
-    <td></td>
-    <td>Emma Dorothy Eliza Nevitte Southworth</td>
-    <td>A Leap in the Dark: A Novel</td>
-    <td>1889</td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr id="EDENS02b" class="hidden">
-    <td></td>
-    <td>Emma Dorothy Eliza Nevitte Southworth</td>
-    <td>Unknown; or the Mystery of Raven Rocks</td>
-    <td>1889</td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr id="EDENS03b" class="hidden">
-    <td></td>
-    <td>Emma Dorothy Eliza Nevitte Southworth</td>
-    <td>The Lost Lady of Lone</td>
-    <td>1890</td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr id="EDENS04b" class="hidden">
-    <td></td>
-    <td>Emma Dorothy Eliza Nevitte Southworth</td>
-    <td>The Rejected Bride</td>
-    <td>1894</td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr id="EDENS05b" class="hidden">
-    <td></td>
-    <td>Emma Dorothy Eliza Nevitte Southworth</td>
-    <td>Gertrude Haddon</td>
-    <td>1894</td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr>
-    <td></td>
-    <td>F. Scott Fitzgerald</td>
-    <td>The Great Gatsby</td>
-    <td>1925</td>
-    <td>9780743273565</td>
-    <td>0743273567</td>
-  </tr>
-  <tr>
-    <td></td>
-    <td>George Orwell</td>
-    <td>Nineteen Eighty-Four</td>
-    <td>1948</td>
-    <td>9780451524935</td>
-    <td>0451524934</td>
-  </tr>
-  *@
   </tbody>
 </table>
