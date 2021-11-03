@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using PdfSharp.Pdf.IO;
 
 namespace Form8snCore.FileFormats
 {
@@ -52,5 +54,55 @@ namespace Form8snCore.FileFormats
         /// Mapping configuration for this template
         /// </summary>
         public Dictionary<string, MappingInfo> DataFilters { get; set; }
+
+        /// <summary>
+        /// Generate a new index file from an existing PDF
+        /// </summary>
+        /// <param name="pdfSource">Stream holding a PDF file</param>
+        /// <param name="pdfReloadUrl">URL from which the PDF can be reloaded later, for use by the renderer and clients</param>
+        /// <param name="templateName"></param>
+        public static IndexFile FromExistingPdf(Stream pdfSource, string pdfReloadUrl, string templateName)
+        {
+            using var pdf = PdfReader.Open(pdfSource);
+            
+            var pages = new List<TemplatePage>();
+            var pageCount = 1;
+            foreach (var pdfPage in pdf.Pages)
+            {
+                var page = new TemplatePage
+                {
+                    Boxes = new Dictionary<string, TemplateBox>(),
+                    Name = $"Page {pageCount} of {pdf.PageCount}",
+                    Notes = null,
+                    BackgroundImage = null,
+                    HeightMillimetres = pdfPage.Height.Millimeter,
+                    WidthMillimetres = pdfPage.Width.Millimeter,
+                    RenderBackground = false,
+                    RepeatMode = new RepeatMode{Repeats = false, DataPath = null},
+                    PageFontSize = null,
+                    PageDataFilters = new Dictionary<string, MappingInfo>()
+                };
+                page.Boxes.Add("Sample", new TemplateBox{
+                    Alignment = TextAlignment.BottomLeft,
+                    Height = 10, Width = 10, Left = 10, Top = 10,
+                    BoxOrder = 1, DependsOn = "otherBoxName",
+                    DisplayFormat = new DisplayFormatFilter{Type = DisplayFormatType.DateFormat, FormatParameters = new Dictionary<string, string>()},
+                    MappingPath = new string[]{"path","is","here"},
+                    WrapText = true, ShrinkToFit = true, BoxFontSize = 16
+                });
+                pages.Add(page);
+                pageCount++;
+            }
+            
+            return new IndexFile(templateName){
+                Notes = "",
+                Pages = pages,
+                DataFilters = new Dictionary<string, MappingInfo>(),
+                FontName = null,
+                BaseFontSize = null,
+                BasePdfFile = pdfReloadUrl,
+                SampleFileName = null
+            };
+        }
     }
 }

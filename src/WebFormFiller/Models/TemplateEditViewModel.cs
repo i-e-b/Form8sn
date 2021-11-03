@@ -6,5 +6,7 @@ namespace WebFormFiller.Models
     {
         public IndexFile Document { get; set; } = new("");
         public string PdfUrl { get; set; } = "";
+        public string ProjectLoadUrl { get; set; } = "";
+        public string DocumentId { get; set; } = "";
     }
 }

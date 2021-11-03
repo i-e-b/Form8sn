@@ -23,6 +23,7 @@
 @* Taken from https://mozilla.github.io/pdf.js/build/pdf.js *@
 <script src="~/js/pdf.js" asp-append-version="true"></script>
 
+@* PDF LOADING *@
 <script>
 // Load a sample PDF with complex elements and multiple pages
 const url = "@Model!.PdfUrl";//'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf';
@@ -123,49 +124,145 @@ document.getElementById('next').addEventListener('click', onNextPage); // bind e
 
 @* BOX DRAW SCRIPTS *@
 <script>
+// Note, this dummy data is just here to help with 
+let projectFile = {
+                    SampleFileName: null,
+                    BasePdfFile: "/File/....pdf",
+                    Notes: "",
+                    Name: "Sample template",
+                    BaseFontSize: null,
+                    FontName: null,
+                    Pages: [
+                      {
+                        WidthMillimetres: 210.0,
+                        HeightMillimetres: 297.0,
+                        PageFontSize: null,
+                        Name: "Page 1",
+                        Notes: null,
+                        BackgroundImage: null,
+                        RepeatMode: {
+                          Repeats: false,
+                          DataPath: null
+                        },
+                        Boxes: {
+                          "Sample": {
+                            WrapText: true,
+                            ShrinkToFit: true,
+                            BoxFontSize: 16,
+                            Alignment: "BottomLeft",
+                            DependsOn: "otherBoxName",
+                            Top: 10,
+                            Left: 10,
+                            Width: 10,
+                            Height: 10,
+                            MappingPath: [
+                              "path",
+                              "is",
+                              "here"
+                            ],
+                            DisplayFormat: {
+                              Type: "DateFormat",
+                              FormatParameters: {}
+                            },
+                            BoxOrder: 1
+                          }
+                        },
+                        PageDataFilters: {},
+                        RenderBackground: false
+                      }
+                    ],
+                    DataFilters: {}
+                  };
+let renderBoxes = null;
+
 (function() { // Activate the overlay canvas with mouse event handlers
 	const canvas = document.querySelector('#box-render');
 	const ctx = canvas.getContext('2d');
 
-	let box = {top:0, left:0, right:0, bottom:0};
+	let activeBox = {top:0, left:0, right:0, bottom:0};
 	let mouse = {x: 0, y: 0, buttons:0};
     let last_mouse = {x: 0, y: 0};
-
 	
+	const drawSingleBox = function(def, xs, ys, active){
+		if (active) {
+			ctx.fillStyle = "rgba(80, 100, 200, 0.3)";
+			ctx.strokeStyle = "#07F";
+			ctx.lineWidth = 2;
+		} else {
+			ctx.fillStyle = "rgba(255, 80, 80, 0.3)";
+			ctx.strokeStyle = "#F00";
+			ctx.lineWidth = 3;
+		}		
+		
+		const {Width,Top,Height,Left} = def;
+		ctx.fillRect(Left*xs, Top*ys, Width*xs, Height*ys);
+		ctx.strokeRect(Left*xs, Top*ys, Width*xs, Height*ys);
+	}
 	
-	ctx.lineWidth = 5;
-	ctx.strokeStyle = 'blue';
-	
-	// mouseleave, mouseenter, * mouseout, * mouseover
-	
-	
-	//////////////////////////////////////////////////////////////////////////////////////////////////// PAINT ALL
-	const onPaint = function() {
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		ctx.fillStyle = "rgba(255, 80, 80, 0.3)";
-		ctx.strokeStyle = "#F00";
+	const drawActiveBox = function(){
+		let width = activeBox.right-activeBox.left;
+		let height = activeBox.bottom-activeBox.top;
+		if (width < 1 || height < 1) return; // box is zero sized
+		
+		ctx.fillStyle = "rgba(255, 190, 80, 0.3)";
+		ctx.strokeStyle = "#FA0";
 		ctx.lineWidth = 3;
 		
-		ctx.fillRect(box.left, box.top, box.right-box.left, box.bottom-box.top);
-		ctx.strokeRect(box.left, box.top, box.right-box.left, box.bottom-box.top);
+		// The box
+		ctx.fillRect(activeBox.left, activeBox.top, width, height);
+		ctx.strokeRect(activeBox.left, activeBox.top, width, height);
+		
+		// resize handles
+		ctx.fillStyle = "#FA0";
+		ctx.strokeStyle = "#A50";
+		ctx.lineWidth = 1;
+		ctx.fillRect(activeBox.left, activeBox.top, -10, -10); ctx.strokeRect(activeBox.left, activeBox.top, -10, -10);
+		ctx.fillRect(activeBox.right, activeBox.top, 10, -10); ctx.strokeRect(activeBox.right, activeBox.top, 10, -10);
+		ctx.fillRect(activeBox.right, activeBox.bottom, 10, 10); ctx.strokeRect(activeBox.right, activeBox.bottom, 10, 10);
+		ctx.fillRect(activeBox.left, activeBox.bottom, -10, 10); ctx.strokeRect(activeBox.left, activeBox.bottom, -10, 10);
+	}
+	
+	//////////////////////////////////////////////////////////////////////////////////////////////////// PAINT ALL
+	renderBoxes = function() {
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		ctx.setTransform(1, 0, 0, 1, 0, 0);ctx.translate(0.5,0.5); // makes box edges a bit sharpers
+		
+		if (!projectFile.Pages) {
+			console.log("BAD DEFINITION");
+			console.dir(projectFile);
+			return;
+		}
+		let pageDef = projectFile.Pages[pageNum - 1];
+		if (!pageDef) {console.log("Bad def on page "+pageNum);return;}
+		
+		let xScale = canvas.width / pageDef.WidthMillimetres;
+		let yScale = canvas.height / pageDef.HeightMillimetres;
+		
+		for (let name in pageDef.Boxes) {
+			let def = pageDef.Boxes.Sample;
+			drawSingleBox(def, xScale, yScale, true); // TODO: true only if this box has a valid data path
+		}
+		
+		// Draw the 'active' box if one is being created
+		drawActiveBox();
 	};
 	
 	
 	//////////////////////////////////////////////////////////////////////////////////////////////////// MOUSE DOWN
 	canvas.addEventListener('mouseout', function(){ mouse.buttons = 0; }); // prevent drag-lock
 	canvas.addEventListener('mousedown', function(e) {
-		box.top = 0|e.offsetY;
-		box.left = 0|e.offsetX;
+		activeBox.top = 0|e.offsetY;
+		activeBox.left = 0|e.offsetX;
 		
 		// TODO: handle initial click (right or left?) -- might want to pop up the details modal
 	}, false);
 	
 	//////////////////////////////////////////////////////////////////////////////////////////////////// MOUSE UP
 	canvas.addEventListener('mouseup', function(e) {
-		box.right = 0|e.offsetX;
-		box.bottom = 0|e.offsetY;
+		activeBox.right = 0|e.offsetX;
+		activeBox.bottom = 0|e.offsetY;
 		
-		onPaint();
+		renderBoxes();
 		
 		// TODO: handle release. We might want to send changes back to the server
 	}, false);
@@ -186,18 +283,18 @@ document.getElementById('next').addEventListener('click', onNextPage); // bind e
 		mouse.x = newX;
 		mouse.y = newY;
 		
-		box.right = 0|e.offsetX;
-		box.bottom = 0|e.offsetY;
+		activeBox.right = 0|e.offsetX;
+		activeBox.bottom = 0|e.offsetY;
 		
 		if (mouse.buttons !== 0) {
-			onPaint();
+			renderBoxes();
 		}
 	}, false);
 	
 }());
 </script>
 
-@* PDF LOAD SCRIPTS *@
+@* PDF LOAD TRIGGER *@
 <script>
 // Actually load the PDF (async then call our page render)
 // This requires a modern web browser that supports promises.
@@ -208,4 +305,48 @@ pdfJsLib.getDocument(url).promise.then(function(pdfDoc_) {
   // Initial/first page rendering
   renderPage(pageNum);
 });
+</script>
+
+@* PROJECT LOAD AND STORE SCRIPTS *@
+<script>
+var oReq = new XMLHttpRequest();
+
+oReq.addEventListener("progress", updateProgress);
+oReq.addEventListener("load", transferComplete);
+oReq.addEventListener("error", transferFailed);
+oReq.addEventListener("abort", transferCanceled);
+
+oReq.onload = function(e) {
+	projectFile = oReq.response;
+  // TODO: store the project, and trigger the box render code
+  
+}
+
+oReq.open('GET', '@(Model.ProjectLoadUrl)?docId=@(Model.DocumentId)');
+oReq.responseType = "json";
+oReq.send();
+
+// progress on transfers from the server to the client (downloads)
+function updateProgress (oEvent) {
+  if (oEvent.lengthComputable) {
+    var percentComplete = oEvent.loaded / oEvent.total * 100;
+	console.log(`Loading ${percentComplete}%`);
+    // ...
+  } else {
+    // Unable to compute progress information since the total size is unknown
+    console.log("Loading");
+  }
+}
+
+function transferComplete(evt) {
+  console.log("The transfer is complete.");
+}
+
+function transferFailed(evt) {
+  console.log("An error occurred while transferring the file.");
+}
+
+function transferCanceled(evt) {
+  console.log("The transfer has been canceled by the user.");
+}
 </script>

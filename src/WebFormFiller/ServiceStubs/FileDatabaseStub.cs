@@ -8,7 +8,7 @@ using SkinnyJson;
 namespace WebFormFiller.ServiceStubs
 {
     /// <summary>
-    ///  This class should be replaced with your database or other storage solution.
+    /// This class should be replaced with your database or other storage solution.
     /// This stub doesn't even try to be efficient.
     /// </summary>
     public class FileDatabaseStub

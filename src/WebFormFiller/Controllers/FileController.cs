@@ -21,6 +21,9 @@ namespace WebFormFiller.Controllers
             return File(bytes, "application/pdf")!;
         }
 
+        /// <summary>
+        /// Store a file for later recovery using the [GET]Load(name) endpoint.
+        /// </summary>
         public static void Store(string name, Stream stream)
         {
             if (!Directory.Exists(FileDatabaseStub.StorageDirectory)) { Directory.CreateDirectory(FileDatabaseStub.StorageDirectory); }
