@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
+using PdfSharp.Pdf.AcroForms;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Pdf.StreamDecode;
@@ -55,22 +56,35 @@ namespace TestApp
 
             var sw = new Stopwatch();
             sw.Start();
-            var targetFile = "big_test";
+            var targetFile = "finland";
             using (var existing = PdfReader.Open($"{targetFile}.pdf"))
             {
+                //var what = existing.Internals.AllObjects[700];
+                //LogPdfItem(what);
                 var form = existing.AcroForm;
                 if (form == null) Console.WriteLine("No form found");
                 else
                 {
                     Console.WriteLine($"Found {form.Fields.Count} form fields");
-                    foreach (var field in form.Fields)
+                    PdfAcroField? acroF;
+                    foreach (var afName in form.Fields.Names)
                     {
-                        Console.WriteLine("Field def:");
+                        var field = form.Fields[afName];
+                        var maybePage = GetPageFromField(existing, afName, out var pageNum);
+                        Console.WriteLine($"Field def for page {pageNum} / {(maybePage==null?"not found":"found")}:");
                         LogPdfItem(field);
                     }
+                    
+
+                    /*foreach (var field in form.Fields)
+                    {
+                        //var maybePage = GetPageFromField(existing, acroF, out var pageNum);
+                        //Console.WriteLine($"Field def for page {pageNum} / {(maybePage==null?"not found":"found")}:");
+                    }*/
                 }
 
                 Console.WriteLine($"Found {existing.FullPath}: {existing.Pages.Count} pages");
+                Environment.Exit(0);
                 int pageNumber = 0;
                 foreach (var ePage in existing.Pages)
                 {
@@ -266,6 +280,27 @@ namespace TestApp
             // of PDFsharp.
         }
 
+        static PdfPage? GetPageFromField(PdfDocument myDocument, string focusFieldName, out int pageNum)
+        {
+            pageNum = 0;
+            PdfAcroField currentField = (PdfAcroField)(myDocument.AcroForm.Fields[focusFieldName]);
+
+            if (currentField == null) return null;
+            
+            // get the page element
+            var focusPageReference = (PdfReference)currentField.Elements["/P"];
+            // loop through our pages to match the reference
+            foreach (var page in myDocument.Pages)
+            {
+                pageNum++;
+                if (page.Reference == focusPageReference)
+                {
+                    return page;
+                }
+            }
+            // could not find a page for this field
+            return null;
+        }
 
         private static void LogPdfItem(PdfItem item)
         {

@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.IO;
 
 namespace Form8snCore.FileFormats
@@ -82,14 +85,9 @@ namespace Form8snCore.FileFormats
                     PageFontSize = null,
                     PageDataFilters = new Dictionary<string, MappingInfo>()
                 };
-                page.Boxes.Add("Sample", new TemplateBox{
-                    Alignment = TextAlignment.BottomLeft,
-                    Height = 10, Width = 10, Left = 10, Top = 10,
-                    BoxOrder = 1, DependsOn = "otherBoxName",
-                    DisplayFormat = new DisplayFormatFilter{Type = DisplayFormatType.DateFormat, FormatParameters = new Dictionary<string, string>()},
-                    MappingPath = new string[]{"path","is","here"},
-                    WrapText = true, ShrinkToFit = true, BoxFontSize = 16
-                });
+                // TODO: try to read pre-existing boxes?
+                //pdfPage.
+                ReadExistingBoxes(pdf, pdfPage, page);
                 pages.Add(page);
                 pageCount++;
             }
@@ -103,6 +101,71 @@ namespace Form8snCore.FileFormats
                 BasePdfFile = pdfReloadUrl,
                 SampleFileName = null
             };
+        }
+
+        /// <summary>
+        ///  See PDF reference, section 8.6;Table 8.49; pdf-page 551
+        /// </summary>
+        /// <param name="pdf"></param>
+        /// <param name="pdfPage"></param>
+        /// <param name="page"></param>
+        private static void ReadExistingBoxes(PdfDocument pdf, PdfPage pdfPage, TemplatePage page)
+        {
+            var form = pdf.AcroForm;
+            if (form == null) Console.WriteLine("No form found");
+            else
+            {
+                Console.WriteLine($"Found {form.Fields.Count} form fields");
+                PdfObject thing;
+                int i = 1;
+                foreach (var field in form.Fields)
+                {
+                    if (field is PdfReference refr) { thing = refr.Value; }
+                    else { thing = (PdfObject)field; }
+
+                    if (thing is PdfDictionary dict)
+                    {
+                        var rect = dict.Elements["/Rect"] as PdfArray; // or PdfRectangle?
+                        if (rect is null)
+                        {
+                            Console.WriteLine("Expected PdfArray");
+                            continue;
+                        }
+
+                        var a = rect.Elements[0] as PdfReal;
+                        var b = rect.Elements[1] as PdfReal;
+                        var c = rect.Elements[2] as PdfReal;
+                        var d = rect.Elements[3] as PdfReal;
+                        if (a is null || b is null || c is null || d is null)
+                        {
+                            continue;
+                        }
+
+                        page.Boxes.Add("Auto_"+i, new TemplateBox{
+                            Alignment = TextAlignment.BottomLeft,
+                            Height = d.Value, Width = c.Value, Left = a.Value, Top = b.Value,
+                            BoxOrder = 1, DependsOn = "otherBoxName",
+                            DisplayFormat = new DisplayFormatFilter{Type = DisplayFormatType.DateFormat, FormatParameters = new Dictionary<string, string>()},
+                            MappingPath = new string[]{"path","is","here"},
+                            WrapText = true, ShrinkToFit = true, BoxFontSize = 16
+                        });
+                        i++;
+                    }
+
+                    Console.WriteLine(thing.Internals.TypeID);
+                    Console.WriteLine("Field def:");
+                    //LogPdfItem(field);
+                    
+                    /*page.Boxes.Add("Sample", new TemplateBox{
+                        Alignment = TextAlignment.BottomLeft,
+                        Height = 10, Width = 10, Left = 10, Top = 10,
+                        BoxOrder = 1, DependsOn = "otherBoxName",
+                        DisplayFormat = new DisplayFormatFilter{Type = DisplayFormatType.DateFormat, FormatParameters = new Dictionary<string, string>()},
+                        MappingPath = new string[]{"path","is","here"},
+                        WrapText = true, ShrinkToFit = true, BoxFontSize = 16
+                    });*/
+                }
+            }
         }
     }
 }
