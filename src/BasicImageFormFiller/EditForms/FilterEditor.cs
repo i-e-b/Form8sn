@@ -12,7 +12,7 @@ namespace BasicImageFormFiller.EditForms
     public partial class FilterEditor : Form
     {
         private readonly IScreenModule? _returnModule;
-        private readonly Project? _project;
+        private readonly FileSystemProject? _project;
         private readonly string? _filterName;
         private readonly int? _pageIndex;
 
@@ -23,7 +23,7 @@ namespace BasicImageFormFiller.EditForms
             InitializeComponent();
         }
 
-        public FilterEditor(IScreenModule returnModule, Project project, string filterName, int? pageIndex)
+        public FilterEditor(IScreenModule returnModule, FileSystemProject project, string filterName, int? pageIndex)
         {
             _returnModule = returnModule;
             _project = project;

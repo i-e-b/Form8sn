@@ -15,7 +15,7 @@ namespace BasicImageFormFiller.EditForms
     public sealed partial class BoxPlacer : Form
     {
         private readonly IScreenModule? _returnModule;
-        private readonly Project? _project;
+        private readonly FileSystemProject? _project;
         private readonly int _pageIndex;
         private readonly Bitmap? _imageCache;
         
@@ -35,7 +35,7 @@ namespace BasicImageFormFiller.EditForms
 
         public BoxPlacer() { InitializeComponent(); }
         
-        public BoxPlacer(IScreenModule returnModule, Project project, int pageIndex)
+        public BoxPlacer(IScreenModule returnModule, FileSystemProject project, int pageIndex)
         {
             InitializeComponent();
             _returnModule = returnModule;

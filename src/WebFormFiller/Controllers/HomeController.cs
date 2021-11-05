@@ -3,7 +3,6 @@ using System.IO;
 using System.Threading.Tasks;
 using Form8snCore.FileFormats;
 using Form8snCore.HelpersAndConverters;
-using Form8snCore.UiHelpers;
 using Microsoft.AspNetCore.Mvc;
 using WebFormFiller.Models;
 using WebFormFiller.ServiceStubs;
@@ -26,10 +25,13 @@ namespace WebFormFiller.Controllers
         public IActionResult TreeTableSample()
         {
             // TEMP: this should be supplied by caller, or is part of the template?
-            var sampleData = SkinnyJson.Json.Defrost(System.IO.File.ReadAllText(@"C:\Temp\ExpectedResponse.json")); 
+            var sampleData = SkinnyJson.Json.Defrost(System.IO.File.ReadAllText(@"C:\Temp\ExampleData.json")); 
+            var sampleProject = new FileSystemProject(@"C:\Temp\OldSystem\New Template\Index.json");
             // END TEMP
             
-            var tree = JsonDataReader.ReadObjectIntoNodeTree(sampleData, "", "Data");
+            var prev = new string[]{ };
+            var repeat = new[]{"#", "Reclaims in sets of 4"};
+            var tree = JsonDataReader.BuildDataSourcePicker(sampleProject.Index, sampleData, prev, repeat, 4);
             var list = JsonDataReader.FlattenTree(tree);
             
             var model = new DataSourceViewModel{

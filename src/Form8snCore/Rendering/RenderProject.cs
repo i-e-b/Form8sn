@@ -31,7 +31,7 @@ namespace Form8snCore.Rendering
             return _fontCache[size];
         }
         
-        public static RenderResultInfo ToFile(string outputFilePath, string dataFilePath, Project project)
+        public static RenderResultInfo ToFile(string outputFilePath, string dataFilePath, FileSystemProject project)
         {
             _loadingTimer.Reset();
             _totalTimer.Restart();

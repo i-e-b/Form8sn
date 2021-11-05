@@ -8,7 +8,7 @@ namespace BasicImageFormFiller.EditForms
     public partial class RepeatModePicker : Form
     {
         private readonly IScreenModule? _returnModule;
-        private readonly Project? _project;
+        private readonly FileSystemProject? _project;
         private readonly int _pageIndex;
         private string[]? _selectedPath;
 
@@ -17,7 +17,7 @@ namespace BasicImageFormFiller.EditForms
             InitializeComponent();
         }
 
-        public RepeatModePicker(IScreenModule returnModule, Project project, int pageIndex)
+        public RepeatModePicker(IScreenModule returnModule, FileSystemProject project, int pageIndex)
         {
             InitializeComponent();
             _returnModule = returnModule;

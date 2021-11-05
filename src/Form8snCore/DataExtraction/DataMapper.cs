@@ -8,13 +8,13 @@ namespace Form8snCore.DataExtraction
 {
     public class DataMapper
     {
-        private readonly Project _project;
+        private readonly FileSystemProject _project;
         private readonly object _data;
         private readonly Dictionary<string,string> _emptyParams;
         private object? _repeatData;
         private string[]? _originalPath;
 
-        public DataMapper(Project project, object data)
+        public DataMapper(FileSystemProject project, object data)
         {
             _emptyParams = new Dictionary<string, string>();
             _project = project;

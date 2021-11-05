@@ -1,17 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using SkinnyJson;
 
 namespace Form8snCore.FileFormats
 {
-    // TODO: this is very file-system centric. Pull out an interface so users can replace it.
-    public class Project
+    /// <summary>
+    /// A helper for loading/reading/storing project information
+    /// </summary>
+    public class FileSystemProject
     {
         private readonly string _indexPath;
         private readonly string _baseUri;
 
-        public Project(string path)
+        public FileSystemProject(string path)
         {
             _indexPath = path;
             BasePath = Path.GetDirectoryName(_indexPath)!;

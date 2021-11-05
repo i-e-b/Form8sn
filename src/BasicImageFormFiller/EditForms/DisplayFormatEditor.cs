@@ -9,13 +9,13 @@ namespace BasicImageFormFiller.EditForms
 {
     public partial class DisplayFormatEditor : Form
     {
-        private readonly Project? _project;
+        private readonly FileSystemProject? _project;
         private readonly int _pageIndex;
         private readonly string? _boxKey;
 
         public DisplayFormatEditor() { InitializeComponent(); }
 
-        public DisplayFormatEditor(Project project, int pageIndex, string boxKey)
+        public DisplayFormatEditor(FileSystemProject project, int pageIndex, string boxKey)
         {
             _project = project;
             _pageIndex = pageIndex;

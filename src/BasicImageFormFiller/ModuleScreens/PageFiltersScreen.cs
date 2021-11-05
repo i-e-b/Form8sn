@@ -17,11 +17,11 @@ namespace BasicImageFormFiller.ModuleScreens
         private const string DeleteFilterCommand = "/delete-filter";
         private const string EditFilterCommand = "/edit-filter";
         
-        private readonly Project _project;
+        private readonly FileSystemProject _project;
         private readonly int _pageIndex;
         private StateChangePermission _stateChange;
 
-        public PageFiltersScreen(Project project, int pageIndex)
+        public PageFiltersScreen(FileSystemProject project, int pageIndex)
         {
             _project = project;
             _pageIndex = pageIndex;

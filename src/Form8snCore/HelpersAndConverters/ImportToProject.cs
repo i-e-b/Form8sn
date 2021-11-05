@@ -6,10 +6,11 @@ using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.AcroForms;
 using PdfSharp.Pdf.IO;
+using String_Extensions;
 
 namespace Form8snCore.HelpersAndConverters
 {
-    public class ImportToProject
+    public static class ImportToProject
     {
         /// <summary>
         /// Generate a new index file from an existing PDF
@@ -62,38 +63,33 @@ namespace Form8snCore.HelpersAndConverters
         private static void ReadExistingBoxes(PdfDocument pdf, PdfPage pdfPage, int pdfPageNumber, TemplatePage page)
         {
             var form = pdf.AcroForm;
-            if (form == null) Console.WriteLine("No form found");
-            else
+            if (form is null) return; // no form present
+            
+            for (var fieldNumber = 0; fieldNumber < form.Fields.Count; fieldNumber++)
             {
-                for (var fieldNumber = 0; fieldNumber < form.Fields.Count; fieldNumber++)
-                {
-                    var field = form.Fields[fieldNumber];
-                    field.GetPage(out var pageNum);
+                var field = form.Fields[fieldNumber];
+                field.GetPage(out var pageNum);
                     
-                    if (pageNum != pdfPageNumber) continue;
+                if (pageNum != pdfPageNumber) continue;
 
-                    switch (field)
-                    {
-                        // the fields that make sense to import
-                        case PdfTextField _:
-                        case PdfCheckBoxField _:
-                        case PdfChoiceField _: // includes lists, combo boxes, dropdowns
-                        case PdfGenericField _:
-                        case PdfSignatureField _:
-                            AddBoxForAcroField(page, pdfPage, field, fieldNumber);
-                            break;
+                switch (field)
+                {
+                    // the fields that make sense to import
+                    case PdfTextField _:
+                    case PdfCheckBoxField _:
+                    case PdfChoiceField _: // includes lists, combo boxes, dropdowns
+                    case PdfGenericField _:
+                    case PdfSignatureField _:
+                        AddBoxForAcroField(page, pdfPage, field, fieldNumber);
+                        break;
                         
-                        // ignore everything else
-                    }
+                    // ignore everything else
                 }
             }
         }
 
         private static void AddBoxForAcroField(TemplatePage page, PdfPage pdfPage, PdfAcroField field, int fieldNumber)
         {
-            
-            // TODO: convert right&bottom to width & height
-            // TODO: convert from std units to millimetres.
             if (!field.Elements.ContainsKey("/Rect")) return;
             var rect = field.Elements["/Rect"] as PdfArray; // or PdfRectangle?
             if (rect is null) return;
@@ -101,9 +97,10 @@ namespace Form8snCore.HelpersAndConverters
             var name = $"Pdf field {fieldNumber}";
             if (field.Elements.ContainsKey("/TU"))
             {
-                if (field.Elements["/TU"] is PdfString description)
+                if (field.Elements["/TU"] is PdfString description
+                && !string.IsNullOrWhiteSpace(description.Value))
                 {
-                    name = "Pdf field " + description.Value;
+                    name = description.Value.ReplaceAsciiCompatible();
                 }
             }
 

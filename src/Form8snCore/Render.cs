@@ -5,7 +5,7 @@ namespace Form8snCore
 {
     public static class Render
     {
-        public static RenderResultInfo ProjectToFile(string outputFilePath, string dataFilePath, Project project)
+        public static RenderResultInfo ProjectToFile(string outputFilePath, string dataFilePath, FileSystemProject project)
         {
             return RenderProject.ToFile(outputFilePath, dataFilePath, project);
         }

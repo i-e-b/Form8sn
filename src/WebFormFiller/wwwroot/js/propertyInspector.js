@@ -15,6 +15,7 @@
             // if this row is also collapsable, AND is expanded, collapse it.
             if (childRowElements[i].classList.contains("shown")) {
                 let childBtnId = "btn-" + childRowElements[i].id;
+                if (childBtnId === btnID) continue; // prevent client side stack overflow if server supplied IDs are broken
                 let found = document.getElementById(childBtnId);
                 if (found && found.onclick) {
                     toggle(childBtnId, "close");

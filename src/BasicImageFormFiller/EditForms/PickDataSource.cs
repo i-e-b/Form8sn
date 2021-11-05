@@ -27,7 +27,7 @@ namespace BasicImageFormFiller.EditForms
         /// <param name="repeaterPath">Optional: Page-specific repeater data path. This will show the data for page 1, but the path selection will be correct for all pages</param>
         /// <param name="pageIndex">Optional: If given, page-specific filters will be shown</param>
         /// <param name="allowEmpty">If true, the pick button will be available when no item is selected</param>
-        public PickDataSource(Project project, string prompt, string[]? previous, string[]? repeaterPath, int? pageIndex, bool allowEmpty)
+        public PickDataSource(FileSystemProject project, string prompt, string[]? previous, string[]? repeaterPath, int? pageIndex, bool allowEmpty)
         {
             _allowEmpty = allowEmpty;
             InitializeComponent();
@@ -36,6 +36,9 @@ namespace BasicImageFormFiller.EditForms
             // load tree from sample data
             var data = project.LoadSampleData();
             if (data == null) return;
+            
+            
+            // TODO: extract the logic of this to core (share with web ui and make it more testable)
             
             AddSampleData(data);
             AddDataFilters(project, data);
@@ -83,7 +86,7 @@ namespace BasicImageFormFiller.EditForms
             treeView!.Nodes.Add(pagesNode);
         }
 
-        private void AddRepeaterPath(Project project, object sampleData, string[] repeaterPath)
+        private void AddRepeaterPath(FileSystemProject project, object sampleData, string[] repeaterPath)
         {
             // Get a "sample" from the data.
             // If it's an ArrayList, take the first item and make nodes from it.
@@ -166,7 +169,7 @@ namespace BasicImageFormFiller.EditForms
             treeView!.Nodes.AddRange(nodes.ToArray());
         }
 
-        private void AddPageDataFilters(Project project, object data, int pageIndex)
+        private void AddPageDataFilters(FileSystemProject project, object data, int pageIndex)
         {
             var repeatData = MappingActions.ApplyFilter(
                 MappingType.None,
@@ -211,7 +214,7 @@ namespace BasicImageFormFiller.EditForms
             treeView!.Nodes.Add(filters);
         }
 
-        private void AddDataFilters(Project project, object data)
+        private void AddDataFilters(FileSystemProject project, object data)
         {
             var filters = new TreeNode {Text = "Filters", Name = "#", Tag = Strings.FilterMarker, ForeColor = Color.DimGray};
             foreach (var filter in project.Index.DataFilters)

@@ -11,7 +11,7 @@ namespace BasicImageFormFiller.EditForms.PropertyGridSpecialTypes
     public class PropertyGridDataPicker: ISpecialString
     {
         public PropertyGridDataPicker() { }
-        public PropertyGridDataPicker(string? parsedValue, Project? project, int? pageIndex)
+        public PropertyGridDataPicker(string? parsedValue, FileSystemProject? project, int? pageIndex)
         {
             Path = string.IsNullOrWhiteSpace(parsedValue) ? null : parsedValue.Split('.');
             BaseProject = project;
@@ -19,7 +19,7 @@ namespace BasicImageFormFiller.EditForms.PropertyGridSpecialTypes
         }
 
         internal string []? Path { get; set; }
-        internal Project? BaseProject { get; set; }
+        internal FileSystemProject? BaseProject { get; set; }
         internal int? PageDefinitionIndex { get; set; }
 
         public override string ToString()

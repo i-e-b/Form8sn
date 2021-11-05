@@ -11,12 +11,12 @@ namespace BasicImageFormFiller.EditForms
     public partial class EditPageMeta : Form
     {
         private readonly IScreenModule? _returnModule;
-        private readonly Project? _project;
+        private readonly FileSystemProject? _project;
         private readonly int _pageIndex;
 
         public EditPageMeta() { InitializeComponent(); }
 
-        public EditPageMeta(IScreenModule returnModule, Project project, int pageIndex)
+        public EditPageMeta(IScreenModule returnModule, FileSystemProject project, int pageIndex)
         {
             _returnModule = returnModule;
             _project = project;

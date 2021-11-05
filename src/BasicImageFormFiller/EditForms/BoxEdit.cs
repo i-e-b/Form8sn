@@ -8,7 +8,7 @@ namespace BasicImageFormFiller.EditForms
 {
     public partial class BoxEdit : Form
     {
-        private readonly Project? _project;
+        private readonly FileSystemProject? _project;
         private readonly int _pageIndex;
         private readonly string _boxKey;
 
@@ -18,7 +18,7 @@ namespace BasicImageFormFiller.EditForms
             InitializeComponent();
         }
 
-        public BoxEdit (Project project, int pageIndex, string boxKey)
+        public BoxEdit (FileSystemProject project, int pageIndex, string boxKey)
         {
             InitializeComponent();
             _project = project;
@@ -223,7 +223,7 @@ namespace BasicImageFormFiller.EditForms
             return true;
         }
 
-        private void SetupDependentCombo(Project project, int pageIndex, string boxKey, TemplateBox box)
+        private void SetupDependentCombo(FileSystemProject project, int pageIndex, string boxKey, TemplateBox box)
         {
             dependsOnComboBox!.Items.Clear();
             dependsOnComboBox!.Items.Add(""); // Blank is no dependency

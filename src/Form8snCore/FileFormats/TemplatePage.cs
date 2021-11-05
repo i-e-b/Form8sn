@@ -57,12 +57,12 @@ namespace Form8snCore.FileFormats
         /// </summary>
         public bool RenderBackground { get; set; } = true;
 
-        public string GetBackgroundUrl(Project project)
+        public string GetBackgroundUrl(FileSystemProject project)
         {
             return $"{project.BaseUri}/{BackgroundImage}";
         }
 
-        public string GetBackgroundPath(Project project)
+        public string GetBackgroundPath(FileSystemProject project)
         {
             return Path.Combine(project.BasePath, BackgroundImage ?? "");
         }
@@ -72,7 +72,7 @@ namespace Form8snCore.FileFormats
         /// Otherwise if there is a background, return the URL to that.
         /// Otherwise, return empty string.
         /// </summary>
-        public string GetBackgroundPreviewUrl(Project project)
+        public string GetBackgroundPreviewUrl(FileSystemProject project)
         {
             if (BackgroundImage == null) return "";
             
@@ -84,7 +84,7 @@ namespace Form8snCore.FileFormats
         /// <summary>
         /// Get the expected path to read or write page previews
         /// </summary>
-        public string? GetPreviewPath(Project project)
+        public string? GetPreviewPath(FileSystemProject project)
         {
             return BackgroundImage == null
                 ? null

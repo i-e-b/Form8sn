@@ -10,7 +10,14 @@ These get resized when each PDF page is loaded, based on the page and the zoom l
 }
 
 
-/* For the property picker canvas */
+/* 
+For the property picker.
+This is a table with all items in the tree flattened into consecutive rows.
+Also has some script to drive the hierarchical folding.
+
+The folded items are hidden with the 'visually-hidden' class rather than display:none.
+This is so screen-readers etc can 'see' the rows without having to expand items.
+*/
 table {
     margin: 1em 0;
     border-collapse: collapse;
@@ -22,8 +29,7 @@ caption {
     padding: 0.25em 0.5em 0.5em 0.5em;
 }
 
-th,
-td {
+th, td {
     padding: 0.25em 0.5em 0.25em 1em;
     vertical-align: text-top;
     text-align: left;
@@ -82,6 +88,7 @@ button.expando {
     transform: rotate(90deg);
 }
 
+/* Not visible, but semantically present */
 .visually-hidden {
     position: absolute;
     top: auto;

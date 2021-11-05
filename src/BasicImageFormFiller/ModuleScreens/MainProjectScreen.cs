@@ -13,7 +13,7 @@ namespace BasicImageFormFiller.ModuleScreens
 {
     internal class MainProjectScreen: IScreenModule
     {
-        private readonly Project _project;
+        private readonly FileSystemProject _project;
         private StateChangePermission _stateChange = StateChangePermission.Allowed;
         private int _lastPageIndex;
        
@@ -37,7 +37,7 @@ namespace BasicImageFormFiller.ModuleScreens
         private const string DeletePageCommand       = "/delete-this-page";
         #endregion
         
-        public MainProjectScreen(Project project, int pageIndex)
+        public MainProjectScreen(FileSystemProject project, int pageIndex)
         {
             _lastPageIndex = pageIndex;
             _project = project;

@@ -8,13 +8,13 @@ namespace BasicImageFormFiller.EditForms
     public partial class EditProjectNotes : Form
     {
         private readonly IScreenModule? _returnModule;
-        private readonly Project? _project;
+        private readonly FileSystemProject? _project;
 
         public EditProjectNotes()
         {
             InitializeComponent();
         }
-        public EditProjectNotes(IScreenModule returnModule, Project project)
+        public EditProjectNotes(IScreenModule returnModule, FileSystemProject project)
         {
             _returnModule = returnModule;
             _project = project;
