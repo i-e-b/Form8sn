@@ -59,32 +59,22 @@ namespace TestApp
             var targetFile = "finland";
             using (var existing = PdfReader.Open($"{targetFile}.pdf"))
             {
-                //var what = existing.Internals.AllObjects[700];
-                //LogPdfItem(what);
                 var form = existing.AcroForm;
                 if (form == null) Console.WriteLine("No form found");
                 else
                 {
                     Console.WriteLine($"Found {form.Fields.Count} form fields");
-                    PdfAcroField? acroF;
                     foreach (var afName in form.Fields.Names)
                     {
                         var field = form.Fields[afName];
-                        var maybePage = GetPageFromField(existing, afName, out var pageNum);
+                        var pageNum = 0;
+                        var maybePage = field?.GetPage(out pageNum);
                         Console.WriteLine($"Field def for page {pageNum} / {(maybePage==null?"not found":"found")}:");
                         LogPdfItem(field);
                     }
-                    
-
-                    /*foreach (var field in form.Fields)
-                    {
-                        //var maybePage = GetPageFromField(existing, acroF, out var pageNum);
-                        //Console.WriteLine($"Field def for page {pageNum} / {(maybePage==null?"not found":"found")}:");
-                    }*/
                 }
 
                 Console.WriteLine($"Found {existing.FullPath}: {existing.Pages.Count} pages");
-                Environment.Exit(0);
                 int pageNumber = 0;
                 foreach (var ePage in existing.Pages)
                 {

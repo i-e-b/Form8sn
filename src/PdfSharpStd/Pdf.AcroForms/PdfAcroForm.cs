@@ -57,13 +57,13 @@ namespace PdfSharp.Pdf.AcroForms
             {
                 if (_fields == null)
                 {
-                    object o = Elements.GetValue(Keys.Fields, VCF.CreateIndirect);
-                    _fields = (PdfAcroField.PdfAcroFieldCollection)o;
+                    var o = Elements.GetValue(Keys.Fields, VCF.CreateIndirect);
+                    _fields = (PdfAcroField.PdfAcroFieldCollection)o!;
                 }
-                return _fields;
+                return _fields!;
             }
         }
-        PdfAcroField.PdfAcroFieldCollection _fields;
+        PdfAcroField.PdfAcroFieldCollection? _fields;
 
         /// <summary>
         /// Predefined keys of this dictionary. 

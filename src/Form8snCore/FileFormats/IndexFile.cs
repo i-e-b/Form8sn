@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using PdfSharp.Drawing;
 using PdfSharp.Pdf;
+using PdfSharp.Pdf.AcroForms;
 using PdfSharp.Pdf.Advanced;
 using PdfSharp.Pdf.IO;
 
@@ -69,13 +72,13 @@ namespace Form8snCore.FileFormats
             using var pdf = PdfReader.Open(pdfSource);
             
             var pages = new List<TemplatePage>();
-            var pageCount = 1;
+            var pageNumber = 1;
             foreach (var pdfPage in pdf.Pages)
             {
                 var page = new TemplatePage
                 {
                     Boxes = new Dictionary<string, TemplateBox>(),
-                    Name = $"Page {pageCount} of {pdf.PageCount}",
+                    Name = $"Page {pageNumber} of {pdf.PageCount}",
                     Notes = null,
                     BackgroundImage = null,
                     HeightMillimetres = pdfPage.Height.Millimeter,
@@ -85,11 +88,11 @@ namespace Form8snCore.FileFormats
                     PageFontSize = null,
                     PageDataFilters = new Dictionary<string, MappingInfo>()
                 };
-                // TODO: try to read pre-existing boxes?
-                //pdfPage.
-                ReadExistingBoxes(pdf, pdfPage, page);
+                
+                // Try to read pre-existing boxes, if there is AcroForms data in this PDF
+                ReadExistingBoxes(pdf, pdfPage, pageNumber, page);
                 pages.Add(page);
-                pageCount++;
+                pageNumber++;
             }
             
             return new IndexFile(templateName){
@@ -104,68 +107,103 @@ namespace Form8snCore.FileFormats
         }
 
         /// <summary>
-        ///  See PDF reference, section 8.6;Table 8.49; pdf-page 551
+        /// See PDF reference, section 8.6;Table 8.49; pdf-page 551
         /// </summary>
-        /// <param name="pdf"></param>
-        /// <param name="pdfPage"></param>
-        /// <param name="page"></param>
-        private static void ReadExistingBoxes(PdfDocument pdf, PdfPage pdfPage, TemplatePage page)
+        private static void ReadExistingBoxes(PdfDocument pdf, PdfPage pdfPage, int pdfPageNumber, TemplatePage page)
         {
             var form = pdf.AcroForm;
             if (form == null) Console.WriteLine("No form found");
             else
             {
-                Console.WriteLine($"Found {form.Fields.Count} form fields");
-                PdfObject thing;
-                int i = 1;
-                foreach (var field in form.Fields)
+                for (var fieldNumber = 0; fieldNumber < form.Fields.Count; fieldNumber++)
                 {
-                    if (field is PdfReference refr) { thing = refr.Value; }
-                    else { thing = (PdfObject)field; }
-
-                    if (thing is PdfDictionary dict)
-                    {
-                        var rect = dict.Elements["/Rect"] as PdfArray; // or PdfRectangle?
-                        if (rect is null)
-                        {
-                            Console.WriteLine("Expected PdfArray");
-                            continue;
-                        }
-
-                        var a = rect.Elements[0] as PdfReal;
-                        var b = rect.Elements[1] as PdfReal;
-                        var c = rect.Elements[2] as PdfReal;
-                        var d = rect.Elements[3] as PdfReal;
-                        if (a is null || b is null || c is null || d is null)
-                        {
-                            continue;
-                        }
-
-                        page.Boxes.Add("Auto_"+i, new TemplateBox{
-                            Alignment = TextAlignment.BottomLeft,
-                            Height = d.Value, Width = c.Value, Left = a.Value, Top = b.Value,
-                            BoxOrder = 1, DependsOn = "otherBoxName",
-                            DisplayFormat = new DisplayFormatFilter{Type = DisplayFormatType.DateFormat, FormatParameters = new Dictionary<string, string>()},
-                            MappingPath = new string[]{"path","is","here"},
-                            WrapText = true, ShrinkToFit = true, BoxFontSize = 16
-                        });
-                        i++;
-                    }
-
-                    Console.WriteLine(thing.Internals.TypeID);
-                    Console.WriteLine("Field def:");
-                    //LogPdfItem(field);
+                    var field = form.Fields[fieldNumber];
+                    field.GetPage(out var pageNum);
                     
-                    /*page.Boxes.Add("Sample", new TemplateBox{
-                        Alignment = TextAlignment.BottomLeft,
-                        Height = 10, Width = 10, Left = 10, Top = 10,
-                        BoxOrder = 1, DependsOn = "otherBoxName",
-                        DisplayFormat = new DisplayFormatFilter{Type = DisplayFormatType.DateFormat, FormatParameters = new Dictionary<string, string>()},
-                        MappingPath = new string[]{"path","is","here"},
-                        WrapText = true, ShrinkToFit = true, BoxFontSize = 16
-                    });*/
+                    if (pageNum != pdfPageNumber) continue;
+
+                    switch (field)
+                    {
+                        // the fields that make sense to import
+                        case PdfTextField _:
+                        case PdfCheckBoxField _:
+                        case PdfChoiceField _:
+                        case PdfGenericField _:
+                        case PdfSignatureField _:
+                            AddBoxForAcroField(page, pdfPage, field, fieldNumber);
+                            break;
+                        
+                        // ignore everything else
+                        default:
+                            Console.WriteLine("Ignoring a field");
+                            break;
+                    }
                 }
             }
+        }
+
+        private static void AddBoxForAcroField(TemplatePage page, PdfPage pdfPage, PdfAcroField field, int fieldNumber)
+        {
+            
+            // TODO: convert right&bottom to width & height
+            // TODO: convert from std units to millimetres.
+            if (!field.Elements.ContainsKey("/Rect")) return;
+            var rect = field.Elements["/Rect"] as PdfArray; // or PdfRectangle?
+            if (rect is null) return;
+
+            var name = $"Pdf field {fieldNumber}";
+            if (field.Elements.ContainsKey("/TU"))
+            {
+                if (field.Elements["/TU"] is PdfString description)
+                {
+                    name = "Pdf field " + description.Value;
+                }
+            }
+
+            AddTemplateBox(page, pdfPage, rect, name);
+        }
+
+        private static void AddTemplateBox(TemplatePage page, PdfPage pdfPage, PdfArray rect, string name)
+        {
+            var a = rect.Elements[0] as PdfReal;
+            var b = rect.Elements[1] as PdfReal;
+            var c = rect.Elements[2] as PdfReal;
+            var d = rect.Elements[3] as PdfReal;
+            if (a is null || b is null || c is null || d is null) return;
+
+            // Convert rect to millimeters,
+            // and flip vertically (PDF 0,0 is bottom-left; XGraphics, images, and template 0,0 is top-left)
+            var x1 = XUnit.FromPoint(a.Value).Millimeter;
+            var x2 = XUnit.FromPoint(c.Value).Millimeter;
+            var y1 = pdfPage.Height.Millimeter - XUnit.FromPoint(b.Value).Millimeter;
+            var y2 = pdfPage.Height.Millimeter - XUnit.FromPoint(d.Value).Millimeter;
+            
+            // normalise rectangle (PDF allows for any opposite corners)
+            var left = Math.Min(x1,x2);
+            var right = Math.Max(x1,x2);
+            var top = Math.Min(y1,y2);
+            var bottom = Math.Max(y1,y2);
+            
+            var boxName = name;
+            for (var i = 0; i < 100; i++)
+            {
+                if (!page.Boxes.ContainsKey(boxName)) break;
+                boxName = name+"_"+i;
+            }
+
+            page.Boxes.Add(boxName, new TemplateBox
+            {
+                Alignment = TextAlignment.BottomLeft,
+                
+                Left = left, Top = top,
+                Width = right-left,
+                Height = bottom-top,
+                
+                BoxOrder = 1, DependsOn = "otherBoxName",
+                DisplayFormat = new DisplayFormatFilter { Type = DisplayFormatType.DateFormat, FormatParameters = new Dictionary<string, string>() },
+                MappingPath = new string[] { "path", "is", "here" },
+                WrapText = true, ShrinkToFit = true, BoxFontSize = 16
+            });
         }
     }
 }

@@ -64,6 +64,32 @@ namespace PdfSharp.Pdf.AcroForms
                 return name;
             }
         }
+        
+        
+        /// <summary>
+        /// Return the page this field is displayed on, if any.
+        /// </summary>
+        public PdfPage? GetPage(out int pageNum)
+        {
+            pageNum = 0;
+            if (_document is null) return null;
+            var currentField = _document.AcroForm?.Fields[Name];
+            if (currentField is null) return null;
+            
+            // get the page element
+            var focusPageReference = currentField.Elements["/P"] as PdfReference;
+            // loop through our pages to match the reference
+            foreach (var page in _document.Pages)
+            {
+                pageNum++;
+                if (page.Reference == focusPageReference)
+                {
+                    return page;
+                }
+            }
+            // could not find a page for this field
+            return null;
+        }
 
         /// <summary>
         /// Gets the field flags of this instance.
@@ -83,7 +109,7 @@ namespace PdfSharp.Pdf.AcroForms
         /// <summary>
         /// Gets or sets the value of the field.
         /// </summary>
-        public virtual PdfItem Value
+        public virtual PdfItem? Value
         {
             get { return Elements[Keys.V]; }
             set
@@ -115,17 +141,14 @@ namespace PdfSharp.Pdf.AcroForms
         /// <summary>
         /// Gets the field with the specified name.
         /// </summary>
-        public PdfAcroField this[string name]
-        {
-            get { return GetValue(name); }
-        }
+        public PdfAcroField this[string name] => GetValue(name);
 
         /// <summary>
         /// Gets a child field by name.
         /// </summary>
-        protected virtual PdfAcroField GetValue(string name)
+        protected virtual PdfAcroField? GetValue(string name)
         {
-            if (String.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(name))
                 return this;
             if (HasKids)
                 return Fields.GetValue(name);
@@ -139,11 +162,8 @@ namespace PdfSharp.Pdf.AcroForms
         {
             get
             {
-                PdfItem item = Elements[Keys.Kids];
-                if (item == null)
-                    return false;
-                if (item is PdfArray)
-                    return ((PdfArray)item).Elements.Count > 0;
+                var item = Elements[Keys.Kids];
+                if (item is PdfArray array) return array.Elements.Count > 0;
                 return false;
             }
         }
@@ -180,8 +200,7 @@ namespace PdfSharp.Pdf.AcroForms
         public string[] GetAppearanceNames()
         {
             Dictionary<string, object> names = new Dictionary<string, object>();
-            PdfDictionary dict = Elements["/AP"] as PdfDictionary;
-            if (dict != null)
+            if (Elements["/AP"] is PdfDictionary dict)
             {
                 AppDict(dict, names);
 
@@ -190,12 +209,8 @@ namespace PdfSharp.Pdf.AcroForms
                     PdfItem[] kids = Fields.Elements.Items;
                     foreach (PdfItem pdfItem in kids)
                     {
-                        if (pdfItem is PdfReference)
-                        {
-                            PdfDictionary xxx = ((PdfReference)pdfItem).Value as PdfDictionary;
-                            if (xxx != null)
-                                AppDict(xxx, names);
-                        }
+                        if (pdfItem is PdfReference { Value: PdfDictionary refDict }) 
+                            AppDict(refDict, names);
                     }
                     //((PdfDictionary)(((PdfReference)(Fields.Elements.Items[1])).Value)).Elements.SetName(Keys.V, name1);
 
@@ -374,28 +389,25 @@ namespace PdfSharp.Pdf.AcroForms
                 {
                     PdfItem item = Elements[index];
                     Debug.Assert(item is PdfReference);
-                    PdfDictionary dict = ((PdfReference)item).Value as PdfDictionary;
+                    var dict = ((PdfReference)item).Value as PdfDictionary;
                     Debug.Assert(dict != null);
-                    PdfAcroField field = dict as PdfAcroField;
+                    var field = dict as PdfAcroField;
                     if (field == null && dict != null)
                     {
                         // Do type transformation
                         field = CreateAcroField(dict);
                         //Elements[index] = field.XRef;
                     }
-                    return field;
+                    return field!;
                 }
             }
 
             /// <summary>
             /// Gets the field with the specified name.
             /// </summary>
-            public PdfAcroField this[string name]
-            {
-                get { return GetValue(name); }
-            }
+            public PdfAcroField? this[string name] => GetValue(name);
 
-            internal PdfAcroField GetValue(string name)
+            internal PdfAcroField? GetValue(string name)
             {
                 if (String.IsNullOrEmpty(name))
                     return null;
