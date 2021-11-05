@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Form8snCore.FileFormats;
+using Form8snCore.HelpersAndConverters;
 using Form8snCore.UiHelpers;
 using Microsoft.AspNetCore.Mvc;
 using WebFormFiller.Models;
@@ -65,7 +66,9 @@ namespace WebFormFiller.Controllers
             FileController.Store(fileName, ms);
             var pdfUrl = Url!.Action("Load","File", new{name = fileName})!;
             ms.Seek(0,  SeekOrigin.Begin);
-            var id = FileDatabaseStub.SaveDocumentTemplate(IndexFile.FromExistingPdf(ms, pdfUrl, model.Title), null);
+            
+            var template = ImportToProject.FromPdf(ms, pdfUrl, model.Title);
+            var id = FileDatabaseStub.SaveDocumentTemplate(template, null);
 
 
             return RedirectToAction(nameof(BoxEditor), new{docId = id})!;

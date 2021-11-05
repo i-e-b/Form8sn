@@ -1,4 +1,7 @@
-﻿/* For the PDF display canvas and the box overlay canvas */
+﻿/*
+For the PDF display canvas and the box overlay canvas.
+These get resized when each PDF page is loaded, based on the page and the zoom level.
+*/
 #container {
     position:relative;
 }
