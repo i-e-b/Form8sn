@@ -14,8 +14,19 @@ namespace Form8snCore.HelpersAndConverters
     public static class JsonDataReader
     {
 
+        /// <summary>
+        /// Build the tree used to select source data for boxes and filters
+        /// </summary>
+        /// <param name="index">The template's index file</param>
+        /// <param name="sampleData">Sample data to pick from. Also used to populate filter output</param>
+        /// <param name="previous">The already selected path, if any</param>
+        /// <param name="repeaterPath">Path used by the page repeater, if any</param>
+        /// <param name="pageIndex">The page definition being targeted (in the index file), if any</param>
         public static List<DataNode> BuildDataSourcePicker(IndexFile index, object sampleData, string[]? previous, string[]? repeaterPath, int? pageIndex)
         {
+            // TODO: test these with data sets that don't fill filters (like split reclaims in 4s with only 2 reclaims)
+            
+            
             var result = new List<DataNode>();
             
             AddSampleData(result, sampleData);
@@ -29,6 +40,10 @@ namespace Form8snCore.HelpersAndConverters
             return result;
         }
 
+        /// <summary>
+        /// Flatten a data tree into a depth-first list.
+        /// This is used to display the hierarchy in table views
+        /// </summary>
         public static IEnumerable<DataNode> FlattenTree(List<DataNode> tree)
         {
             var result = new List<DataNode>();
@@ -59,14 +74,13 @@ namespace Form8snCore.HelpersAndConverters
             
             for (var i = 1; i < path.Length; i++)
             {
-                node.Select();
+                node.Expand();
                 node = FindByName(node.Nodes, path[i]);
                 if (node == null) return;
             }
 
-            
-            // TODO: this needs an expand
-            //if (node != null) treeView.SelectedNode = node;
+            node.Expand();
+            node.Select();
         }
         
         private static DataNode? FindByName(ICollection<DataNode>? nodes, string tag)
@@ -90,6 +104,7 @@ namespace Form8snCore.HelpersAndConverters
                 Root = root, Depth = 1,
                 DataPath = $"{Strings.PageDataMarker}{Strings.Separator}{nameof(DocumentBoxType.CurrentPageNumber)}",
                 Name = nameof(DocumentBoxType.CurrentPageNumber),
+                CanBePicked = true
             });
 
             pagesNode.Nodes.Add(new DataNode
@@ -98,6 +113,7 @@ namespace Form8snCore.HelpersAndConverters
                 Root = root, Depth = 1,
                 DataPath = $"{Strings.PageDataMarker}{Strings.Separator}{nameof(DocumentBoxType.TotalPageCount)}",
                 Name = nameof(DocumentBoxType.TotalPageCount),
+                CanBePicked = true
             });
 
             if (repeaterPath != null)
@@ -108,6 +124,7 @@ namespace Form8snCore.HelpersAndConverters
                     Root = root, Depth = 1,
                     DataPath = $"{Strings.PageDataMarker}{Strings.Separator}{nameof(DocumentBoxType.RepeatingPageNumber)}",
                     Name = nameof(DocumentBoxType.RepeatingPageNumber),
+                    CanBePicked = true
                 });
 
                 pagesNode.Nodes.Add(new DataNode
@@ -116,6 +133,7 @@ namespace Form8snCore.HelpersAndConverters
                     Root = root, Depth = 1,
                     DataPath = $"{Strings.PageDataMarker}{Strings.Separator}{nameof(DocumentBoxType.RepeatingPageTotalCount)}",
                     Name = nameof(DocumentBoxType.RepeatingPageTotalCount),
+                    CanBePicked = true
                 });
             }
 
@@ -129,7 +147,7 @@ namespace Form8snCore.HelpersAndConverters
             dataNodes.AddRange(nodes.ToArray());
         }
         
-        // BUG: this is not returning the data as expected. Compare to WinForms and fix
+        // BUG: this might not be working if not enough data to repeat. Check with unit test.
         private static void AddRepeaterPath(ICollection<DataNode> dataNodes, IndexFile index, object sampleData, string[] repeaterPath)
         {
             const string root = "repeater";
@@ -237,7 +255,7 @@ namespace Form8snCore.HelpersAndConverters
             );
             if (repeatData is ArrayList list) repeatData = list[0];
             
-            var filters = new DataNode {Text = "Page Filters", Root=root, Name = "P", DataPath = Strings.FilterMarker, ForeColor = ColorGrey};
+            var filters = new DataNode {Text = "Page Filters", Root=root, Name = "P", DataPath = Strings.FilterMarker, ForeColor = ColorGrey, CanBePicked = false};
             foreach (var filter in index.Pages[pageIndex].PageDataFilters)
             {
                 var path = Strings.FilterMarker + Strings.Separator + filter.Key;
@@ -254,8 +272,8 @@ namespace Form8snCore.HelpersAndConverters
 
                 if (sample == null)
                 {
-                    var node = new DataNode { Text = filter.Key, DataPath = path, ForeColor = ColorBlue };
-                    node.Nodes.Add(new DataNode {Text = "No result", ForeColor = ColorRed, BackColor = ColorPink});
+                    var node = new DataNode { Text = filter.Key, DataPath = path, ForeColor = ColorBlue, CanBePicked = false};
+                    node.Nodes.Add(new DataNode {Text = "No result", ForeColor = ColorRed, BackColor = ColorPink, CanBePicked = false});
                     filters.Nodes.Add(node);
                 }
                 else
@@ -271,7 +289,9 @@ namespace Form8snCore.HelpersAndConverters
         private static void AddDataFilters(ICollection<DataNode> dataNodes, IndexFile index, object data)
         {
             const string root = "page-filters";
-            var filters = new DataNode {Text = "Filters", Root = root, Name = "#", DataPath = Strings.FilterMarker, ForeColor = ColorGrey};
+            var filters = new DataNode {
+                Text = "Filters", Root = root, Name = "#", DataPath = Strings.FilterMarker, ForeColor = ColorGrey, CanBePicked = false
+            };
             foreach (var filter in index.DataFilters)
             {
                 var path = Strings.FilterMarker + Strings.Separator + filter.Key;
@@ -288,8 +308,8 @@ namespace Form8snCore.HelpersAndConverters
 
                 if (sample == null)
                 {
-                    var node = new DataNode { Text = filter.Key, DataPath = path, ForeColor = ColorBlue };
-                    node.Nodes.Add(new DataNode {Text = "No result", ForeColor = ColorRed, BackColor = ColorPink});
+                    var node = new DataNode { Text = filter.Key, DataPath = path, ForeColor = ColorBlue, CanBePicked = false };
+                    node.Nodes.Add(new DataNode {Text = "No result", ForeColor = ColorRed, BackColor = ColorPink, CanBePicked = false});
                     filters.Nodes.Add(node);
                 }
                 else

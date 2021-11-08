@@ -17,7 +17,7 @@ namespace BasicImageFormFiller.EditForms
         public EditPathForm()
         {
             InitializeComponent();
-            _originalValue = new string[0];
+            _originalValue = Array.Empty<string>();
         }
 
         public EditPathForm(IScreenModule? returnModule, IEnumerable<string> path)

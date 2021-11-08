@@ -9,6 +9,10 @@
 </div>
 <a asp-action="StartNewTemplate">Upload new form</a><br/>
 <a asp-action="TreeTableSample">Tree-table test</a>
+<a asp-controller="EditModals" asp-action="TemplateBox"
+   asp-route-documentTemplateId="1"
+   asp-route-pageIndex="0"
+   asp-route-boxKey="Pdf field Family name">Box editor test</a>
 
 <ul>
     @foreach (var item in Model!.Templates)

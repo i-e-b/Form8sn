@@ -25,7 +25,7 @@ namespace WebFormFiller.Controllers
         public IActionResult TreeTableSample()
         {
             // TEMP: this should be supplied by caller, or is part of the template?
-            var sampleData = SkinnyJson.Json.Defrost(System.IO.File.ReadAllText(@"C:\Temp\ExampleData.json")); 
+            var sampleData = SkinnyJson.Json.Defrost(System.IO.File.ReadAllText(@"C:\Temp\OldSystem\New Template\ExpectedResponse.json")); 
             var sampleProject = new FileSystemProject(@"C:\Temp\OldSystem\New Template\Index.json");
             // END TEMP
             

@@ -23,6 +23,7 @@ namespace WebFormFiller.Controllers
 
         /// <summary>
         /// Store a file for later recovery using the [GET]Load(name) endpoint.
+        /// In your implementation, you might want to supply files from a CDN, S3, or similar. 
         /// </summary>
         public static void Store(string name, Stream stream)
         {

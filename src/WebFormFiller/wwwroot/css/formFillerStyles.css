@@ -60,7 +60,7 @@ tr.hidden {
     display: none;
 }
 
-tr:hover {
+.picker tr:hover {
     background-color:#eee;
 }
 
