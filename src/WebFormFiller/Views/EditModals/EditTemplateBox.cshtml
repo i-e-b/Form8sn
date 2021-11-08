@@ -1,27 +1,8 @@
 ﻿@using Form8snCore.FileFormats
 @model WebFormFiller.Models.TemplateBoxModalViewModel
+@{ Layout = null; }
 @* ReSharper disable AssignNullToNotNullAttribute *@
 @* ReSharper disable PossibleNullReferenceException *@
-@{
-    Layout = null;
-}
-<!DOCTYPE html>
-<html lang="en"><head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <link rel="stylesheet" href="~/css/spectre.css" asp-append-version="true"/>
-    <link rel="stylesheet" href="~/css/formFillerStyles.css" asp-append-version="true"/>
-    <title>Box Edit Modal</title>
-</head>
-<body>
-<script>
-function showPickerModal() {
-    alert("Would make the path picker modal visible now");
-}
-function showDisplayFormatModal(){
-    alert("Would make the display format modal visible now");
-}
-</script>
 
 <form asp-action="TemplateBox" method="post">
     <input type="hidden" asp-for="@Model.DocumentId" value="@Model.DocumentId"/>
@@ -37,11 +18,11 @@ function showDisplayFormatModal(){
     @* SOURCE DATA OPTIONS *@
     <div class="form-group">
         <label class="form-label" asp-for="@Model.DataPath">Data Path</label>
-        <button id="DataPathPickBtn" onclick="showPickerModal()">Pick Data</button>
+        <button id="DataPathPickBtn" type="button" onclick="showPickerModal()">Pick Data</button>
         <input class="form-input" type="text" asp-for="@Model.DataPath" value="@Model.DataPath">
         
         <label class="form-label" asp-for="@Model.DisplayFormatDescription">Data Path</label>
-        <button id="DisplayFormatBtn" onclick="showDisplayFormatModal()">Set Format</button>
+        <button id="DisplayFormatBtn" type="button" onclick="showDisplayFormatModal()">Set Format</button>
         <input class="form-input" disabled="disabled" type="text" asp-for="@Model.DisplayFormatDescription" value="@Model.DisplayFormatDescription">
     </div>
     
@@ -93,10 +74,70 @@ function showDisplayFormatModal(){
             @* ReSharper restore Html.IdNotResolved *@
         </table>
     </div>
+    
+    @* SAVE / CANCEL CONTROLS *@
+    <div class="form-group">
+        <button id="CancelEdit" type="button" onclick="closeBoxEditModal()">Cancel</button>
+        
+        <button id="SaveChanges" type="submit">Save</button>
+    </div>
 </form>
 
-@* TODO: Put an initially invisible modal here, ready to pick a data item *@
+<script>
+function loadPartialToModal(url, targetId, nextAction){
+    let targetElement = document.getElementById(targetId);
+    if (!targetElement) return;
+    
+    let oReq = new XMLHttpRequest();
+    
+    oReq.onerror = function(evt) { targetElement.innerText = "An error occurred while transferring this UI element"; console.dir(evt); }
+    oReq.onabort = function(evt) { targetElement.innerText = "The transfer has been canceled by the user."; console.dir(evt); }
+    oReq.onload = function(e) {
+        targetElement.innerHTML = oReq.responseText;
+        if (nextAction) nextAction(e);
+    }
+    
+    oReq.open('GET', url);
+    oReq.send();
+    
+}
+function showDisplayFormatModal(){
+    alert("Would make the display format modal visible now");
+}
+function closeBoxEditModal() {
+    alert();
+}
+function showPickerModal() {
+    let modal = document.getElementById('EditTemplateBox_DataMap');
+    if (!modal) return;
+    
+    loadPartialToModal('@Model.LoadDataPickerUrl', 'EditTemplateBox_DataMap_Content', function(){modal.classList.add("active");});
+}
+function closeDataPathPicker(){
+    let modal = document.getElementById('EditTemplateBox_DataMap');
+    if (!modal) return;
+    
+    modal.classList.remove("active");
+    
+    let deadContent = document.getElementById('EditTemplateBox_DataMap_Content');
+    if (deadContent) deadContent.innerHTML = "";
+}
+</script>
 
-
-</body>
-</html>
+@* Put an initially invisible modal here, ready to pick a data item *@
+@* These should be independent of other modals that might be on the page *@
+<div class="modal" id="EditTemplateBox_DataMap">
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="modal-title h5">Choose a data path</div>
+        </div>
+        <div class="modal-body">
+            <div class="content" style="width:30vw;height:50vh" id="EditTemplateBox_DataMap_Content">
+                Failed to load from server!
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" onclick="closeDataPathPicker()">Cancel</button>
+        </div>
+    </div>
+</div>

@@ -10,13 +10,24 @@ namespace WebFormFiller.Models
     public class TemplateBoxModalViewModel
     {
         #region Read-Only Properties
+        /// <summary>
+        /// DocumentId of the template project we are editing
+        /// </summary>
         public int DocumentId { get; set; }
+        /// <summary>
+        /// Index in the document's page list that contains the box to be edited
+        /// </summary>
         public int PageIndex { get; set; }
         /// <summary>
         /// Name of the box. This is used as the key into the project index file, and
         /// should NOT be edited
         /// </summary>
         public string? BoxKey { get; set; }
+        
+        /// <summary>
+        /// Url for the client to load the data-picker partial view into a modal
+        /// </summary>
+        public string LoadDataPickerUrl { get; set; }
         #endregion
 
         /// <summary>

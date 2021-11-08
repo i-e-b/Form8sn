@@ -13,7 +13,8 @@ namespace Form8snCore.HelpersAndConverters
     /// </summary>
     public static class JsonDataReader
     {
-
+        // TODO: test these with data sets that don't fill filters (like split reclaims in 4s with only 2 reclaims)
+        
         /// <summary>
         /// Build the tree used to select source data for boxes and filters
         /// </summary>
@@ -24,15 +25,12 @@ namespace Form8snCore.HelpersAndConverters
         /// <param name="pageIndex">The page definition being targeted (in the index file), if any</param>
         public static List<DataNode> BuildDataSourcePicker(IndexFile index, object sampleData, string[]? previous, string[]? repeaterPath, int? pageIndex)
         {
-            // TODO: test these with data sets that don't fill filters (like split reclaims in 4s with only 2 reclaims)
-            
-            
             var result = new List<DataNode>();
             
             AddSampleData(result, sampleData);
             AddDataFilters(result, index, sampleData);
             if (repeaterPath != null) AddRepeaterPath(result, index, sampleData, repeaterPath);
-            if (pageIndex != null) AddPageDataFilters(result, index, sampleData, pageIndex.Value);
+            if (pageIndex != null) AddPageDataFilters(result, index, sampleData, pageIndex);
             AddPageNumbers(result, repeaterPath);
             
             SelectPath(result, previous); // Expand and highlight previous selection
@@ -143,7 +141,7 @@ namespace Form8snCore.HelpersAndConverters
         private static void AddSampleData(List<DataNode> dataNodes, object data)
         {
             var nodes = ReadObjectRecursive(data, "", "Data", "page-data", 0);
-            if (nodes.Count > 0) nodes[0].Expand(); // expand first node by default
+            if (nodes.Count > 0) nodes[0]!.Expand(); // expand first node by default
             dataNodes.AddRange(nodes.ToArray());
         }
         
@@ -211,7 +209,7 @@ namespace Form8snCore.HelpersAndConverters
                         var sampleNodes = ReadObjectRecursive(dict, "D", "XXX", root, 0);
                         if (sampleNodes.Count != 1) throw new Exception("Unexpected object result in page data ReadObjectRecursive");
                     
-                        foreach (var node in sampleNodes[0].Nodes)
+                        foreach (var node in sampleNodes[0]!.Nodes)
                         {
                             pageNode.Nodes.Add(node);
                         }
@@ -240,13 +238,19 @@ namespace Form8snCore.HelpersAndConverters
             dataNodes.Add(pageNode);
         }
         
-        private static void AddPageDataFilters(ICollection<DataNode> dataNodes, IndexFile index, object data, int pageIndex)
+        private static void AddPageDataFilters(ICollection<DataNode> dataNodes, IndexFile index, object data, int? pageIndex)
         {
+            if (pageIndex is null) return;
+            if (pageIndex.Value < 0 || pageIndex.Value >= index.Pages.Count) return;
+            
+            var thePage = index.Pages[pageIndex.Value];
+            if (thePage is null) return;
+            
             const string root = "page-data";
             var repeatData = MappingActions.ApplyFilter(
                 MappingType.None,
                 new Dictionary<string, string>(),
-                index.Pages[pageIndex].RepeatMode.DataPath,
+                thePage.RepeatMode.DataPath,
                 null,
                 index.DataFilters,
                 data,
@@ -256,8 +260,10 @@ namespace Form8snCore.HelpersAndConverters
             if (repeatData is ArrayList list) repeatData = list[0];
             
             var filters = new DataNode {Text = "Page Filters", Root=root, Name = "P", DataPath = Strings.FilterMarker, ForeColor = ColorGrey, CanBePicked = false};
-            foreach (var filter in index.Pages[pageIndex].PageDataFilters)
+            foreach (var filter in thePage.PageDataFilters)
             {
+                if (filter.Value is null || filter.Key is null) continue;
+                
                 var path = Strings.FilterMarker + Strings.Separator + filter.Key;
                 var sample = MappingActions.ApplyFilter(
                     filter.Value.MappingType,
@@ -294,6 +300,8 @@ namespace Form8snCore.HelpersAndConverters
             };
             foreach (var filter in index.DataFilters)
             {
+                if (filter.Value is null || filter.Key is null) continue;
+                
                 var path = Strings.FilterMarker + Strings.Separator + filter.Key;
                 var sample = MappingActions.ApplyFilter(
                     filter.Value.MappingType,
@@ -331,6 +339,7 @@ namespace Form8snCore.HelpersAndConverters
                 var collection = new List<DataNode>();
                 foreach (var kvp in dict)
                 {
+                    if (kvp.Key is null || kvp.Value is null) continue;
                     collection.AddRange(ReadObjectRecursive(kvp.Value, path + Strings.Separator + kvp.Key, kvp.Key, root, depth + 1));
                 }
 

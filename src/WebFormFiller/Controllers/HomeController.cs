@@ -24,20 +24,9 @@ namespace WebFormFiller.Controllers
         [HttpGet]
         public IActionResult TreeTableSample()
         {
-            // TEMP: this should be supplied by caller, or is part of the template?
-            var sampleData = SkinnyJson.Json.Defrost(System.IO.File.ReadAllText(@"C:\Temp\OldSystem\New Template\ExpectedResponse.json")); 
-            var sampleProject = new FileSystemProject(@"C:\Temp\OldSystem\New Template\Index.json");
-            // END TEMP
-            
-            var prev = new string[]{ };
-            var repeat = new[]{"#", "Reclaims in sets of 4"};
-            var tree = JsonDataReader.BuildDataSourcePicker(sampleProject.Index, sampleData, prev, repeat, 4);
-            var list = JsonDataReader.FlattenTree(tree);
-            
-            var model = new DataSourceViewModel{
-                Nodes = list
+            var model = new TemplateBoxModalViewModel{
+                LoadDataPickerUrl = Url!.Action("DataPicker", "EditModals", new{documentTemplateId = 1, pageIndex = 0})!
             };
-            
             return View(model)!;
         }
 

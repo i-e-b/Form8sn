@@ -1,4 +1,5 @@
-﻿@model DataSourceViewModel
+﻿@using Form8snCore.FileFormats
+@model WebFormFiller.Models.TemplateBoxModalViewModel
 
 @{
     ViewBag!.Title = "Sample";
@@ -11,40 +12,59 @@
 <h2>Sample</h2>
 
 
-@* TODO: generate this from expando data, like in the BasicImageFormFiller *@
-<table class="picker cell" style="min-width:400px">
-  <caption>Pick a data source</caption>
-  <thead>
-    <tr>
-      <th><span class="visually-hidden">Toggle</span></th>
-      <th>Text</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-  @*
-  Note - For anything that's not expanded, we need to set an expansion id, 
-  and set class=hidden; We also want a toggle button with the on-click to expand it.
-*@
-  @foreach (var node in Model!.Nodes)
-  {
-    <tr id="@node.HtmlId" class="@(node.Depth>0?"hidden":"")"  >
-      <td style="padding-left:@(node.Depth.ToString())em">
-        @if (node.HasChildren)
-        {
-          <button type="button" id="btn-@node.HtmlId" class="expando" aria-expanded="false" childIds="@node.ChildIds" onclick="toggle('btn-@node.HtmlId')">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" focusable="false"><path d="M70.3 13.8L40 66.3 9.7 13.8z"></path></svg>
-          </button>
-        }
-      </td>
-      <td style="padding-left:@(node.Depth.ToString())em;color:@(node.ForeColor)">@node.Text</td>
-      <td>
-        @if (node.CanBePicked)
-        {
-          <button onclick="alert('You picked node @node.Name from path @node.DataPath')">Pick</button>
-        }
-      </td>
-    </tr>
-  }
-  </tbody>
-</table>
+<script>
+function loadPartialToModal(url, targetId, nextAction){
+    let targetElement = document.getElementById(targetId);
+    if (!targetElement) return;
+    
+    let oReq = new XMLHttpRequest();
+    
+    oReq.onerror = function(evt) { targetElement.innerText = "An error occurred while transferring this UI element"; console.dir(evt); }
+    oReq.onabort = function(evt) { targetElement.innerText = "The transfer has been canceled by the user."; console.dir(evt); }
+    oReq.onload = function(e) {
+        targetElement.innerHTML = oReq.responseText;
+        if (nextAction) nextAction(e);
+    }
+    
+    oReq.open('GET', url);
+    oReq.send();
+    
+}
+function showPickerModal() {
+    let modal = document.getElementById('EditTemplateBox_DataMap');
+    if (!modal) return;
+    
+    loadPartialToModal('@Model.LoadDataPickerUrl', 'EditTemplateBox_DataMap_Content', function(){modal.classList.add("active");});
+}
+function closeDataPathPicker(){
+    let modal = document.getElementById('EditTemplateBox_DataMap');
+    if (!modal) return;
+    
+    modal.classList.remove("active");
+    
+    let deadContent = document.getElementById('EditTemplateBox_DataMap_Content');
+    if (deadContent) deadContent.innerHTML = "";
+}
+</script>
+
+@* Initially invisible modal *@
+<div class="modal active" id="EditTemplateBox_DataMap">
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="modal-title h5">Choose a data path</div>
+        </div>
+        <div class="modal-body">
+            <div class="content" style="width:30vw;height:50vh" id="EditTemplateBox_DataMap_Content">
+                Failed to load from server!
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" onclick="closeDataPathPicker()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+@* Trigger the editor *@
+<script>
+showPickerModal();
+</script>
