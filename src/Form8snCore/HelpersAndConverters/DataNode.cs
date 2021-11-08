@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Form8snCore.FileFormats;
@@ -102,15 +103,22 @@ namespace Form8snCore.HelpersAndConverters
         public void Expand() => Expanded = true;
 
         public void Select() => Selected = true;
-        
-        
+
+
+        public string InitialDisplayClass {
+            get {
+                if (Depth <= 0) return "";
+                if (Expanded) return ""; // ???
+                return "hidden";
+            }
+        }
         
         private string GenerateIdString()
         {
             if (!(_idString is null)) return _idString;
             var sb = new StringBuilder();
             
-            var bits = DataPath.Split(Strings.Separator);
+            var bits = DataPath.Split(Strings.Separator) ?? Array.Empty<string>();
             if (bits.Length < 1) { _idString = Name; return _idString; }
             
             sb.Append(Root);

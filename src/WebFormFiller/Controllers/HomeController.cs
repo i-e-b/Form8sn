@@ -20,12 +20,12 @@ namespace WebFormFiller.Controllers
             })!;
         }
 
-        // TEMPORARY
+        // TEMPORARY - Test different settings
         [HttpGet]
         public IActionResult TreeTableSample()
         {
             var model = new TemplateBoxModalViewModel{
-                LoadDataPickerUrl = Url!.Action("DataPicker", "EditModals", new{documentTemplateId = 1, pageIndex = 0})!
+                LoadDataPickerUrl = Url!.Action("DataPicker", "EditModals", new{documentTemplateId = 1, pageIndex = 0, oldPath=".Claimant.FiscalAddress.Country.Name"})!
             };
             return View(model)!;
         }

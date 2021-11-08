@@ -1,5 +1,4 @@
-﻿@using Form8snCore.FileFormats
-@model WebFormFiller.Models.TemplateBoxModalViewModel
+﻿@model WebFormFiller.Models.TemplateBoxModalViewModel
 
 @{
     ViewBag!.Title = "Sample";
@@ -8,8 +7,6 @@
 
 <script src="~/js/propertyInspector.js" asp-append-version="true"></script>
 <link rel="stylesheet" href="~/css/formFillerStyles.css" asp-append-version="true"/>
-
-<h2>Sample</h2>
 
 
 <script>
@@ -34,7 +31,7 @@ function showPickerModal() {
     let modal = document.getElementById('EditTemplateBox_DataMap');
     if (!modal) return;
     
-    loadPartialToModal('@Model.LoadDataPickerUrl', 'EditTemplateBox_DataMap_Content', function(){modal.classList.add("active");});
+    loadPartialToModal('@Html!.Raw(Model.LoadDataPickerUrl)', 'EditTemplateBox_DataMap_Content', function(){modal.classList.add("active");});
 }
 function closeDataPathPicker(){
     let modal = document.getElementById('EditTemplateBox_DataMap');
@@ -54,7 +51,7 @@ function closeDataPathPicker(){
             <div class="modal-title h5">Choose a data path</div>
         </div>
         <div class="modal-body">
-            <div class="content" style="width:30vw;height:50vh" id="EditTemplateBox_DataMap_Content">
+            <div class="content" style="height:50vh" id="EditTemplateBox_DataMap_Content">
                 Failed to load from server!
             </div>
         </div>

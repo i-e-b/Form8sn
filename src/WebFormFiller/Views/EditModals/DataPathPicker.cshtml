@@ -3,24 +3,23 @@
 @* ReSharper disable AssignNullToNotNullAttribute *@
 @* ReSharper disable PossibleNullReferenceException *@
 
-<table class="picker cell" style="min-width:400px">
-    <caption>Pick a data source</caption>
+<table class="picker cell" style="width:100%">
     <thead>
     <tr>
         <th><span class="visually-hidden">Toggles</span></th>
-        <th><span class="visually-hidden">Data that can be selected</span></th>
+        <th style="width:100%"><span class="visually-hidden">Data that can be selected</span></th>
         <th><span class="visually-hidden">Selection options</span></th>
     </tr>
     </thead>
     <tbody>
 @*
-  Note - For anything that's not expanded, we need to set an expansion id, 
+  Note - For anything that's not expanded, we need to set an expansion id,
   and set class=hidden; We also want a toggle button with the on-click to expand it.
 *@
     @foreach (var node in Model!.Nodes)
     {
-        <tr id="@node.HtmlId" class="@(node.Depth>0?"hidden":"")"  >
-            <td style="padding-left:@(node.Depth.ToString())em">
+        <tr id="@node.HtmlId" class="@node.InitialDisplayClass">
+            <td style="margin-left:@(node.Depth.ToString())em">
                 @if (node.HasChildren)
                 {
                     <button type="button" id="btn-@node.HtmlId" class="expando" aria-expanded="false" childIds="@node.ChildIds" onclick="toggle('btn-@node.HtmlId')">
@@ -28,9 +27,15 @@
                     </button>
                 }
             </td>
-            <td style="padding-left:@(node.Depth.ToString())em;color:@(node.ForeColor)">@node.Text</td>
+            <td style="padding-left:@(node.Depth.ToString())em;color:@(node.ForeColor)">
+                @node.Text
+            </td>
             <td>
-                @if (node.CanBePicked)
+                @if (node.Selected)
+                {
+                    <button disabled=disabled>Pick</button>
+                }
+                else if (node.CanBePicked)
                 {
                     <button onclick="alert('You picked node @node.Name from path @node.DataPath')">Pick</button>
                 }

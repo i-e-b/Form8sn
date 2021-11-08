@@ -16,7 +16,7 @@ namespace WebFormFiller.Controllers
         /// <param name="pageIndex">Optional: if supplied, the page-specific filters will be available</param>
         /// <param name="oldPath">Optional: if supplied, this path will be highlighted in the UI as the 'current selection'</param>
         [HttpGet]
-        public IActionResult DataPicker(int documentTemplateId, int? pageIndex, string? oldPath)
+        public IActionResult DataPicker(int documentTemplateId, [FromQuery]int? pageIndex, [FromQuery]string? oldPath)
         {
             var sampleData = FileDatabaseStub.GetSampleData();
             var project = FileDatabaseStub.GetDocumentById(documentTemplateId);
@@ -46,7 +46,7 @@ namespace WebFormFiller.Controllers
         /// This does not create new boxes -- that should be done with the BoxEditor view.
         /// </summary>
         [HttpGet]
-        public IActionResult TemplateBox(int documentTemplateId, int pageIndex, string boxKey)
+        public IActionResult TemplateBox(int documentTemplateId, [FromQuery]int pageIndex, [FromQuery]string boxKey)
         {
             var project = FileDatabaseStub.GetDocumentById(documentTemplateId);
             

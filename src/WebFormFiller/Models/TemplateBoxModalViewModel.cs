@@ -27,7 +27,7 @@ namespace WebFormFiller.Models
         /// <summary>
         /// Url for the client to load the data-picker partial view into a modal
         /// </summary>
-        public string LoadDataPickerUrl { get; set; }
+        public string? LoadDataPickerUrl { get; set; }
         #endregion
 
         /// <summary>
