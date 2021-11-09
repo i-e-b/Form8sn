@@ -3,7 +3,6 @@
 @{
     ViewBag!.Title = "Document editor";
     Layout = "_Layout";
-    var pdfWorkerSource = Url!.Content("~/js/pdf.worker.js")!; // Snapshot from https://mozilla.github.io/pdf.js/build/pdf.worker.js
 }
 
 @* PAGE CONTROLS *@
@@ -49,10 +48,11 @@
 
 @* Expose C# model data to Javascript*@
 <script>
-const pdfWorkerSource = "@pdfWorkerSource";
+const pdfWorkerSource = "@(Url!.Content("~/js/pdf.worker.js")!)"; // Snapshot from https://mozilla.github.io/pdf.js/build/pdf.worker.js
 const basePdfSourceUrl = "@Model!.PdfUrl"; // PDF file from project
 const projectJsonLoadUrl = "@(Model.ProjectLoadUrl)?docId=@(Model.DocumentId)"; // AJAX call-back to read template project file
-const boxEditPartialUrl = "@(Model.BoxEditPartialUrl)?documentTemplateId=@(Model.DocumentId)"; // AJAX call-back to load editor for a specific template box
+const projectJsonStoreUrl = "@(Model.ProjectStoreUrl)?docId=@(Model.DocumentId)"; // AJAX call-back to write template project file
+const boxEditPartialUrl = "@(Model.BoxEditPartialUrl)?docId=@(Model.DocumentId)"; // AJAX call-back to load editor for a specific template box
 const boxMoveUrl = "@(Model.BoxMoveUrl)?docId=@(Model.DocumentId)"; // AJAX call-back to save new box position and size
 </script>
 

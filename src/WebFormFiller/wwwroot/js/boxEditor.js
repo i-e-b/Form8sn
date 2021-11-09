@@ -3,11 +3,12 @@
 NOTE:
 
 When embedding on a page, you must define these variables BEFORE importing this script:
- * basePdfSourceUrl   -- URL from where the PDF can be loaded
- * projectJsonLoadUrl -- URL from where we can load the JSON definition of the template project
- * boxEditPartialUrl  -- URL for template box partial view
- * pdfWorkerSource    -- URL of the file at ~/js/pdf.worker.js
- * boxMoveUrl         -- URL used to send back box movements & resizes
+ * basePdfSourceUrl    -- URL from where the PDF can be loaded
+ * projectJsonLoadUrl  -- URL from where we can load the JSON definition of the template project
+ * projectJsonStoreUrl -- URL to which we can post an updated JSON definition of the template project
+ * boxEditPartialUrl   -- URL for template box partial view
+ * pdfWorkerSource     -- URL of the file at ~/js/pdf.worker.js
+ * boxMoveUrl          -- URL used to send back box movements & resizes
 
  */
 
@@ -178,7 +179,7 @@ function showBoxEditModal() {
     }
 
     // Synthesise a url, then show the modal.
-    // Calls to EditModalsController->TemplateBox(int documentTemplateId, int pageIndex, string boxKey)
+    // Calls to EditModalsController->TemplateBox(docId, pageIndex, boxKey)
     let pageIdx = pageNum - 1;
 
     let modal = document.getElementById('EditTemplateBox_BoxInfo');
@@ -345,6 +346,45 @@ function tryUpdateActiveBox(){
     req.send();
 }
 
+function tryCreateNewBox(x, y){
+    // try to find a safe new name for this box
+    let page = projectFile.Pages[pageNum-1];
+    let name, found = false;
+    for (let i = 1; i < 150; i++) {
+        name = `Box_${i}`;
+        if (page.Boxes[name]) continue;
+        
+        found = true;
+        break;
+    }
+    
+    if (!found) {
+        alert("Too many boxes with default names. Please rename some.");
+        return;
+    }
+
+    // scaling factor to change screen-space to document-space units
+    let xi = page.WidthMillimetres / boxCanvas.width;
+    let yi = page.HeightMillimetres / boxCanvas.height;
+    
+    page.Boxes[name] =  {
+        WrapText: true,
+        ShrinkToFit: true,
+        BoxFontSize: null,
+        Alignment: "TopLeft",
+        DependsOn: null,
+        Top: y*yi,
+        Left: x*xi,
+        Width: 10,
+        Height: 10,
+        MappingPath: null,
+        DisplayFormat: null,
+        BoxOrder: null
+    }
+    
+    storeAndReloadProjectFile();
+}
+
 const drawSingleBox = function (def, name, xs, ys, validMapping) {
     if (!def) {
         console.log("Invalid box def: " + JSON.stringify(def));
@@ -506,9 +546,11 @@ boxCanvas.addEventListener('mousedown', function (e) {
     updateEditButton();
 
 
-    if (e.buttons === 2 && mouse.mode === 'none') {
+    if ((e.buttons === 2 || e.shiftKey) && mouse.mode === 'none') {
         // initial right-click. If we drag from here, a new box should be created
-
+        e.preventDefault();
+        tryCreateNewBox(mx,my);
+        renderBoxes();
     }
 }, false);
 
@@ -519,8 +561,6 @@ boxCanvas.addEventListener('mouseup', function (e) {
     if (mouse.mode === 'move' || mouse.mode === 'size') {
         tryUpdateActiveBox();
     }
-    // TODO: handle release. We might want to send changes back to the server
-    // NOTE: send an incremented version ID in the project index file, to prevent old versions overwriting later changes.
 }, false);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// MOUSE MOVE
@@ -571,6 +611,37 @@ boxCanvas.addEventListener('mousemove', function (e) {
 
 // PROJECT LOAD AND STORE =============================================================================================
 
+function storeAndReloadProjectFile(){
+    // We always reload the project file, even after an error -- this is in case the error was due to an 
+    // out-of-date project definition
+
+    let req = new XMLHttpRequest();
+
+    req.onload = function (evt) {
+        if (!(req.status >= 200 && req.status < 400)) {
+            console.log("An error occurred while loading document template definition: " + req.responseText);
+            console.dir(evt);
+        }
+        reloadProjectFile();
+    }
+
+    req.open('POST', projectJsonStoreUrl, true);
+    req.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+
+    req.onerror = function (evt) {
+        console.log("An error occurred while loading document template definition.");
+        console.dir(evt);
+        reloadProjectFile();
+    };
+    req.onabort = function (evt) {
+        console.log("Loading document template definition has been canceled by a user action.");
+        console.dir(evt);
+        reloadProjectFile();
+    };
+
+    req.send(JSON.stringify(projectFile));
+}
+
 function reloadProjectFile() {
     let req = new XMLHttpRequest();
 
@@ -585,7 +656,7 @@ function reloadProjectFile() {
         }
     }
 
-    req.open('GET', projectJsonLoadUrl);
+    req.open('GET', projectJsonLoadUrl, true);
     req.responseType = "json";
 
     req.onerror = function (evt) {
@@ -597,7 +668,6 @@ function reloadProjectFile() {
         console.dir(evt);
     };
 
-    // Send it
     req.send();
 }
 

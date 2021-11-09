@@ -53,7 +53,7 @@ namespace WebFormFiller.Models
         public IEnumerable<SelectListItem> OtherBoxKeys { get; set; } = Array.Empty<SelectListItem>();
         public TextAlignment TextAlign { get; set; }
 
-        public static TemplateBoxModalViewModel From(IndexFile project, int documentTemplateId, int pageIndex, string boxKey)
+        public static TemplateBoxModalViewModel From(IndexFile project, int docId, int pageIndex, string boxKey)
         {
             var thePage = project.Pages[pageIndex];
             var otherBoxes = thePage.Boxes.Keys.Where(k=>k!=boxKey).Select(k=>new SelectListItem(k,k)).ToList();
@@ -64,7 +64,7 @@ namespace WebFormFiller.Models
                 // Keys, not to be edited
                 PageIndex = pageIndex,
                 Version = (project.Version ?? 0) + 1,
-                DocumentId = documentTemplateId,
+                DocumentId = docId,
                 BoxKey = boxKey,
                 OtherBoxKeys = otherBoxes,
                 

@@ -14,7 +14,6 @@ namespace WebFormFiller.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            // TODO: list out documents, option to create/delete
             return View(new TemplateListViewModel{
                 Templates = FileDatabaseStub.ListDocumentTemplates()
             })!;
@@ -25,7 +24,7 @@ namespace WebFormFiller.Controllers
         public IActionResult TreeTableSample()
         {
             var model = new TemplateBoxModalViewModel{
-                LoadDataPickerUrl = Url!.Action("DataPicker", "EditModals", new{documentTemplateId = 1, pageIndex = 0, oldPath=".Claimant.FiscalAddress.Country.Name"})!
+                LoadDataPickerUrl = Url!.Action("DataPicker", "EditModals", new{docId = 1, pageIndex = 0, oldPath=".Claimant.FiscalAddress.Country.Name"})!
             };
             return View(model)!;
         }
@@ -78,6 +77,7 @@ namespace WebFormFiller.Controllers
             var model = new TemplateEditViewModel{
                 Document = document,
                 ProjectLoadUrl = Url!.Action("ReadProject", "Home")!,
+                ProjectStoreUrl = Url!.Action("WriteProject","Home")!,
                 BoxEditPartialUrl = Url!.Action("TemplateBox","EditModals")!,
                 BoxMoveUrl = Url!.Action("MoveBox", "Home")!,
                 DocumentId = docId.ToString(),
@@ -95,6 +95,29 @@ namespace WebFormFiller.Controllers
         {
             var document = FileDatabaseStub.GetDocumentById(docId);
             return Content(SkinnyJson.Json.Freeze(document), "application/json")!;
+        }
+
+        /// <summary>
+        /// Store a new version of a document template's project file.
+        /// Changes are rejected if the incoming file is based off an older version than stored.
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> WriteProject([FromQuery]int docId)
+        {
+            // MVC [FromBody] is a bit fussy, and tends to return 'null'
+            // So we read directly.
+            if (Request?.Body is null) return BadRequest("Invalid Document")!;
+            var ms = new MemoryStream();
+            await Request.Body.CopyToAsync(ms);
+            
+            ms.Seek(0, SeekOrigin.Begin);
+            var document = SkinnyJson.Json.Defrost<IndexFile>(ms);
+            
+            var original = FileDatabaseStub.GetDocumentById(docId);
+            if (document.Version < (original.Version ?? 0)) return BadRequest("Out of Order")!;
+            
+            FileDatabaseStub.SaveDocumentTemplate(document, docId);
+            return Content("OK")!;
         }
 
         /// <summary>

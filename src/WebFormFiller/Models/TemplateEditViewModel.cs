@@ -20,6 +20,11 @@ namespace WebFormFiller.Models
         public string ProjectLoadUrl { get; set; } = "";
         
         /// <summary>
+        /// URL to which we can post an updated template definition index
+        /// </summary>
+        public string ProjectStoreUrl { get; set; } = "";
+        
+        /// <summary>
         /// ID of the document template being edited (see FileDatabaseStub)
         /// </summary>
         public string DocumentId { get; set; } = "";
@@ -33,5 +38,6 @@ namespace WebFormFiller.Models
         /// URL that stores a new size and location for a template page box
         /// </summary>
         public string BoxMoveUrl { get; set; } = "";
+
     }
 }

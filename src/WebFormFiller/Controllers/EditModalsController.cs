@@ -12,14 +12,14 @@ namespace WebFormFiller.Controllers
         /// View and select the data available from the sample data set for a specific document template file.
         /// If a page index is given, page-specific options may be provided.
         /// </summary>
-        /// <param name="documentTemplateId">Document ID, used to read the filters in the document template</param>
+        /// <param name="docId">Document ID, used to read the filters in the document template</param>
         /// <param name="pageIndex">Optional: if supplied, the page-specific filters will be available</param>
         /// <param name="oldPath">Optional: if supplied, this path will be highlighted in the UI as the 'current selection'</param>
         [HttpGet]
-        public IActionResult DataPicker(int documentTemplateId, [FromQuery]int? pageIndex, [FromQuery]string? oldPath)
+        public IActionResult DataPicker(int docId, [FromQuery]int? pageIndex, [FromQuery]string? oldPath)
         {
             var sampleData = FileDatabaseStub.GetSampleData();
-            var project = FileDatabaseStub.GetDocumentById(documentTemplateId);
+            var project = FileDatabaseStub.GetDocumentById(docId);
 
             string[]? repeat = null;
             if (pageIndex is not null)
@@ -46,12 +46,12 @@ namespace WebFormFiller.Controllers
         /// This does not create new boxes -- that should be done with the BoxEditor view.
         /// </summary>
         [HttpGet]
-        public IActionResult TemplateBox(int documentTemplateId, [FromQuery]int pageIndex, [FromQuery]string boxKey)
+        public IActionResult TemplateBox(int docId, [FromQuery]int pageIndex, [FromQuery]string boxKey)
         {
-            var project = FileDatabaseStub.GetDocumentById(documentTemplateId);
+            var project = FileDatabaseStub.GetDocumentById(docId);
             
-            var model = TemplateBoxModalViewModel.From(project, documentTemplateId, pageIndex, boxKey);
-            model.LoadDataPickerUrl = Url!.Action("DataPicker", "EditModals", new{documentTemplateId, pageIndex, oldPath = model.DataPath})!;
+            var model = TemplateBoxModalViewModel.From(project, docId, pageIndex, boxKey);
+            model.LoadDataPickerUrl = Url!.Action("DataPicker", "EditModals", new{ docId = docId, pageIndex, oldPath = model.DataPath})!;
             
             return PartialView("EditTemplateBox", model)!;
         }
