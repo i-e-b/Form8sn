@@ -28,5 +28,10 @@ namespace WebFormFiller.Models
         /// URL that provides a partial view for editing a single template box
         /// </summary>
         public string BoxEditPartialUrl { get; set; } = "";
+
+        /// <summary>
+        /// URL that stores a new size and location for a template page box
+        /// </summary>
+        public string BoxMoveUrl { get; set; } = "";
     }
 }

@@ -62,22 +62,26 @@ namespace Form8snCore.FileFormats
         
         /// <summary>
         /// Top edge of the box.
-        /// Position and size are in pixels, and are relative to the background image
+        /// If a background image is used, position and size are in pixels, and are relative to the background image
+        /// If a source PDF is used, position and size are in millimetres, and are relative to each PDF page
         /// </summary>
         public double Top { get; set; }
         /// <summary>
         /// Left edge of the box,
-        /// Position and size are in pixels, and are relative to the background image
+        /// If a background image is used, position and size are in pixels, and are relative to the background image
+        /// If a source PDF is used, position and size are in millimetres, and are relative to each PDF page
         /// </summary>
         public double Left { get; set; }
         /// <summary>
         /// Width of the box.
-        /// Position and size are in pixels, and are relative to the background image
+        /// If a background image is used, position and size are in pixels, and are relative to the background image
+        /// If a source PDF is used, position and size are in millimetres, and are relative to each PDF page
         /// </summary>
         public double Width { get; set; }
         /// <summary>
         /// Height of the box.
-        /// Position and size are in pixels, and are relative to the background image
+        /// If a background image is used, position and size are in pixels, and are relative to the background image
+        /// If a source PDF is used, position and size are in millimetres, and are relative to each PDF page
         /// </summary>
         public double Height { get; set; }
         

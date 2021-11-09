@@ -79,6 +79,7 @@ namespace WebFormFiller.Controllers
                 Document = document,
                 ProjectLoadUrl = Url!.Action("ReadProject", "Home")!,
                 BoxEditPartialUrl = Url!.Action("TemplateBox","EditModals")!,
+                BoxMoveUrl = Url!.Action("MoveBox", "Home")!,
                 DocumentId = docId.ToString(),
                 PdfUrl = document.BasePdfFile!
             };
@@ -94,6 +95,33 @@ namespace WebFormFiller.Controllers
         {
             var document = FileDatabaseStub.GetDocumentById(docId);
             return Content(SkinnyJson.Json.Freeze(document), "application/json")!;
+        }
+
+        /// <summary>
+        /// Update the size and location of a single template page box.
+        /// This does nothing if the docVersion provided is less than the one stored.
+        /// </summary>
+        [HttpGet]
+        public IActionResult MoveBox([FromQuery] int docId, [FromQuery] int docVersion, [FromQuery] int pageIndex, [FromQuery] string boxKey,
+            [FromQuery] double left, [FromQuery] double top, [FromQuery] double width, [FromQuery] double height)
+        {
+            if (width <= 0 ||height <= 0)return BadRequest("Box Dimensions")!;
+            
+            var document = FileDatabaseStub.GetDocumentById(docId);
+            if (document.Version is not null && document.Version > docVersion) return BadRequest("Document Version")!;
+            if (pageIndex < 0 || pageIndex >= document.Pages.Count) return BadRequest("Page Index")!;
+            
+            var thePage = document.Pages[pageIndex];
+            if (!thePage.Boxes.ContainsKey(boxKey)) return BadRequest("Box Key")!;
+            
+            var theBox = thePage.Boxes[boxKey];
+            theBox.Width = width;
+            theBox.Height = height;
+            theBox.Left = left;
+            theBox.Top = top;
+            
+            FileDatabaseStub.SaveDocumentTemplate(document, docId);
+            return Content("OK")!;
         }
 
         /// <summary>

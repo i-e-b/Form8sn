@@ -55,6 +55,7 @@ const pdfWorkerSource = "@pdfWorkerSource";
 const basePdfSourceUrl = "@Model!.PdfUrl"; // PDF file from project
 const projectJsonLoadUrl = "@(Model.ProjectLoadUrl)?docId=@(Model.DocumentId)"; // AJAX call-back to read template project file
 const boxEditPartialUrl = "@(Model.BoxEditPartialUrl)?documentTemplateId=@(Model.DocumentId)"; // AJAX call-back to load editor for a specific template box
+const boxMoveUrl = "@(Model.BoxMoveUrl)?docId=@(Model.DocumentId)"; // AJAX call-back to save new box position and size
 </script>
 
 @* Scripts to render PDF with template box overlay, and enable editing of the template *@

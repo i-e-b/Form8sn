@@ -7,6 +7,7 @@ When embedding on a page, you must define these variables BEFORE importing this 
  * projectJsonLoadUrl -- URL from where we can load the JSON definition of the template project
  * boxEditPartialUrl  -- URL for template box partial view
  * pdfWorkerSource    -- URL of the file at ~/js/pdf.worker.js
+ * boxMoveUrl         -- URL used to send back box movements & resizes
 
  */
 
@@ -240,6 +241,7 @@ function closeDataPathPicker() {
 // BOX DRAW AND INTERACTION ===========================================================================================
 // Note, this dummy data is just here to help with IDE auto-fill and type checking
 let projectFile = {
+    Version: 0,
     SampleFileName: null,
     BasePdfFile: "/File/....pdf",
     Notes: "",
@@ -309,6 +311,38 @@ function updateEditButton(){
     if (editButton) {
         editButton.disabled = (activeBox.key === null);
     }
+}
+function tryUpdateActiveBox(){
+    if (activeBox.key === null) return;
+    let pageDef = projectFile.Pages[pageNum - 1];
+    if (!pageDef) return;
+    let theBox = pageDef.Boxes[activeBox.key];
+    if (!theBox) return;
+
+    // un-apply scaling factor to get document-space units back
+    let xi = pageDef.WidthMillimetres / boxCanvas.width;
+    let yi = pageDef.HeightMillimetres / boxCanvas.height;
+    
+    // update the local definition
+    theBox.Top = activeBox.top * yi;
+    theBox.Left = activeBox.left * xi;
+    theBox.Width = (activeBox.right - activeBox.left) * xi;
+    theBox.Height = (activeBox.bottom - activeBox.top) *xi;
+    
+    // Store back to server. We do this fire-and-forget, as we might overwrite the whole document template definition later.
+    let req = new XMLHttpRequest();
+
+    req.onload = function (evt) {
+        if (req.responseText !== 'OK') {
+            console.log("An error occurred while updating document template box location.");
+            console.dir(evt);
+        }
+    }
+    
+    // This calls HomeController->MoveBox(docId, docVersion, pageIndex, boxKey, left, top, width, height)
+    let url = `${boxMoveUrl}&docVersion=${projectFile.Version}&pageIndex=${pageNum-1}&boxKey=${activeBox.key}&left=${theBox.Left}&top=${theBox.Top}&width=${theBox.Width}&height=${theBox.Height}`;
+    req.open('GET', url);
+    req.send();
 }
 
 const drawSingleBox = function (def, name, xs, ys, validMapping) {
@@ -470,11 +504,11 @@ boxCanvas.addEventListener('mousedown', function (e) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// MOUSE UP
 boxCanvas.addEventListener('mouseup', function (e) {
-    //activeBox.right = 0|e.offsetX;
-    //activeBox.bottom = 0|e.offsetY;
-
     renderBoxes();
 
+    if (mouse.mode === 'move' || mouse.mode === 'size') {
+        tryUpdateActiveBox();
+    }
     // TODO: handle release. We might want to send changes back to the server
     // NOTE: send an incremented version ID in the project index file, to prevent old versions overwriting later changes.
 }, false);
