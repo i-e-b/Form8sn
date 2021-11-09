@@ -78,6 +78,7 @@ namespace WebFormFiller.Controllers
             var model = new TemplateEditViewModel{
                 Document = document,
                 ProjectLoadUrl = Url!.Action("ReadProject", "Home")!,
+                BoxEditPartialUrl = Url!.Action("TemplateBox","EditModals")!,
                 DocumentId = docId.ToString(),
                 PdfUrl = document.BasePdfFile!
             };

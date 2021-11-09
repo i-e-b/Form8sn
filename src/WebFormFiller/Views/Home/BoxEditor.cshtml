@@ -17,7 +17,7 @@
     <button id="zoom-minus">Zoom out</button>
 </div>
 <div>
-    <button id="box-edit" disabled>Edit</button><span id="active-box-name"></span>
+    <button id="box-edit" disabled onclick="showBoxEditModal()">Edit</button><span id="active-box-name"></span>
 </div>
 
 @* PAGE RENDERING *@
@@ -26,16 +26,38 @@
     <canvas id="box-render" class="subCanvas"></canvas>
 </div>
 
+@* TEMPLATE BOX EDITING *@
+<div class="modal" id="EditTemplateBox_BoxInfo">
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="modal-title h5">Choose a data path</div>
+        </div>
+        <div class="modal-body">
+            <div class="content" style="height:50vh" id="EditTemplateBox_BoxInfo_Content">
+                Failed to load from server!
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" onclick="closeBoxEditModal()">Cancel</button>
+            
+            <button type="button" onclick="saveBoxEditChanges()">Save</button>
+        </div>
+    </div>
+</div>
+
 
 @* Mozilla PDF rendering library. Snapshot from https://mozilla.github.io/pdf.js/build/pdf.js *@
 <script src="~/js/pdf.js" asp-append-version="true"></script>
 
 @* Expose C# model data to Javascript*@
 <script>
+const pdfWorkerSource = "@pdfWorkerSource";
 const basePdfSourceUrl = "@Model!.PdfUrl"; // PDF file from project
 const projectJsonLoadUrl = "@(Model.ProjectLoadUrl)?docId=@(Model.DocumentId)"; // AJAX call-back to read template project file
-const pdfWorkerSource = "@pdfWorkerSource";
+const boxEditPartialUrl = "@(Model.BoxEditPartialUrl)?documentTemplateId=@(Model.DocumentId)"; // AJAX call-back to load editor for a specific template box
 </script>
 
 @* Scripts to render PDF with template box overlay, and enable editing of the template *@
 <script src="~/js/boxEditor.js" asp-append-version="true"></script>
+@* Scripts to control the hierarchical data picker *@
+<script src="~/js/propertyInspector.js" asp-append-version="true"></script>

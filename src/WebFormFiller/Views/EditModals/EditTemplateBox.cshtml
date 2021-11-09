@@ -5,12 +5,11 @@
 @* ReSharper disable PossibleNullReferenceException *@
 
 
-@* Note to self: maybe I should pre-wrap this in it's own modal? Need to see if modal-in-modal works ok... *@
-
-<form asp-action="TemplateBox" method="post">
+<form asp-action="TemplateBox" id="editTemplateBoxForm" method="post">
     <input type="hidden" asp-for="@Model.DocumentId" value="@Model.DocumentId"/>
     <input type="hidden" asp-for="@Model.PageIndex" value="@Model.PageIndex"/>
     <input type="hidden" asp-for="@Model.BoxKey" value="@Model.BoxKey"/>
+    <input type="hidden" id="dataPickerUrl" value="@Model.LoadDataPickerUrl"/>
 
     @* BOX NAME / KEY *@
     <div class="form-group">
@@ -21,7 +20,7 @@
     @* SOURCE DATA OPTIONS *@
     <div class="form-group">
         <label class="form-label" asp-for="@Model.DataPath">Data Path</label>
-        <button id="DataPathPickBtn" type="button" onclick="showPickerModal()">Pick Data</button>
+        <button id="DataPathPickBtn" type="button" onclick="showDataPickerModal()">Pick Data</button>
         <input class="form-input" type="text" asp-for="@Model.DataPath" value="@Model.DataPath">
         
         <label class="form-label" asp-for="@Model.DisplayFormatDescription">Data Path</label>
@@ -78,54 +77,12 @@
         </table>
     </div>
     
-    @* SAVE / CANCEL CONTROLS *@
+    @* SAVE CONTROL (outer modal handles cancel) *@
+    @* TODO: move the save out to outer modal footer. This needs to be an AJAX call. *@
     <div class="form-group">
-        <button id="CancelEdit" type="button" onclick="closeBoxEditModal()">Cancel</button>
-        
-        <button id="SaveChanges" type="submit">Save</button>
     </div>
 </form>
 
-<script>
-function loadPartialToModal(url, targetId, nextAction){
-    let targetElement = document.getElementById(targetId);
-    if (!targetElement) return;
-    
-    let oReq = new XMLHttpRequest();
-    
-    oReq.onerror = function(evt) { targetElement.innerText = "An error occurred while transferring this UI element"; console.dir(evt); }
-    oReq.onabort = function(evt) { targetElement.innerText = "The transfer has been canceled by the user."; console.dir(evt); }
-    oReq.onload = function(e) {
-        targetElement.innerHTML = oReq.responseText;
-        if (nextAction) nextAction(e);
-    }
-    
-    oReq.open('GET', url);
-    oReq.send();
-    
-}
-function showDisplayFormatModal(){
-    alert("Would make the display format modal visible now");
-}
-function closeBoxEditModal() {
-    alert();
-}
-function showPickerModal() {
-    let modal = document.getElementById('EditTemplateBox_DataMap');
-    if (!modal) return;
-    
-    loadPartialToModal('@Html!.Raw(Model.LoadDataPickerUrl)', 'EditTemplateBox_DataMap_Content', function(){modal.classList.add("active");});
-}
-function closeDataPathPicker(){
-    let modal = document.getElementById('EditTemplateBox_DataMap');
-    if (!modal) return;
-    
-    modal.classList.remove("active");
-    
-    let deadContent = document.getElementById('EditTemplateBox_DataMap_Content');
-    if (deadContent) deadContent.innerHTML = "";
-}
-</script>
 
 @* Put an initially invisible modal here, ready to pick a data item *@
 @* These should be independent of other modals that might be on the page *@
