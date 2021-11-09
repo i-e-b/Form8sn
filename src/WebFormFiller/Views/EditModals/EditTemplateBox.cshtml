@@ -4,6 +4,9 @@
 @* ReSharper disable AssignNullToNotNullAttribute *@
 @* ReSharper disable PossibleNullReferenceException *@
 
+
+@* Note to self: maybe I should pre-wrap this in it's own modal? Need to see if modal-in-modal works ok... *@
+
 <form asp-action="TemplateBox" method="post">
     <input type="hidden" asp-for="@Model.DocumentId" value="@Model.DocumentId"/>
     <input type="hidden" asp-for="@Model.PageIndex" value="@Model.PageIndex"/>

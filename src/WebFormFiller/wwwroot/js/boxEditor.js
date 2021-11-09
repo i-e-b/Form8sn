@@ -5,20 +5,27 @@ NOTE:
 When embedding on a page, you must define these variables BEFORE importing this script:
  * basePdfSourceUrl   -- URL from where the PDF can be loaded
  * projectJsonLoadUrl -- URL from where we can load the JSON definition of the template project
+ * pdfWorkerSource    -- URL of the file at ~/js/pdf.worker.js
 
  */
-//let projectJsonLoadUrl = projectJsonLoadUrl || undefined;  //can I do this to keep Rider quiet?
+
+// Event bindings
+document.getElementById('prev').addEventListener('click', onPrevPage);
+document.getElementById('next').addEventListener('click', onNextPage);
+document.getElementById('zoom-plus').addEventListener('click', onPageZoomPlus);
+document.getElementById('zoom-minus').addEventListener('click', onPageZoomMinus);
 
 // Read PDF.js exports from the ~/js/pdf.js file
 const pdfJsLib = window['pdfjs-dist/build/pdf'];
+pdfJsLib.GlobalWorkerOptions.workerSrc = pdfWorkerSource; // Setup the workerSrc property, as required by the library.
 
 
 // PDF rendering bits
 let pdfDoc = null,
     pageNum = 1,
     pageRendering = false,
-    pageNumPending = null; const scale = 2.8, // zoom level of the PDF
-    // TODO: ability to change the scale level and update the rendering
+    pageNumPending = null,
+    scale = 2.0, // current zoom level of the PDF
     pdfCanvas = document.getElementById('pdf-render'),
     pdfCtx = pdfCanvas.getContext('2d');
 
@@ -39,8 +46,6 @@ function renderPage(num) {
         const viewport = page.getViewport({scale: scale});
         console.dir(viewport);
         console.log(`Native PDF page size is ${viewport.height}x${viewport.width}`);
-        outerContainer.style.width = viewport.width+'px';
-        outerContainer.style.height = viewport.height+'px';
 
         pdfCanvas.height = viewport.height;
         pdfCanvas.width = viewport.width;
@@ -86,13 +91,23 @@ function queueRenderPage(num) {
 }
 
 
+function onPageZoomPlus(){
+    if (scale >= 15) return;
+    scale *= 1.2;
+    queueRenderPage(pageNum);
+}
+function onPageZoomMinus(){
+    if (scale <= 0.5) return;
+    scale /= 1.2;
+    queueRenderPage(pageNum);
+}
+
 // Click event for loading previous page
 function onPrevPage() {
     if (pageNum <= 1) { return; }
     pageNum--;
     queueRenderPage(pageNum);
 }
-document.getElementById('prev').addEventListener('click', onPrevPage); // bind event to button
 
 // Click event for loading next page
 function onNextPage() {
@@ -100,7 +115,6 @@ function onNextPage() {
     pageNum++;
     queueRenderPage(pageNum);
 }
-document.getElementById('next').addEventListener('click', onNextPage); // bind event to button
 
 
 // BOX DRAW SCRIPTS
