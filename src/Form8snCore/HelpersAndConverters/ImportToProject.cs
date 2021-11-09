@@ -100,7 +100,7 @@ namespace Form8snCore.HelpersAndConverters
                 if (field.Elements["/TU"] is PdfString description
                 && !string.IsNullOrWhiteSpace(description.Value))
                 {
-                    name = description.Value.ReplaceAsciiCompatible();
+                    name = Strings.CleanKeyName(description.Value.ReplaceAsciiCompatible());
                 }
             }
 

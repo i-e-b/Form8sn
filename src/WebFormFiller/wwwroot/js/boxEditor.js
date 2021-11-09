@@ -295,7 +295,7 @@ const ctx = boxCtx;
 
 // Mouse co-ords and active box are in screen-space units
 let activeBox = {key: null, top: 0, left: 0, right: 0, bottom: 0};
-let mouse = {x: 0, y: 0, buttons: 0, mode: 'none'};
+let mouse = {x: 0, y: 0, buttons: 0, mode: 'none', xControl:'right', yControl:'bottom'};
 let last_mouse = {x: 0, y: 0};
 
 function clearActiveBox(){
@@ -410,10 +410,20 @@ const drawActiveBox = function () {
 function hitTestBoxes(page, mx, my) {
     // first, test the selected box's control points
     if (activeBox.key !== null) {
-
+        if (mx + 10 >= activeBox.left && mx - 10 <= activeBox.right 
+         && my + 10 >= activeBox.top  && my - 10 <= activeBox.bottom
+         && (mx < activeBox.left || mx > activeBox.right)
+         && (my < activeBox.top || my > activeBox.bottom)
+        ){
+            // We've hit one of the control points
+            // store which of the box's dimensions we should adjust
+            mouse.xControl = (mx <= activeBox.left) ? 'left' : 'right';
+            mouse.yControl = (my <= activeBox.top) ? 'top' : 'bottom';
+            return 'size';
+        }
     }
 
-
+    // Not in a control point, so look for box body hits
     let xScale = boxCanvas.width / page.WidthMillimetres;
     let yScale = boxCanvas.height / page.HeightMillimetres;
     for (let name in page.Boxes) {
@@ -435,12 +445,12 @@ function hitTestBoxes(page, mx, my) {
                 activeBox.left = Left;
                 activeBox.right = Left + Width;
                 activeBox.bottom = Top + Height;
-                return 'select'; // hit the box body
+                return 'select'; // hit the box body of a box we didn't select before.
             }
         }
     }
 
-    // missed everything, de-select any currently selected box
+    // Missed everything, de-select any currently selected box
     clearActiveBox();
     return 'none';
 }
@@ -535,7 +545,7 @@ boxCanvas.addEventListener('mousemove', function (e) {
     //   Resize should set the right & bottom values of the active box.
     //   Move should offset all values.
     if (mouse.mode === 'select') {
-        return; // Nothing
+        return; // No action. The user has to release the mouse and click again to edit.
     } else if (mouse.mode === 'move') {
         // Offset the active box
         let dx = mouse.x - last_mouse.x;
@@ -546,9 +556,11 @@ boxCanvas.addEventListener('mousemove', function (e) {
         activeBox.bottom += dy;
     } else if (mouse.mode === 'size') {
         // resize the active box
-        // TODO: behaviour for other handles (this is just correct for bottom-right)
-        activeBox.right = mouse.x;
-        activeBox.bottom = mouse.y;
+        activeBox[mouse.xControl] = mouse.x;
+        activeBox[mouse.yControl] = mouse.y;
+        // make sure the box is not invalid (we're measuring in screen-space here, zooming in will still let you place tiny boxes)
+        if (activeBox.right + 5 < activeBox.left) activeBox.right = activeBox.left + 5;
+        if (activeBox.bottom + 5 < activeBox.top) activeBox.bottom = activeBox.top + 5;
     }
 
     if (mouse.buttons !== 0) {
