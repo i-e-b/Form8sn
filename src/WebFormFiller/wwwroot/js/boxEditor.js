@@ -558,6 +558,9 @@ boxCanvas.addEventListener('mousedown', function (e) {
 boxCanvas.addEventListener('mouseup', function (e) {
     renderBoxes();
 
+    if (mouse.buttons === 2) {
+        e.preventDefault();
+    }
     if (mouse.mode === 'move' || mouse.mode === 'size') {
         tryUpdateActiveBox();
     }

@@ -5,7 +5,15 @@ The canvas elements get resized when each PDF page is loaded, based on the page 
 #container {
     position:relative;
     width:100%; height:90vh;
+    background-color: #aaa;
+    padding: 24px;
     overflow:scroll;
+}
+.pageShadow {
+    box-shadow: #000 0 0 10px;
+}
+.pageTail {
+    padding: 0 24px 24px 0; /* T-R-B-L; Don't add padding to the top or left, it will break the box drawing code */
 }
 .subCanvas {
     position:absolute;
