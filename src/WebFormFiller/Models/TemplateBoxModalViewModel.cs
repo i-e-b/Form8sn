@@ -29,12 +29,12 @@ namespace WebFormFiller.Models
         /// Url for the client to load the data-picker partial view into a modal
         /// </summary>
         public string? LoadDataPickerUrl { get; set; }
-        #endregion
-
+        
         /// <summary>
         /// Internal revision number. Used to guard against data loss if an old save command comes in very late.
         /// </summary>
         public int Version { get; set; }
+        #endregion
 
         /// <summary>
         /// Name of the box. This will replace the old box name / key when saved.
@@ -63,6 +63,7 @@ namespace WebFormFiller.Models
             var model = new TemplateBoxModalViewModel{
                 // Keys, not to be edited
                 PageIndex = pageIndex,
+                Version = (project.Version ?? 0) + 1,
                 DocumentId = documentTemplateId,
                 BoxKey = boxKey,
                 OtherBoxKeys = otherBoxes,
@@ -82,24 +83,6 @@ namespace WebFormFiller.Models
             return model;
         }
 
-        private static string DescribeFormat(DisplayFormatFilter? format)
-        {
-            if (format is null) return "None";
-            
-            var paramText = string.Join(", ",
-                format.FormatParameters
-                    .Where(kvp=> !string.IsNullOrEmpty(kvp.Value))
-                    .Select(kvp => $"{kvp.Key} = '{kvp.Value}'")
-            );
-            var split = paramText.Length > 0 ? ":\r\n" : "";
-            return $"{format.Type}{split}{paramText}";
-        }
-
-        private static string MappingPathToString(TemplateBox? theBox)
-        {
-            if (theBox?.MappingPath is null) return "";
-            return string.Join(".", theBox.MappingPath);
-        }
 
         /// <summary>
         /// Copy view model values into an existing index file (to perform an update)
@@ -140,6 +123,25 @@ namespace WebFormFiller.Models
             theBox.WrapText = WrapText;
             theBox.ShrinkToFit = ShrinkToFit;
             theBox.BoxFontSize = ParseIntOrDefault(FontSize, theBox.BoxFontSize);
+        }
+        
+        private static string DescribeFormat(DisplayFormatFilter? format)
+        {
+            if (format is null) return "None";
+            
+            var paramText = string.Join(", ",
+                format.FormatParameters
+                    .Where(kvp=> !string.IsNullOrEmpty(kvp.Value))
+                    .Select(kvp => $"{kvp.Key} = '{kvp.Value}'")
+            );
+            var split = paramText.Length > 0 ? ":\r\n" : "";
+            return $"{format.Type}{split}{paramText}";
+        }
+
+        private static string MappingPathToString(TemplateBox? theBox)
+        {
+            if (theBox?.MappingPath is null) return "";
+            return string.Join(".", theBox.MappingPath);
         }
 
         private static int? ParseIntOrDefault(string? value, int? defaultValue) => int.TryParse(value, out var parsed) ? parsed : defaultValue;

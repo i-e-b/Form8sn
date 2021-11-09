@@ -96,7 +96,7 @@ function queueRenderPage(num) {
 const zoomRatio = 1.2;
 
 function onPageZoomPlus() {
-    if (scale >= 15) return;
+    if (scale >= 10) return;
     scale *= zoomRatio;
 
     // update any selected boxes for the new screen space
@@ -370,7 +370,7 @@ const drawActiveBox = function () {
     ctx.fillStyle = "#000";
     ctx.font = '14px sans-serif';
     ctx.textBaseline = 'top';
-    ctx.fillText(name, activeBox.left + 5, activeBox.top + 5);
+    ctx.fillText(activeBox.key, activeBox.left + 5, activeBox.top + 5);
 }
 
 function hitTestBoxes(page, mx, my) {
