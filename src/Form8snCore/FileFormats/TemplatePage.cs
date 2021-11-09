@@ -90,20 +90,20 @@ namespace Form8snCore.FileFormats
                 ? null
                 : Path.Combine(project.BasePath, "Form8sn_preview_"+BackgroundImage);
         }
-    }
-
-    public class RepeatMode
-    {
+        
         /// <summary>
-        /// If true, the data path must be set.
+        /// Update all 'DependsOn' values where a box key name has changed
         /// </summary>
-        public bool Repeats { get; set; }
+        /// <param name="oldKey">The original box name</param>
+        /// <param name="newKey">The new box name</param>
+        public void FixReferences(string oldKey, string newKey)
+        {
+            // scan all 'dependsOn' on this page and fix
+            foreach (var box in Boxes.Values)
+            {
+                if (box.DependsOn == oldKey) box.DependsOn = newKey;
+            }
+        }
 
-        /// <summary>
-        /// Path into data, or name of filter.
-        /// If the path points to a single item or object, you will get only one page.
-        /// If the path doesn't exist in the data set, this page will be skipped.
-        /// </summary>
-        public string[]? DataPath { get; set; }
     }
 }

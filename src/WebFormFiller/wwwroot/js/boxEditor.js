@@ -126,6 +126,7 @@ function onPrevPage() {
     if (pageNum <= 1) {
         return;
     }
+    clearActiveBox();updateEditButton();
     pageNum--;
     queueRenderPage(pageNum);
 }
@@ -135,6 +136,7 @@ function onNextPage() {
     if (pageNum >= pdfDoc.numPages) {
         return;
     }
+    clearActiveBox();updateEditButton();
     pageNum++;
     queueRenderPage(pageNum);
 }
@@ -186,7 +188,15 @@ function showBoxEditModal() {
         });
 }
 function saveBoxEditChanges(){
-    alert("Not yet implemented-- need to send details back to server");
+    const formEle = document.getElementById('editTemplateBoxForm');
+    if (!formEle) return;
+
+    submit(formEle).then(function(response) {
+        // close the modal box and refresh everything
+        closeBoxEditModal();
+        reloadProjectFile();
+        queueRenderPage(pageNum);
+    });
 }
 function closeBoxEditModal() {
     let modal = document.getElementById('EditTemplateBox_BoxInfo');
@@ -286,6 +296,21 @@ let activeBox = {key: null, top: 0, left: 0, right: 0, bottom: 0};
 let mouse = {x: 0, y: 0, buttons: 0, mode: 'none'};
 let last_mouse = {x: 0, y: 0};
 
+function clearActiveBox(){
+    activeBox.key = null;
+    activeBox.top = activeBox.left = activeBox.right = activeBox.bottom = 0;
+}
+function updateEditButton(){
+    let infoSpan = document.getElementById("active-box-name")
+    let editButton = document.getElementById("box-edit");
+    if (infoSpan) {
+        infoSpan.innerText = " " + (activeBox.key || "");
+    }
+    if (editButton) {
+        editButton.disabled = (activeBox.key === null);
+    }
+}
+
 const drawSingleBox = function (def, name, xs, ys, validMapping) {
     if (!def) {
         console.log("Invalid box def: " + JSON.stringify(def));
@@ -382,8 +407,7 @@ function hitTestBoxes(page, mx, my) {
     }
 
     // missed everything, de-select any currently selected box
-    activeBox.key = null;
-    activeBox.top = activeBox.left = activeBox.top = activeBox.bottom = 0;
+    clearActiveBox();
     return 'none';
 }
 
@@ -435,15 +459,7 @@ boxCanvas.addEventListener('mousedown', function (e) {
 
     let page = projectFile.Pages[pageNum - 1];
     mouse.mode = hitTestBoxes(page, mx, my);
-
-    let infoSpan = document.getElementById("active-box-name")
-    let editButton = document.getElementById("box-edit");
-    if (infoSpan) {
-        infoSpan.innerText = " " + activeBox.key;
-    }
-    if (editButton) {
-        editButton.disabled = (activeBox.key === null);
-    }
+    updateEditButton();
 
 
     if (e.buttons === 2 && mouse.mode === 'none') {
@@ -507,6 +523,37 @@ boxCanvas.addEventListener('mousemove', function (e) {
 
 }, false);
 
+// PROJECT LOAD AND STORE =============================================================================================
+
+function reloadProjectFile() {
+    let req = new XMLHttpRequest();
+
+    req.onload = function (evt) {
+        if (req.status >= 200 && req.status < 400) {
+            // store the project to variable, and trigger the box render code
+            projectFile = req.response;
+            renderBoxes();
+        } else {
+            console.log("An error occurred while loading document template definition.");
+            console.dir(evt);
+        }
+    }
+
+    req.open('GET', projectJsonLoadUrl);
+    req.responseType = "json";
+
+    req.onerror = function (evt) {
+        console.log("An error occurred while loading document template definition.");
+        console.dir(evt);
+    };
+    req.onabort = function (evt) {
+        console.log("Loading document template definition has been canceled by a user action.");
+        console.dir(evt);
+    };
+
+    // Send it
+    req.send();
+}
 
 // PDF LOAD TRIGGER ===================================================================================================
 // Actually load the PDF (async then call our page render)
@@ -516,46 +563,6 @@ pdfJsLib.getDocument(basePdfSourceUrl).promise.then(function (pdfDoc_) {
     document.getElementById('page_count').textContent = pdfDoc.numPages;
 
     // Initial/first page rendering
+    reloadProjectFile();
     renderPage(pageNum);
 });
-
-// PROJECT LOAD AND STORE SCRIPTS
-let oReq = new XMLHttpRequest();
-
-oReq.addEventListener("progress", updateProgress);
-oReq.addEventListener("error", transferFailed);
-oReq.addEventListener("abort", transferCanceled);
-
-oReq.onload = function (e) {
-    console.dir(e);
-    // store the project to variable, and trigger the box render code
-    projectFile = oReq.response;
-    renderBoxes();
-}
-
-oReq.open('GET', projectJsonLoadUrl);
-oReq.responseType = "json";
-oReq.send();
-
-// progress on transfers from the server to the client (downloads)
-function updateProgress(oEvent) {
-    if (oEvent.lengthComputable) {
-        let percentComplete = oEvent.loaded / oEvent.total * 100;
-        console.log(`Loading ${percentComplete}%`);
-        // ...
-    } else {
-        // Unable to compute progress information since the total size is unknown
-        console.log("Loading");
-    }
-}
-
-function transferFailed(evt) {
-    console.log("An error occurred while transferring the file.");
-    console.dir(evt);
-}
-
-function transferCanceled(evt) {
-    console.log("The transfer has been canceled by the user.");
-    console.dir(evt);
-}
-    

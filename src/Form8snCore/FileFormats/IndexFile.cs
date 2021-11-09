@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using PdfSharp.Drawing;
-using PdfSharp.Pdf;
-using PdfSharp.Pdf.AcroForms;
-using PdfSharp.Pdf.Advanced;
-using PdfSharp.Pdf.IO;
+﻿using System.Collections.Generic;
 
 namespace Form8snCore.FileFormats
 {
@@ -20,6 +12,11 @@ namespace Form8snCore.FileFormats
             DataFilters = new Dictionary<string, MappingInfo>();
         }
 
+        /// <summary>
+        /// Optional: internal revision number. Used to guard against data loss with async UIs
+        /// </summary>
+        public int? Version { get; set; }
+        
         /// <summary>
         /// Optional: file path for a sample input file
         /// </summary>

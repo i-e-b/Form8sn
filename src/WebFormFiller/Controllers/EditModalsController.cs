@@ -62,9 +62,16 @@ namespace WebFormFiller.Controllers
         [HttpPost]
         public IActionResult TemplateBox([FromForm]TemplateBoxModalViewModel model)
         {
-            // TODO: save changes against the document, then re-load (same as the GET method)
-            Console.WriteLine($"Got changes for {model.BoxKey} -> {model.BoxName}");
-            return PartialView("EditTemplateBox", model)!;
+            // Check against existing version
+            var existing = FileDatabaseStub.GetDocumentById(model.DocumentId);
+            if (existing.Version is not null && model.Version < existing.Version) return Content("OLD")!;
+            
+            // Copy new values across
+            model.CopyTo(existing);
+            
+            // Write back to store
+            FileDatabaseStub.SaveDocumentTemplate(existing, model.DocumentId);
+            return Content("OK")!;
         }
     }
 

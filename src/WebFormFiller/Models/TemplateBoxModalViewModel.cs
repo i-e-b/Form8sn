@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Form8snCore.FileFormats;
+using Form8snCore.HelpersAndConverters;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace WebFormFiller.Models
@@ -29,6 +30,11 @@ namespace WebFormFiller.Models
         /// </summary>
         public string? LoadDataPickerUrl { get; set; }
         #endregion
+
+        /// <summary>
+        /// Internal revision number. Used to guard against data loss if an old save command comes in very late.
+        /// </summary>
+        public int Version { get; set; }
 
         /// <summary>
         /// Name of the box. This will replace the old box name / key when saved.
@@ -94,5 +100,48 @@ namespace WebFormFiller.Models
             if (theBox?.MappingPath is null) return "";
             return string.Join(".", theBox.MappingPath);
         }
+
+        /// <summary>
+        /// Copy view model values into an existing index file (to perform an update)
+        /// </summary>
+        public void CopyTo(IndexFile targetIndexFile)
+        {
+            if (BoxKey is null) return;
+            if (PageIndex < 0 || PageIndex >= targetIndexFile.Pages.Count) return;
+            
+            var thePage = targetIndexFile.Pages[PageIndex];
+            var theBox = thePage.Boxes[BoxKey];
+            
+            // First, handle renaming of box key
+            if (string.IsNullOrWhiteSpace(BoxName)) BoxName = BoxKey;
+            else BoxName = Strings.CleanKeyName(BoxName);
+            
+            if (EditChecks.IsValidRename(thePage, BoxKey, BoxName))
+            {
+                // Rename the box, fix existing 'depends-on' references
+                thePage.Boxes.Remove(BoxKey);
+                thePage.FixReferences(BoxKey, BoxName!);
+                thePage.Boxes.Add(BoxName!, theBox);
+                BoxKey = BoxName;
+            }
+            if (BoxKey is null) throw new Exception("Logic error");
+
+            // Handle depends-on links
+            if (string.IsNullOrWhiteSpace(DependsOn)) theBox.DependsOn = null;
+            else if (EditChecks.NotCircular(thePage, DependsOn, BoxKey)) theBox.DependsOn = DependsOn;
+            
+            // TODO: handle the display properties
+            //theBox.DisplayFormat
+            
+            // Now copy across the regular values
+            theBox.Alignment = TextAlign;
+            theBox.BoxOrder = ParseIntOrDefault(ProcessingOrder, theBox.BoxOrder);
+            theBox.MappingPath = string.IsNullOrWhiteSpace(DataPath) ? null : DataPath?.Split('.');
+            theBox.WrapText = WrapText;
+            theBox.ShrinkToFit = ShrinkToFit;
+            theBox.BoxFontSize = ParseIntOrDefault(FontSize, theBox.BoxFontSize);
+        }
+
+        private static int? ParseIntOrDefault(string? value, int? defaultValue) => int.TryParse(value, out var parsed) ? parsed : defaultValue;
     }
 }
