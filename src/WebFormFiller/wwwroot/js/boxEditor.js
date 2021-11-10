@@ -295,10 +295,11 @@ let renderBoxes = null;
 const ctx = boxCtx;
 
 // Mouse co-ords and active box are in screen-space units
-let activeBox = {key: null, top: 0, left: 0, right: 0, bottom: 0};
+let activeBox = {key: null, new:false, top: 0, left: 0, right: 0, bottom: 0};
 let mouse = {x: 0, y: 0, buttons: 0, mode: 'none', xControl:'right', yControl:'bottom'};
 let last_mouse = {x: 0, y: 0};
 
+//////////////////////////////////////////////////////////////////////////////////////////////////// BOX EDITING
 function clearActiveBox(){
     activeBox.key = null;
     activeBox.top = activeBox.left = activeBox.right = activeBox.bottom = 0;
@@ -313,7 +314,7 @@ function updateEditButton(){
         editButton.disabled = (activeBox.key === null);
     }
 }
-function tryUpdateActiveBox(){
+function tryUpdateActiveBox(sendChanges){
     if (activeBox.key === null) return;
     let pageDef = projectFile.Pages[pageNum - 1];
     if (!pageDef) return;
@@ -329,6 +330,8 @@ function tryUpdateActiveBox(){
     theBox.Left = activeBox.left * xi;
     theBox.Width = (activeBox.right - activeBox.left) * xi;
     theBox.Height = (activeBox.bottom - activeBox.top) *xi;
+    
+    if (!sendChanges) return;
     
     // Store back to server. We do this fire-and-forget, as we might overwrite the whole document template definition later.
     let req = new XMLHttpRequest();
@@ -367,6 +370,16 @@ function tryCreateNewBox(x, y){
     let xi = page.WidthMillimetres / boxCanvas.width;
     let yi = page.HeightMillimetres / boxCanvas.height;
     
+    // Set the active box so user can resize at the same time as creating
+    activeBox.key = name;
+    activeBox.left = x;
+    activeBox.top = y;
+    activeBox.right = x + 2;
+    activeBox.bottom = y + 2;
+    mouse.xControl = 'right';
+    mouse.yControl = 'bottom';
+    
+    // write the new box into the page definition
     page.Boxes[name] =  {
         WrapText: true,
         ShrinkToFit: true,
@@ -375,76 +388,13 @@ function tryCreateNewBox(x, y){
         DependsOn: null,
         Top: y*yi,
         Left: x*xi,
-        Width: 10,
-        Height: 10,
+        Width: 10 * xi, // oversize the initial box so that we don't drop anything
+        Height: 10 * yi, // too small to edit if there is an error.
         MappingPath: null,
         DisplayFormat: null,
         BoxOrder: null
     }
     
-    storeAndReloadProjectFile();
-}
-
-const drawSingleBox = function (def, name, xs, ys, validMapping) {
-    if (!def) {
-        console.log("Invalid box def: " + JSON.stringify(def));
-        return;
-    }
-    if (name === activeBox.key) return; // this box is selected. Don't render it here.
-
-    if (validMapping) {
-        ctx.fillStyle = "rgba(80, 100, 200, 0.3)";
-        ctx.strokeStyle = "#07F";
-        ctx.lineWidth = 2;
-    } else {
-        ctx.fillStyle = "rgba(255, 80, 80, 0.3)";
-        ctx.strokeStyle = "#F00";
-        ctx.lineWidth = 3;
-    }
-
-    // Draw box in place over PDF
-    const {Width, Top, Height, Left} = def;
-    ctx.fillRect(Left * xs, Top * ys, Width * xs, Height * ys);
-    ctx.strokeRect(Left * xs, Top * ys, Width * xs, Height * ys);
-
-    // Write box name
-    ctx.fillStyle = "#000";
-    ctx.font = '14px sans-serif';
-    ctx.textBaseline = 'top';
-    ctx.fillText(name, Left * xs + 5, Top * xs + 5);
-}
-
-const drawActiveBox = function () {
-    let width = activeBox.right - activeBox.left;
-    let height = activeBox.bottom - activeBox.top;
-    if (width < 1 || height < 1) return; // box is zero sized
-
-    ctx.fillStyle = "rgba(255, 190, 80, 0.3)";
-    ctx.strokeStyle = "#FA0";
-    ctx.lineWidth = 3;
-
-    // The box
-    ctx.fillRect(activeBox.left, activeBox.top, width, height);
-    ctx.strokeRect(activeBox.left, activeBox.top, width, height);
-
-    // resize handles
-    ctx.fillStyle = "#FA0";
-    ctx.strokeStyle = "#A50";
-    ctx.lineWidth = 1;
-    ctx.fillRect(activeBox.left, activeBox.top, -10, -10);
-    ctx.strokeRect(activeBox.left, activeBox.top, -10, -10);
-    ctx.fillRect(activeBox.right, activeBox.top, 10, -10);
-    ctx.strokeRect(activeBox.right, activeBox.top, 10, -10);
-    ctx.fillRect(activeBox.right, activeBox.bottom, 10, 10);
-    ctx.strokeRect(activeBox.right, activeBox.bottom, 10, 10);
-    ctx.fillRect(activeBox.left, activeBox.bottom, -10, 10);
-    ctx.strokeRect(activeBox.left, activeBox.bottom, -10, 10);
-
-    // Write box name
-    ctx.fillStyle = "#000";
-    ctx.font = '14px sans-serif';
-    ctx.textBaseline = 'top';
-    ctx.fillText(activeBox.key, activeBox.left + 5, activeBox.top + 5);
 }
 
 function hitTestBoxes(page, mx, my) {
@@ -495,7 +445,67 @@ function hitTestBoxes(page, mx, my) {
     return 'none';
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////// PAINT ALL
+//////////////////////////////////////////////////////////////////////////////////////////////////// BOX PAINTING
+const drawSingleBox = function (def, name, xs, ys, validMapping) {
+    if (!def) {
+        console.log("Invalid box def: " + JSON.stringify(def));
+        return;
+    }
+    if (name === activeBox.key) return; // this box is selected. Don't render it here.
+
+    if (validMapping) {
+        ctx.fillStyle = "rgba(80, 100, 200, 0.3)";
+        ctx.strokeStyle = "#07F";
+        ctx.lineWidth = 2;
+    } else {
+        ctx.fillStyle = "rgba(255, 80, 80, 0.3)";
+        ctx.strokeStyle = "#F00";
+        ctx.lineWidth = 3;
+    }
+
+    // Draw box in place over PDF
+    const {Width, Top, Height, Left} = def;
+    ctx.fillRect(Left * xs, Top * ys, Width * xs, Height * ys);
+    ctx.strokeRect(Left * xs, Top * ys, Width * xs, Height * ys);
+
+    // Write box name
+    ctx.fillStyle = "#000";
+    ctx.font = '14px sans-serif';
+    ctx.textBaseline = 'top';
+    ctx.fillText(name, Left * xs + 5, Top * xs + 5);
+}
+const drawActiveBox = function () {
+    let width = activeBox.right - activeBox.left;
+    let height = activeBox.bottom - activeBox.top;
+    if (width < 1 || height < 1) return; // box is zero sized
+
+    ctx.fillStyle = "rgba(255, 190, 80, 0.3)";
+    ctx.strokeStyle = "#FA0";
+    ctx.lineWidth = 3;
+
+    // The box
+    ctx.fillRect(activeBox.left, activeBox.top, width, height);
+    ctx.strokeRect(activeBox.left, activeBox.top, width, height);
+
+    // resize handles
+    ctx.fillStyle = "#FA0";
+    ctx.strokeStyle = "#A50";
+    ctx.lineWidth = 1;
+    ctx.fillRect(activeBox.left, activeBox.top, -10, -10);
+    ctx.strokeRect(activeBox.left, activeBox.top, -10, -10);
+    ctx.fillRect(activeBox.right, activeBox.top, 10, -10);
+    ctx.strokeRect(activeBox.right, activeBox.top, 10, -10);
+    ctx.fillRect(activeBox.right, activeBox.bottom, 10, 10);
+    ctx.strokeRect(activeBox.right, activeBox.bottom, 10, 10);
+    ctx.fillRect(activeBox.left, activeBox.bottom, -10, 10);
+    ctx.strokeRect(activeBox.left, activeBox.bottom, -10, 10);
+
+    // Write box name
+    ctx.fillStyle = "#000";
+    ctx.font = '14px sans-serif';
+    ctx.textBaseline = 'top';
+    ctx.fillText(activeBox.key, activeBox.left + 5, activeBox.top + 5);
+}
 renderBoxes = function () {
     ctx.clearRect(0, 0, boxCanvas.width, boxCanvas.height);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -525,16 +535,13 @@ renderBoxes = function () {
     drawActiveBox();
 };
 
-
 //////////////////////////////////////////////////////////////////////////////////////////////////// MOUSE DOWN
-boxCanvas.addEventListener('mouseout', function () {
-    mouse.buttons = 0;
-}); // prevent drag-lock
+boxCanvas.addEventListener('mouseout', function () {mouse.buttons = 0;}); // prevent drag-lock
 boxCanvas.addEventListener('mousedown', function (e) {
     let mx = 0 | e.offsetX;
     let my = 0 | e.offsetY;
+    e.preventDefault();
 
-    // TODO: handle initial click (right or left?) -- might want to pop up the details modal
     // Cases:
     // * Hit one of the active box's control points (~10px of the corner) -> re-size
     // * Hit the body of the active box -> move
@@ -544,26 +551,28 @@ boxCanvas.addEventListener('mousedown', function (e) {
     let page = projectFile.Pages[pageNum - 1];
     mouse.mode = hitTestBoxes(page, mx, my);
     updateEditButton();
-
-
+    
     if ((e.buttons === 2 || e.shiftKey) && mouse.mode === 'none') {
-        // initial right-click. If we drag from here, a new box should be created
-        e.preventDefault();
         tryCreateNewBox(mx,my);
-        renderBoxes();
+        mouse.mode = 'create';
     }
+    
+    renderBoxes();
 }, false);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// MOUSE UP
 boxCanvas.addEventListener('mouseup', function (e) {
-    renderBoxes();
+    e.preventDefault();
 
-    if (mouse.buttons === 2) {
-        e.preventDefault();
+    if (mouse.mode === 'create'){
+        tryUpdateActiveBox(false);
+        storeAndReloadProjectFile(); // we've added a new box, so update the entire project
     }
     if (mouse.mode === 'move' || mouse.mode === 'size') {
-        tryUpdateActiveBox();
+        tryUpdateActiveBox(true); // changed an existing box, so we can just send size changes back to server
     }
+    
+    renderBoxes();
 }, false);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// MOUSE MOVE
@@ -597,7 +606,7 @@ boxCanvas.addEventListener('mousemove', function (e) {
         activeBox.top += dy;
         activeBox.right += dx;
         activeBox.bottom += dy;
-    } else if (mouse.mode === 'size') {
+    } else if (mouse.mode === 'size' || mouse.mode === 'create') {
         // resize the active box
         activeBox[mouse.xControl] = mouse.x;
         activeBox[mouse.yControl] = mouse.y;
