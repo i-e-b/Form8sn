@@ -226,7 +226,6 @@ function closeBoxEditModal() {
     if (deadContent) deadContent.innerHTML = "";
 }
 
-
 function showDisplayFormatModal() {
     // TODO: implement this
     alert("Would make the display format modal visible now");
@@ -235,6 +234,14 @@ function closeDisplayFormatModal(){
     alert("not implemented");
 }
 
+function captureDataPickerResult(path){
+    let target = document.getElementById('DataPath'); // in 'EditTemplateBox.cshtml'
+    if (!target) return;
+    
+    target.value = path.replace(/\x1F/g,".");
+    
+    closeDataPathPicker();
+}
 function showDataPickerModal() {
     let modal = document.getElementById('EditTemplateBox_DataMap');
     let link = document.getElementById('dataPickerUrl');
@@ -244,7 +251,6 @@ function showDataPickerModal() {
         modal.classList.add("active");
     });
 }
-
 function closeDataPathPicker() {
     let modal = document.getElementById('EditTemplateBox_DataMap');
     if (!modal) return;

@@ -33,11 +33,11 @@
             <td>
                 @if (node.Selected)
                 {
-                    <button disabled=disabled>Pick</button>
+                    <button disabled=disabled>Current selection</button>
                 }
                 else if (node.CanBePicked)
                 {
-                    <button onclick="alert('You picked node @node.Name from path @node.DataPath')">Pick</button>
+                    <button onclick="captureDataPickerResult('@node.DataPath')">Pick</button>
                 }
             </td>
         </tr>
