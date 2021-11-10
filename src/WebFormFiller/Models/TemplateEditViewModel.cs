@@ -33,6 +33,11 @@ namespace WebFormFiller.Models
         /// URL that provides a partial view for editing a single template box
         /// </summary>
         public string BoxEditPartialUrl { get; set; } = "";
+        
+        /// <summary>
+        /// URL that provides a partial view for editing a template box's display format
+        /// </summary>
+        public object DisplayFormatPartialUrl { get; set; } = "";
 
         /// <summary>
         /// URL that stores a new size and location for a template page box
@@ -43,5 +48,6 @@ namespace WebFormFiller.Models
         /// URL for loading general files (used forbase PDFs and JPEG images)
         /// </summary>
         public string FileLoadUrl { get; set; } = "";
+
     }
 }

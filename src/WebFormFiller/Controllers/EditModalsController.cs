@@ -73,6 +73,20 @@ namespace WebFormFiller.Controllers
             FileDatabaseStub.SaveDocumentTemplate(existing, model.DocumentId);
             return Content("OK")!;
         }
+
+        
+        /// <summary>
+        /// View and edit the display format of a template box.
+        /// </summary>
+        [HttpGet]
+        public IActionResult DisplayFormat(int docId, [FromQuery]int pageIndex, [FromQuery]string boxKey)
+        {
+            var project = FileDatabaseStub.GetDocumentById(docId);
+            
+            var model = DisplayFormatViewModel.From(project, docId, pageIndex, boxKey);
+            
+            return PartialView("DisplayFormatEditor", model)!;
+        }
     }
 
 }

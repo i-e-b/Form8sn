@@ -44,6 +44,21 @@
     </div>
 </div>
 
+@* DISPLAY FORMAT EDITING *@
+<div class="modal" id="EditTemplateBox_DisplayFormat">
+    <div class="modal-container">
+        <div class="modal-body">
+            <div class="content" id="EditTemplateBox_DisplayFormat_Content">
+                Failed to load from server!
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" onclick="closeDisplayFormatModal()">Cancel</button>
+            <button type="button" onclick="saveDisplayFormatChanges()">Save</button>
+        </div>
+    </div>
+</div>
+
 
 @* Mozilla PDF rendering library. Snapshot from https://mozilla.github.io/pdf.js/build/pdf.js *@
 <script src="~/js/pdf.js" asp-append-version="true"></script>
@@ -51,11 +66,14 @@
 @* Expose C# model data to Javascript*@
 <script>
 const pdfWorkerSource = "@(Url!.Content("~/js/pdf.worker.js")!)"; // Snapshot from https://mozilla.github.io/pdf.js/build/pdf.worker.js
+
 const basePdfSourceUrl = "@(Model.FileLoadUrl)?name=@(Model!.BasePdfFile)"; // PDF file from project
-const projectJsonLoadUrl = "@(Model.ProjectLoadUrl)?docId=@(Model.DocumentId)"; // AJAX call-back to read template project file
-const projectJsonStoreUrl = "@(Model.ProjectStoreUrl)?docId=@(Model.DocumentId)"; // AJAX call-back to write template project file
-const boxEditPartialUrl = "@(Model.BoxEditPartialUrl)?docId=@(Model.DocumentId)"; // AJAX call-back to load editor for a specific template box
-const boxMoveUrl = "@(Model.BoxMoveUrl)?docId=@(Model.DocumentId)"; // AJAX call-back to save new box position and size
+const projectJsonLoadUrl = "@(Model.ProjectLoadUrl)?docId=@(Model.DocumentId)"; // call-back to read template project file
+const projectJsonStoreUrl = "@(Model.ProjectStoreUrl)?docId=@(Model.DocumentId)"; // call-back to write template project file
+const boxMoveUrl = "@(Model.BoxMoveUrl)?docId=@(Model.DocumentId)"; // call-back to save new box position and size
+
+const boxEditPartialUrl = "@(Model.BoxEditPartialUrl)?docId=@(Model.DocumentId)"; // call-back to load editor HTML for a specific template box
+const displayFormatPartialUrl = "@(Model.DisplayFormatPartialUrl)?docId=@(Model.DocumentId)"; // call-back to load editor HTML for a template box's display format
 </script>
 
 @* Scripts to render PDF with template box overlay, and enable editing of the template *@

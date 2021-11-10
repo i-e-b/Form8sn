@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Form8snCore;
 using Form8snCore.FileFormats;
 using Form8snCore.Rendering;
 using SkinnyJson;

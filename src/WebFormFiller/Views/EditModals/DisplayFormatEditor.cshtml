@@ -1,0 +1,21 @@
+﻿@using Form8snCore.FileFormats
+@model WebFormFiller.Models.DisplayFormatViewModel
+@{ Layout = null; }
+@* ReSharper disable AssignNullToNotNullAttribute *@
+@* ReSharper disable PossibleNullReferenceException *@
+
+
+<form asp-action="TemplateBox" id="editDisplayFormatForm" method="post">
+    <input type="hidden" asp-for="@Model.DocumentId" value="@Model.DocumentId"/>
+    <input type="hidden" asp-for="@Model.PageIndex" value="@Model.PageIndex"/>
+    <input type="hidden" asp-for="@Model.BoxKey" value="@Model.BoxKey"/>
+    <input type="hidden" asp-for="@Model.Version" value="@Model.Version"/>
+
+        @* DEPENDENCY OPTIONS*@
+        <div class="form-group">
+            <label class="form-label" asp-for="@Model.FormatFilterType">Output filter type (optional - selected data will output as text if none selected)</label>
+            <select class="form-select" asp-for="@Model.FormatFilterType" asp-items="@Model.AvailableFilterTypes">
+                <option value="">- none -</option>
+            </select>
+        </div>
+</form>

@@ -78,11 +78,12 @@ namespace WebFormFiller.Controllers
                 DocumentId = docId.ToString(),
                 BasePdfFile = document.BasePdfFile!,
                 
+                FileLoadUrl = Url!.Action("Load","File")!,
                 ProjectLoadUrl = Url!.Action("ReadProject", "Home")!,
                 ProjectStoreUrl = Url!.Action("WriteProject","Home")!,
                 BoxMoveUrl = Url!.Action("MoveBox", "Home")!,
                 BoxEditPartialUrl = Url!.Action("TemplateBox","EditModals")!,
-                FileLoadUrl = Url!.Action("Load","File")!
+                DisplayFormatPartialUrl = Url!.Action("DisplayFormat","EditModals")!
             };
             
             return View(model)!;

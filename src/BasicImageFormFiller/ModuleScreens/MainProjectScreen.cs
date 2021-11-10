@@ -6,6 +6,7 @@ using BasicImageFormFiller.Helpers;
 using BasicImageFormFiller.Interfaces;
 using Form8snCore;
 using Form8snCore.FileFormats;
+using Form8snCore.Rendering;
 using SkinnyJson;
 using Tag;
 
@@ -229,7 +230,10 @@ namespace BasicImageFormFiller.ModuleScreens
                     var file = moduleScreen.PickNewFile();
                     if (!string.IsNullOrWhiteSpace(file))
                     {
-                        var result = Render.ProjectToFile(file, Path.Combine(_project.BasePath, _project.Index.SampleFileName), _project.Index);
+                        
+                        var fileSource = new FileSource(_project.BasePath);
+                        var result = new RenderProject(fileSource).ToFile(file, Path.Combine(_project.BasePath, _project.Index.SampleFileName), _project.Index);
+
                         if (result.Success)
                         {
                             MessageBox.Show($"Render complete\r\n\r\nloading images: {result.LoadingTime}\r\ntotal time: {result.OverallTime}");

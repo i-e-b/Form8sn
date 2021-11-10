@@ -42,7 +42,7 @@ namespace BasicImageFormFiller.EditForms
             _project = project;
             _pageIndex = pageIndex;
             
-            _imageCache = LoadFromFile(_project.Pages[_pageIndex].GetBackgroundPath());
+            _imageCache = LoadFromFile(Path.Combine(_project.BasePath, _project.Pages[_pageIndex].GetBackgroundPath()));
             
             DoubleBuffered = true;
             MouseWheel += ChangeZoom;

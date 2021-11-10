@@ -15,19 +15,6 @@ using SkinnyJson;
 
 namespace Form8snCore.Rendering
 {
-    internal class PageBacking : IDisposable
-    {
-        public PdfPage? ExistingPage;
-        public XImage? BackgroundImage;
-
-        public void Dispose() => BackgroundImage?.Dispose();
-    }
-
-    public interface IFileSource
-    {
-        Stream Load(string? fileName);
-    }
-
     public class RenderProject
     {
 

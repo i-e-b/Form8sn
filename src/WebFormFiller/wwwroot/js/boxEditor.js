@@ -3,12 +3,13 @@
 NOTE:
 
 When embedding on a page, you must define these variables BEFORE importing this script:
- * basePdfSourceUrl    -- URL from where the PDF can be loaded
- * projectJsonLoadUrl  -- URL from where we can load the JSON definition of the template project
- * projectJsonStoreUrl -- URL to which we can post an updated JSON definition of the template project
- * boxEditPartialUrl   -- URL for template box partial view
- * pdfWorkerSource     -- URL of the file at ~/js/pdf.worker.js
- * boxMoveUrl          -- URL used to send back box movements & resizes
+ * basePdfSourceUrl        -- URL from where the PDF can be loaded
+ * projectJsonLoadUrl      -- URL from where we can load the JSON definition of the template project
+ * projectJsonStoreUrl     -- URL to which we can post an updated JSON definition of the template project
+ * boxEditPartialUrl       -- URL for template box partial view
+ * displayFormatPartialUrl -- URL for display format partial view
+ * pdfWorkerSource         -- URL of the file at ~/js/pdf.worker.js
+ * boxMoveUrl              -- URL used to send back box movements & resizes
 
  */
 
@@ -231,11 +232,38 @@ function closeBoxEditModal() {
 }
 
 function showDisplayFormatModal() {
-    // TODO: implement this
-    alert("Would make the display format modal visible now");
+    if (!activeBox.key) {
+        return;
+    }
+    if (!displayFormatPartialUrl) {
+        console.log('displayFormatPartialUrl was not bound');
+        return;
+    }
+
+    // Synthesise a url, then show the modal.
+    // Calls to EditModalsController->TemplateBox(docId, pageIndex, boxKey)
+    let pageIdx = pageNum - 1;
+
+    // TODO: different modal
+    let modal = document.getElementById('EditTemplateBox_DisplayFormat');
+    if (!modal) return;
+    loadPartialToModal(`${displayFormatPartialUrl}&pageIndex=${pageIdx}&boxKey=${activeBox.key}`,
+        'EditTemplateBox_DisplayFormat_Content', function () {
+            modal.classList.add("active");
+        });
+}
+function saveDisplayFormatChanges(){
+    // TODO: implement me
+    alert("Not yet implemented!");
 }
 function closeDisplayFormatModal(){
-    alert("not implemented");
+    let modal = document.getElementById('EditTemplateBox_DisplayFormat');
+    if (!modal) return;
+
+    modal.classList.remove("active");
+
+    let deadContent = document.getElementById('EditTemplateBox_DisplayFormat_Content');
+    if (deadContent) deadContent.innerHTML = "";
 }
 
 function captureDataPickerResult(path){
@@ -619,6 +647,7 @@ boxCanvas.addEventListener('mouseup', function (e) {
         storeAndReloadProjectFile(function(){ // we've added a new box, so update the entire project
             updateEditButton();
         });
+        mouse.mode = 'select';
     }
     if (mouse.mode === 'move' || mouse.mode === 'size') {
         tryUpdateActiveBox(true); // changed an existing box, so we can just send size changes back to server
