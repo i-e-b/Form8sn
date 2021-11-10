@@ -26,14 +26,19 @@ namespace Form8snCore.HelpersAndConverters
             var pageNumber = 1;
             foreach (var pdfPage in pdf.Pages)
             {
+                // TODO: Portuguese form uses some very odd rotation values, which breaks the page
+                if (pdfPage.Rotate != 0) throw new Exception("Not handled yet!");
+                
                 var page = new TemplatePage
                 {
                     Boxes = new Dictionary<string, TemplateBox>(),
                     Name = $"Page {pageNumber} of {pdf.PageCount}",
                     Notes = null,
                     BackgroundImage = null,
+                    
                     HeightMillimetres = pdfPage.Height.Millimeter,
-                    WidthMillimetres = pdfPage.Width.Millimeter,
+                    WidthMillimetres  = pdfPage.Width.Millimeter,
+                    
                     RenderBackground = true,
                     RepeatMode = new RepeatMode{Repeats = false, DataPath = null},
                     PageFontSize = null,
@@ -104,7 +109,7 @@ namespace Form8snCore.HelpersAndConverters
                 }
             }
 
-            AddTemplateBox(page, pdfPage, rect, name);
+            AddTemplateBox(page, pdfPage, rect, name!);
         }
 
         private static void AddTemplateBox(TemplatePage page, PdfPage pdfPage, PdfArray rect, string name)
@@ -143,10 +148,11 @@ namespace Form8snCore.HelpersAndConverters
                 Width = right-left,
                 Height = bottom-top,
                 
-                BoxOrder = 1, DependsOn = "otherBoxName",
-                DisplayFormat = new DisplayFormatFilter { Type = DisplayFormatType.DateFormat, FormatParameters = new Dictionary<string, string>() },
-                MappingPath = new string[] { "path", "is", "here" },
-                WrapText = true, ShrinkToFit = true, BoxFontSize = 16
+                BoxOrder = null, DependsOn = null,
+                DisplayFormat = null,
+                MappingPath = Array.Empty<string>(),
+                WrapText = false, ShrinkToFit = true,
+                BoxFontSize = null
             });
         }
     }

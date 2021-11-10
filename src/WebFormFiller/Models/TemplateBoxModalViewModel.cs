@@ -52,6 +52,7 @@ namespace WebFormFiller.Models
         public string? DependsOn { get; set; }
         public IEnumerable<SelectListItem> OtherBoxKeys { get; set; } = Array.Empty<SelectListItem>();
         public TextAlignment TextAlign { get; set; }
+        public bool IsRequired { get; set; }
 
         public static TemplateBoxModalViewModel From(IndexFile project, int docId, int pageIndex, string boxKey)
         {
@@ -78,7 +79,8 @@ namespace WebFormFiller.Models
                 ProcessingOrder = theBox.BoxOrder?.ToString()??"",
                 WrapText = theBox.WrapText,
                 ShrinkToFit = theBox.ShrinkToFit,
-                TextAlign = theBox.Alignment
+                TextAlign = theBox.Alignment,
+                IsRequired = theBox.IsRequired
             };
             return model;
         }
@@ -122,6 +124,7 @@ namespace WebFormFiller.Models
             theBox.MappingPath = string.IsNullOrWhiteSpace(DataPath) ? null : DataPath?.Split('.');
             theBox.WrapText = WrapText;
             theBox.ShrinkToFit = ShrinkToFit;
+            theBox.IsRequired = IsRequired;
             theBox.BoxFontSize = ParseIntOrDefault(FontSize, theBox.BoxFontSize);
         }
         

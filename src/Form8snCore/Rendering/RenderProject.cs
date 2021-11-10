@@ -249,7 +249,7 @@ namespace Form8snCore.Rendering
             {
                 var result = PrepareBox(mapper, boxDef.Value!, runningTotals, pageIndex);
                 if (result.IsFailure && boxDef.Value!.IsRequired) return Result.Failure<DocumentPage>(result.FailureCause);
-                if (result.ResultData != null) docPage.DocumentBoxes.Add(boxDef.Key, result.ResultData);
+                if (result.IsSuccess && result.ResultData != null) docPage.DocumentBoxes.Add(boxDef.Key, result.ResultData);
             }
             
             return Result.Success(docPage);
@@ -259,13 +259,18 @@ namespace Form8snCore.Rendering
         {
             try
             {
+                if (box.MappingPath is null) return Result.Failure<DocumentBox?>("Box has no mapping path"); 
                 if (mapper.IsPageValue(box, out var type))
                 {
                     return Result.Success<DocumentBox?>(new DocumentBox(box) { BoxType = type });
                 }
 
                 var str = mapper.FindBoxData(box, pageIndex, runningTotals);
-                if (str == null) return Result.Success<DocumentBox?>(null); // empty data is considered OK
+                if (str == null)
+                {
+                    if (box.IsRequired) return Result.Failure<DocumentBox?>($"Required data was not found at [{string.Join(".",box.MappingPath)}]");
+                    return Result.Success<DocumentBox?>(null); // empty data is considered OK
+                }
 
                 if (box.DisplayFormat != null)
                 {
