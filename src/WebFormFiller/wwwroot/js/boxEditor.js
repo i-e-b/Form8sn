@@ -169,6 +169,18 @@ function loadPartialToModal(url, targetId, nextAction) {
 
 }
 
+function deleteSelectedBox(){
+    if (!activeBox.key) return;
+
+    let pageDef = projectFile.Pages[pageNum - 1];
+    delete pageDef.Boxes[activeBox.key];
+    activeBox.key = null;
+    
+    storeAndReloadProjectFile(function(){
+        closeBoxEditModal();
+        renderBoxes();
+    });
+}
 function showBoxEditModal() {
     if (!activeBox.key) {
         return;
@@ -625,7 +637,7 @@ boxCanvas.addEventListener('mousemove', function (e) {
 
 // PROJECT LOAD AND STORE =============================================================================================
 
-function storeAndReloadProjectFile(){
+function storeAndReloadProjectFile(next){
     // We always reload the project file, even after an error -- this is in case the error was due to an 
     // out-of-date project definition
 
@@ -636,7 +648,7 @@ function storeAndReloadProjectFile(){
             console.log("An error occurred while loading document template definition: " + req.responseText);
             console.dir(evt);
         }
-        reloadProjectFile();
+        reloadProjectFile(next);
     }
 
     req.open('POST', projectJsonStoreUrl, true);
