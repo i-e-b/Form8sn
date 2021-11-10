@@ -192,11 +192,15 @@ function showBoxEditModal() {
 function saveBoxEditChanges(){
     const formEle = document.getElementById('editTemplateBoxForm');
     if (!formEle) return;
+    
+    activeBox.key = document.getElementById('BoxName').value; // We might have changed the name of the box.
 
     submit(formEle).then(function(response) {
         // close the modal box and refresh everything
-        closeBoxEditModal();
-        reloadProjectFile();
+        reloadProjectFile(function() {
+            closeBoxEditModal();
+            renderBoxes();
+        });
         queueRenderPage(pageNum);
     });
 }
@@ -290,9 +294,6 @@ let projectFile = {
     ],
     DataFilters: {}
 };
-let renderBoxes = null;
-
-const ctx = boxCtx;
 
 // Mouse co-ords and active box are in screen-space units
 let activeBox = {key: null, new:false, top: 0, left: 0, right: 0, bottom: 0};
@@ -454,62 +455,63 @@ const drawSingleBox = function (def, name, xs, ys, validMapping) {
     if (name === activeBox.key) return; // this box is selected. Don't render it here.
 
     if (validMapping) {
-        ctx.fillStyle = "rgba(80, 100, 200, 0.3)";
-        ctx.strokeStyle = "#07F";
-        ctx.lineWidth = 2;
+        boxCtx.fillStyle = "rgba(80, 100, 200, 0.3)";
+        boxCtx.strokeStyle = "#07F";
+        boxCtx.lineWidth = 2;
     } else {
-        ctx.fillStyle = "rgba(255, 80, 80, 0.3)";
-        ctx.strokeStyle = "#F00";
-        ctx.lineWidth = 3;
+        boxCtx.fillStyle = "rgba(255, 80, 80, 0.3)";
+        boxCtx.strokeStyle = "#F00";
+        boxCtx.lineWidth = 3;
     }
 
     // Draw box in place over PDF
     const {Width, Top, Height, Left} = def;
-    ctx.fillRect(Left * xs, Top * ys, Width * xs, Height * ys);
-    ctx.strokeRect(Left * xs, Top * ys, Width * xs, Height * ys);
+    boxCtx.fillRect(Left * xs, Top * ys, Width * xs, Height * ys);
+    boxCtx.strokeRect(Left * xs, Top * ys, Width * xs, Height * ys);
 
     // Write box name
-    ctx.fillStyle = "#000";
-    ctx.font = '14px sans-serif';
-    ctx.textBaseline = 'top';
-    ctx.fillText(name, Left * xs + 5, Top * xs + 5);
+    boxCtx.fillStyle = "#000";
+    boxCtx.font = '14px sans-serif';
+    boxCtx.textBaseline = 'top';
+    boxCtx.fillText(name, Left * xs + 5, Top * xs + 5);
 }
 const drawActiveBox = function () {
     let width = activeBox.right - activeBox.left;
     let height = activeBox.bottom - activeBox.top;
     if (width < 1 || height < 1) return; // box is zero sized
+    if (activeBox.key === null) return; // no box is active
 
-    ctx.fillStyle = "rgba(255, 190, 80, 0.3)";
-    ctx.strokeStyle = "#FA0";
-    ctx.lineWidth = 3;
+    boxCtx.fillStyle = "rgba(255, 190, 80, 0.3)";
+    boxCtx.strokeStyle = "#FA0";
+    boxCtx.lineWidth = 3;
 
     // The box
-    ctx.fillRect(activeBox.left, activeBox.top, width, height);
-    ctx.strokeRect(activeBox.left, activeBox.top, width, height);
+    boxCtx.fillRect(activeBox.left, activeBox.top, width, height);
+    boxCtx.strokeRect(activeBox.left, activeBox.top, width, height);
 
     // resize handles
-    ctx.fillStyle = "#FA0";
-    ctx.strokeStyle = "#A50";
-    ctx.lineWidth = 1;
-    ctx.fillRect(activeBox.left, activeBox.top, -10, -10);
-    ctx.strokeRect(activeBox.left, activeBox.top, -10, -10);
-    ctx.fillRect(activeBox.right, activeBox.top, 10, -10);
-    ctx.strokeRect(activeBox.right, activeBox.top, 10, -10);
-    ctx.fillRect(activeBox.right, activeBox.bottom, 10, 10);
-    ctx.strokeRect(activeBox.right, activeBox.bottom, 10, 10);
-    ctx.fillRect(activeBox.left, activeBox.bottom, -10, 10);
-    ctx.strokeRect(activeBox.left, activeBox.bottom, -10, 10);
+    boxCtx.fillStyle = "#FA0";
+    boxCtx.strokeStyle = "#A50";
+    boxCtx.lineWidth = 1;
+    boxCtx.fillRect(activeBox.left, activeBox.top, -10, -10);
+    boxCtx.strokeRect(activeBox.left, activeBox.top, -10, -10);
+    boxCtx.fillRect(activeBox.right, activeBox.top, 10, -10);
+    boxCtx.strokeRect(activeBox.right, activeBox.top, 10, -10);
+    boxCtx.fillRect(activeBox.right, activeBox.bottom, 10, 10);
+    boxCtx.strokeRect(activeBox.right, activeBox.bottom, 10, 10);
+    boxCtx.fillRect(activeBox.left, activeBox.bottom, -10, 10);
+    boxCtx.strokeRect(activeBox.left, activeBox.bottom, -10, 10);
 
     // Write box name
-    ctx.fillStyle = "#000";
-    ctx.font = '14px sans-serif';
-    ctx.textBaseline = 'top';
-    ctx.fillText(activeBox.key, activeBox.left + 5, activeBox.top + 5);
+    boxCtx.fillStyle = "#000";
+    boxCtx.font = '14px sans-serif';
+    boxCtx.textBaseline = 'top';
+    boxCtx.fillText(activeBox.key, activeBox.left + 5, activeBox.top + 5);
 }
-renderBoxes = function () {
-    ctx.clearRect(0, 0, boxCanvas.width, boxCanvas.height);
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.translate(0.5, 0.5); // makes box edges a bit sharpers
+function renderBoxes () {
+    boxCtx.clearRect(0, 0, boxCanvas.width, boxCanvas.height);
+    boxCtx.setTransform(1, 0, 0, 1, 0, 0);
+    boxCtx.translate(0.5, 0.5); // makes box edges a bit sharpers
 
     if (!projectFile.Pages) {
         console.log("BAD DEFINITION");
@@ -654,14 +656,14 @@ function storeAndReloadProjectFile(){
     req.send(JSON.stringify(projectFile));
 }
 
-function reloadProjectFile() {
+function reloadProjectFile(next) {
     let req = new XMLHttpRequest();
 
     req.onload = function (evt) {
         if (req.status >= 200 && req.status < 400) {
             // store the project to variable, and trigger the box render code
             projectFile = req.response;
-            renderBoxes();
+            if (next) {next();}
         } else {
             console.log("An error occurred while loading document template definition.");
             console.dir(evt);
