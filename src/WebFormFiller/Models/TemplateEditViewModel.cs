@@ -12,7 +12,7 @@ namespace WebFormFiller.Models
         /// <summary>
         /// A URL from which the base PDF file can be loaded
         /// </summary>
-        public string PdfUrl { get; set; } = "";
+        public string BasePdfFile { get; set; } = "";
         
         /// <summary>
         /// URL from which the template definition index can be loaded
@@ -39,5 +39,9 @@ namespace WebFormFiller.Models
         /// </summary>
         public string BoxMoveUrl { get; set; } = "";
 
+        /// <summary>
+        /// URL for loading general files (used forbase PDFs and JPEG images)
+        /// </summary>
+        public string FileLoadUrl { get; set; } = "";
     }
 }

@@ -204,13 +204,17 @@ function showBoxEditModal() {
 function saveBoxEditChanges(){
     const formEle = document.getElementById('editTemplateBoxForm');
     if (!formEle) return;
+
+    let newBoxName = document.getElementById('BoxName').value;
+    //selectActiveBox(document.getElementById('BoxName').value);
+    //activeBox.key = ; // We might have changed the name of the box.
     
-    activeBox.key = document.getElementById('BoxName').value; // We might have changed the name of the box.
 
     submit(formEle).then(function(response) {
         // close the modal box and refresh everything
         reloadProjectFile(function() {
             closeBoxEditModal();
+            selectActiveBox(newBoxName);
             renderBoxes();
         });
         queueRenderPage(pageNum);
@@ -416,6 +420,32 @@ function tryCreateNewBox(x, y){
     
 }
 
+function selectActiveBox(name){
+    let page = projectFile.Pages[pageNum - 1];
+    
+    let xScale = boxCanvas.width / page.WidthMillimetres;
+    let yScale = boxCanvas.height / page.HeightMillimetres;
+    
+    let def = page.Boxes[name];
+    
+    if (!def) {
+        activeBox.key = null;
+        return;
+    }
+    
+    let {Width, Top, Height, Left} = def;
+    Width *= xScale;
+    Top *= yScale;
+    Left *= xScale;
+    Height *= yScale;
+    activeBox.key = name;
+    activeBox.top = Top;
+    activeBox.left = Left;
+    activeBox.right = Left + Width;
+    activeBox.bottom = Top + Height;
+    mouse.mode = 'select';
+}
+
 function hitTestBoxes(page, mx, my) {
     // first, test the selected box's control points
     if (activeBox.key !== null) {
@@ -586,12 +616,14 @@ boxCanvas.addEventListener('mouseup', function (e) {
 
     if (mouse.mode === 'create'){
         tryUpdateActiveBox(false);
-        storeAndReloadProjectFile(); // we've added a new box, so update the entire project
+        storeAndReloadProjectFile(function(){ // we've added a new box, so update the entire project
+            updateEditButton();
+        });
     }
     if (mouse.mode === 'move' || mouse.mode === 'size') {
         tryUpdateActiveBox(true); // changed an existing box, so we can just send size changes back to server
     }
-    
+
     renderBoxes();
 }, false);
 

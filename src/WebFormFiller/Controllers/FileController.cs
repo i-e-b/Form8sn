@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
+using Form8snCore.Rendering;
 using Microsoft.AspNetCore.Mvc;
 using WebFormFiller.ServiceStubs;
 
@@ -12,27 +12,29 @@ namespace WebFormFiller.Controllers
         /// Reads a file out of storage. In your implementation, you might want to
         /// supply files from a CDN, S3, or similar. 
         /// </summary>
+        [HttpGet]
         public IActionResult Load(string? name)
         {
             if (!Directory.Exists(FileDatabaseStub.StorageDirectory)) { Directory.CreateDirectory(FileDatabaseStub.StorageDirectory); }
             if (string.IsNullOrWhiteSpace(name)) throw new Exception("File name is required");
             
-            var bytes = System.IO.File.ReadAllBytes(Path.Combine(FileDatabaseStub.StorageDirectory, name + ".pdf"));
+            var bytes = System.IO.File.ReadAllBytes(Path.Combine(FileDatabaseStub.StorageDirectory, name));
             return File(bytes, "application/pdf")!;
         }
-
+        
         /// <summary>
-        /// Store a file for later recovery using the [GET]Load(name) endpoint.
-        /// In your implementation, you might want to supply files from a CDN, S3, or similar. 
+        /// Load the given document template from storage. Generate and return a sample PDF.
         /// </summary>
-        public static void Store(string name, Stream stream)
+        [HttpGet]
+        public IActionResult GenerateSamplePdf(int docId)
         {
-            if (!Directory.Exists(FileDatabaseStub.StorageDirectory)) { Directory.CreateDirectory(FileDatabaseStub.StorageDirectory); }
-
-            using var file = System.IO.File.OpenWrite(Path.Combine(FileDatabaseStub.StorageDirectory, name + ".pdf"));
-            // ReSharper disable once AccessToDisposedClosure
-            Sync.Run(() => stream.CopyToAsync(file));
-            file.Flush(true);
+            var document = FileDatabaseStub.GetDocumentById(docId);
+            var sampleData = FileDatabaseStub.GetSampleData();
+            var ms = new MemoryStream();
+            
+           var info = new RenderProject(new FileDatabaseStub()).ToStream(ms, sampleData, document); 
+           Console.WriteLine(info.ToString());
+           return File(ms, "application/pdf")!;
         }
     }
 }

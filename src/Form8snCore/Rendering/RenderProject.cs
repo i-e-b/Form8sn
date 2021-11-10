@@ -10,12 +10,63 @@ using Form8snCore.DataExtraction;
 using Form8snCore.FileFormats;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
 using SkinnyJson;
 
 namespace Form8snCore.Rendering
 {
+    internal class PageBacking : IDisposable
+    {
+        public PdfPage? ExistingPage;
+        public XImage? BackgroundImage;
+
+        public void Dispose() => BackgroundImage?.Dispose();
+    }
+
+    public interface IFileSource
+    {
+        Stream Load(string? fileName);
+    }
+
     public class RenderProject
     {
+
+        public RenderProject(IFileSource files)
+        {
+            _files = files;
+        }
+        
+        public RenderResultInfo ToStream(Stream target, object data, IndexFile project)
+        {
+            var info = RenderToDocument(data, project, out var document);
+            document.Save(target);
+            document.Dispose();
+            
+            if (target.CanSeek) target.Seek(0, SeekOrigin.Begin);
+            return info;
+        }
+
+        public RenderResultInfo ToFile(string outputFilePath, string dataFilePath, IndexFile project)
+        {
+            if (!File.Exists(dataFilePath))
+            {
+                return new RenderResultInfo
+                {
+                    Success = false,
+                    ErrorMessage = "Could not find input data file"
+                };
+            }
+
+            var data = Json.Defrost(File.ReadAllText(dataFilePath));
+            var info = RenderToDocument(data, project, out var document);
+            document.Save(outputFilePath);
+            document.Dispose();
+            return info;
+        }
+        
+        
+
+        private readonly IFileSource _files;
         private const string FallbackFontFamily = "Courier New";
         private const XFontStyle BaseFontStyle = XFontStyle.Bold;
         private static readonly Stopwatch _loadingTimer = new Stopwatch();
@@ -23,35 +74,57 @@ namespace Form8snCore.Rendering
         
         private static readonly Dictionary<int, XFont> _fontCache = new Dictionary<int, XFont>();
         private static string? _baseFontFamily;
+        private static PdfDocument? _basePdf;
+        
 
+        private PageBacking LoadBackground(IndexFile project, int pageIndex, TemplatePage pageDef)
+        {
+            var backing = new PageBacking();
+            if (_basePdf is null && !string.IsNullOrWhiteSpace(project.BasePdfFile!))
+            {
+                using var fileStream = _files.Load(project.BasePdfFile);
+                /*var ms = new MemoryStream();
+                fileStream.CopyTo(ms);
+                ms.Seek(0, SeekOrigin.Begin);
+                Pdf*/
+                _basePdf = PdfReader.Open(fileStream, PdfDocumentOpenMode.Import); // Must use import mode to copy pages across
+            }
+
+            if (_basePdf != null)
+            {
+                backing.ExistingPage = _basePdf.Pages[pageIndex];
+            }
+
+            if (!string.IsNullOrWhiteSpace(pageDef.BackgroundImage!))
+            {
+                using var fileStream = _files.Load(project.BasePdfFile);
+                backing.BackgroundImage = XImage.FromStream(fileStream);
+            }
+            
+            return backing;
+        }
+
+        
         private static XFont GetFont(int size)
         {
-            if (_fontCache.ContainsKey(size)) return _fontCache[size];
+            if (_fontCache.ContainsKey(size)) return _fontCache[size]!;
             _fontCache.Add(size, new XFont(_baseFontFamily ?? FallbackFontFamily, size, BaseFontStyle));
-            return _fontCache[size];
+            return _fontCache[size]!;
         }
         
-        public static RenderResultInfo ToFile(string outputFilePath, string dataFilePath, FileSystemProject project)
-        {
+        private RenderResultInfo RenderToDocument(object data, IndexFile project, out PdfDocument document){
             _loadingTimer.Reset();
             _totalTimer.Restart();
 
             _loadingTimer.Start();
-            _baseFontFamily = project.Index.FontName;
+            _baseFontFamily = project.FontName;
             var result = new RenderResultInfo {Success = false};
-            if (!File.Exists(dataFilePath))
-            {
-                result.ErrorMessage = "Could not find input data file";
-                return result;
-            }
-
-            var data = Json.Defrost(File.ReadAllText(dataFilePath)!);
             _loadingTimer.Stop();
 
             var mapper = new DataMapper(project, data);
-            var document = new PdfDocument();
+            document = new PdfDocument();
             document.Info.Author = "Generated from data by Form8sn";
-            document.Info.Title = project.Index.Name;
+            document.Info.Title = project.Name;
             document.Info.CreationDate = DateTime.UtcNow;
 
             var runningTotals = new Dictionary<string, decimal>(); // path -> total
@@ -60,14 +133,14 @@ namespace Form8snCore.Rendering
             // This lets us count pages, and defers fitting content into boxes until
             // we've decided to show it (e.g. if it's dependent on an empty box)
             var pageList = new List<DocumentPage>();
-            for (var pageIndex = 0; pageIndex < project.Index.Pages.Count; pageIndex++)
+            for (var pageIndex = 0; pageIndex < project.Pages.Count; pageIndex++)
             {
-                var pageDef = project.Index.Pages[pageIndex];
+                var pageDef = project.Pages[pageIndex]!;
                 if (pageDef.RepeatMode.Repeats)
                 {
                     var dataSets = mapper.GetRepeatData(pageDef.RepeatMode.DataPath);
 
-                    for (int repeatIndex = 0; repeatIndex < dataSets.Count; repeatIndex++)
+                    for (var repeatIndex = 0; repeatIndex < dataSets.Count; repeatIndex++)
                     {
                         var repeatData = dataSets[repeatIndex];
                         mapper.SetRepeater(repeatData, pageDef.RepeatMode.DataPath);
@@ -105,15 +178,19 @@ namespace Form8snCore.Rendering
             PruneBoxes(pageList);
 
             // Next, go through the prepared page and render them to PDF
+            // TODO: THIS IS CRITICAL! Extend this to be able to use base PDF instead of images
             for (var pageIndex = 0; pageIndex < pageList.Count; pageIndex++)
             {
                 _loadingTimer.Start();
-                var pageDef = pageList[pageIndex].Definition;
-                using var image = XImage.FromFile(pageDef.GetBackgroundPath(project)); // we need to load the image regardless, to get the pixel size
-                var font = GetFont(pageDef.PageFontSize ?? project.Index.BaseFontSize ?? 16);
+                var page = pageList[pageIndex]!;
+                var pageDef = page.Definition;
+                
+                using var background = LoadBackground(project, pageIndex, pageDef);
+                //using var image = XImage.FromFile(pageDef.GetBackgroundPath()); // we need to load the image regardless, to get the pixel size
+                var font = GetFont(pageDef.PageFontSize ?? project.BaseFontSize ?? 16);
                 _loadingTimer.Stop();
 
-                var pageResult = OutputPage(document, pageList[pageIndex], font, image, pageIndex, pageList.Count);
+                var pageResult = OutputPage(document, page, font, background, pageIndex, pageList.Count);
                 if (pageResult.IsFailure)
                 {
                     result.ErrorMessage = pageResult.FailureMessage;
@@ -121,7 +198,6 @@ namespace Form8snCore.Rendering
                 }
             }
 
-            document.Save(outputFilePath);
             _totalTimer.Stop();
 
             result.Success = true;
@@ -131,7 +207,6 @@ namespace Form8snCore.Rendering
 
             return result;
         }
-
         private static void PruneBoxes(List<DocumentPage> pageList)
         {
             foreach (var page in pageList)
@@ -139,8 +214,8 @@ namespace Form8snCore.Rendering
                 var boxesToKill = new List<string>(); //key list
                 foreach (var box in page.DocumentBoxes)
                 {
-                    var definition = box.Value.Definition;
-                    if (string.IsNullOrWhiteSpace(definition.DependsOn)) continue; // not dependent
+                    var definition = box.Value!.Definition;
+                    if (string.IsNullOrWhiteSpace(definition.DependsOn!)) continue; // not dependent
                     
                     // Follow the depends chain until we hit one that's either empty, missing, or we hit the end
                     var nextBox = box.Value;
@@ -148,8 +223,8 @@ namespace Form8snCore.Rendering
                     {
                         if (!page.DocumentBoxes.ContainsKey(nextBox.Definition.DependsOn)) { boxesToKill.Add(box.Key); break; } // has been early-culled
                         nextBox = page.DocumentBoxes[nextBox.Definition.DependsOn];
-                        if (string.IsNullOrEmpty(nextBox.RenderContent)) { boxesToKill.Add(box.Key); break; } // dependent is empty
-                        if (string.IsNullOrEmpty(nextBox.Definition.DependsOn)) break; // end of the chain, has a value
+                        if (string.IsNullOrEmpty(nextBox?.RenderContent!)) { boxesToKill.Add(box.Key); break; } // dependent is empty
+                        if (string.IsNullOrEmpty(nextBox.Definition.DependsOn!)) break; // end of the chain, has a value
                         if (nextBox.Definition.DependsOn == box.Key) { boxesToKill.Add(box.Key); break; } // loop in chain. Drop this box
                     }
                 }
@@ -167,6 +242,9 @@ namespace Form8snCore.Rendering
             }
         }
 
+        /// <summary>
+        /// Gather all the data for a single output page
+        /// </summary>
         private static Result<DocumentPage> PreparePage(TemplatePage pageDef, DataMapper mapper, Dictionary<string, decimal> runningTotals, int pageIndex)
         {
             var docPage = new DocumentPage(pageDef);
@@ -174,7 +252,7 @@ namespace Form8snCore.Rendering
             // Draw each box. We sort the boxes (currently by filter type) so running totals can work as expected
             foreach (var boxDef in pageDef.Boxes.Where(HasAValue).OrderBy(OrderBoxes))
             {
-                var result = PrepareBox(mapper, boxDef.Value, runningTotals, pageIndex);
+                var result = PrepareBox(mapper, boxDef.Value!, runningTotals, pageIndex);
                 if (result.IsFailure) return Result.Failure<DocumentPage>(result.FailureCause);
                 if (result.ResultData != null) docPage.DocumentBoxes.Add(boxDef.Key, result.ResultData);
             }
@@ -201,9 +279,14 @@ namespace Form8snCore.Rendering
             return Result.Success<DocumentBox?>(new DocumentBox(box, str));
         }
 
-        private static Result<Nothing> OutputPage(PdfDocument document, DocumentPage pageToRender, XFont font, XImage image, int pageIndex, int pageTotal)
+        /// <summary>
+        /// Render a prepared page into a PDF document
+        /// </summary>
+        private static Result<Nothing> OutputPage(PdfDocument document, DocumentPage pageToRender, XFont font, PageBacking background, int pageIndex, int pageTotal)
         {
-            var page = document.AddPage();
+            // TODO: if NOT render background, don't import the old page
+            var page = background.ExistingPage is null ? document.AddPage() : document.AddPage(background.ExistingPage);
+            
             var pageDef = pageToRender.Definition;
             // If dimensions are silly, reset to A4
             if (pageDef.WidthMillimetres < 10 || pageDef.WidthMillimetres > 1000) pageDef.WidthMillimetres = 210;
@@ -218,16 +301,22 @@ namespace Form8snCore.Rendering
 
             // Draw background at full page size
             _loadingTimer.Start();
-            if (pageDef.RenderBackground)
+            if (pageDef.RenderBackground && background.BackgroundImage != null)
             {
                 var destRect = new XRect(0, 0, (float) page.Width.Point, (float) page.Height.Point);
-                gfx.DrawImage(image, destRect);
+                gfx.DrawImage(background.BackgroundImage, destRect);
             }
             _loadingTimer.Stop();
 
-            // Work out the bitmap -> page adjustment fraction
-            var fx = page.Width.Point / image.PixelWidth;
-            var fy = page.Height.Point / image.PixelHeight;
+            // Do default scaling
+            var fx = page.Width.Point / page.Width.Millimeter;
+            var fy = page.Height.Point / page.Height.Millimeter;
+            // If using an image, work out the bitmap -> page adjustment
+            if (background.BackgroundImage != null)
+            {
+                fx = page.Width.Point / background.BackgroundImage.PixelWidth;
+                fy = page.Height.Point / background.BackgroundImage.PixelHeight;
+            }
 
             // Draw each box.
             foreach (var boxDef in pageToRender.DocumentBoxes)
@@ -241,7 +330,7 @@ namespace Form8snCore.Rendering
 
         private static bool HasAValue(KeyValuePair<string, TemplateBox> boxDef)
         {
-            return boxDef.Value.MappingPath != null;
+            return boxDef.Value?.MappingPath != null;
         }
 
         private static int OrderBoxes(KeyValuePair<string, TemplateBox> boxDef)
@@ -249,10 +338,10 @@ namespace Form8snCore.Rendering
             const int explicitOrderGap = 10000;
             
             // if we have an explicit order, use that (explicits always go first)
-            if (boxDef.Value.BoxOrder != null) return boxDef.Value.BoxOrder.Value;
+            if (boxDef.Value?.BoxOrder != null) return boxDef.Value.BoxOrder.Value;
             
             // otherwise, apply a default ordering.
-            var path = boxDef.Value.MappingPath;
+            var path = boxDef.Value!.MappingPath;
             if (path == null || path.Length < 1) return explicitOrderGap - 3; // unmapped first (they will get ignored anyway)
             if (path[0] == "") return explicitOrderGap - 2; // raw data paths next
             if (path[0] == "D") return explicitOrderGap - 1; // next, page data
@@ -266,7 +355,7 @@ namespace Form8snCore.Rendering
 
         private static Result<Nothing> RenderBox(XFont baseFont, KeyValuePair<string, DocumentBox> boxDef, double fx, double fy, XGraphics gfx, DocumentPage pageToRender, int pageIndex, int pageTotal)
         {
-            var box = boxDef.Value;
+            var box = boxDef.Value!;
             var font = (box.Definition.BoxFontSize != null) ? GetFont(box.Definition.BoxFontSize.Value) : baseFont;
 
             // Read data, or pick a special type
@@ -375,13 +464,13 @@ namespace Form8snCore.Rendering
             var sb = new StringBuilder();
             for (int i = 0; i < words.Count; i++)
             {
-                var bitSize = gfx.MeasureString(words[i], font);
+                var bitSize = gfx.MeasureString(words[i]!, font);
                 lineHeight = Math.Max(lineHeight, bitSize.Height);
                 var wordWidth = bitSize.Width;
 
                 if (wordWidth <= widthRemains) // next word fits on the line
                 {
-                    sb.Append(words[i]);
+                    sb.Append(words[i]!);
                     widthRemains -= wordWidth;
                     continue;
                 }
@@ -390,7 +479,7 @@ namespace Form8snCore.Rendering
                 // output the line, and start another
                 lines.Add(new MeasuredLine(sb.ToString(), lineHeight));
                 sb.Clear();
-                sb.Append(words[i]);
+                sb.Append(words[i]!);
                 lineHeight = bitSize.Height;
                 widthRemains = boxWidth - bitSize.Width;
             }
@@ -419,7 +508,7 @@ namespace Form8snCore.Rendering
                 // Keep adding chunks until one doesn't fit, then break line
                 for (int i = 0; i < bits.Count; i++)
                 {
-                    var bitSize = gfx.MeasureString(bits[i], altFont);
+                    var bitSize = gfx.MeasureString(bits[i]!, altFont);
                     lineMaxHeight = Math.Max(bitSize.Height, lineMaxHeight);
                     var wordWidth = bitSize.Width;
 

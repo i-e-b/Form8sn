@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Form8snCore.FileFormats;
+using Form8snCore.Rendering;
 using SkinnyJson;
 
 namespace WebFormFiller.ServiceStubs
@@ -11,10 +13,22 @@ namespace WebFormFiller.ServiceStubs
     /// This class should be replaced with calls to your database or other storage solution.
     /// This stub doesn't even try to be efficient.
     /// </summary>
-    public class FileDatabaseStub
+    public class FileDatabaseStub : IFileSource
     {
         public const string StorageDirectory = @"C:\Temp\WebFormFiller";
 
+        
+        /// <summary>
+        /// Load file for rendering process
+        /// </summary>
+        public Stream Load(string? fileName)
+        {
+            if (!Directory.Exists(StorageDirectory)) { Directory.CreateDirectory(StorageDirectory); }
+            if (string.IsNullOrWhiteSpace(fileName)) throw new Exception("File name is required");
+            
+            return File.OpenRead(Path.Combine(StorageDirectory, fileName));
+        }
+        
         /// <summary>
         /// List all the document template projects available
         /// </summary>
@@ -48,6 +62,20 @@ namespace WebFormFiller.ServiceStubs
             
             File.WriteAllText(Path.Combine(StorageDirectory, id+"_"+file.Name + ".json"), Json.Freeze(file));
             return id.Value;
+        }
+        
+        /// <summary>
+        /// Store a file for later recovery using the [GET]Load(name) endpoint.
+        /// In your implementation, you might want to supply files from a CDN, S3, or similar. 
+        /// </summary>
+        public static void Store(string name, Stream stream)
+        {
+            if (!Directory.Exists(StorageDirectory)) { Directory.CreateDirectory(StorageDirectory); }
+
+            using var file = File.OpenWrite(Path.Combine(StorageDirectory, name));
+            // ReSharper disable once AccessToDisposedClosure
+            Sync.Run(() => stream.CopyToAsync(file));
+            file.Flush(true);
         }
         
         /// <summary>

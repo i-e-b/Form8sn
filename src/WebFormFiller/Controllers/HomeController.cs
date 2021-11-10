@@ -53,11 +53,10 @@ namespace WebFormFiller.Controllers
             
             ms.Seek(0, SeekOrigin.Begin);
             var fileName = model.Title + "_" + Guid.NewGuid() + ".pdf";
-            FileController.Store(fileName, ms);
-            var pdfUrl = Url!.Action("Load","File", new{name = fileName})!;
-            ms.Seek(0,  SeekOrigin.Begin);
+            FileDatabaseStub.Store(fileName, ms);
+            ms.Seek(0, SeekOrigin.Begin);
             
-            var template = ImportToProject.FromPdf(ms, pdfUrl, model.Title);
+            var template = ImportToProject.FromPdf(ms, fileName, model.Title);
             var id = FileDatabaseStub.SaveDocumentTemplate(template, null);
 
 
@@ -76,12 +75,14 @@ namespace WebFormFiller.Controllers
             
             var model = new TemplateEditViewModel{
                 Document = document,
+                DocumentId = docId.ToString(),
+                BasePdfFile = document.BasePdfFile!,
+                
                 ProjectLoadUrl = Url!.Action("ReadProject", "Home")!,
                 ProjectStoreUrl = Url!.Action("WriteProject","Home")!,
-                BoxEditPartialUrl = Url!.Action("TemplateBox","EditModals")!,
                 BoxMoveUrl = Url!.Action("MoveBox", "Home")!,
-                DocumentId = docId.ToString(),
-                PdfUrl = document.BasePdfFile!
+                BoxEditPartialUrl = Url!.Action("TemplateBox","EditModals")!,
+                FileLoadUrl = Url!.Action("Load","File")!
             };
             
             return View(model)!;

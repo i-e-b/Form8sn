@@ -30,6 +30,9 @@ namespace Form8snCore.FileFormats
         /// </summary>
         public string? Notes { get; set; }
         
+        /// <summary>
+        /// Optional: URL of image to use as background
+        /// </summary>
         public string? BackgroundImage { get; set; }
 
         /// <summary>
@@ -57,14 +60,9 @@ namespace Form8snCore.FileFormats
         /// </summary>
         public bool RenderBackground { get; set; } = true;
 
-        public string GetBackgroundUrl(FileSystemProject project)
+        public string GetBackgroundPath()
         {
-            return $"{project.BaseUri}/{BackgroundImage}";
-        }
-
-        public string GetBackgroundPath(FileSystemProject project)
-        {
-            return Path.Combine(project.BasePath, BackgroundImage ?? "");
+            return BackgroundImage ?? "";
         }
 
         /// <summary>

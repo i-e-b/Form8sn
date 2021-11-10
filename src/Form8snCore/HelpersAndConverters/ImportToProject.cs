@@ -16,9 +16,9 @@ namespace Form8snCore.HelpersAndConverters
         /// Generate a new index file from an existing PDF
         /// </summary>
         /// <param name="pdfSource">Stream holding a PDF file</param>
-        /// <param name="pdfReloadUrl">URL from which the PDF can be reloaded later, for use by the renderer and clients</param>
-        /// <param name="templateName"></param>
-        public static IndexFile FromPdf(Stream pdfSource, string pdfReloadUrl, string templateName)
+        /// <param name="pdfSourceName">Name / ID from which the PDF can be reloaded later, for use by the renderer and clients</param>
+        /// <param name="templateName">Editor-facing name for this project</param>
+        public static IndexFile FromPdf(Stream pdfSource, string pdfSourceName, string templateName)
         {
             using var pdf = PdfReader.Open(pdfSource);
             
@@ -52,7 +52,7 @@ namespace Form8snCore.HelpersAndConverters
                 DataFilters = new Dictionary<string, MappingInfo>(),
                 FontName = null,
                 BaseFontSize = null,
-                BasePdfFile = pdfReloadUrl,
+                BasePdfFile = pdfSourceName,
                 SampleFileName = null
             };
         }

@@ -8,13 +8,13 @@ namespace Form8snCore.DataExtraction
 {
     public class DataMapper
     {
-        private readonly FileSystemProject _project;
+        private readonly IndexFile _project;
         private readonly object _data;
         private readonly Dictionary<string,string> _emptyParams;
         private object? _repeatData;
         private string[]? _originalPath;
 
-        public DataMapper(FileSystemProject project, object data)
+        public DataMapper(IndexFile project, object data)
         {
             _emptyParams = new Dictionary<string, string>();
             _project = project;
@@ -41,10 +41,10 @@ namespace Form8snCore.DataExtraction
 
         private Dictionary<string, MappingInfo> JoinProjectAndPageFilters(int pageIndex)
         {
-            var filters = _project.Index.DataFilters;
-            if (_project.Pages[pageIndex].PageDataFilters.Count <= 0) return filters;
+            var filters = _project.DataFilters;
+            if (_project.Pages[pageIndex]!.PageDataFilters.Count <= 0) return filters;
             
-            var pageFilters = _project.Pages[pageIndex].PageDataFilters;
+            var pageFilters = _project.Pages[pageIndex]!.PageDataFilters;
             filters = new Dictionary<string, MappingInfo>(filters);
             foreach (var filter in pageFilters)
             {
@@ -63,7 +63,7 @@ namespace Form8snCore.DataExtraction
             var outp = new List<object>();
             if (dataPath == null) return outp;
             
-            var list = MappingActions.ApplyFilter(MappingType.None, _emptyParams, dataPath, null, _project.Index.DataFilters, _data, null, null) as ArrayList;
+            var list = MappingActions.ApplyFilter(MappingType.None, _emptyParams, dataPath, null, _project.DataFilters, _data, null, null) as ArrayList;
             if (list == null) return outp;
 
             foreach (var item in list)
@@ -76,12 +76,12 @@ namespace Form8snCore.DataExtraction
         /// <summary>
         /// Set data for a repeater page.
         /// </summary>
-        public void SetRepeater(object repeatData, string[]? originalPath)
+        public void SetRepeater(object? repeatData, string[]? originalPath)
         {
             // chase to the real data here
             if (originalPath != null && originalPath.Length > 1 && originalPath[0] == "#")
             {
-                originalPath = MappingActions.FindSourcePath(originalPath[1], _project.Index.DataFilters);
+                originalPath = MappingActions.FindSourcePath(originalPath[1], _project.DataFilters);
             }
 
             _originalPath = originalPath;

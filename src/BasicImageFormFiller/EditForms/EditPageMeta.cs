@@ -72,7 +72,7 @@ namespace BasicImageFormFiller.EditForms
         private void guessSizeButton_Click(object sender, EventArgs e)
         {
             // guess size from background. Default to A4.
-            var path = _project?.Pages[_pageIndex].GetBackgroundPath(_project);
+            var path = _project?.Pages[_pageIndex].GetBackgroundPath();
             if (path == null || !File.Exists(path)) return;
             
             using var img = Image.FromFile(path);

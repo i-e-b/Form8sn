@@ -229,7 +229,7 @@ namespace BasicImageFormFiller.ModuleScreens
                     var file = moduleScreen.PickNewFile();
                     if (!string.IsNullOrWhiteSpace(file))
                     {
-                        var result = Render.ProjectToFile(file, Path.Combine(_project.BasePath, _project.Index.SampleFileName), _project);
+                        var result = Render.ProjectToFile(file, Path.Combine(_project.BasePath, _project.Index.SampleFileName), _project.Index);
                         if (result.Success)
                         {
                             MessageBox.Show($"Render complete\r\n\r\nloading images: {result.LoadingTime}\r\ntotal time: {result.OverallTime}");
