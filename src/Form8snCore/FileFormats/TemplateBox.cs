@@ -30,6 +30,15 @@ namespace Form8snCore.FileFormats
         public TemplateBox() { }
 
         /// <summary>
+        /// Defaults to false.
+        /// If true and the data path can't be found in the source data, generation of
+        /// the entire document will fail.
+        /// If false and the data path can't be found, this box will be blank and the rest
+        /// of the document will render as normal.
+        /// </summary>
+        public bool IsRequired { get; set; }
+
+        /// <summary>
         /// If text doesn't fit in the box, break on whitespace
         /// <para>This can be combined with ShrinkToFit</para>
         /// </summary>

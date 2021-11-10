@@ -66,15 +66,16 @@ namespace Form8snCore.Rendering
         
         
 
-        private readonly IFileSource _files;
         private const string FallbackFontFamily = "Courier New";
         private const XFontStyle BaseFontStyle = XFontStyle.Bold;
+        
         private static readonly Stopwatch _loadingTimer = new Stopwatch();
         private static readonly Stopwatch _totalTimer = new Stopwatch();
-        
         private static readonly Dictionary<int, XFont> _fontCache = new Dictionary<int, XFont>();
         private static string? _baseFontFamily;
-        private static PdfDocument? _basePdf;
+        
+        private readonly IFileSource _files;
+        private PdfDocument? _basePdf;
         
 
         private PageBacking LoadBackground(IndexFile project, int pageIndex, TemplatePage pageDef)
@@ -83,10 +84,6 @@ namespace Form8snCore.Rendering
             if (_basePdf is null && !string.IsNullOrWhiteSpace(project.BasePdfFile!))
             {
                 using var fileStream = _files.Load(project.BasePdfFile);
-                /*var ms = new MemoryStream();
-                fileStream.CopyTo(ms);
-                ms.Seek(0, SeekOrigin.Begin);
-                Pdf*/
                 _basePdf = PdfReader.Open(fileStream, PdfDocumentOpenMode.Import); // Must use import mode to copy pages across
             }
 
@@ -178,7 +175,6 @@ namespace Form8snCore.Rendering
             PruneBoxes(pageList);
 
             // Next, go through the prepared page and render them to PDF
-            // TODO: THIS IS CRITICAL! Extend this to be able to use base PDF instead of images
             for (var pageIndex = 0; pageIndex < pageList.Count; pageIndex++)
             {
                 _loadingTimer.Start();
@@ -186,7 +182,6 @@ namespace Form8snCore.Rendering
                 var pageDef = page.Definition;
                 
                 using var background = LoadBackground(project, pageIndex, pageDef);
-                //using var image = XImage.FromFile(pageDef.GetBackgroundPath()); // we need to load the image regardless, to get the pixel size
                 var font = GetFont(pageDef.PageFontSize ?? project.BaseFontSize ?? 16);
                 _loadingTimer.Stop();
 
@@ -253,7 +248,7 @@ namespace Form8snCore.Rendering
             foreach (var boxDef in pageDef.Boxes.Where(HasAValue).OrderBy(OrderBoxes))
             {
                 var result = PrepareBox(mapper, boxDef.Value!, runningTotals, pageIndex);
-                if (result.IsFailure) return Result.Failure<DocumentPage>(result.FailureCause);
+                if (result.IsFailure && boxDef.Value!.IsRequired) return Result.Failure<DocumentPage>(result.FailureCause);
                 if (result.ResultData != null) docPage.DocumentBoxes.Add(boxDef.Key, result.ResultData);
             }
             
@@ -262,21 +257,28 @@ namespace Form8snCore.Rendering
 
         private static Result<DocumentBox?> PrepareBox(DataMapper mapper, TemplateBox box, Dictionary<string,decimal> runningTotals, int pageIndex)
         {
-            if (mapper.IsPageValue(box, out var type))
+            try
             {
-                return Result.Success<DocumentBox?>(new DocumentBox(box){BoxType = type});
-            }
+                if (mapper.IsPageValue(box, out var type))
+                {
+                    return Result.Success<DocumentBox?>(new DocumentBox(box) { BoxType = type });
+                }
 
-            var str = mapper.FindBoxData(box, pageIndex, runningTotals);
-            if (str == null) return Result.Success<DocumentBox?>(null); // empty data is considered OK
-            
-            if (box.DisplayFormat != null)
-            {
-                str = DisplayFormatter.ApplyFormat(box, str);
-                if (str == null) return Result.Failure<DocumentBox?>($"Formatter failed: {box.DisplayFormat.Type} applied on {string.Join(".", box.MappingPath!)}");
+                var str = mapper.FindBoxData(box, pageIndex, runningTotals);
+                if (str == null) return Result.Success<DocumentBox?>(null); // empty data is considered OK
+
+                if (box.DisplayFormat != null)
+                {
+                    str = DisplayFormatter.ApplyFormat(box, str);
+                    if (str == null) return Result.Failure<DocumentBox?>($"Formatter failed: {box.DisplayFormat.Type} applied on {string.Join(".", box.MappingPath!)}");
+                }
+
+                return Result.Success<DocumentBox?>(new DocumentBox(box, str));
             }
-            
-            return Result.Success<DocumentBox?>(new DocumentBox(box, str));
+            catch (Exception ex)
+            {
+                return Result.Failure<DocumentBox>(ex)!;
+            }
         }
 
         /// <summary>
@@ -284,14 +286,15 @@ namespace Form8snCore.Rendering
         /// </summary>
         private static Result<Nothing> OutputPage(PdfDocument document, DocumentPage pageToRender, XFont font, PageBacking background, int pageIndex, int pageTotal)
         {
-            // TODO: if NOT render background, don't import the old page
-            var page = background.ExistingPage is null ? document.AddPage() : document.AddPage(background.ExistingPage);
-            
             var pageDef = pageToRender.Definition;
+            
+            // If we have a source PDF, and we aren't trying to render a blank page, then import the page
+            var shouldCopyPdfPage = background.ExistingPage != null && pageDef.RenderBackground;
+            var page = shouldCopyPdfPage ? document.AddPage(background.ExistingPage!) : document.AddPage(/*blank*/);
+            
             // If dimensions are silly, reset to A4
             if (pageDef.WidthMillimetres < 10 || pageDef.WidthMillimetres > 1000) pageDef.WidthMillimetres = 210;
             if (pageDef.HeightMillimetres < 10 || pageDef.HeightMillimetres > 1000) pageDef.HeightMillimetres = 297;
-
 
             // Set the PDF page size (in points under the hood)
             page.Width = XUnit.FromMillimeter(pageDef.WidthMillimetres);
@@ -416,9 +419,14 @@ namespace Form8snCore.Rendering
 
         private static void RenderWrappedLines(XFont font, XGraphics gfx, TemplateBox box, double fy, XStringFormat align, List<MeasuredLine> lines, double boxLeft, double boxWidth)
         {
+            if (lines.Count < 1) return;
+            
             var top = CalculateTop(box, fy, lines);
-            foreach (var line in lines)
+            var start = lines[0]!.Text.Length < 1 ? 1 : 0; // Never draw a blank first line
+            
+            for (var index = start; index < lines.Count; index++)
             {
+                var line = lines[index]!;
                 var lineRect = new XRect(boxLeft, top, boxWidth, line.Height);
                 gfx.DrawString(line.Text, font, XBrushes.Black, lineRect, align);
                 top += line.Height;

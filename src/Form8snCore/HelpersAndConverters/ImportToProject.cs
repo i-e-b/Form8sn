@@ -34,7 +34,7 @@ namespace Form8snCore.HelpersAndConverters
                     BackgroundImage = null,
                     HeightMillimetres = pdfPage.Height.Millimeter,
                     WidthMillimetres = pdfPage.Width.Millimeter,
-                    RenderBackground = false,
+                    RenderBackground = true,
                     RepeatMode = new RepeatMode{Repeats = false, DataPath = null},
                     PageFontSize = null,
                     PageDataFilters = new Dictionary<string, MappingInfo>()

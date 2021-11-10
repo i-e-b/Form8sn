@@ -622,6 +622,7 @@ boxCanvas.addEventListener('mouseup', function (e) {
     }
     if (mouse.mode === 'move' || mouse.mode === 'size') {
         tryUpdateActiveBox(true); // changed an existing box, so we can just send size changes back to server
+        mouse.mode = 'select';
     }
 
     renderBoxes();
