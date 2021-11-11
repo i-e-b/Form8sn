@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Form8snCore;
 using Form8snCore.FileFormats;
-using Form8snCore.Rendering;
 using SkinnyJson;
 
 namespace WebFormFiller.ServiceStubs
@@ -60,7 +59,12 @@ namespace WebFormFiller.ServiceStubs
             if (!Directory.Exists(StorageDirectory)) { Directory.CreateDirectory(StorageDirectory); }
             
             if (id == null) id = GetNextId();
-            
+            else
+            {
+                var old = GetDocumentById(id.Value);
+                if (old.Name != file.Name) File.Delete(Path.Combine(StorageDirectory, id+"_"+old.Name + ".json"));
+            }
+
             File.WriteAllText(Path.Combine(StorageDirectory, id+"_"+file.Name + ".json"), Json.Freeze(file));
             return id.Value;
         }

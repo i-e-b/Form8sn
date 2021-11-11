@@ -7,9 +7,10 @@ namespace Form8snCore.DataExtraction
 {
     public class DisplayFormatter
     {
-        public static string? ApplyFormat(TemplateBox box, string str)
+        public static string? ApplyFormat(TemplateBox box, string? str)
         {
             var type = box.DisplayFormat?.Type;
+            if (str is null) return null;
 
             switch (type)
             {

@@ -83,6 +83,22 @@
 </div>
 
 
+@* DOCUMENT WIDE SETTINGS (this is populated from 'EditDocumentDetails.cshtml' and driven by 'boxEditor.js') *@
+<div class="modal" id="EditDocument_DocumentInfo">
+    <div class="modal-container">
+        <div class="modal-body">
+            <div class="content" style="height:70vh" id="EditDocument_DocumentInfo_Content">
+                Loading...
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" onclick="closeDocumentInfoModal()">Cancel</button>
+            <button type="button" onclick="saveDocumentInfoChanges()">Save</button>
+        </div>
+    </div>
+</div>
+
+
 @* Mozilla PDF rendering library. Snapshot from https://mozilla.github.io/pdf.js/build/pdf.js *@
 <script src="~/js/pdf.js" asp-append-version="true"></script>
 
@@ -97,6 +113,7 @@ const boxMoveUrl = "@(Model.BoxMoveUrl)?docId=@(Model.DocumentId)"; // call-back
 
 const boxEditPartialUrl = "@(Model.BoxEditPartialUrl)?docId=@(Model.DocumentId)"; // call-back to load editor HTML for a specific template box
 const displayFormatPartialUrl = "@(Model.DisplayFormatPartialUrl)?docId=@(Model.DocumentId)"; // call-back to load editor HTML for a template box's display format
+const docInfoPartialUrl = "@(Model.DocumentInfoPartialUrl)?docId=@(Model.DocumentId)"; // call-back to load editor HTML for a template box's display format
 </script>
 
 @* Scripts to render PDF with template box overlay, and enable editing of the template *@

@@ -51,7 +51,7 @@ namespace WebFormFiller.Controllers
             var project = FileDatabaseStub.GetDocumentById(docId);
             
             var model = TemplateBoxModalViewModel.From(project, docId, pageIndex, boxKey);
-            model.LoadDataPickerUrl = Url!.Action("DataPicker", "EditModals", new{ docId = docId, pageIndex, oldPath = model.DataPath})!;
+            model.LoadDataPickerUrl = Url!.Action("DataPicker", "EditModals", new{ docId, pageIndex, oldPath = model.DataPath})!;
             
             return PartialView("EditTemplateBox", model)!;
         }
@@ -74,7 +74,38 @@ namespace WebFormFiller.Controllers
             return Content("OK")!;
         }
 
-        
+        /// <summary>
+        /// View and edit details that cover the whole document, including filters
+        /// </summary>
+        [HttpGet]
+        public IActionResult EditDocumentDetails(int docId)
+        {
+            var project = FileDatabaseStub.GetDocumentById(docId);
+            
+            var model = DocumentSettingsViewModel.From(project, docId);
+            model.LoadDataPickerUrl = Url!.Action("DataPicker", "EditModals", new{ docId})!;
+            
+            return PartialView("EditDocumentDetails", model)!;
+        }
+
+        /// <summary>
+        /// Store changes to document settings
+        /// </summary>
+        [HttpPost]
+        public IActionResult EditDocumentDetails([FromForm]DocumentSettingsViewModel model)
+        {
+            // Check against existing version
+            var existing = FileDatabaseStub.GetDocumentById(model.DocumentId);
+            if (existing.Version is not null && model.Version < existing.Version) return Content("OLD")!;
+            
+            // Copy new values across
+            model.CopyTo(existing);
+            
+            // Write back to store
+            FileDatabaseStub.SaveDocumentTemplate(existing, model.DocumentId);
+            return Content("OK")!;
+        }
+
         /// <summary>
         /// View and edit the display format of a template box.
         /// </summary>

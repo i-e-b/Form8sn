@@ -15,6 +15,9 @@ namespace Portable.Drawing.Toolkit.Portable
     /// </summary>
     public class PortableFont : IToolkitFont
     {
+        /// <summary>
+        /// Display Name => Font File Path
+        /// </summary>
         private static readonly Dictionary<string,string> _fontCache = new Dictionary<string, string>();
         private readonly Font _fontSpec;
         private readonly float _dpi;
@@ -31,13 +34,40 @@ namespace Portable.Drawing.Toolkit.Portable
             BaseTrueTypeFont = new TrueTypeFont(GetFontFilePath(fontSpec));
         }
 
+        /// <summary>
+        /// Lists the display names of all fonts found on the system
+        /// </summary>
+        /// <returns></returns>
+        public static IEnumerable<string> ListKnownFonts()
+        {
+            EnsureFontCache();
+            return _fontCache.Keys.ToList();
+        }
 
         private static void EnsureFontCache()
         {
             if (_fontCache.Count < 1)
             {
-                var basePath = Environment.GetFolderPath(Environment.SpecialFolder.Fonts, Environment.SpecialFolderOption.DoNotVerify);
-                ReadAvailableFonts(basePath);
+                // Try the path where dotnet thinks the fonts should be
+                // and try some other locations, as the dotnet one is often just ~/.fonts on Linux
+                var possiblePaths = new []{
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile, Environment.SpecialFolderOption.DoNotVerify), "AppData/Local/Microsoft/Windows/Fonts/"),
+                    Environment.GetFolderPath(Environment.SpecialFolder.Fonts, Environment.SpecialFolderOption.DoNotVerify),
+                    "/usr/share/fonts/",
+                    "/usr/local/share/fonts",
+                    "/usr/X11R6/lib/X11/fonts/"
+                };
+                foreach (var path in possiblePaths)
+                {
+                    try
+                    {
+                        ReadAvailableFonts(path);
+                    }
+                    catch
+                    {
+                        // ignore
+                    }
+                }
             }
         }
 
@@ -51,13 +81,15 @@ namespace Portable.Drawing.Toolkit.Portable
         public IntPtr GetHfont() => IntPtr.Zero;
 
         public void ToLogFont(object lf, IToolkitGraphics graphics) { }
-        
-        public static void ReadAvailableFonts(string basePath)
+
+        private static void ReadAvailableFonts(string basePath)
         {
+            if (!Directory.Exists(basePath)) return;
+            
             // Font file names usually bear little resemblance to the family and style names.
             // Our portable GDI reads the whole font library and jumps into headers to find the names.
             // This is time and memory expensive, so we cache the results aggressively
-            var allFiles = Directory.EnumerateFiles(basePath, "*.ttf").ToList();
+            var allFiles = Directory.EnumerateFiles(basePath, "*.ttf", SearchOption.AllDirectories).ToList();
 
             foreach (var file in allFiles)
             {
@@ -75,6 +107,8 @@ namespace Portable.Drawing.Toolkit.Portable
                         var key = name.PlatformId == 3 && name.EncodingId == 1
                             ? Encoding.BigEndianUnicode.GetString(name.ByteStringValue)
                             : Encoding.UTF8.GetString(name.ByteStringValue);
+                        
+                        if (LooksLikeBadName(key)) continue;
 
                         if (!_fontCache.ContainsKey(key)) _fontCache.Add(key, file);
                     }
@@ -90,6 +124,23 @@ namespace Portable.Drawing.Toolkit.Portable
                     // ignoring
                 }
             }
+        }
+
+        /// <summary>
+        /// Tries to detect incorrectly encoded names.
+        /// If the first character is non-ascii, but the second is -- then we guess the encoding is wrong
+        /// </summary>
+        private static bool LooksLikeBadName(string key)
+        {
+            if (key.Length < 1) return true;
+            if (key.Length < 2) return false;
+            
+            return !IsAscii(key[0]) && IsAscii(key[1]);
+        }
+
+        private static bool IsAscii(char c)
+        {
+            return c >= '0' && c <= 'z';
         }
 
         private static bool EnglishLanguage(NameRecord name)

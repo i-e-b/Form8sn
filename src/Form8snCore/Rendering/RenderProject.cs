@@ -53,14 +53,13 @@ namespace Form8snCore.Rendering
         }
         
         
-
         private const string FallbackFontFamily = "Courier New";
         private const XFontStyle BaseFontStyle = XFontStyle.Bold;
         
-        private static readonly Stopwatch _loadingTimer = new Stopwatch();
-        private static readonly Stopwatch _totalTimer = new Stopwatch();
-        private static readonly Dictionary<int, XFont> _fontCache = new Dictionary<int, XFont>();
-        private static string? _baseFontFamily;
+        private readonly Stopwatch _loadingTimer = new Stopwatch();
+        private readonly Stopwatch _totalTimer = new Stopwatch();
+        private readonly Dictionary<int, XFont> _fontCache = new Dictionary<int, XFont>(); // per-size cache. Only uses one font.
+        private string? _baseFontFamily;
         
         private readonly IFileSource _files;
         private PdfDocument? _basePdf;
@@ -90,7 +89,7 @@ namespace Form8snCore.Rendering
         }
 
         
-        private static XFont GetFont(int size)
+        private XFont GetFont(int size)
         {
             if (_fontCache.ContainsKey(size)) return _fontCache[size]!;
             _fontCache.Add(size, new XFont(_baseFontFamily ?? FallbackFontFamily, size, BaseFontStyle));
@@ -277,7 +276,7 @@ namespace Form8snCore.Rendering
         /// <summary>
         /// Render a prepared page into a PDF document
         /// </summary>
-        private static Result<Nothing> OutputPage(PdfDocument document, DocumentPage pageToRender, XFont font, PageBacking background, int pageIndex, int pageTotal)
+        private Result<Nothing> OutputPage(PdfDocument document, DocumentPage pageToRender, XFont font, PageBacking background, int pageIndex, int pageTotal)
         {
             var pageDef = pageToRender.Definition;
             
@@ -388,7 +387,7 @@ namespace Form8snCore.Rendering
             return transformed ?? str;
         }
 
-        private static Result<Nothing> RenderBox(XFont baseFont, KeyValuePair<string, DocumentBox> boxDef, double fx, double fy, XGraphics gfx, DocumentPage pageToRender, int pageIndex, int pageTotal)
+        private Result<Nothing> RenderBox(XFont baseFont, KeyValuePair<string, DocumentBox> boxDef, double fx, double fy, XGraphics gfx, DocumentPage pageToRender, int pageIndex, int pageTotal)
         {
             var box = boxDef.Value!;
             var font = (box.Definition.BoxFontSize != null) ? GetFont(box.Definition.BoxFontSize.Value) : baseFont;
@@ -420,7 +419,7 @@ namespace Form8snCore.Rendering
             return Result.Success();
         }
 
-        private static void RenderTextInBox(XFont font, XGraphics gfx, TemplateBox box, double fx, double fy, string str, XRect space, XStringFormat align)
+        private void RenderTextInBox(XFont font, XGraphics gfx, TemplateBox box, double fx, double fy, string str, XRect space, XStringFormat align)
         {
             var boxLeft = box.Left * fx;
             var boxWidth = box.Width * fx;
@@ -532,7 +531,7 @@ namespace Form8snCore.Rendering
                 lines.Add(new MeasuredLine(sb.ToString(), lineHeight));
         }
 
-        private static XFont ShrinkFontAndWrapStringToFit(string str, double boxWidth, double boxHeight, XGraphics gfx, XFont font, out List<MeasuredLine> lines)
+        private XFont ShrinkFontAndWrapStringToFit(string str, double boxWidth, double boxHeight, XGraphics gfx, XFont font, out List<MeasuredLine> lines)
         {
             var bits = SplitByWhitespace(str);
             // Not going to bother with justification, just go ragged edge. Let the normal alignment do its thing.
@@ -613,7 +612,7 @@ namespace Form8snCore.Rendering
             return outp;
         }
 
-        private static XFont ShrinkFontToFit(string str, double boxWidth, double boxHeight, XGraphics gfx, XFont font, XSize size)
+        private XFont ShrinkFontToFit(string str, double boxWidth, double boxHeight, XGraphics gfx, XFont font, XSize size)
         {
             var baseSize = font.Size;
             var altFont = GetFont((int)baseSize);

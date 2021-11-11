@@ -6,8 +6,11 @@ When embedding on a page, you must define these variables BEFORE importing this 
  * basePdfSourceUrl        -- URL from where the PDF can be loaded
  * projectJsonLoadUrl      -- URL from where we can load the JSON definition of the template project
  * projectJsonStoreUrl     -- URL to which we can post an updated JSON definition of the template project
+ 
  * boxEditPartialUrl       -- URL for template box partial view
  * displayFormatPartialUrl -- URL for display format partial view
+ * docInfoPartialUrl       -- URL for document wide settings partial view
+ 
  * pdfWorkerSource         -- URL of the file at ~/js/pdf.worker.js
  * boxMoveUrl              -- URL used to send back box movements & resizes
 
@@ -19,7 +22,7 @@ document.getElementById('next').addEventListener('click', onNextPage);
 document.getElementById('zoom-plus').addEventListener('click', onPageZoomPlus);
 document.getElementById('zoom-minus').addEventListener('click', onPageZoomMinus);
 
-document.getElementById('document-edit').addEventListener('click', TODO);
+document.getElementById('document-edit').addEventListener('click', showDocumentInfoModal);
 document.getElementById('page-edit').addEventListener('click', TODO);
 document.getElementById('box-edit').addEventListener('click', showBoxEditModal);
 
@@ -182,6 +185,7 @@ function setValue(elementId, newValue){
     else {console.log(`Failed to copy value '${newValue}' in element #${elementId}`)}
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////// Edit box
 function deleteSelectedBox(){
     if (!activeBox.key) return;
 
@@ -240,9 +244,46 @@ function closeBoxEditModal() {
     if (deadContent) deadContent.innerHTML = "";
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////// Doc info
+function showDocumentInfoModal(){
+    if (!docInfoPartialUrl) {
+        console.log('docInfoPartialUrl was not bound');
+        return;
+    }
+    let modal = document.getElementById('EditDocument_DocumentInfo');
+    if (!modal) return;
+    
+    modal.classList.add("active"); // Document info screen might need to read all system fonts
+    loadPartialToModal(docInfoPartialUrl,
+        'EditDocument_DocumentInfo_Content', function () {
+        });
+}
+function saveDocumentInfoChanges(){
+    const formEle = document.getElementById('editDocumentSettingsForm');
+    if (!formEle) return;
 
-// Scan all 'format-filter-detail' elements. Hide any that don't apply to the currently selected format type.
+    submit(formEle).then(function() {
+        // close the modal box and refresh everything
+        reloadProjectFile(function() {
+            closeDocumentInfoModal();
+            renderBoxes();
+        });
+        queueRenderPage(pageNum);
+    });
+}
+function closeDocumentInfoModal(){
+    let modal = document.getElementById('EditDocument_DocumentInfo');
+    if (!modal) return;
+
+    modal.classList.remove("active");
+
+    let deadContent = document.getElementById('EditDocument_DocumentInfo_Content');
+    if (deadContent) deadContent.innerHTML = "Loading...";
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////// Display format
 function updateDisplayFormatVisibility(){
+    // Scan all 'format-filter-detail' elements. Hide any that don't apply to the currently selected format type.
     let all = document.getElementsByClassName('format-filter-detail');
     let filterSrc = document.getElementById('FormatFilterType');
 
@@ -323,6 +364,7 @@ function closeDisplayFormatModal(){
     if (deadContent) deadContent.innerHTML = "";
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////// Data path
 function captureDataPickerResult(path){
     let target = document.getElementById('DataPath'); // in 'EditTemplateBox.cshtml'
     if (!target) return;
@@ -353,46 +395,10 @@ function closeDataPathPicker() {
 // BOX DRAW AND INTERACTION ===========================================================================================
 // Note, this dummy data is just here to help with IDE auto-fill and type checking
 let projectFile = {
-    Version: 0,
-    SampleFileName: null,
-    BasePdfFile: "/File/....pdf",
-    Notes: "",
-    Name: "Sample template",
-    BaseFontSize: null,
-    FontName: null,
-    Pages: [
-        {
-            WidthMillimetres: 210.0,
-            HeightMillimetres: 297.0,
-            PageFontSize: null,
-            Name: "Page 1",
-            Notes: null,
-            BackgroundImage: null,
-            RepeatMode: {
-                Repeats: false,
-                DataPath: null
-            },
-            Boxes: {
-                "Sample": {
-                    WrapText: true,
-                    ShrinkToFit: true,
-                    BoxFontSize: 16,
-                    Alignment: "BottomLeft",
-                    DependsOn: "otherBoxName",
-                    Top: 10,
-                    Left: 10,
-                    Width: 10,
-                    Height: 10,
-                    MappingPath: [
-                        "path",
-                        "is",
-                        "here"
-                    ],
-                    DisplayFormat: {
-                        Type: "DateFormat",
-                        FormatParameters: {}
-                    },
-                    BoxOrder: 1
+    Version: 0, SampleFileName: null, BasePdfFile: "/File/....pdf", Notes: "", Name: "Sample template", BaseFontSize: null, FontName: null,
+    Pages: [{WidthMillimetres: 210.0, HeightMillimetres: 297.0, PageFontSize: null, Name: "Page 1", Notes: null, BackgroundImage: null, RepeatMode: {Repeats: false, DataPath: null},
+            Boxes: {"Sample": {WrapText: true, ShrinkToFit: true, BoxFontSize: 16, Alignment: "BottomLeft", DependsOn: "otherBoxName", Top: 10, Left: 10, Width: 10, Height: 10, MappingPath: ["path", "is", "here"],
+                    DisplayFormat: {Type: "DateFormat", FormatParameters: {}}, BoxOrder: 1
                 }
             },
             PageDataFilters: {},
@@ -802,7 +808,7 @@ function reloadProjectFile(next) {
             projectFile = req.response;
             if (next) {next();}
         } else {
-            console.log("An error occurred while loading document template definition.");
+            console.log(`A ${req.status} error occurred while loading document template definition from ${projectJsonLoadUrl}`);
             console.dir(evt);
         }
     }
@@ -811,7 +817,7 @@ function reloadProjectFile(next) {
     req.responseType = "json";
 
     req.onerror = function (evt) {
-        console.log("An error occurred while loading document template definition.");
+        console.log("An error occurred while loading document template definition from "+projectJsonLoadUrl);
         console.dir(evt);
     };
     req.onabort = function (evt) {

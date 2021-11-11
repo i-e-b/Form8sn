@@ -1,0 +1,38 @@
+﻿@using Form8snCore.FileFormats
+@model WebFormFiller.Models.DocumentSettingsViewModel
+@{ Layout = null; }
+@* ReSharper disable AssignNullToNotNullAttribute *@
+@* ReSharper disable PossibleNullReferenceException *@
+
+
+<form asp-action="EditDocumentDetails" id="editDocumentSettingsForm" method="post">
+    <input type="hidden" asp-for="@Model.DocumentId" value="@Model.DocumentId"/>
+    <input type="hidden" asp-for="@Model.Version" value="@Model.Version"/>
+    <input type="hidden" id="dataPickerUrl" value="@Model.LoadDataPickerUrl"/>
+
+    @* DOCUMENT NAME *@
+    <div class="form-group">
+        <label class="form-label" asp-for="@Model.Name">Document name (this is stored as the PDF document title)</label>
+        <input class="form-input" type="text" asp-for="@Model.Name" value="@Model.Name">
+    </div>
+    
+    @* BASE FONT SIZE *@
+    <div class="form-group">
+        <label class="form-label" asp-for="@Model.BaseFontSize">Base Font Size (optional)</label>
+        <input class="form-input" type="text" asp-for="@Model.BaseFontSize" value="@Model.BaseFontSize">
+    </div>
+
+    @* FONT FAMILY *@
+    <div class="form-group">
+        <label class="form-label" asp-for="@Model.FontFamily">Font family (optional)</label>
+        <select class="form-select" asp-for="@Model.FontFamily" asp-items="@Model.KnownFontList">
+            <option value="">- none -</option>
+        </select>
+    </div>
+    
+    @* NOTES *@
+    <div class="form-group">
+        <label class="form-label" asp-for="@Model.Notes">Notes</label>
+        <textarea class="form-input" asp-for="@Model.Notes">@Model.Notes</textarea>
+    </div>
+</form>
