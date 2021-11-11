@@ -94,7 +94,17 @@ namespace Form8snCore.HelpersAndConverters
         private static void AddPageNumbers(ICollection<DataNode> dataNodes, string[]? repeaterPath)
         {
             const string root = "page-num";
-            var pagesNode = new DataNode { Text = "Page numbers", Root = root, Depth = 0, ForeColor = ColorSteelBlue };
+            var pagesNode = new DataNode { Text = "Page info", Root = root, Depth = 0, ForeColor = ColorSteelBlue };
+            
+            
+            pagesNode.Nodes.Add(new DataNode
+            {
+                Text = "Generation Date and Time",
+                Root = root, Depth = 1,
+                DataPath = $"{Strings.PageDataMarker}{Strings.Separator}{nameof(DocumentBoxType.PageGenerationDate)}",
+                Name = nameof(DocumentBoxType.PageGenerationDate),
+                CanBePicked = true
+            });
 
             pagesNode.Nodes.Add(new DataNode
             {

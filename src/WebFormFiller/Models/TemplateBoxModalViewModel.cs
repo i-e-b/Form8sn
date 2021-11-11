@@ -40,6 +40,8 @@ namespace WebFormFiller.Models
         /// Name of the box. This will replace the old box name / key when saved.
         /// </summary>
         public string? BoxName { get; set; }
+
+        public string? Notes { get; set; }
         
         public string? DataPath { get; set; }
         public bool WrapText { get; set; }
@@ -74,6 +76,7 @@ namespace WebFormFiller.Models
                 
                 // Editable values
                 BoxName = boxKey,
+                Notes = theBox.Notes,
                 DataPath = MappingPathToString(theBox),
                 DependsOn = theBox.DependsOn,
                 DisplayFormatDescription = DescribeFormat(theBox.DisplayFormat),
@@ -133,6 +136,7 @@ namespace WebFormFiller.Models
             theBox.ShrinkToFit = ShrinkToFit;
             theBox.IsRequired = IsRequired;
             theBox.BoxFontSize = ParseIntOrDefault(FontSize, theBox.BoxFontSize);
+            theBox.Notes = Notes;
         }
         
         private static string DescribeFormat(DisplayFormatFilter? format)

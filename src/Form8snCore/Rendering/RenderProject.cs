@@ -350,7 +350,7 @@ namespace Form8snCore.Rendering
                 var result = RenderBox(font, boxDef, fx, fy, gfx, pageToRender, pageIndex, pageTotal);
                 if (result.IsFailure) return result;
             }
-            //gfx.Transform.SetIdentity();
+            
             gfx.Restore();
 
             return Result.Success();
@@ -381,6 +381,13 @@ namespace Form8snCore.Rendering
             return explicitOrderGap; // shouldn't be hit
         }
 
+        private static string? TryApplyDisplayFormat(DocumentBox box, string? str)
+        {
+            if (box.Definition.DisplayFormat == null) return str;
+            var transformed = DisplayFormatter.ApplyFormat(box.Definition, str);
+            return transformed ?? str;
+        }
+
         private static Result<Nothing> RenderBox(XFont baseFont, KeyValuePair<string, DocumentBox> boxDef, double fx, double fy, XGraphics gfx, DocumentPage pageToRender, int pageIndex, int pageTotal)
         {
             var box = boxDef.Value!;
@@ -390,10 +397,14 @@ namespace Form8snCore.Rendering
             var str = box.BoxType switch
             {
                 DocumentBoxType.Normal => box.RenderContent,
-                DocumentBoxType.CurrentPageNumber => (pageIndex + 1).ToString(),
-                DocumentBoxType.TotalPageCount => pageTotal.ToString(),
-                DocumentBoxType.RepeatingPageNumber => (pageToRender.RepeatIndex+1).ToString(),
-                DocumentBoxType.RepeatingPageTotalCount => pageToRender.RepeatCount.ToString(),
+                
+                // For the special values, we might want to re-apply the display format
+                DocumentBoxType.PageGenerationDate => TryApplyDisplayFormat(box, DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss")),
+                DocumentBoxType.CurrentPageNumber => TryApplyDisplayFormat(box, (pageIndex + 1).ToString()),
+                DocumentBoxType.TotalPageCount => TryApplyDisplayFormat(box, pageTotal.ToString()),
+                DocumentBoxType.RepeatingPageNumber => TryApplyDisplayFormat(box, (pageToRender.RepeatIndex + 1).ToString()),
+                DocumentBoxType.RepeatingPageTotalCount => TryApplyDisplayFormat(box, pageToRender.RepeatCount.ToString()),
+                
                 _ =>  box.RenderContent
             };
 

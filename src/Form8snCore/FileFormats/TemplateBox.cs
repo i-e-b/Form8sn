@@ -30,6 +30,12 @@ namespace Form8snCore.FileFormats
         public TemplateBox() { }
 
         /// <summary>
+        /// Optional: notes for the template editor. These are not used for generation
+        /// and are not stored in the PDF output.
+        /// </summary>
+        public string? Notes { get; set; }
+
+        /// <summary>
         /// Defaults to false.
         /// If true and the data path can't be found in the source data, generation of
         /// the entire document will fail.

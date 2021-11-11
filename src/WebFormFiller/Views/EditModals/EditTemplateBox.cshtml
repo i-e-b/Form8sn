@@ -82,4 +82,10 @@
             @* ReSharper restore Html.IdNotResolved *@
         </table>
     </div>
+    
+    @* NOTES *@
+    <div class="form-group">
+        <label class="form-label" asp-for="@Model.Notes">Notes</label>
+        <textarea class="form-input" asp-for="@Model.Notes">@Model.Notes</textarea>
+    </div>
 </form>
