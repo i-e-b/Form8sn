@@ -40,6 +40,11 @@ namespace WebFormFiller.Models
         /// UI-side selected filter type
         /// </summary>
         public string? FormatFilterType { get; set; }
+        
+        /// <summary>
+        /// Date format string. Required if DateFormat filter is selected.
+        /// </summary>
+        public string? DateFormatString { get; set; }
 
         public DisplayFormatViewModel()
         {
@@ -50,12 +55,19 @@ namespace WebFormFiller.Models
         }
 
         public IEnumerable<SelectListItem> AvailableFilterTypes { get; set; }
+        public int DecimalPlaces { get; set; }
+        public string? DecimalSeparator { get; set; }
+        public string? Prefix { get; set; }
+        public string? Postfix { get; set; }
+        public string? ThousandsSeparator { get; set; }
 
         public static DisplayFormatViewModel From(IndexFile project, int docId, int pageIndex, string boxKey)
         {
             var thePage = project.Pages[pageIndex];
             
             var theBox = thePage.Boxes[boxKey];
+            
+            // TODO: read existing display format
             
             var model = new DisplayFormatViewModel{
                 // Keys, not to be edited

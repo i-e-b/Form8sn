@@ -11,11 +11,61 @@
     <input type="hidden" asp-for="@Model.BoxKey" value="@Model.BoxKey"/>
     <input type="hidden" asp-for="@Model.Version" value="@Model.Version"/>
 
-        @* DEPENDENCY OPTIONS*@
-        <div class="form-group">
-            <label class="form-label" asp-for="@Model.FormatFilterType">Output filter type (optional - selected data will output as text if none selected)</label>
-            <select class="form-select" asp-for="@Model.FormatFilterType" asp-items="@Model.AvailableFilterTypes">
-                <option value="">- none -</option>
-            </select>
-        </div>
+    @* DEPENDENCY OPTIONS*@
+    <div class="form-group">
+        <label class="form-label" asp-for="@Model.FormatFilterType">Output filter type (optional - selected data will output as text if none selected)</label>
+        <select class="form-select" asp-for="@Model.FormatFilterType" asp-items="@Model.AvailableFilterTypes">
+            <option value="">- none -</option>
+        </select>
+    </div>
+
+    @* ------ DATE FORMAT ------ *@
+    @* FORMAT STRING *@
+    <div class="form-group display-DateFormat">
+        <label class="form-label" asp-for="@Model.DateFormatString">Format string</label>
+        <input class="form-input" type="text" asp-for="@Model.DateFormatString" placeholder="yyyy-MM-dd" value="@Model.DateFormatString">
+        <p>The selected data will be read as a date, and reformatted based on the format string.
+            See <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings">Microsoft Documentation</a> for details</p>
+    </div>
+    
+    
+    @* ------ NUMBER FORMAT ------ *@
+    @* DECIMAL PLACES *@
+    <div class="form-group display-NumberFormat">
+        <label class="form-label" asp-for="@Model.DecimalPlaces">Decimal places</label>
+        <input class="form-input" type="text" asp-for="@Model.DecimalPlaces" value="@Model.DecimalPlaces">
+        <p>Values will be rounded to this number of decimal places. If you want only the 'whole' part of
+            the number with no rounding, use the <code>Integral</code> and/or <code>Fractional</code> display formats</p>
+    </div>
+    @* DECIMAL SEPARATOR *@
+    <div class="form-group display-NumberFormat">
+        <label class="form-label" asp-for="@Model.DecimalSeparator">Decimal separator (optional)</label>
+        <input class="form-input" type="text" asp-for="@Model.DecimalSeparator" value="@Model.DecimalSeparator">
+        <p>Separator for decimal place. Defaults to <code>.</code></p>
+    </div>
+    @* PREFIX STRING *@
+    <div class="form-group display-NumberFormat">
+        <label class="form-label" asp-for="@Model.Prefix">Prefix (optional)</label>
+        <input class="form-input" type="text" asp-for="@Model.Prefix" value="@Model.Prefix">
+        <p>Characters to be placed on the left of the number, such as $ or £</p>
+    </div>
+    @* POSTFIX STRING *@
+    <div class="form-group display-NumberFormat">
+        <label class="form-label" asp-for="@Model.Postfix">Postfix (optional)</label>
+        <input class="form-input" type="text" asp-for="@Model.Postfix" value="@Model.Postfix">
+        <p>Characters to be placed on the right of the number, such as <code>¥</code> or units of measure</p>
+    </div>
+    @* THOUSANDS SEPARATOR *@
+    <div class="form-group display-NumberFormat">
+        <label class="form-label" asp-for="@Model.ThousandsSeparator">Thousands separator (optional)</label>
+        <input class="form-input" type="text" asp-for="@Model.ThousandsSeparator" value="@Model.ThousandsSeparator">
+    </div>
+    
+    
+    @* ------ FRACTIONAL FORMAT ------ *@
+    <div class="form-group display-NumberFormat">
+        <label class="form-label" asp-for="@Model.DecimalPlaces">Decimal places</label>
+        <input class="form-input" type="text" asp-for="@Model.DecimalPlaces" value="@Model.DecimalPlaces">
+        <p>Exactly this number of decimal places will be shown, including leading and trailing zeros</p>
+    </div>
 </form>

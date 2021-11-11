@@ -22,10 +22,45 @@ namespace Form8snCore.DataExtraction
 
                 case DisplayFormatType.NumberFormat:
                     return ReformatNumber(box, str);
+                
+                case DisplayFormatType.Integral:
+                    return ReformatNumberToInt(str);
+                    
+                case DisplayFormatType.Fractional:
+                    return ReformatNumberToFrac(box, str);
 
                 default:
                     return null;
             }
+        }
+
+        
+        private static string? ReformatNumberToInt(string str)
+        {
+            if (!decimal.TryParse(str, out var value)) return null;
+            
+            var intPart = (long)Math.Truncate(value);
+            
+            return intPart.ToString();
+        }
+        
+        private static string? ReformatNumberToFrac(TemplateBox box, string str)
+        {
+            var param = box.DisplayFormat!.FormatParameters;
+            
+            if (!decimal.TryParse(str, out var value)) return null;
+            
+            var dpKey = nameof(NumberDisplayParams.DecimalPlaces);
+            var dpStr = param.ContainsKey(dpKey) ? param[dpKey] : "2";
+            if (!int.TryParse(dpStr, out var decimalPlaces)) decimalPlaces = 2;
+            if (decimalPlaces < 0 || decimalPlaces > 20) decimalPlaces = 2;
+            
+            var scale = (decimal)Math.Pow(10.0, decimalPlaces);
+            var intPart = Math.Truncate(value);
+            var fracPart = value - intPart;
+            
+            var final = (long)((1+fracPart)*scale); // add 1 to get leading zeros
+            return final.ToString()!.Substring(1); // remove the added 1
         }
 
         private static string? ReformatNumber(TemplateBox box, string str)

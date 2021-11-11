@@ -15,8 +15,23 @@ namespace Form8snCore.FileFormats
         [Description("Format as a number")]
         [UsesType(typeof(NumberDisplayParams))]
         NumberFormat,
+        
+        [Description("Format as a number, displaying only whole number part")]
+        [UsesType(typeof(EmptyDisplayParams))]
+        Integral,
+        
+        [Description("Format as a number, displaying only the decimal fraction")]
+        [UsesType(typeof(FractionalDisplayParams))]
+        Fractional,
     }
-    
+
+
+    public class FractionalDisplayParams
+    {
+        [Description("Decimal places")]
+        public int DecimalPlaces { get; set; } = 2;
+    }
+
     public class NumberDisplayParams {
         [Description("Decimal places")]
         public int DecimalPlaces { get; set; } = 2;
