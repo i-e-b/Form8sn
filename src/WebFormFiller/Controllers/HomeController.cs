@@ -19,16 +19,6 @@ namespace WebFormFiller.Controllers
             })!;
         }
 
-        // TEMPORARY - Test different settings
-        [HttpGet]
-        public IActionResult TreeTableSample()
-        {
-            var model = new TemplateBoxModalViewModel{
-                LoadDataPickerUrl = Url!.Action("DataPicker", "EditModals", new{docId = 1, pageIndex = 0, oldPath=".Claimant.FiscalAddress.Country.Name"})!
-            };
-            return View(model)!;
-        }
-
         /// <summary>
         /// Shows a page to supply a PDF and title to start a new document template
         /// </summary>

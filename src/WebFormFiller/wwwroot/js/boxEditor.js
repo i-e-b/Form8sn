@@ -19,6 +19,13 @@ document.getElementById('next').addEventListener('click', onNextPage);
 document.getElementById('zoom-plus').addEventListener('click', onPageZoomPlus);
 document.getElementById('zoom-minus').addEventListener('click', onPageZoomMinus);
 
+document.getElementById('document-edit').addEventListener('click', TODO);
+document.getElementById('page-edit').addEventListener('click', TODO);
+document.getElementById('box-edit').addEventListener('click', showBoxEditModal);
+
+// TODO: delete this
+function TODO(){alert("Not yet implemented");}
+
 // Read PDF.js exports from the ~/js/pdf.js file
 const pdfJsLib = window['pdfjs-dist/build/pdf'];
 pdfJsLib.GlobalWorkerOptions.workerSrc = pdfWorkerSource; // Setup the workerSrc property, as required by the library.

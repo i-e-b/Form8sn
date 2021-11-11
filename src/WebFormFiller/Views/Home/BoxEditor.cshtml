@@ -3,6 +3,7 @@
 @{
     ViewBag!.Title = "Document editor";
     Layout = "_Layout";
+    var previewAction = Url!.Action("GenerateSamplePdf","File", new{docId = Model!.DocumentId})!;
 }
 
 @* PAGE CONTROLS *@
@@ -14,21 +15,23 @@
     <button id="zoom-plus">Zoom in</button>
     <button id="zoom-minus">Zoom out</button>
     &mdash;
-    <a href="@(Url!.Action("GenerateSamplePdf","File", new{docId = Model!.DocumentId})!)" target="_blank" class="btn">Preview</a>
+    <a href="@previewAction" target="_blank" class="btn">Preview</a>
     &mdash;
     <button type="button" onclick="showModal('QuickHelpModal')">Help</button>
 </div>
 <div>
-    <button id="box-edit" disabled onclick="showBoxEditModal()">Edit</button><span id="active-box-name"></span>
+    <button id="document-edit">Document settings</button>
+    <button id="page-edit">Page settings</button>
+    <button id="box-edit" disabled>Edit Box</button><span id="active-box-name"></span>
 </div>
 
-@* PAGE RENDERING *@
+@* PAGE RENDERING AREA (this is entirely driven by 'boxEditor.js') *@
 <div id="container">
     <canvas id="pdf-render" class="subCanvas pageShadow"></canvas>
     <canvas id="box-render" class="subCanvas pageTail" onContextMenu="return false"></canvas>
 </div>
 
-@* TEMPLATE BOX EDITING *@
+@* TEMPLATE BOX EDITING (this is populated from 'EditTemplateBox.cshtml' and driven by 'boxEditor.js') *@
 <div class="modal" id="EditTemplateBox_BoxInfo">
     <div class="modal-container">
         <div class="modal-body">
@@ -44,7 +47,7 @@
     </div>
 </div>
 
-@* DATA MAPPING EDITING *@
+@* DATA MAPPING EDITING (this is populated from 'DataPathPicker.cshtml' and driven by 'boxEditor.js') *@
 <div class="modal" id="EditTemplateBox_DataMap">
     <div class="modal-container">
         <div class="modal-header">
@@ -61,7 +64,7 @@
     </div>
 </div>
 
-@* DISPLAY FORMAT EDITING *@
+@* DISPLAY FORMAT EDITING (this is populated from 'DisplayFormatEditor.cshtml' and driven by 'boxEditor.js') *@
 <div class="modal" id="EditTemplateBox_DisplayFormat">
     <div class="modal-container">
         <div class="modal-header">
@@ -133,18 +136,22 @@ function closeModal(id) {
                     <dt>Next</dt><dd>Go to the next page of the template</dd>
                     <dt>Zoom In</dt><dd>Display the PDF page larger. This does not affect final output, but can make placement and editing easier</dd>
                     <dt>Zoom Out</dt><dd>Display the PDF page smaller. This does not affect final output, but can give a better overview of the page</dd>
-                    <dt>Edit</dt><dd>Change the mappings and settings of the selected template box. This button is disabled if no box is selected</dd>
+                    <dt>Preview</dt><dd>Try to render the current document template using sample data. Opens PDF in a new tab</dd>
+                    
+                    <dt>Document settings</dt><dd>Change settings for the entire document. This includes document-wide filters</dd>
+                    <dt>Page settings</dt><dd>Change settings for the current page. This includes page-specific filters, repeat modes, and background display</dd>
+                    <dt>Edit Box</dt><dd>Change the mappings and settings of the selected template box. This button is disabled if no box is selected</dd>
                 </dl>
                 <h2>General</h2>
                 <p> Each page of the source PDF form is displayed individually, with template boxes overlaid.
-                    Hold the <kbd>Shift</kbd> key and click on the PDF page to add a new template box.
+                    Either right-click, or hold the <kbd>Shift</kbd> key and click, then drag on the PDF page to add a new template box.
                     Click any template box to select it. Once selected, you can press the Edit button to change data bindings and display settings.
                     Drag the middle of a selected box to move it. Drag the small corner buttons to resize a box.
                 </p>
                 Boxes are color coded:
                 <dl>
                     <dt>Orange</dt><dd>Selected</dd>
-                    <dt>Blue</dt><dd>Not selected, has a data source set</dd>
+                    <dt>Blue</dt><dd>Not selected, has a data source set (not guaranteed to be valid)</dd>
                     <dt>Red</dt><dd>Not selected, does NOT have a data source set (this box will never render)</dd>
                 </dl>
             </div>
