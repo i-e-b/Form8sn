@@ -1,9 +1,14 @@
-﻿@using Form8snCore.FileFormats
-@model WebFormFiller.Models.DisplayFormatViewModel
+﻿@model WebFormFiller.Models.DisplayFormatViewModel
 @{ Layout = null; }
 @* ReSharper disable AssignNullToNotNullAttribute *@
 @* ReSharper disable PossibleNullReferenceException *@
 
+@* NOTE - classes are used by the scripts in boxEditor.js to update display and read value.
+
+-> 'format-filter-detail' and 'display-*' classes are used by updateDisplayFormatVisibility()
+-> 'format-param-value' class is used by saveDisplayFormatChanges()
+
+*@
 
 <form asp-action="TemplateBox" id="editDisplayFormatForm" method="post">
     <input type="hidden" asp-for="@Model.DocumentId" value="@Model.DocumentId"/>
@@ -13,17 +18,15 @@
 
     @* DEPENDENCY OPTIONS*@
     <div class="form-group">
-        <label class="form-label" asp-for="@Model.FormatFilterType">Output filter type (optional - selected data will output as text if none selected)</label>
-        <select class="form-select" asp-for="@Model.FormatFilterType" asp-items="@Model.AvailableFilterTypes">
-            <option value="">- none -</option>
-        </select>
+        <label class="form-label" asp-for="@Model.FormatFilterType">Output filter type</label>
+        <select class="form-select" asp-for="@Model.FormatFilterType" asp-items="@Model.AvailableFilterTypes"> </select>
     </div>
 
     @* ------ DATE FORMAT ------ *@
     @* FORMAT STRING *@
-    <div class="form-group display-DateFormat">
-        <label class="form-label" asp-for="@Model.DateFormatString">Format string</label>
-        <input class="form-input" type="text" asp-for="@Model.DateFormatString" placeholder="yyyy-MM-dd" value="@Model.DateFormatString">
+    <div class="form-group format-filter-detail display-DateFormat">
+        <label class="form-label" asp-for="@Model.FormatString">Format string</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.FormatString" placeholder="yyyy-MM-dd" value="@Model.FormatString">
         <p>The selected data will be read as a date, and reformatted based on the format string.
             See <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings">Microsoft Documentation</a> for details</p>
     </div>
@@ -31,41 +34,41 @@
     
     @* ------ NUMBER FORMAT ------ *@
     @* DECIMAL PLACES *@
-    <div class="form-group display-NumberFormat">
+    <div class="form-group format-filter-detail display-NumberFormat">
         <label class="form-label" asp-for="@Model.DecimalPlaces">Decimal places</label>
-        <input class="form-input" type="text" asp-for="@Model.DecimalPlaces" value="@Model.DecimalPlaces">
+        <input class="form-input format-param-value" type="text" asp-for="@Model.DecimalPlaces" value="@Model.DecimalPlaces">
         <p>Values will be rounded to this number of decimal places. If you want only the 'whole' part of
             the number with no rounding, use the <code>Integral</code> and/or <code>Fractional</code> display formats</p>
     </div>
     @* DECIMAL SEPARATOR *@
-    <div class="form-group display-NumberFormat">
+    <div class="form-group format-filter-detail display-NumberFormat">
         <label class="form-label" asp-for="@Model.DecimalSeparator">Decimal separator (optional)</label>
-        <input class="form-input" type="text" asp-for="@Model.DecimalSeparator" value="@Model.DecimalSeparator">
+        <input class="form-input format-param-value" type="text" asp-for="@Model.DecimalSeparator" value="@Model.DecimalSeparator">
         <p>Separator for decimal place. Defaults to <code>.</code></p>
     </div>
     @* PREFIX STRING *@
-    <div class="form-group display-NumberFormat">
+    <div class="form-group format-filter-detail display-NumberFormat">
         <label class="form-label" asp-for="@Model.Prefix">Prefix (optional)</label>
-        <input class="form-input" type="text" asp-for="@Model.Prefix" value="@Model.Prefix">
+        <input class="form-input format-param-value" type="text" asp-for="@Model.Prefix" value="@Model.Prefix">
         <p>Characters to be placed on the left of the number, such as $ or £</p>
     </div>
     @* POSTFIX STRING *@
-    <div class="form-group display-NumberFormat">
+    <div class="form-group format-filter-detail display-NumberFormat">
         <label class="form-label" asp-for="@Model.Postfix">Postfix (optional)</label>
-        <input class="form-input" type="text" asp-for="@Model.Postfix" value="@Model.Postfix">
+        <input class="form-input format-param-value" type="text" asp-for="@Model.Postfix" value="@Model.Postfix">
         <p>Characters to be placed on the right of the number, such as <code>¥</code> or units of measure</p>
     </div>
     @* THOUSANDS SEPARATOR *@
-    <div class="form-group display-NumberFormat">
+    <div class="form-group format-filter-detail display-NumberFormat">
         <label class="form-label" asp-for="@Model.ThousandsSeparator">Thousands separator (optional)</label>
-        <input class="form-input" type="text" asp-for="@Model.ThousandsSeparator" value="@Model.ThousandsSeparator">
+        <input class="form-input format-param-value" type="text" asp-for="@Model.ThousandsSeparator" value="@Model.ThousandsSeparator">
     </div>
     
     
     @* ------ FRACTIONAL FORMAT ------ *@
-    <div class="form-group display-NumberFormat">
+    <div class="form-group format-filter-detail display-Fractional">
         <label class="form-label" asp-for="@Model.DecimalPlaces">Decimal places</label>
-        <input class="form-input" type="text" asp-for="@Model.DecimalPlaces" value="@Model.DecimalPlaces">
+        <input class="form-input format-param-value" type="text" asp-for="@Model.DecimalPlaces" value="@Model.DecimalPlaces">
         <p>Exactly this number of decimal places will be shown, including leading and trailing zeros</p>
     </div>
 </form>

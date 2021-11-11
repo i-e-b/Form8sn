@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Form8snCore.FileFormats;
 using Form8snCore.HelpersAndConverters;
@@ -41,25 +40,23 @@ namespace WebFormFiller.Models
         /// </summary>
         public string? FormatFilterType { get; set; }
         
-        /// <summary>
-        /// Date format string. Required if DateFormat filter is selected.
-        /// </summary>
-        public string? DateFormatString { get; set; }
-
-        public DisplayFormatViewModel()
-        {
-            // TODO: NOTE 
-            // box.DisplayFormat.Type = Enum.Parse<DisplayFormatType>(formatType);
-            
-            AvailableFilterTypes = EnumOptions.AllDisplayFormatTypes().Select(SelectorItemForEnum).ToList();
-        }
-
-        public IEnumerable<SelectListItem> AvailableFilterTypes { get; set; }
-        public int DecimalPlaces { get; set; }
+        #region Parameter values
+        // these must be named the same as parameters in Form8snCore/FileFormats/DisplayFormatType.cs
+        
+        public string? FormatString { get; set; }
+        public string? DecimalPlaces { get; set; }
         public string? DecimalSeparator { get; set; }
         public string? Prefix { get; set; }
         public string? Postfix { get; set; }
         public string? ThousandsSeparator { get; set; }
+        #endregion
+
+        public DisplayFormatViewModel()
+        {
+            AvailableFilterTypes = EnumOptions.AllDisplayFormatTypes().Select(SelectorItemForEnum).ToList();
+        }
+
+        public IEnumerable<SelectListItem> AvailableFilterTypes { get; set; }
 
         public static DisplayFormatViewModel From(IndexFile project, int docId, int pageIndex, string boxKey)
         {

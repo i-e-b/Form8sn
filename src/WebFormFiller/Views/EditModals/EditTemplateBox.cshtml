@@ -10,6 +10,7 @@
     <input type="hidden" asp-for="@Model.PageIndex" value="@Model.PageIndex"/>
     <input type="hidden" asp-for="@Model.BoxKey" value="@Model.BoxKey"/>
     <input type="hidden" asp-for="@Model.Version" value="@Model.Version"/>
+    <input type="hidden" asp-for="@Model.DisplayFormatJsonStruct" value="@Model.DisplayFormatJsonStruct"/>
     <input type="hidden" id="dataPickerUrl" value="@Model.LoadDataPickerUrl"/>
 
     @* BOX NAME / KEY *@
@@ -82,22 +83,3 @@
         </table>
     </div>
 </form>
-
-
-@* Put an initially invisible modal here, ready to pick a data item *@
-@* These should be independent of other modals that might be on the page *@
-<div class="modal" id="EditTemplateBox_DataMap">
-    <div class="modal-container">
-        <div class="modal-header">
-            <div class="modal-title h5">Choose a data path</div>
-        </div>
-        <div class="modal-body">
-            <div class="content" style="height:50vh" id="EditTemplateBox_DataMap_Content">
-                Failed to load from server!
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button type="button" onclick="closeDataPathPicker()">Cancel</button>
-        </div>
-    </div>
-</div>

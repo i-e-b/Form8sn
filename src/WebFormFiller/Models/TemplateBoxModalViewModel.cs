@@ -46,8 +46,11 @@ namespace WebFormFiller.Models
         public bool ShrinkToFit { get; set; }
         public string? FontSize { get; set; }
         
+        /// <summary> A human-readable version of the current format </summary>
         public string? DisplayFormatDescription { get; set; }
-        public DisplayFormatFilter? DisplayFormat { get; set; }
+        /// <summary> Machine-readable version of the current format </summary>
+        public string? DisplayFormatJsonStruct { get; set; }
+        
         public string? ProcessingOrder { get; set; }
         public string? DependsOn { get; set; }
         public IEnumerable<SelectListItem> OtherBoxKeys { get; set; } = Array.Empty<SelectListItem>();
@@ -73,8 +76,9 @@ namespace WebFormFiller.Models
                 BoxName = boxKey,
                 DataPath = MappingPathToString(theBox),
                 DependsOn = theBox.DependsOn,
-                DisplayFormat = theBox.DisplayFormat,
                 DisplayFormatDescription = DescribeFormat(theBox.DisplayFormat),
+                DisplayFormatJsonStruct = SerialiseDisplayFormatParameters(theBox),
+                
                 FontSize = theBox.BoxFontSize?.ToString()??"",
                 ProcessingOrder = theBox.BoxOrder?.ToString()??"",
                 WrapText = theBox.WrapText,
@@ -115,8 +119,11 @@ namespace WebFormFiller.Models
             if (string.IsNullOrWhiteSpace(DependsOn)) theBox.DependsOn = null;
             else if (EditChecks.NotCircular(thePage, DependsOn, BoxKey)) theBox.DependsOn = DependsOn;
             
-            // TODO: handle the display properties
-            //theBox.DisplayFormat
+            // Handle the display properties
+            if (string.IsNullOrWhiteSpace(DisplayFormatJsonStruct))
+                theBox.DisplayFormat = null;
+            else
+                theBox.DisplayFormat = SkinnyJson.Json.Defrost<DisplayFormatFilter>(DisplayFormatJsonStruct);
             
             // Now copy across the regular values
             theBox.Alignment = TextAlign;
@@ -137,8 +144,13 @@ namespace WebFormFiller.Models
                     .Where(kvp=> !string.IsNullOrEmpty(kvp.Value))
                     .Select(kvp => $"{kvp.Key} = '{kvp.Value}'")
             );
-            var split = paramText.Length > 0 ? ":\r\n" : "";
+            var split = paramText.Length > 0 ? ": " : "";
             return $"{format.Type}{split}{paramText}";
+        }
+
+        private static string SerialiseDisplayFormatParameters(TemplateBox? theBox)
+        {
+            return theBox?.DisplayFormat is null ? "" : SkinnyJson.Json.Freeze(theBox.DisplayFormat);
         }
 
         private static string MappingPathToString(TemplateBox? theBox)

@@ -169,6 +169,11 @@ function loadPartialToModal(url, targetId, nextAction) {
     oReq.send();
 
 }
+function setValue(elementId, newValue){
+    let elem = document.getElementById(elementId);
+    if (elem) {elem.value = newValue;}
+    else {console.log(`Failed to copy value '${newValue}' in element #${elementId}`)}
+}
 
 function deleteSelectedBox(){
     if (!activeBox.key) return;
@@ -207,11 +212,8 @@ function saveBoxEditChanges(){
     if (!formEle) return;
 
     let newBoxName = document.getElementById('BoxName').value;
-    //selectActiveBox(document.getElementById('BoxName').value);
-    //activeBox.key = ; // We might have changed the name of the box.
-    
 
-    submit(formEle).then(function(response) {
+    submit(formEle).then(function() {
         // close the modal box and refresh everything
         reloadProjectFile(function() {
             closeBoxEditModal();
@@ -231,30 +233,78 @@ function closeBoxEditModal() {
     if (deadContent) deadContent.innerHTML = "";
 }
 
+
+// Scan all 'format-filter-detail' elements. Hide any that don't apply to the currently selected format type.
+function updateDisplayFormatVisibility(){
+    let all = document.getElementsByClassName('format-filter-detail');
+    let filterSrc = document.getElementById('FormatFilterType');
+
+    if (!filterSrc) { console.log("filter set id missing"); return; }
+    let pattern = "display-"+filterSrc.value;
+
+    for(let i = 0; i < all.length; i++) {
+        let elem = all[i];
+        
+        elem.style.display = (elem.classList.contains(pattern)) ? "block" : "none";
+    }
+}
 function showDisplayFormatModal() {
-    if (!activeBox.key) {
-        return;
-    }
-    if (!displayFormatPartialUrl) {
-        console.log('displayFormatPartialUrl was not bound');
-        return;
-    }
+    if (!activeBox.key) {return;}
+    if (!displayFormatPartialUrl) {console.log('displayFormatPartialUrl was not bound');return;}
 
     // Synthesise a url, then show the modal.
-    // Calls to EditModalsController->TemplateBox(docId, pageIndex, boxKey)
     let pageIdx = pageNum - 1;
 
-    // TODO: different modal
     let modal = document.getElementById('EditTemplateBox_DisplayFormat');
     if (!modal) return;
     loadPartialToModal(`${displayFormatPartialUrl}&pageIndex=${pageIdx}&boxKey=${activeBox.key}`,
         'EditTemplateBox_DisplayFormat_Content', function () {
+
+            let filterSrc = document.getElementById('FormatFilterType');
+            if (filterSrc) filterSrc.addEventListener('change', updateDisplayFormatVisibility);
+            updateDisplayFormatVisibility();
             modal.classList.add("active");
         });
 }
 function saveDisplayFormatChanges(){
-    // TODO: implement me
-    alert("Not yet implemented!");
+    let all = document.getElementsByClassName('format-param-value');
+    let chosen = document.getElementById('FormatFilterType'); // in DisplayFormatEditor.cshtml
+    if (!chosen) {console.log('lost selected filter reference');return;}
+
+    let pattern = "display-"+chosen.value;
+
+    let page = projectFile.Pages[pageNum - 1];
+    if (!page) {console.log('lost page reference');return;}
+    let box = page.Boxes[activeBox.key];
+    if (!box) {console.log('lost box reference');return;}
+    
+    let newSettings = {Type:chosen.value, FormatParameters:{}}
+    let description = chosen.value;
+    
+    let j = 0;
+    for (let i = 0; i < all.length; i++) {
+        let elem = all[i];
+        
+        if (!elem.parentElement.classList.contains(pattern)) continue; // value is not applicable to this filter
+        
+        newSettings.FormatParameters[elem.id] = elem.value;
+        
+        if (j>0) description+=", ";
+        else description+=": ";
+        
+        description += `${elem.id} = ${elem.value}`
+        j++;
+    }
+    
+    // Write a summary of the filter into the box-edit screen (just to hint that everything worked)
+    setValue('DisplayFormatDescription', description); // in EditTemplateBox.cshtml
+    
+    // Copy details from the modal into our selected box
+    // Don't save -- the out box details will do this, and keep the save/cancel semantics correct
+    box.DisplayFormat = newSettings;
+    setValue('DisplayFormatJsonStruct', JSON.stringify(newSettings)) // in EditTemplateBox.cshtml
+    
+    closeDisplayFormatModal();
 }
 function closeDisplayFormatModal(){
     let modal = document.getElementById('EditTemplateBox_DisplayFormat');
@@ -611,7 +661,7 @@ function renderBoxes () {
 
     // Draw the 'active' box if one is being created
     drawActiveBox();
-};
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// MOUSE DOWN
 boxCanvas.addEventListener('mouseout', function () {mouse.buttons = 0;}); // prevent drag-lock
