@@ -26,9 +26,6 @@ namespace Form8snCore.HelpersAndConverters
             var pageNumber = 1;
             foreach (var pdfPage in pdf.Pages)
             {
-                // TODO: Portuguese form uses some very odd rotation values, which breaks the page
-                if (pdfPage.Rotate != 0) throw new Exception("Not handled yet!");
-                
                 var page = new TemplatePage
                 {
                     Boxes = new Dictionary<string, TemplateBox>(),

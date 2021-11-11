@@ -8,6 +8,7 @@ using Containers;
 using Containers.Types;
 using Form8snCore.DataExtraction;
 using Form8snCore.FileFormats;
+using PdfSharp;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
@@ -293,6 +294,36 @@ namespace Form8snCore.Rendering
             page.Height = XUnit.FromMillimeter(pageDef.HeightMillimetres);
 
             using var gfx = XGraphics.FromPdfPage(page);
+            gfx.Save();
+            
+            if (shouldCopyPdfPage && background.ExistingPage!.Rotate != 0)
+            {
+                // Match visual-rotations on page
+                var centre = new XPoint(0,0);
+                var visualRotate = background.ExistingPage!.Rotate % 360; // degrees, spec says it should be a multiple of 90.
+                var angle = 360.0 - visualRotate;
+                gfx.RotateAtTransform(angle, centre);
+                
+                switch (visualRotate)
+                {
+                    case 90:
+                        gfx.TranslateTransform(-page.Height.Point, 0);
+                        break;
+                    case 180:
+                        gfx.TranslateTransform(-page.Width.Point, -page.Height.Point);
+                        break;
+                    case 270:
+                        gfx.TranslateTransform(-page.Height.Point / 2.0, -page.Height.Point); // this one is a guess, as I don't have an example
+                        break;
+                    default:
+                        throw new Exception("Unhandled visual rotation case");
+                }
+
+                if (background.ExistingPage.Orientation == PageOrientation.Landscape)
+                {
+                    (page.Width, page.Height) = (page.Height, page.Width);
+                }
+            }
 
             // Draw background at full page size
             _loadingTimer.Start();
@@ -319,6 +350,8 @@ namespace Form8snCore.Rendering
                 var result = RenderBox(font, boxDef, fx, fy, gfx, pageToRender, pageIndex, pageTotal);
                 if (result.IsFailure) return result;
             }
+            //gfx.Transform.SetIdentity();
+            gfx.Restore();
 
             return Result.Success();
         }
