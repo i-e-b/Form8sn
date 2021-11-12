@@ -5,12 +5,12 @@
 
 @* NOTE - classes are used by the scripts in boxEditor.js to update display and read value.
 
--> 'format-filter-detail' and 'display-*' classes are used by updateDisplayFormatVisibility()
+-> 'data-filter-detail' and 'display-*' classes are used by updateDisplayFormatVisibility()
 -> 'format-param-value' class is used by saveDisplayFormatChanges()
 
 *@
 
-<form asp-action="TemplateBox" id="editDisplayFormatForm" method="post">
+<form asp-action="FilterEditor" id="editDataFilterForm" method="post">
     <input type="hidden" asp-for="@Model.DocumentId" value="@Model.DocumentId"/>
     <input type="hidden" asp-for="@Model.PageIndex" value="@Model.PageIndex"/>
     <input type="hidden" asp-for="@Model.FilterKey" value="@Model.FilterKey"/>
@@ -18,9 +18,109 @@
 
     @* FILTER TYPE *@
     <div class="form-group">
-        <label class="form-label" asp-for="@Model.FormatFilterType">Output filter type</label>
-        <select class="form-select" asp-for="@Model.FormatFilterType" asp-items="@Model.AvailableFilterTypes"> </select>
+        <label class="form-label" asp-for="@Model.DataFilterType">Output filter type</label>
+        <select class="form-select" asp-for="@Model.DataFilterType" asp-items="@Model.AvailableFilterTypes"> </select>
+    </div>
+    
+    
+    @* ------ SplitIntoN: MaxCountMappingParams ------ *@
+    <div class="form-group data-filter-detail display-SplitIntoN">
+        <label class="form-label" asp-for="@Model.MaxCount">The largest number of items in each set</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.MaxCount" value="@Model.MaxCount">
     </div>
 
 
+    @* ------ FixedValue: TextMappingParams ------ *@
+    <div class="form-group data-filter-detail display-FixedValue">
+        <label class="form-label" asp-for="@Model.Text">Text to supply as data</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.Text" value="@Model.Text">
+    </div>
+    
+    
+    @* ------ FormatAllAsNumber: NumberMappingParams ------ *@
+    @* DECIMAL PLACES *@
+    <div class="form-group data-filter-detail display-FormatAllAsNumber">
+        <label class="form-label" asp-for="@Model.DecimalPlaces">Decimal places</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.DecimalPlaces" value="@Model.DecimalPlaces">
+    </div>
+    @* THOUSANDS SEPARATOR *@
+    <div class="form-group data-filter-detail display-FormatAllAsNumber">
+        <label class="form-label" asp-for="@Model.ThousandsSeparator">Thousands separator (blank for none)</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.ThousandsSeparator" value="@Model.ThousandsSeparator">
+    </div>
+    @* DECIMAL SEPARATOR *@
+    <div class="form-group data-filter-detail display-FormatAllAsNumber">
+        <label class="form-label" asp-for="@Model.DecimalSeparator">Decimal place (defaults to '.')</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.DecimalSeparator" value="@Model.DecimalSeparator">
+    </div>
+    @* PREFIX *@
+    <div class="form-group data-filter-detail display-FormatAllAsNumber">
+        <label class="form-label" asp-for="@Model.Prefix">Prefix (like € or $, placed on left, blank for none)</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.Prefix" value="@Model.Prefix">
+    </div>
+    @* POSTFIX *@
+    <div class="form-group data-filter-detail display-FormatAllAsNumber">
+        <label class="form-label" asp-for="@Model.Postfix">Postfix (like ¥ or units of measure, placed on right, blank for none)</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.Postfix" value="@Model.Postfix">
+    </div>
+    
+    
+    @* ------ FormatAllAsDate: DateFormatMappingParams ------ *@
+    <div class="form-group data-filter-detail display-FormatAllAsDate">
+        <label class="form-label" asp-for="@Model.FormatString">Format string</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.FormatString" placeholder="yyyy-MM-dd" value="@Model.FormatString">
+        <p>The selected data will be read as a date, and reformatted based on the format string.
+            See <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings">Microsoft Documentation</a> for details</p>
+    </div>
+    
+    
+    @* ------ SkipWords: SkipMappingParams ------ *@
+    <div class="form-group data-filter-detail display-SkipWords">
+        <label class="form-label" asp-for="@Model.SkipCount">Number of items to skip before using the rest</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.SkipCount" value="@Model.SkipCount">
+    </div>
+    
+    
+    @* ------ TakeWords: TakeMappingParams ------ *@
+    <div class="form-group data-filter-detail display-TakeWords">
+        <label class="form-label" asp-for="@Model.TakeCount">Number of items to use before discarding the rest</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.TakeCount" value="@Model.TakeCount">
+    </div>
+    
+        
+    @* ------ Concatenate: JoinMappingParams ------ *@
+    @* PREFIX *@
+    <div class="form-group data-filter-detail display-Concatenate">
+        <label class="form-label" asp-for="@Model.ConcatPrefix">Text to place at the start of the list</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.ConcatPrefix" value="@Model.ConcatPrefix">
+    </div>
+    @* INFIX *@
+    <div class="form-group data-filter-detail display-Concatenate">
+        <label class="form-label" asp-for="@Model.ConcatInfix">Text to place between each item</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.ConcatInfix" value="@Model.ConcatInfix">
+    </div>
+    @* POSTFIX *@
+    <div class="form-group data-filter-detail display-Concatenate">
+        <label class="form-label" asp-for="@Model.ConcatPostfix">Text to place at the end of the list</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.ConcatPostfix" value="@Model.ConcatPostfix">
+    </div>
+    
+        
+    @* ------ IfElse: IfElseMappingParams ------ *@
+    @* EXPECTED VALUE *@
+    <div class="form-group data-filter-detail display-IfElse">
+        <label class="form-label" asp-for="@Model.ExpectedValue">Value to compare to the input data item</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.ExpectedValue" value="@Model.ExpectedValue">
+    </div>
+    @* SAME *@
+    <div class="form-group data-filter-detail display-IfElse">
+        <label class="form-label" asp-for="@Model.MapSame">Data to output if Value and input data are the same</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.MapSame" value="@Model.MapSame">
+    </div>
+    @* DIFFERENT *@
+    <div class="form-group data-filter-detail display-IfElse">
+        <label class="form-label" asp-for="@Model.MapDifferent">Data to output if Value and input data are different</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.MapDifferent" value="@Model.MapDifferent">
+    </div>
+    
 </form>

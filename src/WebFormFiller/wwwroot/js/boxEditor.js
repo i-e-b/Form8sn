@@ -299,6 +299,9 @@ function editDocumentFilter(filterKey){
 
     loadPartialToModal(url,
         'EditTemplateBox_DataFilter_Content', function () {
+            let filterSrc = document.getElementById('DataFilterType');
+            if (filterSrc) filterSrc.addEventListener('change', updateDataFilterVisibility);
+            updateDataFilterVisibility();
             modal.classList.add("active"); // Document info screen might need to read all system fonts
         });
 }
@@ -315,6 +318,20 @@ function deleteDocumentFilter(filterKey){
     });
 }
 
+function updateDataFilterVisibility(){
+    // Scan all 'format-filter-detail' elements. Hide any that don't apply to the currently selected format type.
+    let all = document.getElementsByClassName('data-filter-detail');
+    let filterSrc = document.getElementById('DataFilterType');
+
+    if (!filterSrc) { console.log("filter set id missing"); return; }
+    let pattern = "display-"+filterSrc.value;
+
+    for(let i = 0; i < all.length; i++) {
+        let elem = all[i];
+
+        elem.style.display = (elem.classList.contains(pattern)) ? "block" : "none";
+    }
+}
 function closeDataFilterModal(){
     let modal = document.getElementById('EditTemplateBox_DataFilter');
     if (!modal) return;
@@ -325,7 +342,14 @@ function closeDataFilterModal(){
     if (deadContent) deadContent.innerHTML = "";
 }
 function saveDataFilterChanges(){
-   alert("not yet implemented");
+    const formEle = document.getElementById('editDataFilterForm');
+    if (!formEle) return;
+
+    submit(formEle).then(function() {
+        reloadProjectFile(function() {
+            closeDataFilterModal();
+        });
+    });
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// Page info

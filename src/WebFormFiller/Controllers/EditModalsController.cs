@@ -105,7 +105,9 @@ namespace WebFormFiller.Controllers
                 PageIndex = pageIndex,
                 DocumentId = docId,
                 FilterKey = filterKey,
-                FormatFilterType = theFilter.MappingType.ToString()
+                DataFilterType = theFilter.MappingType.ToString(),
+                //FilterParameters = theFilter.MappingParameters,
+                SourcePath = string.Join(".", theFilter.DataPath ?? Array.Empty<string>())
             };
             return View(model)!;
         }
@@ -114,6 +116,7 @@ namespace WebFormFiller.Controllers
         public IActionResult FilterEditor([FromForm]FilterEditViewModel model)
         {
             // TODO: implement this
+            Console.WriteLine("Got filter save call");
             return View(model)!;
         }
 
