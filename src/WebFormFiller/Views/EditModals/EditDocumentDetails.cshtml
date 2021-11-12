@@ -8,7 +8,6 @@
 <form asp-action="EditDocumentDetails" id="editDocumentSettingsForm" method="post">
     <input type="hidden" asp-for="@Model.DocumentId" value="@Model.DocumentId"/>
     <input type="hidden" asp-for="@Model.Version" value="@Model.Version"/>
-    <input type="hidden" id="dataPickerUrl" value="@Model.LoadDataPickerUrl"/>
 
     @* DOCUMENT NAME *@
     <div class="form-group">

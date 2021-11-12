@@ -8,8 +8,10 @@ When embedding on a page, you must define these variables BEFORE importing this 
  * projectJsonStoreUrl     -- URL to which we can post an updated JSON definition of the template project
  
  * boxEditPartialUrl       -- URL for template box partial view
+ * dataPickerPartialUrl    -- URL for data path picker partial view
  * displayFormatPartialUrl -- URL for display format partial view
  * docInfoPartialUrl       -- URL for document wide settings partial view
+ * pageInfoPartialUrl      -- URL for page wide settings partial view
  
  * pdfWorkerSource         -- URL of the file at ~/js/pdf.worker.js
  * boxMoveUrl              -- URL used to send back box movements & resizes
@@ -23,11 +25,8 @@ document.getElementById('zoom-plus').addEventListener('click', onPageZoomPlus);
 document.getElementById('zoom-minus').addEventListener('click', onPageZoomMinus);
 
 document.getElementById('document-edit').addEventListener('click', showDocumentInfoModal);
-document.getElementById('page-edit').addEventListener('click', TODO);
+document.getElementById('page-edit').addEventListener('click', showPageInfoModal);
 document.getElementById('box-edit').addEventListener('click', showBoxEditModal);
-
-// TODO: delete this
-function TODO(){alert("Not yet implemented");}
 
 // Read PDF.js exports from the ~/js/pdf.js file
 const pdfJsLib = window['pdfjs-dist/build/pdf'];
@@ -35,19 +34,19 @@ pdfJsLib.GlobalWorkerOptions.workerSrc = pdfWorkerSource; // Setup the workerSrc
 
 
 // PDF RENDERING ======================================================================================================
-let pdfDoc = null,
-    pageNum = 1,
-    pageRendering = false,
-    pageNumPending = null,
-    scale = 2.0, // current zoom level of the PDF
-    pdfCanvas = document.getElementById('pdf-render'),
-    pdfCtx = pdfCanvas.getContext('2d');
+let pdfDoc         = null,                                  // the PDF loaded into memory
+    pageNum        = 1,                                     // 1-based PDF page number
+    pageRendering  = false,                                 // are we waiting for a page render worker to finish?
+    pageNumPending = null,                                  // page we are waiting to render
+    scale          = 2.0,                                   // current zoom level of the PDF
+    pdfCanvas      = document.getElementById('pdf-render'), // HTML canvas for PDF (goes under the box drawing canvas)
+    pdfCtx         = pdfCanvas.getContext('2d');            // draw context for PDF
+const zoomRatio    = 1.2;                                   // how much we scale during zoom in/out
 
 // Box rendering bits
-const outerContainer = document.getElementById("container");
-const boxCanvas = document.getElementById("box-render");
-const boxCtx = boxCanvas.getContext("2d");
-
+const outerContainer = document.getElementById("container");  // HTML <div> that holds the PDF and Box canvas
+const boxCanvas      = document.getElementById("box-render"); // HTML canvas for box drawing and mouse events (goes over the PDF canvas)
+const boxCtx         = boxCanvas.getContext("2d");            // draw context for boxes
 
 /**
  * Get page info from document, resize canvas accordingly, and render page.
@@ -105,9 +104,6 @@ function queueRenderPage(num) {
     }
 }
 
-
-const zoomRatio = 1.2;
-
 function onPageZoomPlus() {
     if (scale >= 10) return;
     scale *= zoomRatio;
@@ -120,7 +116,6 @@ function onPageZoomPlus() {
 
     queueRenderPage(pageNum);
 }
-
 function onPageZoomMinus() {
     if (scale <= 0.5) return;
     scale /= zoomRatio;
@@ -134,7 +129,6 @@ function onPageZoomMinus() {
     queueRenderPage(pageNum);
 }
 
-// Click event for loading previous page
 function onPrevPage() {
     if (pageNum <= 1) {
         return;
@@ -143,8 +137,6 @@ function onPrevPage() {
     pageNum--;
     queueRenderPage(pageNum);
 }
-
-// Click event for loading next page
 function onNextPage() {
     if (pageNum >= pdfDoc.numPages) {
         return;
@@ -281,6 +273,44 @@ function closeDocumentInfoModal(){
     if (deadContent) deadContent.innerHTML = "Loading...";
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////// Page info
+function showPageInfoModal(){
+    if (!pageInfoPartialUrl) {
+        console.log('docInfoPartialUrl was not bound');
+        return;
+    }
+    let modal = document.getElementById('EditDocument_PageInfo');
+    if (!modal) return;
+    let pageIdx = pageNum - 1;
+
+    loadPartialToModal(`${pageInfoPartialUrl}&pageIndex=${pageIdx}`,
+        'EditDocument_PageInfo_Content', function () {
+            modal.classList.add("active");
+        });
+}
+function savePageInfoChanges() {
+    const formEle = document.getElementById('editPageSettingsForm');
+    if (!formEle) return;
+
+    submit(formEle).then(function() {
+        // close the modal box and refresh everything
+        reloadProjectFile(function() {
+            closePageInfoModal();
+            renderBoxes();
+        });
+        queueRenderPage(pageNum);
+    });
+}
+function closePageInfoModal(){
+    let modal = document.getElementById('EditDocument_PageInfo');
+    if (!modal) return;
+
+    modal.classList.remove("active");
+
+    let deadContent = document.getElementById('EditDocument_PageInfo_Content');
+    if (deadContent) deadContent.innerHTML = "Loading...";
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////// Display format
 function updateDisplayFormatVisibility(){
     // Scan all 'format-filter-detail' elements. Hide any that don't apply to the currently selected format type.
@@ -365,26 +395,34 @@ function closeDisplayFormatModal(){
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////// Data path
-function captureDataPickerResult(path){
-    let target = document.getElementById('DataPath'); // in 'EditTemplateBox.cshtml'
-    if (!target) return;
+function captureDataPickerResult(path, targetId){
+    let target = document.getElementById(targetId); // in 'EditTemplateBox.cshtml'
+    if (!target) {console.log(`Lost capture target: '${targetId}'`);return;}
     
     target.value = path.replace(/\x1F/g,".");
     
     closeDataPathPicker();
 }
-function showDataPickerModal() {
+function showDataPickerModal(target) {
+    if (!dataPickerPartialUrl) {console.log('dataPickerPartialUrl was not bound');return;}
+    
+    let targetId = target || 'DataPath';
+    let targetElem = document.getElementById(targetId);
+    if (!targetElem) {console.log(`showDataPickerModal is bound to an element that was not present: '${targetId}'`);return;}
+    
     let modal = document.getElementById('EditTemplateBox_DataMap');
-    let link = document.getElementById('dataPickerUrl');
-    if (!modal || !link) return;
+    if (!modal) {console.log("Lost modal: 'EditTemplateBox_DataMap'");return;}
 
-    loadPartialToModal(link.value, 'EditTemplateBox_DataMap_Content', function () {
+    let pageIdx = pageNum - 1; // TODO: disable for document-wide filter picker
+    let pathReq = encodeURIComponent(targetElem.value);
+
+    loadPartialToModal(`${dataPickerPartialUrl}&pageIndex=${pageIdx}&oldPath=${pathReq}&target=${targetId}`, 'EditTemplateBox_DataMap_Content', function () {
         modal.classList.add("active");
     });
 }
 function closeDataPathPicker() {
     let modal = document.getElementById('EditTemplateBox_DataMap');
-    if (!modal) return;
+    if (!modal) {console.log("Lost modal 'EditTemplateBox_DataMap'");return;}
 
     modal.classList.remove("active");
 
@@ -393,8 +431,7 @@ function closeDataPathPicker() {
 }
 
 // BOX DRAW AND INTERACTION ===========================================================================================
-// Note, this dummy data is just here to help with IDE auto-fill and type checking
-let projectFile = {
+let projectFile = {// Note, this dummy data is just here to help with IDE auto-fill and type checking
     Version: 0, SampleFileName: null, BasePdfFile: "/File/....pdf", Notes: "", Name: "Sample template", BaseFontSize: null, FontName: null,
     Pages: [{WidthMillimetres: 210.0, HeightMillimetres: 297.0, PageFontSize: null, Name: "Page 1", Notes: null, BackgroundImage: null, RepeatMode: {Repeats: false, DataPath: null},
             Boxes: {"Sample": {WrapText: true, ShrinkToFit: true, BoxFontSize: 16, Alignment: "BottomLeft", DependsOn: "otherBoxName", Top: 10, Left: 10, Width: 10, Height: 10, MappingPath: ["path", "is", "here"],
@@ -829,6 +866,7 @@ function reloadProjectFile(next) {
 }
 
 // PDF LOAD TRIGGER ===================================================================================================
+
 // Actually load the PDF (async then call our page render)
 // This requires a modern web browser that supports promises.
 pdfJsLib.getDocument(basePdfSourceUrl).promise.then(function (pdfDoc_) {

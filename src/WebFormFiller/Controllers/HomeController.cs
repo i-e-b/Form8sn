@@ -73,8 +73,10 @@ namespace WebFormFiller.Controllers
                 ProjectStoreUrl = Url!.Action("WriteProject","Home")!,
                 BoxMoveUrl = Url!.Action("MoveBox", "Home")!,
                 BoxEditPartialUrl = Url!.Action("TemplateBox","EditModals")!,
+                DataPathPartialUrl = Url!.Action("DataPicker", "EditModals")!,
                 DisplayFormatPartialUrl = Url!.Action("DisplayFormat","EditModals")!,
-                DocumentInfoPartialUrl = Url!.Action("EditDocumentDetails", "EditModals")!
+                DocumentInfoPartialUrl = Url!.Action("EditDocumentDetails", "EditModals")!,
+                PageInfoPartialUrl = Url!.Action("EditPageDetails","EditModals")!
             };
             
             return View(model)!;

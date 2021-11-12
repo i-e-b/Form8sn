@@ -11,7 +11,6 @@
     <input type="hidden" asp-for="@Model.BoxKey" value="@Model.BoxKey"/>
     <input type="hidden" asp-for="@Model.Version" value="@Model.Version"/>
     <input type="hidden" asp-for="@Model.DisplayFormatJsonStruct" value="@Model.DisplayFormatJsonStruct"/>
-    <input type="hidden" id="dataPickerUrl" value="@Model.LoadDataPickerUrl"/>
 
     @* BOX NAME / KEY *@
     <div class="form-group">
@@ -22,14 +21,14 @@
     @* SOURCE DATA OPTIONS *@
     <div class="form-group">
         <label class="form-label" asp-for="@Model.DataPath">Data Path</label>
-        <button id="DataPathPickBtn" type="button" onclick="showDataPickerModal()">Pick Data</button>
+        <button id="DataPathPickBtn" type="button" onclick="showDataPickerModal('DataPath')">Pick Data</button>
         <input class="form-input" type="text" asp-for="@Model.DataPath" value="@Model.DataPath">
         
         <label class="form-checkbox form-inline" asp-for="@Model.IsRequired">
             <input type="checkbox" asp-for="@Model.IsRequired"><i class="form-icon"></i> Required (if set and data is not available, the document will not render)
         </label>
         
-        <label class="form-label" asp-for="@Model.DisplayFormatDescription">Data Path</label>
+        <label class="form-label" asp-for="@Model.DisplayFormatDescription">Display Format</label>
         <button id="DisplayFormatBtn" type="button" onclick="showDisplayFormatModal()">Set Format</button>
         <input class="form-input" disabled="disabled" type="text" asp-for="@Model.DisplayFormatDescription" value="@Model.DisplayFormatDescription">
     </div>

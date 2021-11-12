@@ -35,6 +35,11 @@ namespace WebFormFiller.Models
         public string BoxEditPartialUrl { get; set; } = "";
         
         /// <summary>
+        /// URL that provides a partial view for picking a data path
+        /// </summary>
+        public string DataPathPartialUrl { get; set; } = "";
+        
+        /// <summary>
         /// URL that provides a partial view for editing a template box's display format
         /// </summary>
         public string DisplayFormatPartialUrl { get; set; } = "";
@@ -43,6 +48,11 @@ namespace WebFormFiller.Models
         /// URL that provides a partial view for editing a document's setting and filters
         /// </summary>
         public string DocumentInfoPartialUrl { get; set; } = "";
+        
+        /// <summary>
+        /// URL that provides a partial view for editing page specific setting and filters
+        /// </summary>
+        public string PageInfoPartialUrl { get; set; } = "";
 
         /// <summary>
         /// URL that stores a new size and location for a template page box
@@ -53,5 +63,6 @@ namespace WebFormFiller.Models
         /// URL for loading general files (used for base PDFs and JPEG images)
         /// </summary>
         public string FileLoadUrl { get; set; } = "";
+
     }
 }

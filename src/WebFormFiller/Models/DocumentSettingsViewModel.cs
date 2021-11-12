@@ -9,6 +9,9 @@ namespace WebFormFiller.Models
 {
     public class DocumentSettingsViewModel
     {
+        /// <summary>
+        /// Generate a view model from a project file
+        /// </summary>
         public static DocumentSettingsViewModel From(IndexFile project, int docId)
         {
             return new DocumentSettingsViewModel{
@@ -42,7 +45,6 @@ namespace WebFormFiller.Models
         
         
         #region Inner workings
-        public string? LoadDataPickerUrl { get; set; }
         public IEnumerable<SelectListItem> KnownFontList { get; set; } = Array.Empty<SelectListItem>();
 
         private static IEnumerable<SelectListItem> ListFontsOnServer(string? selected)

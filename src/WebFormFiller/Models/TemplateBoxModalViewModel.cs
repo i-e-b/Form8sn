@@ -26,11 +26,6 @@ namespace WebFormFiller.Models
         public string? BoxKey { get; set; }
         
         /// <summary>
-        /// Url for the client to load the data-picker partial view into a modal
-        /// </summary>
-        public string? LoadDataPickerUrl { get; set; }
-        
-        /// <summary>
         /// Internal revision number. Used to guard against data loss if an old save command comes in very late.
         /// </summary>
         public int Version { get; set; }

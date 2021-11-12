@@ -33,11 +33,11 @@
             <td>
                 @if (node.Selected)
                 {
-                    <button disabled=disabled>Current selection</button>
+                    <button disabled=disabled>Pick</button>
                 }
                 else if (node.CanBePicked)
                 {
-                    <button onclick="captureDataPickerResult('@node.DataPath')">Pick</button>
+                    <button onclick="captureDataPickerResult('@node.DataPath', '@Model.Target')">Pick</button>
                 }
             </td>
         </tr>

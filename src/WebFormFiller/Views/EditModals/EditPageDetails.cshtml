@@ -1,0 +1,64 @@
+﻿@model WebFormFiller.Models.PageSettingsViewModel
+@{ Layout = null; }
+@* ReSharper disable AssignNullToNotNullAttribute *@
+@* ReSharper disable PossibleNullReferenceException *@
+
+
+<form asp-action="EditPageDetails" id="editPageSettingsForm" method="post">
+    <input type="hidden" asp-for="@Model.DocumentId" value="@Model.DocumentId"/>
+    <input type="hidden" asp-for="@Model.Version" value="@Model.Version"/>
+    <input type="hidden" asp-for="@Model.PageIndex" value="@Model.PageIndex"/>
+
+    @*
+        public double PageHeightMillimetres { get; set; }
+        public double PageWidthMillimetres { get; set; }
+        public string? RepeatDataPath { get; set; }
+        public bool PageRepeats { get; set; }
+        public int? PageFontSize { get; set; }
+        public bool RenderBackground { get; set; }*@
+    
+    @* PAGE NAME *@
+    <div class="form-group">
+        <label class="form-label" asp-for="@Model.Name">Page name (optional)</label>
+        <input class="form-input" type="text" asp-for="@Model.Name" value="@Model.Name">
+    </div>
+    
+    @* PAGE WIDTH & HEIGHT *@
+    <div class="form-group">
+        <label class="form-label form-inline" asp-for="@Model.PageWidthMillimetres">Width (mm)</label>
+        <input class="form-input form-inline" type="text" asp-for="@Model.PageWidthMillimetres" value="@Model.PageWidthMillimetres">
+        
+        <label class="form-label form-inline" asp-for="@Model.PageHeightMillimetres">Height (mm)</label>
+        <input class="form-input form-inline" type="text" asp-for="@Model.PageHeightMillimetres" value="@Model.PageHeightMillimetres">
+        
+        <p>Common sizes in portrait: A4=210x297  US letter=216x279  US legal=216x356</p>
+    </div>
+    
+    @* PAGE WIDTH & HEIGHT *@
+    <div class="form-group">
+        <label class="form-checkbox form-inline" asp-for="@Model.RenderBackground">
+            <input type="checkbox" asp-for="@Model.RenderBackground"><i class="form-icon"></i> Render Background on PDF
+        </label>
+        <p>If true, the whole PDF will be output as normal. If false, the box values will be rendered on a blank page</p>
+    </div>
+    
+   
+    @* REPEAT MODE *@
+    <div class="form-group">
+        <label class="form-checkbox form-inline" asp-for="@Model.PageRepeats">
+            <input type="checkbox" asp-for="@Model.PageRepeats"><i class="form-icon"></i> Page is repeated
+        </label>
+        <button type="button" id="pageRepeatPickDataBtn" onclick="showDataPickerModal('RepeatDataPath')">Pick Data</button>
+        <input class="form-input" type="text" asp-for="@Model.RepeatDataPath" value="@Model.RepeatDataPath">
+        <p>If a page does not repeat, it will be placed in the output exactly once.</p>
+        <p>If a page repeats, a copy will be added to the output for each item in the data path you pick.
+            If the selected data is empty or not present, no pages will be output.</p>
+        <p>List items are marked with "(multiple)" in the data picker</p>
+    </div>
+    
+    @* NOTES *@
+    <div class="form-group">
+        <label class="form-label" asp-for="@Model.Notes">Notes</label>
+        <textarea class="form-input" asp-for="@Model.Notes">@Model.Notes</textarea>
+    </div>
+</form>

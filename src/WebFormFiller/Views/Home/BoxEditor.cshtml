@@ -82,7 +82,6 @@
     </div>
 </div>
 
-
 @* DOCUMENT WIDE SETTINGS (this is populated from 'EditDocumentDetails.cshtml' and driven by 'boxEditor.js') *@
 <div class="modal" id="EditDocument_DocumentInfo">
     <div class="modal-container">
@@ -94,6 +93,21 @@
         <div class="modal-footer">
             <button type="button" onclick="closeDocumentInfoModal()">Cancel</button>
             <button type="button" onclick="saveDocumentInfoChanges()">Save</button>
+        </div>
+    </div>
+</div>
+
+@* PAGE WIDE SETTINGS (this is populated from 'EditPageDetails.cshtml' and driven by 'boxEditor.js') *@
+<div class="modal" id="EditDocument_PageInfo">
+    <div class="modal-container">
+        <div class="modal-body">
+            <div class="content" style="height:70vh" id="EditDocument_PageInfo_Content">
+                Failed to load from server!
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" onclick="closePageInfoModal()">Cancel</button>
+            <button type="button" onclick="savePageInfoChanges()">Save</button>
         </div>
     </div>
 </div>
@@ -112,8 +126,10 @@ const projectJsonStoreUrl = "@(Model.ProjectStoreUrl)?docId=@(Model.DocumentId)"
 const boxMoveUrl = "@(Model.BoxMoveUrl)?docId=@(Model.DocumentId)"; // call-back to save new box position and size
 
 const boxEditPartialUrl = "@(Model.BoxEditPartialUrl)?docId=@(Model.DocumentId)"; // call-back to load editor HTML for a specific template box
+const dataPickerPartialUrl = "@(Model.DataPathPartialUrl)?docId=@(Model.DocumentId)"; // call-back to load editor HTML for a data path
 const displayFormatPartialUrl = "@(Model.DisplayFormatPartialUrl)?docId=@(Model.DocumentId)"; // call-back to load editor HTML for a template box's display format
 const docInfoPartialUrl = "@(Model.DocumentInfoPartialUrl)?docId=@(Model.DocumentId)"; // call-back to load editor HTML for a template box's display format
+const pageInfoPartialUrl = "@(Model.PageInfoPartialUrl)?docId=@(Model.DocumentId)"; // call-back to load editor HTML for a template box's display format
 </script>
 
 @* Scripts to render PDF with template box overlay, and enable editing of the template *@

@@ -15,8 +15,9 @@ namespace WebFormFiller.Controllers
         /// <param name="docId">Document ID, used to read the filters in the document template</param>
         /// <param name="pageIndex">Optional: if supplied, the page-specific filters will be available</param>
         /// <param name="oldPath">Optional: if supplied, this path will be highlighted in the UI as the 'current selection'</param>
+        /// <param name="target">The HTML input tag that should be populated when a data item is picked</param>
         [HttpGet]
-        public IActionResult DataPicker(int docId, [FromQuery]int? pageIndex, [FromQuery]string? oldPath)
+        public IActionResult DataPicker([FromQuery]int docId, [FromQuery]int? pageIndex, [FromQuery]string? oldPath, [FromQuery]string target)
         {
             var sampleData = FileDatabaseStub.GetSampleData();
             var project = FileDatabaseStub.GetDocumentById(docId);
@@ -35,7 +36,7 @@ namespace WebFormFiller.Controllers
             var list = JsonDataReader.FlattenTree(tree);
             
             var model = new DataSourceViewModel{
-                Nodes = list
+                Nodes = list, Target = target
             };
             
              return PartialView("DataPathPicker", model)!;
@@ -51,7 +52,6 @@ namespace WebFormFiller.Controllers
             var project = FileDatabaseStub.GetDocumentById(docId);
             
             var model = TemplateBoxModalViewModel.From(project, docId, pageIndex, boxKey);
-            model.LoadDataPickerUrl = Url!.Action("DataPicker", "EditModals", new{ docId, pageIndex, oldPath = model.DataPath})!;
             
             return PartialView("EditTemplateBox", model)!;
         }
@@ -83,7 +83,6 @@ namespace WebFormFiller.Controllers
             var project = FileDatabaseStub.GetDocumentById(docId);
             
             var model = DocumentSettingsViewModel.From(project, docId);
-            model.LoadDataPickerUrl = Url!.Action("DataPicker", "EditModals", new{ docId})!;
             
             return PartialView("EditDocumentDetails", model)!;
         }
@@ -93,6 +92,37 @@ namespace WebFormFiller.Controllers
         /// </summary>
         [HttpPost]
         public IActionResult EditDocumentDetails([FromForm]DocumentSettingsViewModel model)
+        {
+            // Check against existing version
+            var existing = FileDatabaseStub.GetDocumentById(model.DocumentId);
+            if (existing.Version is not null && model.Version < existing.Version) return Content("OLD")!;
+            
+            // Copy new values across
+            model.CopyTo(existing);
+            
+            // Write back to store
+            FileDatabaseStub.SaveDocumentTemplate(existing, model.DocumentId);
+            return Content("OK")!;
+        }
+
+        /// <summary>
+        /// View and edit details of a document template page, including filters and repeaters
+        /// </summary>
+        [HttpGet]
+        public IActionResult EditPageDetails(int docId, int pageIndex)
+        {
+            var project = FileDatabaseStub.GetDocumentById(docId);
+            
+            var model = PageSettingsViewModel.From(project, docId, pageIndex);
+            
+            return PartialView("EditPageDetails", model)!;
+        }
+        
+        /// <summary>
+        /// Store changes to page settings
+        /// </summary>
+        [HttpPost]
+        public IActionResult EditPageDetails([FromForm]PageSettingsViewModel model)
         {
             // Check against existing version
             var existing = FileDatabaseStub.GetDocumentById(model.DocumentId);
