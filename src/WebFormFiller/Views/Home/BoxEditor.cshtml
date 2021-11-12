@@ -118,6 +118,24 @@
     </div>
 </div>
 
+@* DISPLAY FORMAT EDITING (this is populated from 'FilterEditor.cshtml' and driven by 'boxEditor.js') *@
+<div class="modal" id="EditTemplateBox_DataFilter">
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="modal-title h5">Data filter</div>
+        </div>
+        <div class="modal-body">
+            <div class="content" id="EditTemplateBox_DataFilter_Content">
+                Failed to load from server!
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" onclick="closeDataFilterModal()">Cancel</button>
+            <button type="button" onclick="saveDataFilterChanges()">Save</button>
+        </div>
+    </div>
+</div>
+
 
 @* Mozilla PDF rendering library. Snapshot from https://mozilla.github.io/pdf.js/build/pdf.js *@
 <script src="~/js/pdf.js" asp-append-version="true"></script>
@@ -138,6 +156,7 @@ const dataPickerPartialUrl = "@(Model.DataPathPartialUrl)?docId=@(Model.Document
 const displayFormatPartialUrl = "@(Model.DisplayFormatPartialUrl)?docId=@(Model.DocumentId)"; // call-back to load editor HTML for a template box's display format
 const docInfoPartialUrl = "@(Model.DocumentInfoPartialUrl)?docId=@(Model.DocumentId)"; // call-back to load editor HTML for a template box's display format
 const pageInfoPartialUrl = "@(Model.PageInfoPartialUrl)?docId=@(Model.DocumentId)"; // call-back to load editor HTML for a template box's display format
+const filterEditPartialUrl = "@(Model.FilterEditPartialUrl)?docId=@(Model.DocumentId)"; // call-back to load HTML for editing filters
 </script>
 
 @* Scripts to render PDF with template box overlay, and enable editing of the template *@

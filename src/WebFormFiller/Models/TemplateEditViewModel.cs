@@ -55,6 +55,11 @@ namespace WebFormFiller.Models
         public string PageInfoPartialUrl { get; set; } = "";
 
         /// <summary>
+        /// URL that provides a partial view for editing data filters
+        /// </summary>
+        public string FilterEditPartialUrl { get; set; } = "";
+        
+        /// <summary>
         /// URL that stores a new size and location for a template page box
         /// </summary>
         public string BoxMoveUrl { get; set; } = "";

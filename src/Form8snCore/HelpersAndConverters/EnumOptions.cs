@@ -25,6 +25,11 @@ namespace Form8snCore.HelpersAndConverters
             return FillWithEnum(typeof(DisplayFormatType));
         }
 
+        public static IEnumerable<EnumOption> AllDataFilterTypes()
+        {
+            return FillWithEnum(typeof(MappingType));
+        }
+        
         private static IEnumerable<EnumOption> FillWithEnum(Type type)
         {
             var items = new List<EnumOption>();

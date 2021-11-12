@@ -1,0 +1,26 @@
+﻿@model WebFormFiller.Models.FilterEditViewModel
+@{ Layout = null; }
+@* ReSharper disable AssignNullToNotNullAttribute *@
+@* ReSharper disable PossibleNullReferenceException *@
+
+@* NOTE - classes are used by the scripts in boxEditor.js to update display and read value.
+
+-> 'format-filter-detail' and 'display-*' classes are used by updateDisplayFormatVisibility()
+-> 'format-param-value' class is used by saveDisplayFormatChanges()
+
+*@
+
+<form asp-action="TemplateBox" id="editDisplayFormatForm" method="post">
+    <input type="hidden" asp-for="@Model.DocumentId" value="@Model.DocumentId"/>
+    <input type="hidden" asp-for="@Model.PageIndex" value="@Model.PageIndex"/>
+    <input type="hidden" asp-for="@Model.FilterKey" value="@Model.FilterKey"/>
+    <input type="hidden" asp-for="@Model.Version" value="@Model.Version"/>
+
+    @* FILTER TYPE *@
+    <div class="form-group">
+        <label class="form-label" asp-for="@Model.FormatFilterType">Output filter type</label>
+        <select class="form-select" asp-for="@Model.FormatFilterType" asp-items="@Model.AvailableFilterTypes"> </select>
+    </div>
+
+
+</form>

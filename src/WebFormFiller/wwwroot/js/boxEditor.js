@@ -15,6 +15,7 @@ When embedding on a page, you must define these variables BEFORE importing this 
  * displayFormatPartialUrl -- URL for display format partial view
  * docInfoPartialUrl       -- URL for document wide settings partial view
  * pageInfoPartialUrl      -- URL for page wide settings partial view
+ * filterEditPartialUrl    -- URL for data filter edit partial view
  
  * pdfWorkerSource         -- URL of the file at ~/js/pdf.worker.js
  * boxMoveUrl              -- URL used to send back box movements & resizes
@@ -289,7 +290,17 @@ function addNewDocumentFilter(){
     });
 }
 function editDocumentFilter(filterKey){
-    alert('not yet implemented');
+    if (!filterEditPartialUrl) {console.log("filterEditPartialUrl is not bound");return;}
+
+    let modal = document.getElementById('EditTemplateBox_DataFilter');
+    if (!modal) return;
+    
+    let url = `${filterEditPartialUrl}&filterKey=${encodeURIComponent(filterKey)}`;
+
+    loadPartialToModal(url,
+        'EditTemplateBox_DataFilter_Content', function () {
+            modal.classList.add("active"); // Document info screen might need to read all system fonts
+        });
 }
 function deleteDocumentFilter(filterKey){
     if (!deleteFilterUrl) {console.log("deleteFilterUrl is not bound"); return;}
@@ -302,6 +313,19 @@ function deleteDocumentFilter(filterKey){
         console.log("Server call to delete filter failed");
         console.dir(evt);
     });
+}
+
+function closeDataFilterModal(){
+    let modal = document.getElementById('EditTemplateBox_DataFilter');
+    if (!modal) return;
+
+    modal.classList.remove("active");
+
+    let deadContent = document.getElementById('EditTemplateBox_DataFilter_Content');
+    if (deadContent) deadContent.innerHTML = "";
+}
+function saveDataFilterChanges(){
+   alert("not yet implemented");
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// Page info

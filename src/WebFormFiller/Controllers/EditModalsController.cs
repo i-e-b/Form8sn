@@ -20,8 +20,8 @@ namespace WebFormFiller.Controllers
         /// <param name="target">The HTML input tag that should be populated when a data item is picked</param>
         /// <param name="multiplesCanBePicked">Default false: If true, multiple-value nodes will be selectable</param>
         [HttpGet]
-        public IActionResult DataPicker([FromQuery]int docId, [FromQuery]int? pageIndex,
-            [FromQuery]string? oldPath, [FromQuery]string target, [FromQuery]bool multiplesCanBePicked)
+        public IActionResult DataPicker([FromQuery] int docId, [FromQuery] int? pageIndex,
+            [FromQuery] string? oldPath, [FromQuery] string target, [FromQuery] bool multiplesCanBePicked)
         {
             var sampleData = FileDatabaseStub.GetSampleData();
             var project = FileDatabaseStub.GetDocumentById(docId);
@@ -34,16 +34,20 @@ namespace WebFormFiller.Controllers
             }
 
             var prev = Array.Empty<string>();
-            if (!string.IsNullOrWhiteSpace(oldPath)) { prev = oldPath.Split('.'); }
+            if (!string.IsNullOrWhiteSpace(oldPath))
+            {
+                prev = oldPath.Split('.');
+            }
 
             var tree = JsonDataReader.BuildDataSourcePicker(project, sampleData, prev, repeat, 4, multiplesCanBePicked);
             var list = JsonDataReader.FlattenTree(tree);
-            
-            var model = new DataSourceViewModel{
+
+            var model = new DataSourceViewModel
+            {
                 Nodes = list, Target = target
             };
-            
-             return PartialView("DataPathPicker", model)!;
+
+            return PartialView("DataPathPicker", model)!;
         }
 
         /// <summary>
@@ -51,12 +55,12 @@ namespace WebFormFiller.Controllers
         /// This does not create new boxes -- that should be done with the BoxEditor view.
         /// </summary>
         [HttpGet]
-        public IActionResult TemplateBox(int docId, [FromQuery]int pageIndex, [FromQuery]string boxKey)
+        public IActionResult TemplateBox(int docId, [FromQuery] int pageIndex, [FromQuery] string boxKey)
         {
             var project = FileDatabaseStub.GetDocumentById(docId);
-            
+
             var model = TemplateBoxModalViewModel.From(project, docId, pageIndex, boxKey);
-            
+
             return PartialView("EditTemplateBox", model)!;
         }
 
@@ -64,18 +68,53 @@ namespace WebFormFiller.Controllers
         /// Store the details of a single template box, and re-display the edit controls.
         /// </summary>
         [HttpPost]
-        public IActionResult TemplateBox([FromForm]TemplateBoxModalViewModel model)
+        public IActionResult TemplateBox([FromForm] TemplateBoxModalViewModel model)
         {
             // Check against existing version
             var existing = FileDatabaseStub.GetDocumentById(model.DocumentId);
             if (existing.Version is not null && model.Version < existing.Version) return Content("OLD")!;
-            
+
             // Copy new values across
             model.CopyTo(existing);
-            
+
             // Write back to store
             FileDatabaseStub.SaveDocumentTemplate(existing, model.DocumentId);
             return Content("OK")!;
+        }
+
+        /// <summary>
+        /// View and edit the details of a data filter
+        /// </summary>
+        /// <param name="docId">Document ID</param>
+        /// <param name="pageIndex">Optional: page index. If null, document filters will be used</param>
+        /// <param name="filterKey">Name of the filter</param>
+        [HttpGet]
+        public IActionResult FilterEditor(int docId, [FromQuery] int? pageIndex, [FromQuery] string filterKey)
+        {
+            var project = FileDatabaseStub.GetDocumentById(docId);
+            
+            var filterSet = project.PickFilterSet(pageIndex);
+            if (filterSet is null) return BadRequest()!;
+            if (!filterSet.ContainsKey(filterKey)) return BadRequest()!;
+            
+            var theFilter = filterSet[filterKey];
+            
+            var model = new FilterEditViewModel
+            {
+                Version = project.Version ?? 0,
+                PageIndex = pageIndex,
+                DocumentId = docId,
+                FilterKey = filterKey,
+                FormatFilterType = theFilter.MappingType.ToString()
+            };
+            return View(model)!;
+        }
+
+        [HttpPost]
+        public IActionResult FilterEditor([FromForm]FilterEditViewModel model)
+        {
+            // TODO: implement this
+            return View(model)!;
         }
 
         /// <summary>
@@ -150,10 +189,8 @@ namespace WebFormFiller.Controllers
         {
             var project = FileDatabaseStub.GetDocumentById(docId);
 
-            Dictionary<string,MappingInfo> filterSet;
-            if (pageIdx is null || pageIdx < 0) filterSet = project.DataFilters;
-            else if (pageIdx >= project.Pages.Count) return BadRequest("Index")!;
-            else filterSet = project.Pages[pageIdx.Value].PageDataFilters;
+            var filterSet = project.PickFilterSet(pageIdx);
+            if (filterSet is null) return BadRequest()!;
 
             for (int i = 1; i < 150; i++)
             {
@@ -177,10 +214,8 @@ namespace WebFormFiller.Controllers
             if (string.IsNullOrWhiteSpace(name)) return BadRequest()!;
             var project = FileDatabaseStub.GetDocumentById(docId);
             
-            Dictionary<string,MappingInfo> filterSet;
-            if (pageIdx is null || pageIdx < 0) filterSet = project.DataFilters;
-            else if (pageIdx >= project.Pages.Count) return BadRequest("Index")!;
-            else filterSet = project.Pages[pageIdx.Value].PageDataFilters;
+            var filterSet = project.PickFilterSet(pageIdx);
+            if (filterSet is null) return BadRequest()!;
             
             if (filterSet.ContainsKey(name)) filterSet.Remove(name);
             

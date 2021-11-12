@@ -116,10 +116,10 @@ namespace Form8snCore.FileFormats
         [Description("Decimal place (defaults to '.')")]
         public string DecimalSeparator { get; set; } = "";
         
-        [Description("Prefix (like £ or $, placed on left, blank for none)")]
+        [Description("Prefix (like ï¿½ or $, placed on left, blank for none)")]
         public string Prefix { get; set; } = "";
         
-        [Description("Postfix (like ¥ or units of measure, placed on right, blank for none)")]
+        [Description("Postfix (like ï¿½ or units of measure, placed on right, blank for none)")]
         public string Postfix { get; set; } = "";
     }
 

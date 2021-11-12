@@ -79,7 +79,8 @@ namespace WebFormFiller.Controllers
                 DataPathPartialUrl = Url!.Action("DataPicker", "EditModals")!,
                 DisplayFormatPartialUrl = Url!.Action("DisplayFormat","EditModals")!,
                 DocumentInfoPartialUrl = Url!.Action("EditDocumentDetails", "EditModals")!,
-                PageInfoPartialUrl = Url!.Action("EditPageDetails","EditModals")!
+                PageInfoPartialUrl = Url!.Action("EditPageDetails","EditModals")!,
+                FilterEditPartialUrl = Url!.Action("FilterEditor","EditModals")!
             };
             
             return View(model)!;
