@@ -8,14 +8,17 @@ namespace Form8snCore.Rendering
     /// </summary>
     public class DocumentPage
     {
-        public DocumentPage(TemplatePage src)
+        public DocumentPage(TemplatePage src, int sourcePageIndex)
         {
             Definition = src;
+            SourcePageIndex = sourcePageIndex;
             DocumentBoxes = new Dictionary<string, DocumentBox>();
         }
         
         public TemplatePage Definition { get; set; }
         public Dictionary<string, DocumentBox> DocumentBoxes { get; set; }
+        
+        public int SourcePageIndex { get; set; }
         public int RepeatIndex { get; set; }
         public int RepeatCount { get; set; }
     }

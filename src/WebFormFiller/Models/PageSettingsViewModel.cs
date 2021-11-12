@@ -21,8 +21,8 @@ namespace WebFormFiller.Models
                 Notes = thePage.Notes,
                 RenderBackground = thePage.RenderBackground,
                 PageFontSize = thePage.PageFontSize,
-                PageWidthMillimetres = thePage.WidthMillimetres,
-                PageHeightMillimetres = thePage.HeightMillimetres,
+                PageWidthMillimetres = Math.Round(thePage.WidthMillimetres, 1),
+                PageHeightMillimetres = Math.Round(thePage.HeightMillimetres, 1),
                 
                 PageRepeats = thePage.RepeatMode.Repeats,
                 RepeatDataPath = string.Join('.', thePage.RepeatMode.DataPath??Array.Empty<string>())

@@ -14,7 +14,7 @@ namespace Form8snCore.HelpersAndConverters
     public static class JsonDataReader
     {
         // TODO: test these with data sets that don't fill filters (like split reclaims in 4s with only 2 reclaims)
-        
+
         /// <summary>
         /// Build the tree used to select source data for boxes and filters
         /// </summary>
@@ -23,14 +23,18 @@ namespace Form8snCore.HelpersAndConverters
         /// <param name="previous">The already selected path, if any</param>
         /// <param name="repeaterPath">Path used by the page repeater, if any</param>
         /// <param name="pageIndex">The page definition being targeted (in the index file), if any</param>
-        public static List<DataNode> BuildDataSourcePicker(IndexFile index, object sampleData, string[]? previous, string[]? repeaterPath, int? pageIndex)
+        /// <param name="markMultiplesSelectable">If true, multiple-value nodes will be marked as selectable</param>
+        public static List<DataNode> BuildDataSourcePicker(
+            IndexFile index, object sampleData,
+            string[]? previous, string[]? repeaterPath, int? pageIndex,
+            bool markMultiplesSelectable)
         {
             var result = new List<DataNode>();
             
-            AddSampleData(result, sampleData);
-            AddDataFilters(result, index, sampleData);
-            if (repeaterPath != null) AddRepeaterPath(result, index, sampleData, repeaterPath);
-            if (pageIndex != null) AddPageDataFilters(result, index, sampleData, pageIndex);
+            AddSampleData(result, sampleData, markMultiplesSelectable);
+            AddDataFilters(result, index, sampleData, markMultiplesSelectable);
+            if (repeaterPath != null) AddRepeaterPath(result, index, sampleData, repeaterPath, markMultiplesSelectable);
+            if (pageIndex != null) AddPageDataFilters(result, index, sampleData, pageIndex, markMultiplesSelectable);
             AddPageNumbers(result, repeaterPath);
             
             SelectPath(result, previous); // Expand and highlight previous selection
@@ -148,15 +152,15 @@ namespace Form8snCore.HelpersAndConverters
             dataNodes.Add(pagesNode);
         }
 
-        private static void AddSampleData(List<DataNode> dataNodes, object data)
+        private static void AddSampleData(List<DataNode> dataNodes, object data, bool markMultiple)
         {
-            var nodes = ReadObjectRecursive(data, "", "Data", "page-data", 0);
+            var nodes = ReadObjectRecursive(data, "", "Data", "page-data", 0, markMultiple);
             if (nodes.Count > 0) nodes[0]!.Expand(); // expand first node by default
             dataNodes.AddRange(nodes.ToArray());
         }
         
         // BUG: this might not be working if not enough data to repeat. Check with unit test.
-        private static void AddRepeaterPath(ICollection<DataNode> dataNodes, IndexFile index, object sampleData, string[] repeaterPath)
+        private static void AddRepeaterPath(ICollection<DataNode> dataNodes, IndexFile index, object sampleData, string[] repeaterPath, bool markMultiple)
         {
             const string root = "repeater";
             // Get a "sample" from the data.
@@ -195,7 +199,7 @@ namespace Form8snCore.HelpersAndConverters
                     // each page has multiple rows
                     case ArrayList page1:
                     {
-                        var sampleNodes = ReadObjectRecursive(page1, "D", "XXX", root, 0).ToArray();
+                        var sampleNodes = ReadObjectRecursive(page1, "D", "XXX", root, 0, markMultiple).ToArray();
                         if (sampleNodes.Length < 1)
                         {
                             pageNode.Nodes.Add(new DataNode {Text = "Sample data can't fill this repeater", ForeColor = ColorRed, BackColor = ColorPink});
@@ -216,7 +220,7 @@ namespace Form8snCore.HelpersAndConverters
                     // each page has a single compound object
                     case Dictionary<string, object> dict:
                     {
-                        var sampleNodes = ReadObjectRecursive(dict, "D", "XXX", root, 0);
+                        var sampleNodes = ReadObjectRecursive(dict, "D", "XXX", root, 0, markMultiple);
                         if (sampleNodes.Count != 1) throw new Exception("Unexpected object result in page data ReadObjectRecursive");
                     
                         foreach (var node in sampleNodes[0]!.Nodes)
@@ -248,7 +252,7 @@ namespace Form8snCore.HelpersAndConverters
             dataNodes.Add(pageNode);
         }
         
-        private static void AddPageDataFilters(ICollection<DataNode> dataNodes, IndexFile index, object data, int? pageIndex)
+        private static void AddPageDataFilters(ICollection<DataNode> dataNodes, IndexFile index, object data, int? pageIndex, bool markMultiple)
         {
             if (pageIndex is null) return;
             if (pageIndex.Value < 0 || pageIndex.Value >= index.Pages.Count) return;
@@ -294,7 +298,7 @@ namespace Form8snCore.HelpersAndConverters
                 }
                 else
                 {
-                    var sampleNodes = ReadObjectRecursive(sample, path, filter.Key, root, 1).ToArray();
+                    var sampleNodes = ReadObjectRecursive(sample, path, filter.Key, root, 1, markMultiple).ToArray();
                     filters.Nodes.AddRange(sampleNodes);
                 }
             }
@@ -302,7 +306,7 @@ namespace Form8snCore.HelpersAndConverters
             dataNodes.Add(filters);
         }
         
-        private static void AddDataFilters(ICollection<DataNode> dataNodes, IndexFile index, object data)
+        private static void AddDataFilters(ICollection<DataNode> dataNodes, IndexFile index, object data, bool markMultiple)
         {
             const string root = "page-filters";
             var filters = new DataNode {
@@ -332,7 +336,7 @@ namespace Form8snCore.HelpersAndConverters
                 }
                 else
                 {
-                    var sampleNodes = ReadObjectRecursive(sample, path, filter.Key, root, 1).ToArray();
+                    var sampleNodes = ReadObjectRecursive(sample, path, filter.Key, root, 1, markMultiple).ToArray();
                     filters.Nodes.AddRange(sampleNodes);
                 }
             }
@@ -340,7 +344,7 @@ namespace Form8snCore.HelpersAndConverters
             dataNodes.Add(filters);
         }
 
-        private static List<DataNode> ReadObjectRecursive(object o, string path, string node, string root, int depth)
+        private static List<DataNode> ReadObjectRecursive(object o, string path, string node, string root, int depth, bool markMultiple)
         {
             var name = string.IsNullOrWhiteSpace(path) ? "" : node;
             var outp = new List<DataNode>();
@@ -350,7 +354,7 @@ namespace Form8snCore.HelpersAndConverters
                 foreach (var kvp in dict)
                 {
                     if (kvp.Key is null || kvp.Value is null) continue;
-                    collection.AddRange(ReadObjectRecursive(kvp.Value, path + Strings.Separator + kvp.Key, kvp.Key, root, depth + 1));
+                    collection.AddRange(ReadObjectRecursive(kvp.Value, path + Strings.Separator + kvp.Key, kvp.Key, root, depth + 1, markMultiple));
                 }
 
                 outp.Add(new DataNode(node, collection.ToArray())
@@ -371,7 +375,7 @@ namespace Form8snCore.HelpersAndConverters
                     var idxStr = $"[{index}]";
                     if (kvp != null)
                     {
-                        collection.AddRange(ReadObjectRecursive(kvp, path + Strings.Separator + idxStr, idxStr, root, depth + 1));
+                        collection.AddRange(ReadObjectRecursive(kvp, path + Strings.Separator + idxStr, idxStr, root, depth + 1, markMultiple));
                     }
                     else
                         collection.Add(new DataNode
@@ -388,6 +392,7 @@ namespace Form8snCore.HelpersAndConverters
                 outp.Add(new DataNode(node + " (multiple)", collection.ToArray())
                 {
                     Root = root,
+                    CanBePicked = markMultiple,
                     Depth = depth,
                     IsRepeated = true,
                     DataPath = path,

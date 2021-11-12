@@ -48,7 +48,7 @@
         <label class="form-checkbox form-inline" asp-for="@Model.PageRepeats">
             <input type="checkbox" asp-for="@Model.PageRepeats"><i class="form-icon"></i> Page is repeated
         </label>
-        <button type="button" id="pageRepeatPickDataBtn" onclick="showDataPickerModal('RepeatDataPath')">Pick Data</button>
+        <button type="button" id="pageRepeatPickDataBtn" onclick="showDataPickerModal('RepeatDataPath', true, false)">Pick Data</button>
         <input class="form-input" type="text" asp-for="@Model.RepeatDataPath" value="@Model.RepeatDataPath">
         <p>If a page does not repeat, it will be placed in the output exactly once.</p>
         <p>If a page repeats, a copy will be added to the output for each item in the data path you pick.

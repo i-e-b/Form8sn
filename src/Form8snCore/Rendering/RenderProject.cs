@@ -65,7 +65,7 @@ namespace Form8snCore.Rendering
         private PdfDocument? _basePdf;
         
 
-        private PageBacking LoadBackground(IndexFile project, int pageIndex, TemplatePage pageDef)
+        private PageBacking LoadBackground(IndexFile project, int sourcePageIndex, TemplatePage pageDef)
         {
             var backing = new PageBacking();
             if (_basePdf is null && !string.IsNullOrWhiteSpace(project.BasePdfFile!))
@@ -76,7 +76,7 @@ namespace Form8snCore.Rendering
 
             if (_basePdf != null)
             {
-                backing.ExistingPage = _basePdf.Pages[pageIndex];
+                backing.ExistingPage = _basePdf.Pages[sourcePageIndex];
             }
 
             if (!string.IsNullOrWhiteSpace(pageDef.BackgroundImage!))
@@ -168,7 +168,7 @@ namespace Form8snCore.Rendering
                 var page = pageList[pageIndex]!;
                 var pageDef = page.Definition;
                 
-                using var background = LoadBackground(project, pageIndex, pageDef);
+                using var background = LoadBackground(project, page.SourcePageIndex, pageDef);
                 var font = GetFont(pageDef.PageFontSize ?? project.BaseFontSize ?? 16);
                 _loadingTimer.Stop();
 
@@ -229,7 +229,7 @@ namespace Form8snCore.Rendering
         /// </summary>
         private static Result<DocumentPage> PreparePage(TemplatePage pageDef, DataMapper mapper, Dictionary<string, decimal> runningTotals, int pageIndex)
         {
-            var docPage = new DocumentPage(pageDef);
+            var docPage = new DocumentPage(pageDef, pageIndex);
             
             // Draw each box. We sort the boxes (currently by filter type) so running totals can work as expected
             foreach (var boxDef in pageDef.Boxes.Where(HasAValue).OrderBy(OrderBoxes))

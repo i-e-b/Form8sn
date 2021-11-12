@@ -16,8 +16,10 @@ namespace WebFormFiller.Controllers
         /// <param name="pageIndex">Optional: if supplied, the page-specific filters will be available</param>
         /// <param name="oldPath">Optional: if supplied, this path will be highlighted in the UI as the 'current selection'</param>
         /// <param name="target">The HTML input tag that should be populated when a data item is picked</param>
+        /// <param name="multiplesCanBePicked">Default false: If true, multiple-value nodes will be selectable</param>
         [HttpGet]
-        public IActionResult DataPicker([FromQuery]int docId, [FromQuery]int? pageIndex, [FromQuery]string? oldPath, [FromQuery]string target)
+        public IActionResult DataPicker([FromQuery]int docId, [FromQuery]int? pageIndex,
+            [FromQuery]string? oldPath, [FromQuery]string target, [FromQuery]bool multiplesCanBePicked)
         {
             var sampleData = FileDatabaseStub.GetSampleData();
             var project = FileDatabaseStub.GetDocumentById(docId);
@@ -32,7 +34,7 @@ namespace WebFormFiller.Controllers
             var prev = Array.Empty<string>();
             if (!string.IsNullOrWhiteSpace(oldPath)) { prev = oldPath.Split('.'); }
 
-            var tree = JsonDataReader.BuildDataSourcePicker(project, sampleData, prev, repeat, 4);
+            var tree = JsonDataReader.BuildDataSourcePicker(project, sampleData, prev, repeat, 4, multiplesCanBePicked);
             var list = JsonDataReader.FlattenTree(tree);
             
             var model = new DataSourceViewModel{

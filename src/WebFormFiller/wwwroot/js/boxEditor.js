@@ -403,7 +403,7 @@ function captureDataPickerResult(path, targetId){
     
     closeDataPathPicker();
 }
-function showDataPickerModal(target) {
+function showDataPickerModal(target, allowMultiple, noPage) {
     if (!dataPickerPartialUrl) {console.log('dataPickerPartialUrl was not bound');return;}
     
     let targetId = target || 'DataPath';
@@ -413,10 +413,14 @@ function showDataPickerModal(target) {
     let modal = document.getElementById('EditTemplateBox_DataMap');
     if (!modal) {console.log("Lost modal: 'EditTemplateBox_DataMap'");return;}
 
-    let pageIdx = pageNum - 1; // TODO: disable for document-wide filter picker
+    let pageIdx = pageNum - 1;
     let pathReq = encodeURIComponent(targetElem.value);
+    
+    let url = `${dataPickerPartialUrl}&oldPath=${pathReq}&target=${targetId}`;
+    if (allowMultiple) url += "&multiplesCanBePicked=true";
+    if (!noPage) url += `&pageIndex=${pageIdx}`;
 
-    loadPartialToModal(`${dataPickerPartialUrl}&pageIndex=${pageIdx}&oldPath=${pathReq}&target=${targetId}`, 'EditTemplateBox_DataMap_Content', function () {
+    loadPartialToModal(url, 'EditTemplateBox_DataMap_Content', function () {
         modal.classList.add("active");
     });
 }
