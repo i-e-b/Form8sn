@@ -330,8 +330,7 @@ namespace Form8snCore.HelpersAndConverters
 
                 if (sample == null)
                 {
-                    var node = new DataNode { Text = filter.Key, DataPath = path, ForeColor = ColorBlue, CanBePicked = false };
-                    node.Nodes.Add(new DataNode {Text = "No result", ForeColor = ColorRed, BackColor = ColorPink, CanBePicked = false});
+                    var node = new DataNode { Text = filter.Key + " (No result from sample)", Root = root, Depth = 1, DataPath = path, ForeColor = ColorBrown, CanBePicked = true };
                     filters.Nodes.Add(node);
                 }
                 else

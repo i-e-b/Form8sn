@@ -64,7 +64,6 @@ namespace WebFormFiller.Models
             
             var theBox = thePage.Boxes[boxKey];
             
-            // TODO: read existing display format
             
             var model = new DisplayFormatViewModel{
                 // Keys, not to be edited

@@ -345,8 +345,13 @@ function saveDataFilterChanges(){
     const formEle = document.getElementById('editDataFilterForm');
     if (!formEle) return;
 
+    let pageIdx = formEle.elements["PageIndex"].value || -1;
+
     submit(formEle).then(function() {
         reloadProjectFile(function() {
+            // reload the parent modal
+            if (pageIdx >= 0) { showPageInfoModal();
+            } else { showDocumentInfoModal(); }
             closeDataFilterModal();
         });
     });

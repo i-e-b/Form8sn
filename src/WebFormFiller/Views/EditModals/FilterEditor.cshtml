@@ -25,50 +25,50 @@
     
     @* ------ SplitIntoN: MaxCountMappingParams ------ *@
     <div class="form-group data-filter-detail display-SplitIntoN">
-        <label class="form-label" asp-for="@Model.MaxCount">The largest number of items in each set</label>
-        <input class="form-input format-param-value" type="text" asp-for="@Model.MaxCount" value="@Model.MaxCount">
+        <label class="form-label" asp-for="@Model.SplitNMaxCount">The largest number of items in each set</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.SplitNMaxCount" value="@Model.SplitNMaxCount">
     </div>
 
 
     @* ------ FixedValue: TextMappingParams ------ *@
     <div class="form-group data-filter-detail display-FixedValue">
-        <label class="form-label" asp-for="@Model.Text">Text to supply as data</label>
-        <input class="form-input format-param-value" type="text" asp-for="@Model.Text" value="@Model.Text">
+        <label class="form-label" asp-for="@Model.FixedText">Text to supply as data</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.FixedText" value="@Model.FixedText">
     </div>
     
     
     @* ------ FormatAllAsNumber: NumberMappingParams ------ *@
     @* DECIMAL PLACES *@
     <div class="form-group data-filter-detail display-FormatAllAsNumber">
-        <label class="form-label" asp-for="@Model.DecimalPlaces">Decimal places</label>
-        <input class="form-input format-param-value" type="text" asp-for="@Model.DecimalPlaces" value="@Model.DecimalPlaces">
+        <label class="form-label" asp-for="@Model.AllAsNumberDecimalPlaces">Decimal places</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.AllAsNumberDecimalPlaces" value="@Model.AllAsNumberDecimalPlaces">
     </div>
     @* THOUSANDS SEPARATOR *@
     <div class="form-group data-filter-detail display-FormatAllAsNumber">
-        <label class="form-label" asp-for="@Model.ThousandsSeparator">Thousands separator (blank for none)</label>
-        <input class="form-input format-param-value" type="text" asp-for="@Model.ThousandsSeparator" value="@Model.ThousandsSeparator">
+        <label class="form-label" asp-for="@Model.AllAsNumberThousandsSeparator">Thousands separator (blank for none)</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.AllAsNumberThousandsSeparator" value="@Model.AllAsNumberThousandsSeparator">
     </div>
     @* DECIMAL SEPARATOR *@
     <div class="form-group data-filter-detail display-FormatAllAsNumber">
-        <label class="form-label" asp-for="@Model.DecimalSeparator">Decimal place (defaults to '.')</label>
-        <input class="form-input format-param-value" type="text" asp-for="@Model.DecimalSeparator" value="@Model.DecimalSeparator">
+        <label class="form-label" asp-for="@Model.AllAsNumberDecimalSeparator">Decimal place (defaults to '.')</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.AllAsNumberDecimalSeparator" value="@Model.AllAsNumberDecimalSeparator">
     </div>
     @* PREFIX *@
     <div class="form-group data-filter-detail display-FormatAllAsNumber">
-        <label class="form-label" asp-for="@Model.Prefix">Prefix (like € or $, placed on left, blank for none)</label>
-        <input class="form-input format-param-value" type="text" asp-for="@Model.Prefix" value="@Model.Prefix">
+        <label class="form-label" asp-for="@Model.AllAsNumberPrefix">Prefix (like € or $, placed on left, blank for none)</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.AllAsNumberPrefix" value="@Model.AllAsNumberPrefix">
     </div>
     @* POSTFIX *@
     <div class="form-group data-filter-detail display-FormatAllAsNumber">
-        <label class="form-label" asp-for="@Model.Postfix">Postfix (like ¥ or units of measure, placed on right, blank for none)</label>
-        <input class="form-input format-param-value" type="text" asp-for="@Model.Postfix" value="@Model.Postfix">
+        <label class="form-label" asp-for="@Model.AllAsNumberPostfix">Postfix (like ¥ or units of measure, placed on right, blank for none)</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.AllAsNumberPostfix" value="@Model.AllAsNumberPostfix">
     </div>
     
     
     @* ------ FormatAllAsDate: DateFormatMappingParams ------ *@
     <div class="form-group data-filter-detail display-FormatAllAsDate">
-        <label class="form-label" asp-for="@Model.FormatString">Format string</label>
-        <input class="form-input format-param-value" type="text" asp-for="@Model.FormatString" placeholder="yyyy-MM-dd" value="@Model.FormatString">
+        <label class="form-label" asp-for="@Model.AsDateFormatString">Format string</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.AsDateFormatString" placeholder="yyyy-MM-dd" value="@Model.AsDateFormatString">
         <p>The selected data will be read as a date, and reformatted based on the format string.
             See <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings">Microsoft Documentation</a> for details</p>
     </div>
@@ -109,18 +109,18 @@
     @* ------ IfElse: IfElseMappingParams ------ *@
     @* EXPECTED VALUE *@
     <div class="form-group data-filter-detail display-IfElse">
-        <label class="form-label" asp-for="@Model.ExpectedValue">Value to compare to the input data item</label>
-        <input class="form-input format-param-value" type="text" asp-for="@Model.ExpectedValue" value="@Model.ExpectedValue">
+        <label class="form-label" asp-for="@Model.IfElseExpectedValue">Value to compare to the input data item</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.IfElseExpectedValue" value="@Model.IfElseExpectedValue">
     </div>
     @* SAME *@
     <div class="form-group data-filter-detail display-IfElse">
-        <label class="form-label" asp-for="@Model.MapSame">Data to output if Value and input data are the same</label>
-        <input class="form-input format-param-value" type="text" asp-for="@Model.MapSame" value="@Model.MapSame">
+        <label class="form-label" asp-for="@Model.IfElseMapSame">Data to output if Value and input data are the same</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.IfElseMapSame" value="@Model.IfElseMapSame">
     </div>
     @* DIFFERENT *@
     <div class="form-group data-filter-detail display-IfElse">
-        <label class="form-label" asp-for="@Model.MapDifferent">Data to output if Value and input data are different</label>
-        <input class="form-input format-param-value" type="text" asp-for="@Model.MapDifferent" value="@Model.MapDifferent">
+        <label class="form-label" asp-for="@Model.IfElseMapDifferent">Data to output if Value and input data are different</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.IfElseMapDifferent" value="@Model.IfElseMapDifferent">
     </div>
     
 </form>

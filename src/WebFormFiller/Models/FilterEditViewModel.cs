@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Form8snCore.FileFormats;
 using Form8snCore.HelpersAndConverters;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -33,6 +35,72 @@ namespace WebFormFiller.Models
             AvailableFilterTypes = EnumOptions.AllDataFilterTypes().Select(SelectorItemForEnum).ToList();
         }
         
+        public static FilterEditViewModel From(IndexFile project, int? pageIndex, int docId, string filterKey, MappingInfo theFilter)
+        {
+            return new FilterEditViewModel{
+                Version = project.Version ?? 0,
+                PageIndex = pageIndex ?? -1,
+                DocumentId = docId,
+                FilterKey = filterKey,
+                DataFilterType = theFilter.MappingType.ToString(),
+                SourcePath = string.Join(".", theFilter.DataPath ?? Array.Empty<string>()),
+                
+                AllAsNumberPostfix            = ReadParam(theFilter, nameof(NumberMappingParams.Postfix)),
+                AllAsNumberPrefix             = ReadParam(theFilter, nameof(NumberMappingParams.Prefix)),
+                AllAsNumberDecimalPlaces      = ReadParam(theFilter, nameof(NumberMappingParams.DecimalPlaces)),
+                AllAsNumberDecimalSeparator   = ReadParam(theFilter, nameof(NumberMappingParams.DecimalSeparator)),
+                AllAsNumberThousandsSeparator = ReadParam(theFilter, nameof(NumberMappingParams.ThousandsSeparator)),
+
+                ConcatInfix                   = ReadParam(theFilter, nameof(JoinMappingParams.Infix)),
+                ConcatPostfix                 = ReadParam(theFilter, nameof(JoinMappingParams.Postfix)),
+                ConcatPrefix                  = ReadParam(theFilter, nameof(JoinMappingParams.Prefix)),
+                
+                IfElseExpectedValue           = ReadParam(theFilter, nameof(IfElseMappingParams.ExpectedValue)),
+                IfElseMapDifferent            = ReadParam(theFilter, nameof(IfElseMappingParams.Different)),
+                IfElseMapSame                 = ReadParam(theFilter, nameof(IfElseMappingParams.Same)),
+                
+                FixedText                     = ReadParam(theFilter, nameof(TextMappingParams.Text)),
+                
+                SkipCount                     = ReadParam(theFilter, nameof(SkipMappingParams.Count)),
+                
+                TakeCount                     = ReadParam(theFilter, nameof(TakeMappingParams.Count)),
+                
+                AsDateFormatString            = ReadParam(theFilter, nameof(DateFormatMappingParams.FormatString)),
+                
+                SplitNMaxCount                = ReadParam(theFilter, nameof(MaxCountMappingParams.MaxCount))
+            };
+        }
+
+        public void CopyTo(MappingInfo theFilter)
+        {
+            theFilter.MappingType = ParseMappingType();
+            theFilter.DataPath = SourcePath.Split('.');
+            
+            var p = new Dictionary<string, string>();
+            
+            TryMapTo(p, SplitNMaxCount               , nameof(MaxCountMappingParams.MaxCount));
+            TryMapTo(p, AsDateFormatString           , nameof(DateFormatMappingParams.FormatString));
+            TryMapTo(p, TakeCount                    , nameof(TakeMappingParams.Count));
+            TryMapTo(p, SkipCount                    , nameof(SkipMappingParams.Count));
+            TryMapTo(p, FixedText                    , nameof(TextMappingParams.Text));
+            
+            TryMapTo(p, IfElseMapSame                , nameof(IfElseMappingParams.Same));
+            TryMapTo(p, IfElseMapDifferent           , nameof(IfElseMappingParams.Different));
+            TryMapTo(p, IfElseExpectedValue          , nameof(IfElseMappingParams.ExpectedValue));
+            
+            TryMapTo(p, ConcatInfix                  , nameof(JoinMappingParams.Infix));
+            TryMapTo(p, ConcatPostfix                , nameof(JoinMappingParams.Postfix));
+            TryMapTo(p, ConcatPrefix                 , nameof(JoinMappingParams.Prefix));
+            
+            TryMapTo(p, AllAsNumberPostfix           , nameof(NumberMappingParams.Postfix));
+            TryMapTo(p, AllAsNumberPrefix            , nameof(NumberMappingParams.Prefix));
+            TryMapTo(p, AllAsNumberDecimalPlaces     , nameof(NumberMappingParams.DecimalPlaces));
+            TryMapTo(p, AllAsNumberDecimalSeparator  , nameof(NumberMappingParams.DecimalSeparator));
+            TryMapTo(p, AllAsNumberThousandsSeparator, nameof(NumberMappingParams.ThousandsSeparator));
+            
+            theFilter.MappingParameters = p;
+        }
+
         /// <summary>
         /// UI-side selected filter type
         /// </summary>
@@ -40,28 +108,48 @@ namespace WebFormFiller.Models
 
         public IEnumerable<SelectListItem> AvailableFilterTypes { get; set; }
         public string SourcePath { get; set; } = "";
-        public string? MaxCount { get; set; }
-        public string? Text { get; set; }
-        public string? MapDifferent { get; set; }
-        public string? MapSame { get; set; }
-        public string? ExpectedValue { get; set; }
+        public string? SplitNMaxCount { get; set; }
+        public string? FixedText { get; set; }
+        public string? IfElseMapDifferent { get; set; }
+        public string? IfElseMapSame { get; set; }
+        public string? IfElseExpectedValue { get; set; }
         public string? ConcatPostfix { get; set; }
         public string? ConcatInfix { get; set; }
         public string? ConcatPrefix { get; set; }
         public string? TakeCount { get; set; }
         public string? SkipCount { get; set; }
-        public string? FormatString { get; set; }
-        public string? Postfix { get; set; }
-        public string? Prefix { get; set; }
-        public string? DecimalSeparator { get; set; }
-        public string? ThousandsSeparator { get; set; }
-        public string? DecimalPlaces { get; set; }
+        public string? AsDateFormatString { get; set; }
+        public string? AllAsNumberPostfix { get; set; }
+        public string? AllAsNumberPrefix { get; set; }
+        public string? AllAsNumberDecimalSeparator { get; set; }
+        public string? AllAsNumberThousandsSeparator { get; set; }
+        public string? AllAsNumberDecimalPlaces { get; set; }
 
 
         private static SelectListItem SelectorItemForEnum(EnumOption e)
         {
             if (string.IsNullOrWhiteSpace(e.Description)) return new SelectListItem(e.Name, e.Name);
             return new SelectListItem(e.Name + " - " + e.Description, e.Name);
+        }
+
+        private static string? ReadParam(MappingInfo theFilter, string name)
+        {
+            if (theFilter.MappingParameters.ContainsKey(name)) return theFilter.MappingParameters[name];
+            return null;
+        }
+
+        private void TryMapTo(Dictionary<string,string> target, string? value, string key)
+        {
+            if (target.ContainsKey(key)) return;
+            if (string.IsNullOrEmpty(value)) return;
+            target.Add(key, value);
+        }
+
+        private MappingType ParseMappingType()
+        {
+            if (DataFilterType is null) return MappingType.None;
+            try { return Enum.Parse<MappingType>(DataFilterType, true); }
+            catch { return MappingType.None; }
         }
     }
 }

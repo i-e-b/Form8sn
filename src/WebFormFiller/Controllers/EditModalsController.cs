@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Form8snCore.FileFormats;
 using Form8snCore.HelpersAndConverters;
 using Microsoft.AspNetCore.Mvc;
@@ -99,25 +98,29 @@ namespace WebFormFiller.Controllers
             
             var theFilter = filterSet[filterKey];
             
-            var model = new FilterEditViewModel
-            {
-                Version = project.Version ?? 0,
-                PageIndex = pageIndex,
-                DocumentId = docId,
-                FilterKey = filterKey,
-                DataFilterType = theFilter.MappingType.ToString(),
-                //FilterParameters = theFilter.MappingParameters,
-                SourcePath = string.Join(".", theFilter.DataPath ?? Array.Empty<string>())
-            };
+            var model = FilterEditViewModel.From(project, pageIndex, docId, filterKey, theFilter);
+            
             return View(model)!;
         }
 
         [HttpPost]
         public IActionResult FilterEditor([FromForm]FilterEditViewModel model)
         {
-            // TODO: implement this
-            Console.WriteLine("Got filter save call");
-            return View(model)!;
+            var existing = FileDatabaseStub.GetDocumentById(model.DocumentId);
+            
+            var filterSet = existing.PickFilterSet(model.PageIndex);
+            if (filterSet is null) return BadRequest()!;
+            if (model.FilterKey is null) return BadRequest()!;
+            if (!filterSet.ContainsKey(model.FilterKey)) return BadRequest()!;
+            
+            var theFilter = filterSet[model.FilterKey];
+            
+            // Copy new values across
+            model.CopyTo(theFilter);
+
+            // Write back to store
+            FileDatabaseStub.SaveDocumentTemplate(existing, model.DocumentId);
+            return Content("OK")!;
         }
 
         /// <summary>
