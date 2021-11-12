@@ -1,5 +1,4 @@
-﻿@using Form8snCore.FileFormats
-@model WebFormFiller.Models.DocumentSettingsViewModel
+﻿@model WebFormFiller.Models.DocumentSettingsViewModel
 @{ Layout = null; }
 @* ReSharper disable AssignNullToNotNullAttribute *@
 @* ReSharper disable PossibleNullReferenceException *@
@@ -34,4 +33,17 @@
         <label class="form-label" asp-for="@Model.Notes">Notes</label>
         <textarea class="form-input" asp-for="@Model.Notes">@Model.Notes</textarea>
     </div>
+    
+    @* FILTERS LIST *@
+    <h6>Document data filters</h6>
+    <button id="addDocumentFilterButton" type="button" onclick="addNewDocumentFilter()">Add</button>
+    <dl>
+    @foreach (var filter in Model.Filters)
+    {
+        <dt>@filter.Key</dt>
+        <dd>@filter.Value.MappingType.ToString() &mdash; 
+            <button id="editDocumentFilterButton" type="button" onclick="editDocumentFilter('@(filter.Key)')">Edit</button>
+            <button id="deleteDocumentFilterButton" type="button" onclick="deleteDocumentFilter('@(filter.Key)')">Delete</button>
+        </dd>
+    }</dl>
 </form>

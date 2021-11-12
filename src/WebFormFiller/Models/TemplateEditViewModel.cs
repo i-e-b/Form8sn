@@ -58,7 +58,17 @@ namespace WebFormFiller.Models
         /// URL that stores a new size and location for a template page box
         /// </summary>
         public string BoxMoveUrl { get; set; } = "";
+        
+        /// <summary>
+        /// URL that adds a new filter to a document or page
+        /// </summary>
+        public string AddFilterUrl { get; set; } = "";
 
+        /// <summary>
+        /// URL that deletes an existing filter from a document or page
+        /// </summary>
+        public string DeleteFilterUrl { get; set; } = "";
+        
         /// <summary>
         /// URL for loading general files (used for base PDFs and JPEG images)
         /// </summary>

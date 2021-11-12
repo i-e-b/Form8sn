@@ -9,14 +9,6 @@
     <input type="hidden" asp-for="@Model.Version" value="@Model.Version"/>
     <input type="hidden" asp-for="@Model.PageIndex" value="@Model.PageIndex"/>
 
-    @*
-        public double PageHeightMillimetres { get; set; }
-        public double PageWidthMillimetres { get; set; }
-        public string? RepeatDataPath { get; set; }
-        public bool PageRepeats { get; set; }
-        public int? PageFontSize { get; set; }
-        public bool RenderBackground { get; set; }*@
-    
     @* PAGE NAME *@
     <div class="form-group">
         <label class="form-label" asp-for="@Model.Name">Page name (optional)</label>
@@ -34,7 +26,13 @@
         <p>Common sizes in portrait: A4=210x297  US letter=216x279  US legal=216x356</p>
     </div>
     
-    @* PAGE WIDTH & HEIGHT *@
+    @* PAGE FONT DEFAULT *@
+    <div class="form-group">
+        <label class="form-label" asp-for="@Model.PageFontSize">Default Font Size for Page (optional)</label>
+        <input class="form-input" type="text" asp-for="@Model.PageFontSize" value="@Model.PageFontSize">
+    </div>
+    
+    @* RENDER BACKGROUND SWITCH *@
     <div class="form-group">
         <label class="form-checkbox form-inline" asp-for="@Model.RenderBackground">
             <input type="checkbox" asp-for="@Model.RenderBackground"><i class="form-icon"></i> Render Background on PDF

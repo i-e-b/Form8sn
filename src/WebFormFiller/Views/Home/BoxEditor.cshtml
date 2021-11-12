@@ -50,6 +50,9 @@
 @* DOCUMENT WIDE SETTINGS (this is populated from 'EditDocumentDetails.cshtml' and driven by 'boxEditor.js') *@
 <div class="modal" id="EditDocument_DocumentInfo">
     <div class="modal-container">
+        <div class="modal-header">
+            <div class="modal-title h5">Document-wide settings</div>
+        </div>
         <div class="modal-body">
             <div class="content" style="height:70vh" id="EditDocument_DocumentInfo_Content">
                 Loading...
@@ -65,6 +68,9 @@
 @* PAGE WIDE SETTINGS (this is populated from 'EditPageDetails.cshtml' and driven by 'boxEditor.js') *@
 <div class="modal" id="EditDocument_PageInfo">
     <div class="modal-container">
+        <div class="modal-header">
+            <div class="modal-title h5">Page specific settings</div>
+        </div>
         <div class="modal-body">
             <div class="content" style="height:70vh" id="EditDocument_PageInfo_Content">
                 Failed to load from server!
@@ -124,6 +130,8 @@ const basePdfSourceUrl = "@(Model.FileLoadUrl)?name=@(Model!.BasePdfFile)"; // P
 const projectJsonLoadUrl = "@(Model.ProjectLoadUrl)?docId=@(Model.DocumentId)"; // call-back to read template project file
 const projectJsonStoreUrl = "@(Model.ProjectStoreUrl)?docId=@(Model.DocumentId)"; // call-back to write template project file
 const boxMoveUrl = "@(Model.BoxMoveUrl)?docId=@(Model.DocumentId)"; // call-back to save new box position and size
+const addFilterUrl = "@(Model.AddFilterUrl)?docId=@(Model.DocumentId)"; // call-back to add a new filter (can be page or document)
+const deleteFilterUrl = "@(Model.DeleteFilterUrl)?docId=@(Model.DocumentId)"; // call-back to add a new filter (can be page or document)
 
 const boxEditPartialUrl = "@(Model.BoxEditPartialUrl)?docId=@(Model.DocumentId)"; // call-back to load editor HTML for a specific template box
 const dataPickerPartialUrl = "@(Model.DataPathPartialUrl)?docId=@(Model.DocumentId)"; // call-back to load editor HTML for a data path

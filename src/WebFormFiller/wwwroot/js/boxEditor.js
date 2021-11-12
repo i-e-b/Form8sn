@@ -1,4 +1,5 @@
-﻿/*
+﻿"use strict";
+/*
 
 NOTE:
 
@@ -6,6 +7,8 @@ When embedding on a page, you must define these variables BEFORE importing this 
  * basePdfSourceUrl        -- URL from where the PDF can be loaded
  * projectJsonLoadUrl      -- URL from where we can load the JSON definition of the template project
  * projectJsonStoreUrl     -- URL to which we can post an updated JSON definition of the template project
+ * addFilterUrl            -- URL to add a new filter
+ * deleteFilterUrl         -- URL to delete an existing filter
  
  * boxEditPartialUrl       -- URL for template box partial view
  * dataPickerPartialUrl    -- URL for data path picker partial view
@@ -148,28 +151,30 @@ function onNextPage() {
 
 
 // HTML MODAL CONTROL FOR BOX DETAIL EDITING ==========================================================================
+function serverCallback(url, verb, success, failure) {
+    let xhr = new XMLHttpRequest();
+    xhr.onerror = function (evt) {failure(evt);}
+    xhr.onabort = function (evt) {failure(evt);}
+    xhr.onload = function (evt) {
+        if (xhr.status >= 200 && xhr.status < 400) {success(evt, xhr);
+        } else {failure(evt);}
+    };
+        
+
+    xhr.open(verb, url);
+    xhr.send();
+}
 function loadPartialToModal(url, targetId, nextAction) {
     let targetElement = document.getElementById(targetId);
-    if (!targetElement) return;
-
-    let oReq = new XMLHttpRequest();
-
-    oReq.onerror = function (evt) {
+    if (!targetElement) {console.log(`Could not load from ${url}, as target element #${targetId} was not found`);return;}
+    
+    serverCallback(url, 'GET', function (evt, xhr) {
+        targetElement.innerHTML = xhr.responseText;
+        if (nextAction) nextAction(evt);
+    }, function (evt) {
         targetElement.innerText = "An error occurred while transferring this UI element";
         console.dir(evt);
-    }
-    oReq.onabort = function (evt) {
-        targetElement.innerText = "The transfer has been canceled by the user.";
-        console.dir(evt);
-    }
-    oReq.onload = function (e) {
-        targetElement.innerHTML = oReq.responseText;
-        if (nextAction) nextAction(e);
-    }
-
-    oReq.open('GET', url);
-    oReq.send();
-
+    })
 }
 function setValue(elementId, newValue){
     let elem = document.getElementById(elementId);
@@ -271,6 +276,32 @@ function closeDocumentInfoModal(){
 
     let deadContent = document.getElementById('EditDocument_DocumentInfo_Content');
     if (deadContent) deadContent.innerHTML = "Loading...";
+}
+
+function addNewDocumentFilter(){
+    if (!addFilterUrl) {console.log("addFilterUrl is not bound"); return;}
+    
+    serverCallback(addFilterUrl, 'GET', function(){
+        showDocumentInfoModal(); // reload the modal
+    }, function(evt){
+        console.log("Server call to add filter failed");
+        console.dir(evt);
+    });
+}
+function editDocumentFilter(filterKey){
+    alert('not yet implemented');
+}
+function deleteDocumentFilter(filterKey){
+    if (!deleteFilterUrl) {console.log("deleteFilterUrl is not bound"); return;}
+
+    let url = `${deleteFilterUrl}&name=${encodeURIComponent(filterKey)}`;
+    
+    serverCallback(url, 'GET', function(){
+        showDocumentInfoModal(); // reload the modal
+    }, function(evt){
+        console.log("Server call to delete filter failed");
+        console.dir(evt);
+    });
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// Page info

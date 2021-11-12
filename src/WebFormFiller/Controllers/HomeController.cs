@@ -72,6 +72,9 @@ namespace WebFormFiller.Controllers
                 ProjectLoadUrl = Url!.Action("ReadProject", "Home")!,
                 ProjectStoreUrl = Url!.Action("WriteProject","Home")!,
                 BoxMoveUrl = Url!.Action("MoveBox", "Home")!,
+                AddFilterUrl = Url!.Action("AddFilter","EditModals")!,
+                DeleteFilterUrl = Url!.Action("DeleteFilter","EditModals")!,
+                
                 BoxEditPartialUrl = Url!.Action("TemplateBox","EditModals")!,
                 DataPathPartialUrl = Url!.Action("DataPicker", "EditModals")!,
                 DisplayFormatPartialUrl = Url!.Action("DisplayFormat","EditModals")!,

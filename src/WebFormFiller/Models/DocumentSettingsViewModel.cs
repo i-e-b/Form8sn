@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Form8snCore.FileFormats;
@@ -21,6 +22,7 @@ namespace WebFormFiller.Models
                 BaseFontSize = project.BaseFontSize?.ToString(),
                 FontFamily = project.FontName,
                 Notes = project.Notes,
+                Filters = project.DataFilters,
                 KnownFontList = ListFontsOnServer(project.FontName)
             };
         }
@@ -42,6 +44,7 @@ namespace WebFormFiller.Models
         public string? BaseFontSize { get; set; }
         public string? FontFamily { get; set; }
         public string? Notes { get; set; }
+        public IDictionary<string, MappingInfo> Filters { get; set; } = new Dictionary<string, MappingInfo>();
         
         
         #region Inner workings

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Form8snCore.FileFormats;
 using Form8snCore.HelpersAndConverters;
 using Microsoft.AspNetCore.Mvc;
 using WebFormFiller.Models;
@@ -136,6 +138,54 @@ namespace WebFormFiller.Controllers
             // Write back to store
             FileDatabaseStub.SaveDocumentTemplate(existing, model.DocumentId);
             return Content("OK")!;
+        }
+
+        /// <summary>
+        /// Add a new filter to page or document
+        /// </summary>
+        /// <param name="docId"></param>
+        /// <param name="pageIdx">Optional: if given, the filter will be page specific. Otherwise it will be a document filter</param>
+        [HttpGet]
+        public IActionResult AddFilter(int docId, int? pageIdx)
+        {
+            var project = FileDatabaseStub.GetDocumentById(docId);
+
+            Dictionary<string,MappingInfo> filterSet;
+            if (pageIdx is null || pageIdx < 0) filterSet = project.DataFilters;
+            else if (pageIdx >= project.Pages.Count) return BadRequest("Index")!;
+            else filterSet = project.Pages[pageIdx.Value].PageDataFilters;
+
+            for (int i = 1; i < 150; i++)
+            {
+                var name = $"New filter {i}";
+                if (!filterSet.ContainsKey(name))
+                {
+                    filterSet.Add(name, new MappingInfo());
+                    FileDatabaseStub.SaveDocumentTemplate(project, docId);
+                    return Ok(name)!;
+                }
+            }
+            return BadRequest("Too many unnamed filters")!;
+        }
+
+        /// <summary>
+        /// Remove a single filter by name from the document or page
+        /// </summary>
+        [HttpGet]
+        public IActionResult DeleteFilter(int docId, string? name, int? pageIdx)
+        {
+            if (string.IsNullOrWhiteSpace(name)) return BadRequest()!;
+            var project = FileDatabaseStub.GetDocumentById(docId);
+            
+            Dictionary<string,MappingInfo> filterSet;
+            if (pageIdx is null || pageIdx < 0) filterSet = project.DataFilters;
+            else if (pageIdx >= project.Pages.Count) return BadRequest("Index")!;
+            else filterSet = project.Pages[pageIdx.Value].PageDataFilters;
+            
+            if (filterSet.ContainsKey(name)) filterSet.Remove(name);
+            
+            FileDatabaseStub.SaveDocumentTemplate(project, docId);
+            return Ok()!;
         }
 
         /// <summary>
