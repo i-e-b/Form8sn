@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Portable.Drawing.Drawing2D;
 using Portable.Drawing.Toolkit.Fonts;
@@ -41,7 +41,7 @@ namespace Portable.Drawing.Toolkit.Portable
         public static IEnumerable<string> ListKnownFonts()
         {
             EnsureFontCache();
-            return _fontCache.Keys.ToList();
+            return _fontCache.Keys.OrderBy(s => s).ToList();
         }
 
         private static void EnsureFontCache()
@@ -51,8 +51,13 @@ namespace Portable.Drawing.Toolkit.Portable
                 // Try the path where dotnet thinks the fonts should be
                 // and try some other locations, as the dotnet one is often just ~/.fonts on Linux
                 var possiblePaths = new []{
+                    // Fonts stored alongside the exe
+                    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                    // User fonts in Windows
                     Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile, Environment.SpecialFolderOption.DoNotVerify), "AppData/Local/Microsoft/Windows/Fonts/"),
+                    // Standard font directory according to dotnet (Windows & Linux)
                     Environment.GetFolderPath(Environment.SpecialFolder.Fonts, Environment.SpecialFolderOption.DoNotVerify),
+                    // Common font locations in Linux
                     "/usr/share/fonts/",
                     "/usr/local/share/fonts",
                     "/usr/X11R6/lib/X11/fonts/"
