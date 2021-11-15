@@ -16,6 +16,7 @@ namespace Form8snCore.DataExtraction
             {
                 case null:
                 case DisplayFormatType.None:
+                case DisplayFormatType.RenderImage:
                     return str;
 
                 case DisplayFormatType.DateFormat:
@@ -51,7 +52,7 @@ namespace Form8snCore.DataExtraction
             
             if (!decimal.TryParse(str, out var value)) return null;
             
-            var dpKey = nameof(NumberDisplayParams.DecimalPlaces);
+            var dpKey = nameof(FractionalDisplayParams.DecimalPlaces);
             var dpStr = param.ContainsKey(dpKey) ? param[dpKey] : "2";
             if (!int.TryParse(dpStr, out var decimalPlaces)) decimalPlaces = 2;
             if (decimalPlaces < 0 || decimalPlaces > 20) decimalPlaces = 2;

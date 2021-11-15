@@ -19,5 +19,10 @@ namespace BasicImageFormFiller.ModuleScreens
             if (fileName is null) throw new Exception("Invalid file path");
             return File.OpenRead(Path.Combine(_baseDir, fileName));
         }
+
+        public Stream? LoadUrl(string? targetUrl)
+        {
+            return null; // not supported in the WinForm prototype
+        }
     }
 }

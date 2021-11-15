@@ -28,15 +28,22 @@ namespace Form8snCore.DataExtraction
         /// <param name="pageIndex">Page definition index</param>
         /// <param name="runningTotals"></param>
         /// <returns>String to render, or null if not applicable</returns>
-        public string? FindBoxData(TemplateBox box, int pageIndex, Dictionary<string, decimal> runningTotals)
+        public string? TryFindBoxData(TemplateBox box, int pageIndex, Dictionary<string, decimal> runningTotals)
         {
-            if (box.MappingPath == null) return null;
-            
-            var filters = JoinProjectAndPageFilters(pageIndex);
+            try
+            {
+                if (box.MappingPath == null) return null;
 
-            var obj = MappingActions.ApplyFilter(MappingType.None, _emptyParams, box.MappingPath, _originalPath, filters, _data, _repeatData, runningTotals);
+                var filters = JoinProjectAndPageFilters(pageIndex);
 
-            return obj?.ToString();
+                var obj = MappingActions.ApplyFilter(MappingType.None, _emptyParams, box.MappingPath, _originalPath, filters, _data, _repeatData, runningTotals);
+
+                return obj?.ToString();
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private Dictionary<string, MappingInfo> JoinProjectAndPageFilters(int pageIndex)
@@ -98,13 +105,19 @@ namespace Form8snCore.DataExtraction
         }
 
         /// <summary>
-        /// Returns true if this box requires the page count to be known.
+        /// Returns true if this box requires special handling -- such as the page count to be known, or image embedding
         /// </summary>
-        public bool IsPageValue(TemplateBox box, out DocumentBoxType type)
+        public bool IsSpecialValue(TemplateBox box, out DocumentBoxType type)
         {
             type = DocumentBoxType.Normal;
             if (box.MappingPath == null || box.MappingPath.Length != 2) return false;
-            
+
+            if (box.DisplayFormat?.Type == DisplayFormatType.RenderImage)
+            {
+                type = DocumentBoxType.EmbedJpegImage;
+                return true;
+            }
+
             var filter = box.MappingPath[0];
             if (filter != "P") return false;
             

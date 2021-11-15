@@ -7,6 +7,7 @@ namespace Form8snCore.Rendering
         CurrentPageNumber,
         TotalPageCount,
         RepeatingPageNumber,
-        RepeatingPageTotalCount
+        RepeatingPageTotalCount,
+        EmbedJpegImage
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Form8snCore;
 using Form8snCore.FileFormats;
@@ -16,6 +17,7 @@ namespace WebFormFiller.ServiceStubs
     public class FileDatabaseStub : IFileSource
     {
         public const string StorageDirectory = @"C:\Temp\WebFormFiller";
+        private static readonly HttpClient _client = new HttpClient();
 
         
         /// <summary>
@@ -28,7 +30,27 @@ namespace WebFormFiller.ServiceStubs
             
             return File.OpenRead(Path.Combine(StorageDirectory, fileName));
         }
-        
+
+        /// <summary>
+        /// Load the file at a given URL as a stream, or null if it can't be loaded.
+        /// This is used to load embedded images into files.
+        /// </summary>
+        public Stream? LoadUrl(string? targetUrl)
+        {
+            try
+            {
+                using var src = Sync.Run(() => _client.GetStreamAsync(targetUrl));
+                var ms = new MemoryStream();
+                Sync.Run(()=>src.CopyToAsync(ms));
+                ms.Seek(0, SeekOrigin.Begin);
+                return ms;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         /// <summary>
         /// List all the document template projects available
         /// </summary>

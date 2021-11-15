@@ -23,6 +23,10 @@ namespace Form8snCore.FileFormats
         [Description("Format as a number, displaying only the decimal fraction")]
         [UsesType(typeof(FractionalDisplayParams))]
         Fractional,
+        
+        [Description("Data URL to a JPEG image")]
+        [UsesType(typeof(EmptyDisplayParams))]
+        RenderImage
     }
 
 

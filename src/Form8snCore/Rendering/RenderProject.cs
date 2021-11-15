@@ -242,17 +242,21 @@ namespace Form8snCore.Rendering
             return Result.Success(docPage);
         }
 
+        /// <summary>
+        /// Gather the data available for a single template box.
+        /// </summary>
         private static Result<DocumentBox?> PrepareBox(DataMapper mapper, TemplateBox box, Dictionary<string,decimal> runningTotals, int pageIndex)
         {
             try
             {
                 if (box.MappingPath is null) return Result.Failure<DocumentBox?>("Box has no mapping path"); 
-                if (mapper.IsPageValue(box, out var type))
+                var str = mapper.TryFindBoxData(box, pageIndex, runningTotals);
+                
+                if (mapper.IsSpecialValue(box, out var type))
                 {
-                    return Result.Success<DocumentBox?>(new DocumentBox(box) { BoxType = type });
+                    return Result.Success<DocumentBox?>(new DocumentBox(box) { BoxType = type, RenderContent = str});
                 }
 
-                var str = mapper.FindBoxData(box, pageIndex, runningTotals);
                 if (str == null)
                 {
                     if (box.IsRequired) return Result.Failure<DocumentBox?>($"Required data was not found at [{string.Join(".",box.MappingPath)}]");
@@ -387,10 +391,38 @@ namespace Form8snCore.Rendering
             return transformed ?? str;
         }
 
+        /// <summary>
+        /// Draw the prepared box to a PDF page
+        /// </summary>
         private Result<Nothing> RenderBox(XFont baseFont, KeyValuePair<string, DocumentBox> boxDef, double fx, double fy, XGraphics gfx, DocumentPage pageToRender, int pageIndex, int pageTotal)
         {
             var box = boxDef.Value!;
             var font = (box.Definition.BoxFontSize != null) ? GetFont(box.Definition.BoxFontSize.Value) : baseFont;
+            
+            
+            // boxes are defined in terms of the background image pixels or existing PDF page, so we need to convert
+            var boxWidth = box.Definition.Width * fx;
+            var boxHeight = box.Definition.Height * fy;
+            var space = new XRect(box.Definition.Left * fx, box.Definition.Top * fy, boxWidth, boxHeight);
+            
+            // Handle the special case of embedding an image
+            if (box.BoxType == DocumentBoxType.EmbedJpegImage)
+            {
+                if (string.IsNullOrWhiteSpace(box.RenderContent!)) return Result.Success(); // empty data is considered OK
+                try
+                {
+                    var jpegStream = _files.LoadUrl(box.RenderContent);
+                    if (jpegStream is null) return Result.Success(); // Embedded images are always considered optional
+                    var img = XImage.FromStream(jpegStream);
+                    gfx.DrawImage(img, space);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                    // Nothing. Embedded images are always considered optional
+                }
+                return Result.Success();
+            }
 
             // Read data, or pick a special type
             var str = box.BoxType switch
@@ -409,10 +441,6 @@ namespace Form8snCore.Rendering
 
             if (str == null) return Result.Success(); // empty data is considered OK
 
-            // boxes are defined in terms of the background image pixels, so we need to convert
-            var boxWidth = box.Definition.Width * fx;
-            var boxHeight = box.Definition.Height * fy;
-            var space = new XRect(box.Definition.Left * fx, box.Definition.Top * fy, boxWidth, boxHeight);
             var align = MapAlignments(box.Definition);
 
             RenderTextInBox(font, gfx, box.Definition, fx, fy, str, space, align);
