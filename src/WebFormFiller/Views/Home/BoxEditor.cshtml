@@ -83,6 +83,24 @@
     </div>
 </div>
 
+@* DATA FILTER EDITING (this is populated from 'FilterEditor.cshtml' and driven by 'boxEditor.js') *@
+<div class="modal" id="EditTemplateBox_DataFilter">
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="modal-title h5">Data filter</div>
+        </div>
+        <div class="modal-body">
+            <div class="content" id="EditTemplateBox_DataFilter_Content">
+                Failed to load from server!
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" onclick="closeDataFilterModal()">Cancel</button>
+            <button type="button" onclick="saveDataFilterChanges()">Save</button>
+        </div>
+    </div>
+</div>
+
 @* DATA MAPPING EDITING (this is populated from 'DataPathPicker.cshtml' and driven by 'boxEditor.js') *@
 <div class="modal" id="EditTemplateBox_DataMap">
     <div class="modal-container">
@@ -114,24 +132,6 @@
         <div class="modal-footer">
             <button type="button" onclick="closeDisplayFormatModal()">Cancel</button>
             <button type="button" onclick="saveDisplayFormatChanges()">OK</button>
-        </div>
-    </div>
-</div>
-
-@* DISPLAY FORMAT EDITING (this is populated from 'FilterEditor.cshtml' and driven by 'boxEditor.js') *@
-<div class="modal" id="EditTemplateBox_DataFilter">
-    <div class="modal-container">
-        <div class="modal-header">
-            <div class="modal-title h5">Data filter</div>
-        </div>
-        <div class="modal-body">
-            <div class="content" id="EditTemplateBox_DataFilter_Content">
-                Failed to load from server!
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button type="button" onclick="closeDataFilterModal()">Cancel</button>
-            <button type="button" onclick="saveDataFilterChanges()">Save</button>
         </div>
     </div>
 </div>

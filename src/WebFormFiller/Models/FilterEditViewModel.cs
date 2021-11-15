@@ -42,6 +42,7 @@ namespace WebFormFiller.Models
                 PageIndex = pageIndex ?? -1,
                 DocumentId = docId,
                 FilterKey = filterKey,
+                NewFilterName = filterKey,
                 DataFilterType = theFilter.MappingType.ToString(),
                 SourcePath = string.Join(".", theFilter.DataPath ?? Array.Empty<string>()),
                 
@@ -71,10 +72,13 @@ namespace WebFormFiller.Models
             };
         }
 
-        public void CopyTo(MappingInfo theFilter)
+        public void CopyTo(Dictionary<string, MappingInfo> filterSet)
         {
+            if (string.IsNullOrWhiteSpace(FilterKey) || !filterSet.ContainsKey(FilterKey)) return;
+            
+            var theFilter = filterSet[FilterKey!];
             theFilter.MappingType = ParseMappingType();
-            theFilter.DataPath = SourcePath.Split('.');
+            theFilter.DataPath = string.IsNullOrWhiteSpace(SourcePath) ? Array.Empty<string>() : SourcePath.Split('.');
             
             var p = new Dictionary<string, string>();
             
@@ -99,6 +103,14 @@ namespace WebFormFiller.Models
             TryMapTo(p, AllAsNumberThousandsSeparator, nameof(NumberMappingParams.ThousandsSeparator));
             
             theFilter.MappingParameters = p;
+            
+            // If filter name has been changed, check it's valid and update
+            var newName = Strings.CleanKeyName(NewFilterName);
+            if (!string.IsNullOrWhiteSpace(newName) && newName != FilterKey && !filterSet.ContainsKey(newName))
+            {
+                filterSet.Add(newName, theFilter);
+                filterSet.Remove(FilterKey);
+            }
         }
 
         /// <summary>
@@ -124,6 +136,7 @@ namespace WebFormFiller.Models
         public string? AllAsNumberDecimalSeparator { get; set; }
         public string? AllAsNumberThousandsSeparator { get; set; }
         public string? AllAsNumberDecimalPlaces { get; set; }
+        public string? NewFilterName { get; set; }
 
 
         private static SelectListItem SelectorItemForEnum(EnumOption e)

@@ -1,7 +1,11 @@
 ﻿@model WebFormFiller.Models.FilterEditViewModel
-@{ Layout = null; }
+@{ 
+    Layout = null;
+    var onPage = Model!.PageIndex >= 0 ? "true" : "false";
+}
 @* ReSharper disable AssignNullToNotNullAttribute *@
 @* ReSharper disable PossibleNullReferenceException *@
+@* ReSharper disable CSharpWarnings::CS8602 *@
 
 @* NOTE - classes are used by the scripts in boxEditor.js to update display and read value.
 
@@ -16,6 +20,20 @@
     <input type="hidden" asp-for="@Model.FilterKey" value="@Model.FilterKey"/>
     <input type="hidden" asp-for="@Model.Version" value="@Model.Version"/>
 
+    
+    @* FILTER NAME / KEY *@
+    <div class="form-group">
+        <label class="form-label" asp-for="@Model.NewFilterName">Filter Name (must be unique)</label>
+        <input class="form-input" type="text" asp-for="@Model.NewFilterName" placeholder="Name" value="@Model.FilterKey">
+    </div>
+
+    @* SOURCE DATA *@
+    <div class="form-group">
+        <label class="form-label" asp-for="@Model.SourcePath">Data Path</label>
+        <button id="DataPathPickBtn" type="button" onclick="showDataPickerModal('SourcePath', true, @onPage)">Pick Data</button>
+        <input class="form-input" type="text" asp-for="@Model.SourcePath" value="@Model.SourcePath">
+    </div>
+    
     @* FILTER TYPE *@
     <div class="form-group">
         <label class="form-label" asp-for="@Model.DataFilterType">Output filter type</label>
@@ -115,11 +133,13 @@
     @* SAME *@
     <div class="form-group data-filter-detail display-IfElse">
         <label class="form-label" asp-for="@Model.IfElseMapSame">Data to output if Value and input data are the same</label>
+        <button id="IfElseMapSamePickBtn" type="button" onclick="showDataPickerModal('IfElseMapSame', true, @onPage)">Pick Data</button>
         <input class="form-input format-param-value" type="text" asp-for="@Model.IfElseMapSame" value="@Model.IfElseMapSame">
     </div>
     @* DIFFERENT *@
     <div class="form-group data-filter-detail display-IfElse">
         <label class="form-label" asp-for="@Model.IfElseMapDifferent">Data to output if Value and input data are different</label>
+        <button id="IfElseMapDifferentPickBtn" type="button" onclick="showDataPickerModal('IfElseMapDifferent', true, @onPage)">Pick Data</button>
         <input class="form-input format-param-value" type="text" asp-for="@Model.IfElseMapDifferent" value="@Model.IfElseMapDifferent">
     </div>
     

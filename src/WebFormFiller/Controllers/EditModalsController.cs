@@ -113,10 +113,8 @@ namespace WebFormFiller.Controllers
             if (model.FilterKey is null) return BadRequest()!;
             if (!filterSet.ContainsKey(model.FilterKey)) return BadRequest()!;
             
-            var theFilter = filterSet[model.FilterKey];
-            
             // Copy new values across
-            model.CopyTo(theFilter);
+            model.CopyTo(filterSet);
 
             // Write back to store
             FileDatabaseStub.SaveDocumentTemplate(existing, model.DocumentId);
