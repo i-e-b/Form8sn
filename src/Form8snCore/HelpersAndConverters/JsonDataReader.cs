@@ -98,7 +98,7 @@ namespace Form8snCore.HelpersAndConverters
         private static void AddPageNumbers(ICollection<DataNode> dataNodes, string[]? repeaterPath)
         {
             const string root = "page-num";
-            var pagesNode = new DataNode { Text = "Page info", Root = root, Depth = 0, ForeColor = ColorSteelBlue };
+            var pagesNode = new DataNode { Text = "Page info", Root = root, Depth = 0, ForeColor = ColorSteelBlue, Expanded = true };
             
             
             pagesNode.Nodes.Add(new DataNode
@@ -173,7 +173,7 @@ namespace Form8snCore.HelpersAndConverters
                 Text = "Page Repeat Data",
                 DataPath = "D",
                 BackColor = ColorLinen,
-                ForeColor = ColorBrown
+                ForeColor = ColorBrown, Depth = 0, Expanded = true
             };
             
             var sample = MappingActions.ApplyFilter(
@@ -273,7 +273,7 @@ namespace Form8snCore.HelpersAndConverters
             );
             if (repeatData is ArrayList list) repeatData = list[0];
             
-            var filters = new DataNode {Text = "Page Filters", Root=root, Name = "P", DataPath = Strings.FilterMarker, ForeColor = ColorGrey, CanBePicked = false};
+            var filters = new DataNode {Text = "Page Filters", Root=root, Name = "P", DataPath = Strings.FilterMarker, ForeColor = ColorGrey, CanBePicked = false, Depth = 0, Expanded = true};
             foreach (var filter in thePage.PageDataFilters)
             {
                 if (filter.Value is null || filter.Key is null) continue;
@@ -310,7 +310,7 @@ namespace Form8snCore.HelpersAndConverters
         {
             const string root = "data-filters";
             var filters = new DataNode {
-                Text = "Filters", Root = root, Name = "#", DataPath = Strings.FilterMarker, ForeColor = ColorGrey, CanBePicked = false
+                Text = "Filters", Root = root, Name = "#", DataPath = Strings.FilterMarker, ForeColor = ColorGrey, CanBePicked = false, Depth = 0, Expanded = true
             };
             foreach (var filter in index.DataFilters)
             {

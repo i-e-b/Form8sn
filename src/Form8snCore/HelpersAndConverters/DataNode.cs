@@ -112,7 +112,9 @@ namespace Form8snCore.HelpersAndConverters
                 return "hidden";
             }
         }
-        
+
+        public override string ToString() => Text;
+
         private string GenerateIdString()
         {
             if (!(_idString is null)) return _idString;

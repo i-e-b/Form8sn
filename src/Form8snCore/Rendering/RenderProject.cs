@@ -411,6 +411,7 @@ namespace Form8snCore.Rendering
                 if (string.IsNullOrWhiteSpace(box.RenderContent!)) return Result.Success(); // empty data is considered OK
                 try
                 {
+                    _loadingTimer.Start();
                     var jpegStream = _files.LoadUrl(box.RenderContent);
                     if (jpegStream is null) return Result.Success(); // Embedded images are always considered optional
                     var img = XImage.FromStream(jpegStream);
@@ -421,6 +422,11 @@ namespace Form8snCore.Rendering
                     Console.WriteLine(ex);
                     // Nothing. Embedded images are always considered optional
                 }
+                finally
+                {
+                    _loadingTimer.Stop();
+                }
+
                 return Result.Success();
             }
 

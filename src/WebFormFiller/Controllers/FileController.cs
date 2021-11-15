@@ -33,7 +33,7 @@ namespace WebFormFiller.Controllers
             var ms = new MemoryStream();
             
            var info = new RenderProject(new FileDatabaseStub()).ToStream(ms, sampleData, document); 
-           Console.WriteLine(info.ToString());
+           Console.WriteLine($"Render success: {info.Success}; Overall time: {info.OverallTime}; Time loading artefacts: {info.LoadingTime}; Message: {(info.ErrorMessage??"<none>")}.");
            return File(ms, "application/pdf")!;
         }
     }
