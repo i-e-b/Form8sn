@@ -36,14 +36,14 @@
     
     @* FILTERS LIST *@
     <h6>Document data filters</h6>
-    <button id="addDocumentFilterButton" type="button" onclick="addNewDocumentFilter()">Add</button>
+    <button id="addDocumentFilterButton" type="button" onclick="addNewDataFilter()">Add</button>
     <dl>
     @foreach (var filter in Model.Filters)
     {
         <dt>@filter.Key</dt>
         <dd>@filter.Value.MappingType.ToString() &mdash; 
-            <button id="editDocumentFilterButton" type="button" onclick="editDocumentFilter('@(filter.Key)')">Edit</button>
-            <button id="deleteDocumentFilterButton" type="button" onclick="deleteDocumentFilter('@(filter.Key)')">Delete</button>
+            <button id="editDocumentFilterButton" type="button" onclick="editDataFilter('@(filter.Key)')">Edit</button>
+            <button id="deleteDocumentFilterButton" type="button" onclick="deleteDataFilter('@(filter.Key)')">Delete</button>
         </dd>
     }</dl>
 </form>

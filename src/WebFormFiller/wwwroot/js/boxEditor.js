@@ -279,23 +279,37 @@ function closeDocumentInfoModal(){
     if (deadContent) deadContent.innerHTML = "Loading...";
 }
 
-function addNewDocumentFilter(){
+//////////////////////////////////////////////////////////////////////////////////////////////////// Data Filters
+function addNewDataFilter(pageIdx){
     if (!addFilterUrl) {console.log("addFilterUrl is not bound"); return;}
     
-    serverCallback(addFilterUrl, 'GET', function(){
-        showDocumentInfoModal(); // reload the modal
+    let url = addFilterUrl;
+    if (typeof pageIdx != 'undefined'){
+        url += `&pageIdx=${pageIdx}`;
+    }
+    
+    serverCallback(url, 'GET', function(){
+        // reload the modal
+        if (typeof pageIdx != 'undefined') {
+            showPageInfoModal();
+        } else {
+            showDocumentInfoModal();
+        }
     }, function(evt){
         console.log("Server call to add filter failed");
         console.dir(evt);
     });
 }
-function editDocumentFilter(filterKey){
+function editDataFilter(filterKey, pageIdx){
     if (!filterEditPartialUrl) {console.log("filterEditPartialUrl is not bound");return;}
 
     let modal = document.getElementById('EditTemplateBox_DataFilter');
     if (!modal) return;
     
     let url = `${filterEditPartialUrl}&filterKey=${encodeURIComponent(filterKey)}`;
+    if (typeof pageIdx != 'undefined'){
+        url += `&pageIndex=${pageIdx}`;
+    }
 
     loadPartialToModal(url,
         'EditTemplateBox_DataFilter_Content', function () {
@@ -305,13 +319,21 @@ function editDocumentFilter(filterKey){
             modal.classList.add("active"); // Document info screen might need to read all system fonts
         });
 }
-function deleteDocumentFilter(filterKey){
+function deleteDataFilter(filterKey, pageIdx){
     if (!deleteFilterUrl) {console.log("deleteFilterUrl is not bound"); return;}
 
     let url = `${deleteFilterUrl}&name=${encodeURIComponent(filterKey)}`;
+    if (typeof pageIdx != 'undefined'){
+        url += `&pageIdx=${pageIdx}`;
+    }
     
     serverCallback(url, 'GET', function(){
-        showDocumentInfoModal(); // reload the modal
+        // reload the modal
+        if (typeof pageIdx != 'undefined') {
+            showPageInfoModal();
+        } else {
+            showDocumentInfoModal();
+        }
     }, function(evt){
         console.log("Server call to delete filter failed");
         console.dir(evt);

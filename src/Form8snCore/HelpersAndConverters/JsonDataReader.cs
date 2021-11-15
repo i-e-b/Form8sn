@@ -254,13 +254,13 @@ namespace Form8snCore.HelpersAndConverters
         
         private static void AddPageDataFilters(ICollection<DataNode> dataNodes, IndexFile index, object data, int? pageIndex, bool markMultiple)
         {
+            const string root = "page-data-filters";
             if (pageIndex is null) return;
             if (pageIndex.Value < 0 || pageIndex.Value >= index.Pages.Count) return;
             
             var thePage = index.Pages[pageIndex.Value];
             if (thePage is null) return;
             
-            const string root = "page-data";
             var repeatData = MappingActions.ApplyFilter(
                 MappingType.None,
                 new Dictionary<string, string>(),
@@ -308,7 +308,7 @@ namespace Form8snCore.HelpersAndConverters
         
         private static void AddDataFilters(ICollection<DataNode> dataNodes, IndexFile index, object data, bool markMultiple)
         {
-            const string root = "page-filters";
+            const string root = "data-filters";
             var filters = new DataNode {
                 Text = "Filters", Root = root, Name = "#", DataPath = Strings.FilterMarker, ForeColor = ColorGrey, CanBePicked = false
             };

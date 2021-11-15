@@ -10,10 +10,24 @@ namespace Form8snCore.HelpersAndConverters
         /// <summary>
         /// Returns true if the old and new keys are different, and the new key is valid as part of a rename
         /// </summary>
-        public static bool IsValidRename(TemplatePage page, string oldKey, string? newKey)
+        public static bool IsValidBoxRename(TemplatePage page, string oldKey, string? newKey)
         {
             if (string.IsNullOrWhiteSpace(newKey!)) return false; // new name is junk
             if (page.Boxes.ContainsKey(newKey)) return false; // name is already in use
+            
+            return newKey != oldKey;
+        }
+        
+        /// <summary>
+        /// Returns true if the old and new keys are difference, and the the keys is valid as part of a rename.
+        /// If the pageIdx is null, this checks for document-wide filters
+        /// </summary>
+        public static bool IsValidFilterRename(IndexFile project, int? pageIdx, string oldKey, string? newKey)
+        {
+            var filterSet = project.PickFilterSet(pageIdx);
+            if (filterSet is null) return false;
+            if (string.IsNullOrWhiteSpace(newKey!)) return false; // new name is junk
+            if (filterSet.ContainsKey(newKey)) return false; // name is already in use
             
             return newKey != oldKey;
         }

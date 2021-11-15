@@ -7,6 +7,6 @@ namespace WebFormFiller.Models
     public class DataSourceViewModel
     {
         public IEnumerable<DataNode> Nodes { get; set; } = Array.Empty<DataNode>();
-        public string Target { get; set; }
+        public string Target { get; set; } = "";
     }
 }

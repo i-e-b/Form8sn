@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using Form8snCore.FileFormats;
 
 namespace WebFormFiller.Models
@@ -25,7 +27,8 @@ namespace WebFormFiller.Models
                 PageHeightMillimetres = Math.Round(thePage.HeightMillimetres, 1),
                 
                 PageRepeats = thePage.RepeatMode.Repeats,
-                RepeatDataPath = string.Join('.', thePage.RepeatMode.DataPath??Array.Empty<string>())
+                RepeatDataPath = string.Join('.', thePage.RepeatMode.DataPath??Array.Empty<string>()),
+                Filters = thePage.PageDataFilters
             };
         }
 
@@ -63,8 +66,9 @@ namespace WebFormFiller.Models
         public int Version { get; set; }
         public string? Name { get; set; } = "";
         public string? Notes { get; set; }
-        
-        
+        public IDictionary<string, MappingInfo> Filters { get; set; } = new Dictionary<string, MappingInfo>();
+
+
         private static int? ParseOrNull(string? baseFontSize)
         {
             if (baseFontSize is null) return null;

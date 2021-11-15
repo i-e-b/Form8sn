@@ -38,7 +38,7 @@ namespace WebFormFiller.Controllers
                 prev = oldPath.Split('.');
             }
 
-            var tree = JsonDataReader.BuildDataSourcePicker(project, sampleData, prev, repeat, 4, multiplesCanBePicked);
+            var tree = JsonDataReader.BuildDataSourcePicker(project, sampleData, prev, repeat, pageIndex, multiplesCanBePicked);
             var list = JsonDataReader.FlattenTree(tree);
 
             var model = new DataSourceViewModel
@@ -114,7 +114,7 @@ namespace WebFormFiller.Controllers
             if (!filterSet.ContainsKey(model.FilterKey)) return BadRequest()!;
             
             // Copy new values across
-            model.CopyTo(filterSet);
+            model.CopyTo(existing);
 
             // Write back to store
             FileDatabaseStub.SaveDocumentTemplate(existing, model.DocumentId);

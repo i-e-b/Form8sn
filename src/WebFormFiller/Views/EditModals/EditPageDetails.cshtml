@@ -59,4 +59,18 @@
         <label class="form-label" asp-for="@Model.Notes">Notes</label>
         <textarea class="form-input" asp-for="@Model.Notes">@Model.Notes</textarea>
     </div>
+    
+    
+    @* FILTERS LIST *@
+    <h6>Document data filters</h6>
+    <button id="addDocumentFilterButton" type="button" onclick="addNewDataFilter(@Model.PageIndex)">Add</button>
+    <dl>
+    @foreach (var filter in Model.Filters)
+    {
+        <dt>@filter.Key</dt>
+        <dd>@filter.Value.MappingType.ToString() &mdash; 
+            <button id="editDocumentFilterButton" type="button" onclick="editDataFilter('@(filter.Key)', @Model.PageIndex)">Edit</button>
+            <button id="deleteDocumentFilterButton" type="button" onclick="deleteDataFilter('@(filter.Key)', @Model.PageIndex)">Delete</button>
+        </dd>
+    }</dl>
 </form>

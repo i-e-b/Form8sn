@@ -424,7 +424,8 @@ namespace Form8snCore.DataExtraction
             var root = path[0];
             var pathSkip = 1;
 
-            if (root == "#")
+            // Empty root means plain data, otherwise, we expect '#', 'D', 'P'
+            if (root == "#") // Data filter
             {
                 if (path.Length < 2) return null;
                 var newFilter = pkg.RedirectFilter(path[1]);
@@ -433,12 +434,16 @@ namespace Form8snCore.DataExtraction
                 if (data == null) return null;
                 pathSkip = 2; // root and filter name
             }
-            else if (root == "D")
+            else if (root == "D") // Page repeat
             {
                 if (pkg.RepeaterData == null) throw new Exception("Was asked for repeat page data, but none was supplied");
                 if (path.Length < 2) return null;
                 data = pkg.RepeaterData;
                 pathSkip = 1; // root 'D'
+            }
+            else if (root == "P")
+            {
+                return GetPageInfoData(pkg);
             }
             else if (path[0] != "") throw new Exception($"Unexpected root marker: {path[0]}");
 
@@ -473,6 +478,19 @@ namespace Form8snCore.DataExtraction
             }
 
             return target;
+        }
+
+        private static object? GetPageInfoData(FilterState pkg)
+        {
+            if (pkg.SourcePath is null) return null;
+            if (pkg.SourcePath.Length < 2) return null;
+            switch (pkg.SourcePath[1])
+            {
+                case "PageGenerationDate":
+                    return DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                
+                default: return "Unmapped page info data: "+pkg.SourcePath[1];
+            }
         }
 
         private static object? ListOfDistinctValues(FilterState pkg)

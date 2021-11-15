@@ -102,16 +102,7 @@ namespace WebFormFiller.Models
             // First, handle renaming of box key
             if (string.IsNullOrWhiteSpace(BoxName)) BoxName = BoxKey;
             else BoxName = Strings.CleanKeyName(BoxName);
-            
-            if (EditChecks.IsValidRename(thePage, BoxKey, BoxName))
-            {
-                // Rename the box, fix existing 'depends-on' references
-                thePage.Boxes.Remove(BoxKey);
-                thePage.FixReferences(BoxKey, BoxName!);
-                thePage.Boxes.Add(BoxName!, theBox);
-                BoxKey = BoxName;
-            }
-            if (BoxKey is null) throw new Exception("Logic error");
+            if (BoxKey != BoxName ) BoxKey = RenameOperations.RenamePageBox(thePage, BoxKey, BoxName);
 
             // Handle depends-on links
             if (string.IsNullOrWhiteSpace(DependsOn)) theBox.DependsOn = null;

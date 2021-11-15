@@ -72,8 +72,10 @@ namespace WebFormFiller.Models
             };
         }
 
-        public void CopyTo(Dictionary<string, MappingInfo> filterSet)
+        public void CopyTo(IndexFile project)
         {
+            var filterSet = project.PickFilterSet(PageIndex);
+            if (filterSet is null) throw new Exception("Filter set 'CopyTo' lost reference to filter set");
             if (string.IsNullOrWhiteSpace(FilterKey) || !filterSet.ContainsKey(FilterKey)) return;
             
             var theFilter = filterSet[FilterKey!];
@@ -105,11 +107,9 @@ namespace WebFormFiller.Models
             theFilter.MappingParameters = p;
             
             // If filter name has been changed, check it's valid and update
-            var newName = Strings.CleanKeyName(NewFilterName);
-            if (!string.IsNullOrWhiteSpace(newName) && newName != FilterKey && !filterSet.ContainsKey(newName))
+            if (!string.IsNullOrWhiteSpace(NewFilterName) && NewFilterName != FilterKey)
             {
-                filterSet.Add(newName, theFilter);
-                filterSet.Remove(FilterKey);
+                FilterKey = RenameOperations.RenameDataFilter(project, PageIndex, FilterKey, NewFilterName);
             }
         }
 
