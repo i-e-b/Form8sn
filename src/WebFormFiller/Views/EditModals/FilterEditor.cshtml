@@ -143,4 +143,18 @@
         <input class="form-input format-param-value" type="text" asp-for="@Model.IfElseMapDifferent" value="@Model.IfElseMapDifferent">
     </div>
     
+        
+    @* ------ Join: JoinPathsMappingParams ------ *@
+    @* INFIX *@
+    <div class="form-group data-filter-detail display-Join">
+        <label class="form-label" asp-for="@Model.JoinInfix">Text to put between the two items (optional)</label>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.JoinInfix" value="@Model.JoinInfix">
+    </div>
+    @* EXTRA DATA *@
+    <div class="form-group data-filter-detail display-Join">
+        <label class="form-label" asp-for="@Model.JoinExtraData">Extra data to add to the end</label>
+        <button id="JoinExtraDataPickBtn" type="button" onclick="showDataPickerModal('JoinExtraData', true, @onPage)">Pick Data</button>
+        <input class="form-input format-param-value" type="text" asp-for="@Model.JoinExtraData" value="@Model.JoinExtraData">
+    </div>
+    
 </form>

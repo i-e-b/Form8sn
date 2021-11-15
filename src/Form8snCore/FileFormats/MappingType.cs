@@ -18,6 +18,10 @@ namespace Form8snCore.FileFormats
         [UsesType(typeof(TextMappingParams))]
         FixedValue,
         
+        [Description("Join a second data value to the selected path")]
+        [UsesType(typeof(JoinPathsMappingParams))]
+        Join,
+        
         [Description("Split a list into a list of sub-lists, each up to 'count' long")]
         [UsesType(typeof(MaxCountMappingParams))]
         SplitIntoN,
@@ -80,6 +84,14 @@ namespace Form8snCore.FileFormats
         public string? Same { get; set; } // this is secretly mapped to `PropertyGridDataPicker` in BasicImageFormFiller/EditForms/PropertyGridSpecialTypes/PropertyGridDataPicker.cs
         [Description("Data to output if Value and input data are different")]
         public string? Different { get; set; }
+    }
+    
+    
+    public class JoinPathsMappingParams {
+        [Description("Text to place between each item")]
+        public string Infix { get; set; } = "";
+        [Description("Data path to second item")]
+        public string? ExtraData { get; set; }
     }
 
     public class JoinMappingParams {

@@ -60,6 +60,9 @@ namespace WebFormFiller.Models
                 IfElseMapDifferent            = ReadParam(theFilter, nameof(IfElseMappingParams.Different)),
                 IfElseMapSame                 = ReadParam(theFilter, nameof(IfElseMappingParams.Same)),
                 
+                JoinInfix                     = ReadParam(theFilter, nameof(JoinPathsMappingParams.Infix)),
+                JoinExtraData                 = ReadParam(theFilter, nameof(JoinPathsMappingParams.ExtraData)),
+                
                 FixedText                     = ReadParam(theFilter, nameof(TextMappingParams.Text)),
                 
                 SkipCount                     = ReadParam(theFilter, nameof(SkipMappingParams.Count)),
@@ -93,6 +96,9 @@ namespace WebFormFiller.Models
             TryMapTo(p, IfElseMapSame                , nameof(IfElseMappingParams.Same));
             TryMapTo(p, IfElseMapDifferent           , nameof(IfElseMappingParams.Different));
             TryMapTo(p, IfElseExpectedValue          , nameof(IfElseMappingParams.ExpectedValue));
+            
+            TryMapTo(p, JoinInfix                    , nameof(JoinPathsMappingParams.Infix));
+            TryMapTo(p, JoinExtraData                , nameof(JoinPathsMappingParams.ExtraData));
             
             TryMapTo(p, ConcatInfix                  , nameof(JoinMappingParams.Infix));
             TryMapTo(p, ConcatPostfix                , nameof(JoinMappingParams.Postfix));
@@ -137,6 +143,8 @@ namespace WebFormFiller.Models
         public string? AllAsNumberThousandsSeparator { get; set; }
         public string? AllAsNumberDecimalPlaces { get; set; }
         public string? NewFilterName { get; set; }
+        public string? JoinInfix { get; set; }
+        public string? JoinExtraData { get; set; }
 
 
         private static SelectListItem SelectorItemForEnum(EnumOption e)

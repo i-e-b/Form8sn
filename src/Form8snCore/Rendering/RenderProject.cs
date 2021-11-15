@@ -430,7 +430,7 @@ namespace Form8snCore.Rendering
                 DocumentBoxType.Normal => box.RenderContent,
                 
                 // For the special values, we might want to re-apply the display format
-                DocumentBoxType.PageGenerationDate => TryApplyDisplayFormat(box, DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss")),
+                DocumentBoxType.PageGenerationDate => TryApplyDisplayFormat(box, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")),
                 DocumentBoxType.CurrentPageNumber => TryApplyDisplayFormat(box, (pageIndex + 1).ToString()),
                 DocumentBoxType.TotalPageCount => TryApplyDisplayFormat(box, pageTotal.ToString()),
                 DocumentBoxType.RepeatingPageNumber => TryApplyDisplayFormat(box, (pageToRender.RepeatIndex + 1).ToString()),

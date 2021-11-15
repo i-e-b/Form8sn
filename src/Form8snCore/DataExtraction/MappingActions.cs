@@ -90,6 +90,9 @@ namespace Form8snCore.DataExtraction
                 case MappingType.IfElse:
                     return ReturnIfElse(pkg);
                 
+                case MappingType.Join:
+                    return JoinValues(pkg);
+                
                 case MappingType.Distinct:
                     return ListOfDistinctValues(pkg);
                 
@@ -110,6 +113,34 @@ namespace Form8snCore.DataExtraction
                 
                 default: return "Not yet implemented";
             }
+        }
+
+        private static object? JoinValues(FilterState pkg)
+        {
+            if (pkg.Data == null || pkg.SourcePath == null || pkg.SourcePath.Length < 1) return null;
+            var param = pkg.Params;
+
+            object? GetMappedData(string s) => string.IsNullOrWhiteSpace(s) ? null : GetDataAtPath(pkg.NewPath(s.Split('.') ?? Array.Empty<string>()));
+
+            // Get the params.
+            // Get the data
+            // If data == expected return recurse success path, else recurse fail path
+            
+            var target = GetDataAtPath(pkg);
+            
+            var infixKey = nameof(JoinPathsMappingParams.Infix);
+            var infix = param.ContainsKey(infixKey) ? param[infixKey]??"" : "";
+            
+            var extraDataKey = nameof(JoinPathsMappingParams.ExtraData);
+            var extraDataPath = param.ContainsKey(extraDataKey) ? param[extraDataKey] : "";
+
+            if (string.IsNullOrWhiteSpace(extraDataPath!)) return target;
+            
+            var extraData =  GetMappedData(extraDataPath)?.ToString();
+            
+            if (string.IsNullOrWhiteSpace(extraData!)) return target;
+
+            return target + infix + extraData;
         }
 
         private static object? ReturnIfElse(FilterState pkg)
