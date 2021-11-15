@@ -730,7 +730,7 @@ function hitTestBoxes(page, mx, my) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// BOX PAINTING
-const drawSingleBox = function (def, name, xs, ys, validMapping) {
+function drawSingleBox(def, name, xs, ys, validMapping) {
     if (!def) {
         console.error("Invalid box def: " + JSON.stringify(def));
         return;
@@ -758,7 +758,7 @@ const drawSingleBox = function (def, name, xs, ys, validMapping) {
     boxCtx.textBaseline = 'top';
     boxCtx.fillText(name, Left * xs + 5, Top * xs + 5);
 }
-const drawActiveBox = function () {
+function drawActiveBox() {
     let width = activeBox.right - activeBox.left;
     let height = activeBox.bottom - activeBox.top;
     if (width < 1 || height < 1) return; // box is zero sized
@@ -791,6 +791,60 @@ const drawActiveBox = function () {
     boxCtx.textBaseline = 'top';
     boxCtx.fillText(activeBox.key, activeBox.left + 5, activeBox.top + 5);
 }
+function middleOfBox(box, xs, ys){
+    const {Width, Top, Height, Left} = box;
+    let x = (Left + (Width / 2)) * xs;
+    let y = (Top + (Height / 2)) * ys;
+    return {x:x, y:y}
+}
+function canvas_arrow(from, to, headSize) {
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const angle = Math.atan2( dy, dx );
+    boxCtx.beginPath();
+    boxCtx.moveTo( from.x, from.y );
+    boxCtx.lineTo( to.x, to.y );
+    boxCtx.stroke();
+    boxCtx.beginPath();
+    boxCtx.moveTo( to.x - headSize * Math.cos( angle - Math.PI / 6 ), to.y - headSize * Math.sin( angle - Math.PI / 6 ) );
+    boxCtx.lineTo( to.x, to.y );
+    boxCtx.lineTo( to.x - headSize * Math.cos( angle + Math.PI / 6 ), to.y - headSize * Math.sin( angle + Math.PI / 6 ) );
+    boxCtx.stroke();
+}
+function drawBoxDependency(active, from, to, xs, ys, r,g,b){
+    let midFrom = middleOfBox(from, xs, ys);
+    let midTo = middleOfBox(to, xs, ys);
+    
+    let headSize = 8;
+    
+    if (active) {
+        boxCtx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.8)`;
+        boxCtx.lineWidth = 2;
+        headSize = 10;
+    } else {
+        boxCtx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.3)`;
+        boxCtx.lineWidth = 1;
+    }
+    canvas_arrow(midFrom, midTo, headSize);
+}
+function drawOrderArrows(orderArrows, page, xs, ys){
+    if (!orderArrows.length || orderArrows.length < 2) return;
+    orderArrows.sort((a, b) => { // {order:(0|def.BoxOrder), key:name}
+        return a.order - b.order;
+    });
+
+    let prev = orderArrows[0]
+    for (let i = 1; i < orderArrows.length; i++) {
+        let current = orderArrows[i];
+        
+        let active = prev.key === activeBox.key || current.key === activeBox.key;
+        let from = page.Boxes[prev.key];
+        let to = page.Boxes[current.key];
+        drawBoxDependency(active, from, to, xs, ys,  0,0,0)
+        
+        prev = current;
+    }
+}
 function renderBoxes () {
     boxCtx.clearRect(0, 0, boxCanvas.width, boxCanvas.height);
     boxCtx.setTransform(1, 0, 0, 1, 0, 0);
@@ -809,13 +863,26 @@ function renderBoxes () {
 
     let xScale = boxCanvas.width / pageDef.WidthMillimetres;
     let yScale = boxCanvas.height / pageDef.HeightMillimetres;
+    let orderArrows = [];
 
     for (let name in pageDef.Boxes) {
         let def = pageDef.Boxes[name];
         let active = def.MappingPath && (def.MappingPath.length > 1);
         drawSingleBox(def, name, xScale, yScale, active);
+        
+        // If this box 'depends on' another, draw an arrow line between the two
+        if (def.DependsOn && pageDef.Boxes[def.DependsOn]) {
+            drawBoxDependency(name === activeBox.key, def, pageDef.Boxes[def.DependsOn], xScale, yScale, 0,80,100);
+        }
+        
+        // If this box is part of an order set, add it to the list we'll draw later
+        if (def.BoxOrder) {
+            orderArrows.push({order:(0|def.BoxOrder), key:name});
+        }
     }
 
+    drawOrderArrows(orderArrows, pageDef, xScale, yScale);
+    
     // Draw the 'active' box if one is being created
     drawActiveBox();
 }
