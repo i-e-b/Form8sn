@@ -61,9 +61,6 @@ function renderPage(num) {
     // Using promise to fetch the page
     pdfDoc.getPage(num).then(function (page) {
         const viewport = page.getViewport({scale: scale});
-        console.dir(viewport);
-        console.log(`Native PDF page size is ${viewport.height}x${viewport.width}`);
-
         pdfCanvas.height = viewport.height;
         pdfCanvas.width = viewport.width;
 
@@ -167,7 +164,7 @@ function serverCallback(url, verb, success, failure) {
 }
 function loadPartialToModal(url, targetId, nextAction) {
     let targetElement = document.getElementById(targetId);
-    if (!targetElement) {console.log(`Could not load from ${url}, as target element #${targetId} was not found`);return;}
+    if (!targetElement) {console.error(`Could not load from ${url}, as target element #${targetId} was not found`);return;}
     
     serverCallback(url, 'GET', function (evt, xhr) {
         targetElement.innerHTML = xhr.responseText;
@@ -180,7 +177,7 @@ function loadPartialToModal(url, targetId, nextAction) {
 function setValue(elementId, newValue){
     let elem = document.getElementById(elementId);
     if (elem) {elem.value = newValue;}
-    else {console.log(`Failed to copy value '${newValue}' in element #${elementId}`)}
+    else {console.error(`Failed to copy value '${newValue}' in element #${elementId}`)}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// Edit box
@@ -201,7 +198,7 @@ function showBoxEditModal() {
         return;
     }
     if (!boxEditPartialUrl) {
-        console.log('boxEditPartialUrl was not bound');
+        console.error('boxEditPartialUrl was not bound');
         return;
     }
 
@@ -245,7 +242,7 @@ function closeBoxEditModal() {
 //////////////////////////////////////////////////////////////////////////////////////////////////// Doc info
 function showDocumentInfoModal(){
     if (!docInfoPartialUrl) {
-        console.log('docInfoPartialUrl was not bound');
+        console.error('docInfoPartialUrl was not bound');
         return;
     }
     let modal = document.getElementById('EditDocument_DocumentInfo');
@@ -281,7 +278,7 @@ function closeDocumentInfoModal(){
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// Data Filters
 function addNewDataFilter(pageIdx){
-    if (!addFilterUrl) {console.log("addFilterUrl is not bound"); return;}
+    if (!addFilterUrl) {console.error("addFilterUrl is not bound"); return;}
     
     let url = addFilterUrl;
     if (typeof pageIdx != 'undefined'){
@@ -296,12 +293,12 @@ function addNewDataFilter(pageIdx){
             showDocumentInfoModal();
         }
     }, function(evt){
-        console.log("Server call to add filter failed");
+        console.error("Server call to add filter failed");
         console.dir(evt);
     });
 }
 function editDataFilter(filterKey, pageIdx){
-    if (!filterEditPartialUrl) {console.log("filterEditPartialUrl is not bound");return;}
+    if (!filterEditPartialUrl) {console.error("filterEditPartialUrl is not bound");return;}
 
     let modal = document.getElementById('EditTemplateBox_DataFilter');
     if (!modal) return;
@@ -320,7 +317,7 @@ function editDataFilter(filterKey, pageIdx){
         });
 }
 function deleteDataFilter(filterKey, pageIdx){
-    if (!deleteFilterUrl) {console.log("deleteFilterUrl is not bound"); return;}
+    if (!deleteFilterUrl) {console.error("deleteFilterUrl is not bound"); return;}
 
     let url = `${deleteFilterUrl}&name=${encodeURIComponent(filterKey)}`;
     if (typeof pageIdx != 'undefined'){
@@ -335,7 +332,7 @@ function deleteDataFilter(filterKey, pageIdx){
             showDocumentInfoModal();
         }
     }, function(evt){
-        console.log("Server call to delete filter failed");
+        console.error("Server call to delete filter failed");
         console.dir(evt);
     });
 }
@@ -345,7 +342,7 @@ function updateDataFilterVisibility(){
     let all = document.getElementsByClassName('data-filter-detail');
     let filterSrc = document.getElementById('DataFilterType');
 
-    if (!filterSrc) { console.log("filter set id missing"); return; }
+    if (!filterSrc) { console.error("filter set id missing"); return; }
     let pattern = "display-"+filterSrc.value;
 
     for(let i = 0; i < all.length; i++) {
@@ -382,7 +379,7 @@ function saveDataFilterChanges(){
 //////////////////////////////////////////////////////////////////////////////////////////////////// Page info
 function showPageInfoModal(){
     if (!pageInfoPartialUrl) {
-        console.log('docInfoPartialUrl was not bound');
+        console.error('docInfoPartialUrl was not bound');
         return;
     }
     let modal = document.getElementById('EditDocument_PageInfo');
@@ -423,7 +420,7 @@ function updateDisplayFormatVisibility(){
     let all = document.getElementsByClassName('format-filter-detail');
     let filterSrc = document.getElementById('FormatFilterType');
 
-    if (!filterSrc) { console.log("filter set id missing"); return; }
+    if (!filterSrc) { console.error("filter set id missing"); return; }
     let pattern = "display-"+filterSrc.value;
 
     for(let i = 0; i < all.length; i++) {
@@ -434,7 +431,7 @@ function updateDisplayFormatVisibility(){
 }
 function showDisplayFormatModal() {
     if (!activeBox.key) {return;}
-    if (!displayFormatPartialUrl) {console.log('displayFormatPartialUrl was not bound');return;}
+    if (!displayFormatPartialUrl) {console.error('displayFormatPartialUrl was not bound');return;}
 
     // Synthesise a url, then show the modal.
     let pageIdx = pageNum - 1;
@@ -453,14 +450,14 @@ function showDisplayFormatModal() {
 function saveDisplayFormatChanges(){
     let all = document.getElementsByClassName('format-param-value');
     let chosen = document.getElementById('FormatFilterType'); // in DisplayFormatEditor.cshtml
-    if (!chosen) {console.log('lost selected filter reference');return;}
+    if (!chosen) {console.error('lost selected filter reference');return;}
 
     let pattern = "display-"+chosen.value;
 
     let page = projectFile.Pages[pageNum - 1];
-    if (!page) {console.log('lost page reference');return;}
+    if (!page) {console.error('lost page reference');return;}
     let box = page.Boxes[activeBox.key];
-    if (!box) {console.log('lost box reference');return;}
+    if (!box) {console.error('lost box reference');return;}
     
     let newSettings = {Type:chosen.value, FormatParameters:{}}
     let description = chosen.value;
@@ -503,21 +500,21 @@ function closeDisplayFormatModal(){
 /////////////////////////////////////////////////////////////////////////////////////////////////// Data path
 function captureDataPickerResult(path, targetId){
     let target = document.getElementById(targetId); // in 'EditTemplateBox.cshtml'
-    if (!target) {console.log(`Lost capture target: '${targetId}'`);return;}
+    if (!target) {console.error(`Lost capture target: '${targetId}'`);return;}
     
     target.value = path.replace(/\x1F/g,".");
     
     closeDataPathPicker();
 }
 function showDataPickerModal(target, allowMultiple, noPage) {
-    if (!dataPickerPartialUrl) {console.log('dataPickerPartialUrl was not bound');return;}
+    if (!dataPickerPartialUrl) {console.error('dataPickerPartialUrl was not bound');return;}
     
     let targetId = target || 'DataPath';
     let targetElem = document.getElementById(targetId);
-    if (!targetElem) {console.log(`showDataPickerModal is bound to an element that was not present: '${targetId}'`);return;}
+    if (!targetElem) {console.error(`showDataPickerModal is bound to an element that was not present: '${targetId}'`);return;}
     
     let modal = document.getElementById('EditTemplateBox_DataMap');
-    if (!modal) {console.log("Lost modal: 'EditTemplateBox_DataMap'");return;}
+    if (!modal) {console.error("Lost modal: 'EditTemplateBox_DataMap'");return;}
 
     let pageIdx = pageNum - 1;
     let pathReq = encodeURIComponent(targetElem.value);
@@ -532,7 +529,7 @@ function showDataPickerModal(target, allowMultiple, noPage) {
 }
 function closeDataPathPicker() {
     let modal = document.getElementById('EditTemplateBox_DataMap');
-    if (!modal) {console.log("Lost modal 'EditTemplateBox_DataMap'");return;}
+    if (!modal) {console.error("Lost modal 'EditTemplateBox_DataMap'");return;}
 
     modal.classList.remove("active");
 
@@ -599,7 +596,7 @@ function tryUpdateActiveBox(sendChanges){
 
     req.onload = function (evt) {
         if (req.responseText !== 'OK') {
-            console.log("An error occurred while updating document template box location.");
+            console.error("An error occurred while updating document template box location.");
             console.dir(evt);
         }
     }
@@ -735,7 +732,7 @@ function hitTestBoxes(page, mx, my) {
 //////////////////////////////////////////////////////////////////////////////////////////////////// BOX PAINTING
 const drawSingleBox = function (def, name, xs, ys, validMapping) {
     if (!def) {
-        console.log("Invalid box def: " + JSON.stringify(def));
+        console.error("Invalid box def: " + JSON.stringify(def));
         return;
     }
     if (name === activeBox.key) return; // this box is selected. Don't render it here.
@@ -800,13 +797,13 @@ function renderBoxes () {
     boxCtx.translate(0.5, 0.5); // makes box edges a bit sharpers
 
     if (!projectFile.Pages) {
-        console.log("BAD DEFINITION");
+        console.error("Invalid index file - no page definitions found");
         console.dir(projectFile);
         return;
     }
     let pageDef = projectFile.Pages[pageNum - 1];
     if (!pageDef) {
-        console.log("Bad def on page " + pageNum);
+        console.error("Bad page definition for index " + (pageNum-1));
         return;
     }
 
@@ -923,7 +920,7 @@ function storeAndReloadProjectFile(next){
 
     req.onload = function (evt) {
         if (!(req.status >= 200 && req.status < 400)) {
-            console.log("An error occurred while loading document template definition: " + req.responseText);
+            console.error("An error occurred while loading document template definition: " + req.responseText);
             console.dir(evt);
         }
         reloadProjectFile(next);
@@ -933,12 +930,12 @@ function storeAndReloadProjectFile(next){
     req.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
 
     req.onerror = function (evt) {
-        console.log("An error occurred while loading document template definition.");
+        console.error("An error occurred while loading document template definition.");
         console.dir(evt);
         reloadProjectFile();
     };
     req.onabort = function (evt) {
-        console.log("Loading document template definition has been canceled by a user action.");
+        console.error("Loading document template definition has been canceled by a user action.");
         console.dir(evt);
         reloadProjectFile();
     };
@@ -955,7 +952,7 @@ function reloadProjectFile(next) {
             projectFile = req.response;
             if (next) {next();}
         } else {
-            console.log(`A ${req.status} error occurred while loading document template definition from ${projectJsonLoadUrl}`);
+            console.error(`A ${req.status} error occurred while loading document template definition from ${projectJsonLoadUrl}`);
             console.dir(evt);
         }
     }
@@ -964,11 +961,11 @@ function reloadProjectFile(next) {
     req.responseType = "json";
 
     req.onerror = function (evt) {
-        console.log("An error occurred while loading document template definition from "+projectJsonLoadUrl);
+        console.error("An error occurred while loading document template definition from "+projectJsonLoadUrl);
         console.dir(evt);
     };
     req.onabort = function (evt) {
-        console.log("Loading document template definition has been canceled by a user action.");
+        console.error("Loading document template definition has been canceled by a user action.");
         console.dir(evt);
     };
 

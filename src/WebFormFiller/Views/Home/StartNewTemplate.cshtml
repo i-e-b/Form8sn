@@ -7,8 +7,9 @@
 
 <h2>Create new template</h2>
 <form asp-action="StartNewTemplate" method="post" enctype="multipart/form-data">
+    <p>The name here will be stored inside generated PDFs as the document title. It can be changed later.</p>
     <input asp-for="@Model!.Title" type="text" value="@Model!.Title"/>
     <input asp-for="@Model!.Upload" type="file"/>
-    
-    <button type="submit">Submit</button>
+
+    <button type="submit">Create</button>
 </form>

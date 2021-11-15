@@ -37,6 +37,6 @@
         // Update recorded state
         button.setAttribute("aria-expanded", "true");
     } else {
-        console.log(`Toggle binding error: ${btnID}`);
+        console.error(`Toggle binding error: ${btnID}`);
     }
 }
