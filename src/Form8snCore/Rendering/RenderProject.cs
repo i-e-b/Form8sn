@@ -311,7 +311,7 @@ namespace Form8snCore.Rendering
                 if (box.MappingPath is null) return Result.Failure<DocumentBox?>("Box has no mapping path"); 
                 var str = mapper.TryFindBoxData(box, pageIndex, runningTotals);
                 
-                if (mapper.IsSpecialValue(box, out var type))
+                if (DataMapper.IsSpecialValue(box, out var type))
                 {
                     return Result.Success<DocumentBox?>(new DocumentBox(box) { BoxType = type, RenderContent = str});
                 }

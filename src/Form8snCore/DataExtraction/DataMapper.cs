@@ -46,22 +46,6 @@ namespace Form8snCore.DataExtraction
             }
         }
 
-        private Dictionary<string, MappingInfo> JoinProjectAndPageFilters(int pageIndex)
-        {
-            var filters = _project.DataFilters;
-            if (_project.Pages[pageIndex]!.PageDataFilters.Count <= 0) return filters;
-            
-            var pageFilters = _project.Pages[pageIndex]!.PageDataFilters;
-            filters = new Dictionary<string, MappingInfo>(filters);
-            foreach (var filter in pageFilters)
-            {
-                if (filters.ContainsKey(filter.Key)) filters[filter.Key] = filter.Value; // page specific over-rides general
-                else filters.Add(filter.Key, filter.Value);
-            }
-
-            return filters;
-        }
-
         /// <summary>
         /// Get data for a repeating page. Will return empty list if there is no data
         /// </summary>
@@ -70,7 +54,8 @@ namespace Form8snCore.DataExtraction
             var outp = new List<object>();
             if (dataPath == null) return outp;
             
-            var list = MappingActions.ApplyFilter(MappingType.None, _emptyParams, dataPath, null, _project.DataFilters, _data, null, null) as ArrayList;
+            var list = MappingActions.ApplyFilter(MappingType.None, _emptyParams, dataPath, null, _project.DataFilters, _data, null, null) 
+                as ArrayList;
             if (list == null) return outp;
 
             foreach (var item in list)
@@ -107,7 +92,7 @@ namespace Form8snCore.DataExtraction
         /// <summary>
         /// Returns true if this box requires special handling -- such as the page count to be known, or image embedding
         /// </summary>
-        public bool IsSpecialValue(TemplateBox box, out DocumentBoxType type)
+        public static bool IsSpecialValue(TemplateBox box, out DocumentBoxType type)
         {
             type = DocumentBoxType.Normal;
             if (box.MappingPath == null || box.MappingPath.Length != 2) return false;
@@ -124,5 +109,23 @@ namespace Form8snCore.DataExtraction
             if (!Enum.TryParse(box.MappingPath[1], out type)) return false;
             return true;
         }
+        
+        
+        private Dictionary<string, MappingInfo> JoinProjectAndPageFilters(int pageIndex)
+        {
+            var filters = _project.DataFilters;
+            if (_project.Pages[pageIndex]!.PageDataFilters.Count <= 0) return filters;
+            
+            var pageFilters = _project.Pages[pageIndex]!.PageDataFilters;
+            filters = new Dictionary<string, MappingInfo>(filters);
+            foreach (var filter in pageFilters)
+            {
+                if (filters.ContainsKey(filter.Key)) filters[filter.Key] = filter.Value; // page specific over-rides general
+                else filters.Add(filter.Key, filter.Value);
+            }
+
+            return filters;
+        }
+
     }
 }

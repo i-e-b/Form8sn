@@ -7,7 +7,7 @@ using Form8snCore.FileFormats;
 
 namespace Form8snCore.Tests.Helpers
 {
-    public static class SampleIndexFiles
+    public static class SampleProjectFiles
     {
         public static TemplateProject BasicFile
         {
@@ -27,7 +27,7 @@ namespace Form8snCore.Tests.Helpers
             }
         }
 
-        const string DocumentFilterKey = "Doc Filter to be referenced";
+        public const string DocumentFilterKey = "Doc Filter to be referenced";
         public static Dictionary<string, MappingInfo> BasicDocFilters
         {
             get
@@ -78,7 +78,7 @@ namespace Form8snCore.Tests.Helpers
                     new TemplatePage
                     {
                         Boxes = Basic_Page_Boxes,
-                        Name = "Basic page 1 of 3",
+                        Name = "Basic page 1 of 2",
                         Notes = "Page 1 notes",
                         BackgroundImage = null,
                         HeightMillimetres = A4_Height,
@@ -89,26 +89,66 @@ namespace Form8snCore.Tests.Helpers
                             Repeats = false,
                             DataPath = null
                         },
-                        PageDataFilters = Basic_Page_Filters,
+                        PageDataFilters = Basic_Page1_Filters,
+                        PageFontSize = null
+                    },
+                    new TemplatePage
+                    {
+                        Boxes = Basic_Page_Boxes,
+                        Name = "Basic page 1 of 2",
+                        Notes = "Page 2 notes",
+                        BackgroundImage = null,
+                        HeightMillimetres = A4_Height,
+                        WidthMillimetres = A4_Width,
+                        RenderBackground = true,
+                        RepeatMode = new RepeatMode
+                        {
+                            Repeats = false,
+                            DataPath = null
+                        },
+                        PageDataFilters = Basic_Page2_Filters,
                         PageFontSize = null
                     }
                 };
             }
         }
 
-        public static Dictionary<string, MappingInfo> Basic_Page_Filters
+        public const string Page1FilterKey = "Page filter 1";
+        public static Dictionary<string, MappingInfo> Basic_Page1_Filters
         {
             get
             {
                 return new Dictionary<string, MappingInfo>
                 {
                     {
-                        "Page filter 1", new MappingInfo
+                        Page1FilterKey, new MappingInfo
                         {
                             DataPath = new[] { "#", DocumentFilterKey },
                             MappingType = MappingType.Join,
                             MappingParameters = new Dictionary<string, string>{
                                 {nameof(JoinPathsMappingParams.Infix), "-"},
+                                {nameof(JoinPathsMappingParams.ExtraData), ".AuthorisedRepresentative.CompanyName"}
+                            }
+                        }
+                    }
+                };
+            }
+        }
+        
+        public const string Page2FilterKey = "Page filter 2";
+        public static Dictionary<string, MappingInfo> Basic_Page2_Filters
+        {
+            get
+            {
+                return new Dictionary<string, MappingInfo>
+                {
+                    {
+                        Page2FilterKey, new MappingInfo
+                        {
+                            DataPath = new[] { "#", DocumentFilterKey },
+                            MappingType = MappingType.Join,
+                            MappingParameters = new Dictionary<string, string>{
+                                {nameof(JoinPathsMappingParams.Infix), "!!"},
                                 {nameof(JoinPathsMappingParams.ExtraData), ".AuthorisedRepresentative.CompanyName"}
                             }
                         }
@@ -152,6 +192,40 @@ namespace Form8snCore.Tests.Helpers
                             DisplayFormat = null,
                             IsRequired = false,
                             MappingPath = new[] { "", "Claimant", "MailingAddress", "Country", "Code" },
+                            WrapText = true,
+                            ShrinkToFit = false,
+                            BoxFontSize = null
+                        }
+                    },
+                    {
+                        "BoxWithDocRef", new TemplateBox
+                        {
+                            Alignment = TextAlignment.MidlineCentre,
+                            Left = 10, Top = 250,
+                            Height = 25, Width = 150,
+                            Notes = "notes for box 2",
+                            BoxOrder = null,
+                            DependsOn = null,
+                            DisplayFormat = null,
+                            IsRequired = false,
+                            MappingPath = new[] { "#", DocumentFilterKey },
+                            WrapText = true,
+                            ShrinkToFit = false,
+                            BoxFontSize = null
+                        }
+                    },
+                    {
+                        "BoxWithPageRef", new TemplateBox
+                        {
+                            Alignment = TextAlignment.MidlineCentre,
+                            Left = 10, Top = 250,
+                            Height = 25, Width = 150,
+                            Notes = "notes for box 2",
+                            BoxOrder = null,
+                            DependsOn = null,
+                            DisplayFormat = null,
+                            IsRequired = false,
+                            MappingPath = new[] { "#", Page1FilterKey },
                             WrapText = true,
                             ShrinkToFit = false,
                             BoxFontSize = null
