@@ -1,8 +1,12 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Form8snCore.FileFormats;
+
+[assembly: InternalsVisibleTo("Form8snCore.Tests")]
 
 namespace Form8snCore.DataExtraction
 {
+    
     /// <summary>
     /// Contains the state that follows the recursive application of filters to data
     /// </summary>
@@ -40,6 +44,7 @@ namespace Form8snCore.DataExtraction
             Redirects.Add(name);
             
             var newFilterDef = FilterSet[name];
+            if (newFilterDef is null) return null;
             
             return new FilterState{
                 Type = newFilterDef.MappingType,
