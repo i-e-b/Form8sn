@@ -21,7 +21,7 @@ namespace Form8snCore.HelpersAndConverters
             return safeName!;
         }
 
-        public static string RenameDataFilter(IndexFile project, int? pageIdx, string oldKey, string? newKey)
+        public static string RenameDataFilter(TemplateProject project, int? pageIdx, string oldKey, string? newKey)
         {
             var filterSet = project.PickFilterSet(pageIdx);
             if (filterSet is null || !filterSet.ContainsKey(oldKey)) return oldKey;

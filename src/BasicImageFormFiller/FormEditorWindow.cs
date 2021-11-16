@@ -59,7 +59,7 @@ namespace BasicImageFormFiller
             if (directory?.Exists != true) throw new Exception("Failed to create template path");
 
             
-            File.WriteAllText(Path.Combine(path, IndexFileName), Json.Freeze(new IndexFile(name))!);
+            File.WriteAllText(Path.Combine(path, IndexFileName), Json.Freeze(new TemplateProject(name))!);
 
             LoadTemplateProject(path);
         }

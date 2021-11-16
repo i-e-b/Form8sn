@@ -54,7 +54,7 @@ namespace WebFormFiller.Models
         public TextAlignment TextAlign { get; set; }
         public bool IsRequired { get; set; }
 
-        public static TemplateBoxModalViewModel From(IndexFile project, int docId, int pageIndex, string boxKey)
+        public static TemplateBoxModalViewModel From(TemplateProject project, int docId, int pageIndex, string boxKey)
         {
             var thePage = project.Pages[pageIndex];
             var otherBoxes = thePage.Boxes.Keys.Where(k=>k!=boxKey).Select(k=>new SelectListItem(k,k)).ToList();
@@ -91,12 +91,12 @@ namespace WebFormFiller.Models
         /// <summary>
         /// Copy view model values into an existing index file (to perform an update)
         /// </summary>
-        public void CopyTo(IndexFile targetIndexFile)
+        public void CopyTo(TemplateProject targetTemplateProject)
         {
             if (BoxKey is null) return;
-            if (PageIndex < 0 || PageIndex >= targetIndexFile.Pages.Count) return;
+            if (PageIndex < 0 || PageIndex >= targetTemplateProject.Pages.Count) return;
             
-            var thePage = targetIndexFile.Pages[PageIndex];
+            var thePage = targetTemplateProject.Pages[PageIndex];
             var theBox = thePage.Boxes[BoxKey];
             
             // First, handle renaming of box key

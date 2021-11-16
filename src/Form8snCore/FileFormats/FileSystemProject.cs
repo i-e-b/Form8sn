@@ -19,10 +19,10 @@ namespace Form8snCore.FileFormats
             _indexPath = path;
             BasePath = Path.GetDirectoryName(_indexPath)!;
             _baseUri = "file:///"+BasePath.Replace("\\","/");
-            Index = Json.Defrost<IndexFile>(File.ReadAllText(_indexPath)!)!;
+            Index = Json.Defrost<TemplateProject>(File.ReadAllText(_indexPath)!)!;
         }
 
-        public IndexFile Index { get; private set; }
+        public TemplateProject Index { get; private set; }
         public string BasePath { get; }
         public List<TemplatePage> Pages => Index.Pages;
         public object BaseUri => _baseUri;
@@ -36,7 +36,7 @@ namespace Form8snCore.FileFormats
 
         public void Reload()
         {
-            Index = Json.Defrost<IndexFile>(File.ReadAllText(_indexPath)!)!;
+            Index = Json.Defrost<TemplateProject>(File.ReadAllText(_indexPath)!)!;
         }
 
         public object? LoadSampleData()

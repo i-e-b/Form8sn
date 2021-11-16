@@ -23,7 +23,7 @@ namespace Form8snCore.HelpersAndConverters
         /// <param name="pageIndex">The page definition being targeted (in the index file), if any</param>
         /// <param name="markMultiplesSelectable">If true, multiple-value nodes will be marked as selectable</param>
         public static List<DataNode> BuildDataSourcePicker(
-            IndexFile index, object sampleData,
+            TemplateProject index, object sampleData,
             string[]? previous, string[]? repeaterPath, int? pageIndex,
             bool markMultiplesSelectable)
         {
@@ -158,7 +158,7 @@ namespace Form8snCore.HelpersAndConverters
         }
         
         // BUG: this might not be working if not enough data to repeat. Check with unit test.
-        private static void AddRepeaterPath(ICollection<DataNode> dataNodes, IndexFile index, object sampleData, string[] repeaterPath, bool markMultiple)
+        private static void AddRepeaterPath(ICollection<DataNode> dataNodes, TemplateProject index, object sampleData, string[] repeaterPath, bool markMultiple)
         {
             const string root = "repeater";
             // Get a "sample" from the data.
@@ -250,7 +250,7 @@ namespace Form8snCore.HelpersAndConverters
             dataNodes.Add(pageNode);
         }
         
-        private static void AddPageDataFilters(ICollection<DataNode> dataNodes, IndexFile index, object data, int? pageIndex, bool markMultiple)
+        private static void AddPageDataFilters(ICollection<DataNode> dataNodes, TemplateProject index, object data, int? pageIndex, bool markMultiple)
         {
             const string root = "page-data-filters";
             if (pageIndex is null) return;
@@ -304,7 +304,7 @@ namespace Form8snCore.HelpersAndConverters
             dataNodes.Add(filters);
         }
         
-        private static void AddDataFilters(ICollection<DataNode> dataNodes, IndexFile index, object data, bool markMultiple)
+        private static void AddDataFilters(ICollection<DataNode> dataNodes, TemplateProject index, object data, bool markMultiple)
         {
             const string root = "data-filters";
             var filters = new DataNode {

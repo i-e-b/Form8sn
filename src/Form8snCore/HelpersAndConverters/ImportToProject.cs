@@ -18,7 +18,7 @@ namespace Form8snCore.HelpersAndConverters
         /// <param name="pdfSource">Stream holding a PDF file</param>
         /// <param name="pdfSourceName">Name / ID from which the PDF can be reloaded later, for use by the renderer and clients</param>
         /// <param name="templateName">Editor-facing name for this project</param>
-        public static IndexFile FromPdf(Stream pdfSource, string pdfSourceName, string templateName)
+        public static TemplateProject FromPdf(Stream pdfSource, string pdfSourceName, string templateName)
         {
             using var pdf = PdfReader.Open(pdfSource);
             
@@ -48,7 +48,7 @@ namespace Form8snCore.HelpersAndConverters
                 pageNumber++;
             }
             
-            return new IndexFile(templateName){
+            return new TemplateProject(templateName){
                 Notes = "",
                 Pages = pages,
                 DataFilters = new Dictionary<string, MappingInfo>(),

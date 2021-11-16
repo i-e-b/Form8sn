@@ -9,7 +9,7 @@ namespace Form8snCore.HelpersAndConverters
         /// Return the data filter set for a given page.
         /// If the pageIdx is null, document filters are returned
         /// </summary>
-        public static Dictionary<string, MappingInfo>? PickFilterSet(this IndexFile project, int? pageIdx)
+        public static Dictionary<string, MappingInfo>? PickFilterSet(this TemplateProject project, int? pageIdx)
         {
             if (pageIdx is null || pageIdx < 0) return project.DataFilters;
             if (pageIdx >= project.Pages.Count) return null;

@@ -115,7 +115,7 @@ namespace WebFormFiller.Controllers
             await Request.Body.CopyToAsync(ms);
             
             ms.Seek(0, SeekOrigin.Begin);
-            var document = SkinnyJson.Json.Defrost<IndexFile>(ms);
+            var document = SkinnyJson.Json.Defrost<TemplateProject>(ms);
             
             var original = FileDatabaseStub.GetDocumentById(docId);
             if (document.Version < (original.Version ?? 0)) return BadRequest("Out of Order")!;
@@ -130,7 +130,7 @@ namespace WebFormFiller.Controllers
         /// <param name="project">Details of the document template</param>
         /// <param name="docId">The document template ID</param>
         [HttpPost]
-        public IActionResult StoreProject([FromBody]IndexFile project, [FromQuery]int? docId)
+        public IActionResult StoreProject([FromBody]TemplateProject project, [FromQuery]int? docId)
         {
             var newId = FileDatabaseStub.SaveDocumentTemplate(project, docId);
             return Json(new{id = newId})!;

@@ -5,13 +5,13 @@ namespace Form8snCore.FileFormats
     /// <summary>
     /// The main file for a document template project. This stores all mappings, and links to related documents (like PDFs or background images)
     /// </summary>
-    public class IndexFile
+    public class TemplateProject
     {
         /// <summary>
         /// Create a new blank project file, with a name
         /// </summary>
         /// <param name="name">Name used for listing projects, and stored in the PDF as a title</param>
-        public IndexFile(string name)
+        public TemplateProject(string name)
         {
             Name = name;
             Notes = "";

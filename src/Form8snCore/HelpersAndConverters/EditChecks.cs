@@ -22,7 +22,7 @@ namespace Form8snCore.HelpersAndConverters
         /// Returns true if the old and new keys are difference, and the the keys is valid as part of a rename.
         /// If the pageIdx is null, this checks for document-wide filters
         /// </summary>
-        public static bool IsValidFilterRename(IndexFile project, int? pageIdx, string oldKey, string? newKey)
+        public static bool IsValidFilterRename(TemplateProject project, int? pageIdx, string oldKey, string? newKey)
         {
             var filterSet = project.PickFilterSet(pageIdx);
             if (filterSet is null) return false;

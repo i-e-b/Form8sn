@@ -58,7 +58,7 @@ namespace WebFormFiller.Models
 
         public IEnumerable<SelectListItem> AvailableFilterTypes { get; set; }
 
-        public static DisplayFormatViewModel From(IndexFile project, int docId, int pageIndex, string boxKey)
+        public static DisplayFormatViewModel From(TemplateProject project, int docId, int pageIndex, string boxKey)
         {
             var thePage = project.Pages[pageIndex];
             

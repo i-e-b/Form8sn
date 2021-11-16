@@ -13,7 +13,7 @@ namespace WebFormFiller.Models
         /// <summary>
         /// Generate a view model from a project file
         /// </summary>
-        public static DocumentSettingsViewModel From(IndexFile project, int docId)
+        public static DocumentSettingsViewModel From(TemplateProject project, int docId)
         {
             return new DocumentSettingsViewModel{
                 DocumentId = docId,
@@ -30,7 +30,7 @@ namespace WebFormFiller.Models
         /// <summary>
         /// Copy view model values into an existing index file (to perform an update)
         /// </summary>
-        public void CopyTo(IndexFile target)
+        public void CopyTo(TemplateProject target)
         {
             target.BaseFontSize = ParseOrNull(BaseFontSize);
             target.FontName = FontFamily;

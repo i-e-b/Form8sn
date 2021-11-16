@@ -35,7 +35,7 @@ namespace WebFormFiller.Models
             AvailableFilterTypes = EnumOptions.AllDataFilterTypes().Select(SelectorItemForEnum).ToList();
         }
         
-        public static FilterEditViewModel From(IndexFile project, int? pageIndex, int docId, string filterKey, MappingInfo theFilter)
+        public static FilterEditViewModel From(TemplateProject project, int? pageIndex, int docId, string filterKey, MappingInfo theFilter)
         {
             return new FilterEditViewModel{
                 Version = project.Version ?? 0,
@@ -75,7 +75,7 @@ namespace WebFormFiller.Models
             };
         }
 
-        public void CopyTo(IndexFile project)
+        public void CopyTo(TemplateProject project)
         {
             var filterSet = project.PickFilterSet(PageIndex);
             if (filterSet is null) throw new Exception("Filter set 'CopyTo' lost reference to filter set");

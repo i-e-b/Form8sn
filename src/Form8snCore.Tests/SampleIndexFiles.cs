@@ -9,11 +9,11 @@ namespace Form8snCore.Tests
 {
     public static class SampleIndexFiles
     {
-        public static IndexFile BasicFile
+        public static TemplateProject BasicFile
         {
             get
             {
-                return new IndexFile("Sample File")
+                return new TemplateProject("Sample File")
                 {
                     Notes = "Project notes",
                     Pages = BasicPages,

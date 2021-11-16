@@ -11,7 +11,7 @@ namespace WebFormFiller.Models
         /// <summary>
         /// Generate a view model from a project file
         /// </summary>
-        public static PageSettingsViewModel From(IndexFile project, int docId, int pageIndex)
+        public static PageSettingsViewModel From(TemplateProject project, int docId, int pageIndex)
         {
             var thePage = project.Pages[pageIndex];
             return new PageSettingsViewModel{
@@ -35,7 +35,7 @@ namespace WebFormFiller.Models
         /// <summary>
         /// Copy view model values into an existing index file (to perform an update)
         /// </summary>
-        public void CopyTo(IndexFile target)
+        public void CopyTo(TemplateProject target)
         {
             var thePage = target.Pages[PageIndex];
             

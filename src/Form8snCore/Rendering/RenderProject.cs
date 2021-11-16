@@ -19,12 +19,21 @@ namespace Form8snCore.Rendering
     public class RenderProject
     {
 
+        /// <summary>
+        /// Create a renderer with a source of files
+        /// </summary>
         public RenderProject(IFileSource files)
         {
             _files = files;
         }
         
-        public RenderResultInfo ToStream(Stream target, object data, IndexFile project)
+        /// <summary>
+        /// Render a PDF to a writable stream.
+        /// </summary>
+        /// <param name="target">Output stream. Must be open and writable</param>
+        /// <param name="data">Data to use for page generation</param>
+        /// <param name="project">Project file that defines the PDF to generate</param>
+        public RenderResultInfo ToStream(Stream target, object data, TemplateProject project)
         {
             var info = RenderToDocument(data, project, out var document);
             document.Save(target);
@@ -34,7 +43,13 @@ namespace Form8snCore.Rendering
             return info;
         }
 
-        public RenderResultInfo ToFile(string outputFilePath, string dataFilePath, IndexFile project)
+        /// <summary>
+        /// Render a PDF to a local file path
+        /// </summary>
+        /// <param name="outputFilePath">Local file path for the output PDF</param>
+        /// <param name="dataFilePath">File that contains the data to use for page generation</param>
+        /// <param name="project">Project file that defines the PDF to generate</param>
+        public RenderResultInfo ToFile(string outputFilePath, string dataFilePath, TemplateProject project)
         {
             if (!File.Exists(dataFilePath))
             {
@@ -52,6 +67,100 @@ namespace Form8snCore.Rendering
             return info;
         }
         
+
+        /// <summary>
+        /// Follow all data paths and page repeaters in the project. Results in either a set of pages that
+        /// can be rendered to PDF, or null if the document can't be rendered
+        /// </summary>
+        /// <param name="project">Project file to generate a document for</param>
+        /// <param name="mapper">Data mapper holding the final data for a single document</param>
+        /// <param name="result">Rendering result, including any error messages</param>
+        /// <returns>List of pages to render, or null</returns>
+        public static List<DocumentPage>? PrepareAllPages(TemplateProject project, DataMapper mapper, RenderResultInfo result)
+        {
+            var runningTotals = new Dictionary<string, decimal>(); // path -> total
+
+            // First, we run through the definitions, gathering data
+            // This lets us count pages, and defers fitting content into boxes until
+            // we've decided to show it (e.g. if it's dependent on an empty box)
+            var pageList = new List<DocumentPage>();
+            for (var pageIndex = 0; pageIndex < project.Pages.Count; pageIndex++)
+            {
+                var pageDef = project.Pages[pageIndex]!;
+                if (pageDef.RepeatMode.Repeats)
+                {
+                    var dataSets = mapper.GetRepeatData(pageDef.RepeatMode.DataPath);
+
+                    for (var repeatIndex = 0; repeatIndex < dataSets.Count; repeatIndex++)
+                    {
+                        var repeatData = dataSets[repeatIndex];
+                        mapper.SetRepeater(repeatData, pageDef.RepeatMode.DataPath);
+                        var pageResult = PreparePage(pageDef, mapper, runningTotals, pageIndex);
+                        mapper.ClearRepeater();
+                        ClearPageTotals(runningTotals);
+
+                        if (pageResult.IsFailure)
+                        {
+                            result.ErrorMessage = pageResult.FailureMessage;
+                            return null;
+                        }
+
+                        pageResult.ResultData.RepeatIndex = repeatIndex;
+                        pageResult.ResultData.RepeatCount = dataSets.Count;
+                        pageList.Add(pageResult.ResultData);
+                    }
+                }
+                else
+                {
+                    var pageResult = PreparePage(pageDef, mapper, runningTotals, pageIndex);
+                    ClearPageTotals(runningTotals);
+
+                    if (pageResult.IsFailure)
+                    {
+                        result.ErrorMessage = pageResult.FailureMessage;
+                        return null;
+                    }
+
+                    pageList.Add(pageResult.ResultData);
+                }
+            }
+
+            // remove boxes that have null/empty dependencies
+            PruneBoxes(pageList);
+            return pageList;
+        }
+
+        
+        /// <summary>
+        /// Render prepared pages into a PDF document
+        /// </summary>
+        /// <param name="project">Project file to generate a document for</param>
+        /// <param name="document">Open and writable PDF file to add pages to</param>
+        /// <param name="pageList">A set of pages from PrepareAllPages()</param>
+        /// <param name="result">Rendering result, including any error messages</param>
+        /// <returns>True for success, false for failure</returns>
+        public bool RenderPagesToPdfDocument(TemplateProject project, PdfDocument document, List<DocumentPage> pageList, RenderResultInfo result)
+        {
+            for (var pageIndex = 0; pageIndex < pageList.Count; pageIndex++)
+            {
+                _loadingTimer.Start();
+                var page = pageList[pageIndex]!;
+                var pageDef = page.Definition;
+
+                using var background = LoadBackground(project, page.SourcePageIndex, pageDef);
+                var font = GetFont(pageDef.PageFontSize ?? project.BaseFontSize ?? 16);
+                _loadingTimer.Stop();
+
+                var pageResult = OutputPage(document, page, font, background, pageIndex, pageList.Count);
+                if (pageResult.IsFailure)
+                {
+                    result.ErrorMessage = pageResult.FailureMessage;
+                    return false;
+                }
+            }
+            return true;
+        }
+
         
         private const string FallbackFontFamily = "Courier New";
         private const XFontStyle BaseFontStyle = XFontStyle.Bold;
@@ -64,8 +173,52 @@ namespace Form8snCore.Rendering
         private readonly IFileSource _files;
         private PdfDocument? _basePdf;
         
+        /// <summary>
+        /// This is the main process of rendering a project to a pdf
+        /// </summary>
+        private RenderResultInfo RenderToDocument(object data, TemplateProject project, out PdfDocument document){
+            _loadingTimer.Reset();
+            _totalTimer.Restart();
 
-        private PageBacking LoadBackground(IndexFile project, int sourcePageIndex, TemplatePage pageDef)
+            _loadingTimer.Start();
+            _baseFontFamily = project.FontName;
+            var result = new RenderResultInfo {Success = false};
+            _loadingTimer.Stop();
+
+            var mapper = new DataMapper(project, data);
+            document = new PdfDocument();
+            document.Info.Author = "Generated from data by Form8sn";
+            document.Info.Title = project.Name;
+            document.Info.CreationDate = DateTime.UtcNow;
+
+            // Go through the project file and data, generate all the pages, and the
+            // template boxes with appropriately formatted data
+            var pageList = PrepareAllPages(project, mapper, result);
+            if (pageList is null)
+            {
+                result.Success = false;
+                return result;
+            }
+
+            // Next, go through the prepared page and render them to PDF
+            var ok = RenderPagesToPdfDocument(project, document, pageList, result);
+            if (!ok)
+            {
+                result.Success = false;
+                return result;
+            }
+
+            _totalTimer.Stop();
+
+            result.Success = true;
+
+            result.OverallTime = _totalTimer.Elapsed;
+            result.LoadingTime = _loadingTimer.Elapsed;
+
+            return result;
+        }
+
+        private PageBacking LoadBackground(TemplateProject project, int sourcePageIndex, TemplatePage pageDef)
         {
             var backing = new PageBacking();
             if (_basePdf is null && !string.IsNullOrWhiteSpace(project.BasePdfFile!))
@@ -87,7 +240,6 @@ namespace Form8snCore.Rendering
             
             return backing;
         }
-
         
         private XFont GetFont(int size)
         {
@@ -96,99 +248,6 @@ namespace Form8snCore.Rendering
             return _fontCache[size]!;
         }
         
-        private RenderResultInfo RenderToDocument(object data, IndexFile project, out PdfDocument document){
-            _loadingTimer.Reset();
-            _totalTimer.Restart();
-
-            _loadingTimer.Start();
-            _baseFontFamily = project.FontName;
-            var result = new RenderResultInfo {Success = false};
-            _loadingTimer.Stop();
-
-            var mapper = new DataMapper(project, data);
-            document = new PdfDocument();
-            document.Info.Author = "Generated from data by Form8sn";
-            document.Info.Title = project.Name;
-            document.Info.CreationDate = DateTime.UtcNow;
-
-            var runningTotals = new Dictionary<string, decimal>(); // path -> total
-
-            // First, we run through the definitions, gathering data
-            // This lets us count pages, and defers fitting content into boxes until
-            // we've decided to show it (e.g. if it's dependent on an empty box)
-            var pageList = new List<DocumentPage>();
-            for (var pageIndex = 0; pageIndex < project.Pages.Count; pageIndex++)
-            {
-                var pageDef = project.Pages[pageIndex]!;
-                if (pageDef.RepeatMode.Repeats)
-                {
-                    var dataSets = mapper.GetRepeatData(pageDef.RepeatMode.DataPath);
-
-                    for (var repeatIndex = 0; repeatIndex < dataSets.Count; repeatIndex++)
-                    {
-                        var repeatData = dataSets[repeatIndex];
-                        mapper.SetRepeater(repeatData, pageDef.RepeatMode.DataPath);
-                        var pageResult = PreparePage(pageDef, mapper, runningTotals, pageIndex);
-                        mapper.ClearRepeater();
-                        ClearPageTotals(runningTotals);
-                        
-                        if (pageResult.IsFailure)
-                        {
-                            result.ErrorMessage = pageResult.FailureMessage;
-                            return result;
-                        }
-                    
-                        pageResult.ResultData.RepeatIndex = repeatIndex;
-                        pageResult.ResultData.RepeatCount = dataSets.Count;
-                        pageList.Add(pageResult.ResultData);
-                    }
-                }
-                else
-                {
-                    var pageResult = PreparePage(pageDef, mapper, runningTotals, pageIndex);
-                    ClearPageTotals(runningTotals);
-                        
-                    if (pageResult.IsFailure)
-                    {
-                        result.ErrorMessage = pageResult.FailureMessage;
-                        return result;
-                    }
-                    
-                    pageList.Add(pageResult.ResultData);
-                }
-            }
-
-            // remove boxes that have null/empty dependencies
-            PruneBoxes(pageList);
-
-            // Next, go through the prepared page and render them to PDF
-            for (var pageIndex = 0; pageIndex < pageList.Count; pageIndex++)
-            {
-                _loadingTimer.Start();
-                var page = pageList[pageIndex]!;
-                var pageDef = page.Definition;
-                
-                using var background = LoadBackground(project, page.SourcePageIndex, pageDef);
-                var font = GetFont(pageDef.PageFontSize ?? project.BaseFontSize ?? 16);
-                _loadingTimer.Stop();
-
-                var pageResult = OutputPage(document, page, font, background, pageIndex, pageList.Count);
-                if (pageResult.IsFailure)
-                {
-                    result.ErrorMessage = pageResult.FailureMessage;
-                    return result;
-                }
-            }
-
-            _totalTimer.Stop();
-
-            result.Success = true;
-
-            result.OverallTime = _totalTimer.Elapsed;
-            result.LoadingTime = _loadingTimer.Elapsed;
-
-            return result;
-        }
         private static void PruneBoxes(List<DocumentPage> pageList)
         {
             foreach (var page in pageList)

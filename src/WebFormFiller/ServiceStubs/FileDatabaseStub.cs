@@ -76,7 +76,7 @@ namespace WebFormFiller.ServiceStubs
         /// If id is provided, this acts as Update.
         /// If is is null, this is an Insert
         /// </summary>
-        public static int SaveDocumentTemplate(IndexFile file, int? id)
+        public static int SaveDocumentTemplate(TemplateProject file, int? id)
         {
             if (!Directory.Exists(StorageDirectory)) { Directory.CreateDirectory(StorageDirectory); }
             
@@ -108,7 +108,7 @@ namespace WebFormFiller.ServiceStubs
         /// <summary>
         /// Read a document template file by ID
         /// </summary>
-        public static IndexFile GetDocumentById(int docId)
+        public static TemplateProject GetDocumentById(int docId)
         {
             if (!Directory.Exists(StorageDirectory)) { Directory.CreateDirectory(StorageDirectory); }
             
@@ -116,7 +116,7 @@ namespace WebFormFiller.ServiceStubs
             if (files.Count > 1) throw new Exception("Ambiguous file");
             if (files.Count < 1) throw new Exception("File not found");
             
-            return Json.Defrost<IndexFile>(File.ReadAllText(files[0]));
+            return Json.Defrost<TemplateProject>(File.ReadAllText(files[0]));
         }
 
         /// <summary>

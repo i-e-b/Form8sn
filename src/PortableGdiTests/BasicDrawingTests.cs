@@ -96,9 +96,9 @@ namespace PortableGdiTests
                 
                 using var thickPen1 = new Port.Pen(Port.Color.Teal, 5.5f);
                 using var thickPen2 = new Port.Pen(Port.Color.DarkKhaki, 5.5f);
-                g.DrawEllipse(thickPen1, 280.5f, 10.25f, 50f, 50.5f);
-                g.DrawArc(thickPen1, 350.5f, 10.25f, 50f, 50.5f, 0, 45); // 0deg = centre-right, +45 degrees clockwise
-                g.DrawArc(thickPen2, 350.5f, 10.25f, 50f, 50.5f, 180, 120); // 180deg = centre-left, ends at 300deg
+//              g.DrawEllipse(thickPen1, 280.5f, 10.25f, 50f, 50.5f);
+//              g.DrawArc(thickPen1, 350.5f, 10.25f, 50f, 50.5f, 0, 45); // 0deg = centre-right, +45 degrees clockwise
+//              g.DrawArc(thickPen2, 350.5f, 10.25f, 50f, 50.5f, 180, 120); // 180deg = centre-left, ends at 300deg
                 
                 bmp.Save("Z_simple_portable.png", Port.Imaging.ImageFormat.Png);
             }

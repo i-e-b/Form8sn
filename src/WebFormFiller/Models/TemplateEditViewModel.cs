@@ -7,7 +7,7 @@ namespace WebFormFiller.Models
         /// <summary>
         /// The definition of this document template
         /// </summary>
-        public IndexFile Document { get; set; } = new("");
+        public TemplateProject Document { get; set; } = new("");
         
         /// <summary>
         /// A URL from which the base PDF file can be loaded
