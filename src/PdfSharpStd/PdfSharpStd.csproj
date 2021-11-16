@@ -40,9 +40,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <EmbeddedResource Include="Resources\Messages.de.restext">
-        <Generator>ResGen</Generator>
-      </EmbeddedResource>
       <EmbeddedResource Include="Resources\Messages.restext" />
       <None Remove="Resources\easycode.ttf" />
       <EmbeddedResource Include="Resources\easycode.ttf" />
