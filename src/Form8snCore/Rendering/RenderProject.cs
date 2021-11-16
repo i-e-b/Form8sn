@@ -324,7 +324,7 @@ namespace Form8snCore.Rendering
 
                 if (box.DisplayFormat != null)
                 {
-                    str = DisplayFormatter.ApplyFormat(box, str);
+                    str = DisplayFormatter.ApplyFormat(box.DisplayFormat, str);
                     if (str == null) return Result.Failure<DocumentBox?>($"Formatter failed: {box.DisplayFormat.Type} applied on {string.Join(".", box.MappingPath!)}");
                 }
 
@@ -446,7 +446,7 @@ namespace Form8snCore.Rendering
         private static string? TryApplyDisplayFormat(DocumentBox box, string? str)
         {
             if (box.Definition.DisplayFormat == null) return str;
-            var transformed = DisplayFormatter.ApplyFormat(box.Definition, str);
+            var transformed = DisplayFormatter.ApplyFormat(box.Definition.DisplayFormat, str);
             return transformed ?? str;
         }
 

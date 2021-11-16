@@ -1,4 +1,4 @@
-﻿namespace Form8snCore.Tests
+﻿namespace Form8snCore.Tests.Helpers
 {
     public class SampleData
     {

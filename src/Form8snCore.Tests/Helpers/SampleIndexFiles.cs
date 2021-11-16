@@ -5,7 +5,7 @@ using Form8snCore.FileFormats;
 // ReSharper disable InconsistentNaming
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace Form8snCore.Tests
+namespace Form8snCore.Tests.Helpers
 {
     public static class SampleIndexFiles
     {

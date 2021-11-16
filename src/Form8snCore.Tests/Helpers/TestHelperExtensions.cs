@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Form8snCore.HelpersAndConverters;
 
-namespace Form8snCore.Tests
+namespace Form8snCore.Tests.Helpers
 {
     public static class TestHelperExtensions
     {

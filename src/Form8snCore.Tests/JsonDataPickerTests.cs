@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using Form8snCore.FileFormats;
 using Form8snCore.HelpersAndConverters;
+using Form8snCore.Tests.Helpers;
 using NUnit.Framework;
 
 namespace Form8snCore.Tests

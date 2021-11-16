@@ -7,29 +7,29 @@ namespace Form8snCore.DataExtraction
 {
     public class DisplayFormatter
     {
-        public static string? ApplyFormat(TemplateBox box, string? str)
+        public static string? ApplyFormat(DisplayFormatFilter? format, string? str)
         {
-            var type = box.DisplayFormat?.Type;
             if (str is null) return null;
+            if (format is null) return str;
+            var type = format.Type;
 
             switch (type)
             {
-                case null:
                 case DisplayFormatType.None:
                 case DisplayFormatType.RenderImage:
                     return str;
 
                 case DisplayFormatType.DateFormat:
-                    return ReformatDate(box, str);
+                    return ReformatDate(format, str);
 
                 case DisplayFormatType.NumberFormat:
-                    return ReformatNumber(box, str);
+                    return ReformatNumber(format, str);
                 
                 case DisplayFormatType.Integral:
                     return ReformatNumberToInt(str);
                     
                 case DisplayFormatType.Fractional:
-                    return ReformatNumberToFrac(box, str);
+                    return ReformatNumberToFrac(format, str);
 
                 default:
                     return null;
@@ -46,14 +46,14 @@ namespace Form8snCore.DataExtraction
             return intPart.ToString();
         }
         
-        private static string? ReformatNumberToFrac(TemplateBox box, string str)
+        private static string? ReformatNumberToFrac(DisplayFormatFilter format, string str)
         {
-            var param = box.DisplayFormat!.FormatParameters;
+            var param = format.FormatParameters;
             
             if (!decimal.TryParse(str, out var value)) return null;
             
             var dpKey = nameof(FractionalDisplayParams.DecimalPlaces);
-            var dpStr = param.ContainsKey(dpKey) ? param[dpKey] : "2";
+            var dpStr = param.ContainsKey(dpKey) ? param[dpKey]??"" : "2";
             if (!int.TryParse(dpStr, out var decimalPlaces)) decimalPlaces = 2;
             if (decimalPlaces < 0 || decimalPlaces > 20) decimalPlaces = 2;
             
@@ -61,26 +61,26 @@ namespace Form8snCore.DataExtraction
             var intPart = Math.Truncate(value);
             var fracPart = value - intPart;
             
-            var final = (long)((1+fracPart)*scale); // add 1 to get leading zeros
-            return final.ToString()!.Substring(1); // remove the added 1
+            var final = Math.Round((1+fracPart)*scale, 0); // add 1 to get leading zeros
+            return final.ToString(CultureInfo.InvariantCulture)!.Substring(1); // remove the added 1
         }
 
-        private static string? ReformatNumber(TemplateBox box, string str)
+        private static string? ReformatNumber(DisplayFormatFilter format, string str)
         {
-            var param = box.DisplayFormat!.FormatParameters;
+            var param = format.FormatParameters;
 
             if (!decimal.TryParse(str, out var value)) return null;
 
             var dpKey = nameof(NumberDisplayParams.DecimalPlaces);
-            var dpStr = param.ContainsKey(dpKey) ? param[dpKey] : "2";
+            var dpStr = param.ContainsKey(dpKey) ? param[dpKey]??"" : "2";
             if (!int.TryParse(dpStr, out var decimalPlaces)) decimalPlaces = 2;
             if (decimalPlaces < 0 || decimalPlaces > 20) decimalPlaces = 2;
 
             var tsKey = nameof(NumberDisplayParams.ThousandsSeparator);
-            var thousands = param.ContainsKey(tsKey) ? param[tsKey] : "";
+            var thousands = param.ContainsKey(tsKey) ? param[tsKey]??"" : "";
 
             var dcKey = nameof(NumberDisplayParams.DecimalSeparator);
-            var decimalSeparator = param.ContainsKey(dcKey) ? param[dcKey] : ".";
+            var decimalSeparator = param.ContainsKey(dcKey) ? param[dcKey]??"" : ".";
             if (string.IsNullOrEmpty(decimalSeparator)) decimalSeparator = ".";
 
             var preKey = nameof(NumberDisplayParams.Prefix);
@@ -180,17 +180,17 @@ namespace Form8snCore.DataExtraction
             return sb.ToString();
         }
 
-        private static string? ReformatDate(TemplateBox box, string str)
+        private static string? ReformatDate(DisplayFormatFilter format, string str)
         {
-            var param = box.DisplayFormat!.FormatParameters;
+            var param = format.FormatParameters;
 
             var key = nameof(DateDisplayParams.FormatString);
-            var fmt = param.ContainsKey(key) ? param[key] : null;
+            var fmt = (param.ContainsKey(key) ? param[key] : null) ?? "yyyy-MM-dd";
 
             try
             {
                 // first, try the exact format that *should* be used
-                if (DateTime.TryParseExact(str, "yyyy-MM-dd", null, DateTimeStyles.AssumeUniversal | DateTimeStyles.AllowWhiteSpaces, out var dt))
+                if (DateTime.TryParseExact(str, "yyyy-MM-dd", null!, DateTimeStyles.AssumeUniversal | DateTimeStyles.AllowWhiteSpaces, out var dt))
                     return dt.ToString(fmt);
 
                 // try a more general search

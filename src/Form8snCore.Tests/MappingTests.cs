@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Form8snCore.DataExtraction;
 using Form8snCore.FileFormats;
+using Form8snCore.Tests.Helpers;
 using NUnit.Framework;
 
 // ReSharper disable InconsistentNaming
