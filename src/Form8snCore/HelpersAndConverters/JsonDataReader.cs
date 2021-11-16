@@ -13,8 +13,6 @@ namespace Form8snCore.HelpersAndConverters
     /// </summary>
     public static class JsonDataReader
     {
-        // TODO: test these with data sets that don't fill filters (like split reclaims in 4s with only 2 reclaims)
-
         /// <summary>
         /// Build the tree used to select source data for boxes and filters
         /// </summary>

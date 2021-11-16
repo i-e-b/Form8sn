@@ -53,6 +53,17 @@ namespace Form8snCore.Tests
                                 { nameof(IfElseMappingParams.Different), ".BatchNumber" }
                             }
                         }
+                    },
+                    {
+                        "HugeGroup", new MappingInfo // split into N, with a large enough N that we only get one item
+                        {
+                            DataPath = new[] { "", "Reclaims" },
+                            MappingType = MappingType.SplitIntoN,
+                            MappingParameters = new Dictionary<string, string>
+                            {
+                                { nameof(MaxCountMappingParams.MaxCount), "100" }
+                            }
+                        }
                     }
                 };
             }

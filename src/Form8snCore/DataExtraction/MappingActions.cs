@@ -428,7 +428,6 @@ namespace Form8snCore.DataExtraction
 
         private static object RepackArray(ArrayList list, int count)
         {
-            if (list.Count <= count) return list;
             var outp = new ArrayList();
 
             var subList = new ArrayList();
