@@ -164,15 +164,17 @@ namespace Form8snCore.DataExtraction
         {
             var sb = new StringBuilder();
             var i = str.Length % 3;
+            var first = true;
             foreach (var c in str)
             {
                 if (i-- <= 0)
                 {
-                    sb.Append(sep);
+                    if (!first) sb.Append(sep);
                     i = 2;
                 }
 
                 sb.Append(c);
+                first = false;
             }
 
             return sb.ToString();

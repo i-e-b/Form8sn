@@ -280,8 +280,10 @@ namespace Form8snCore.DataExtraction
             if (target is string str) return $"{prefix}{str}{postfix}";
 
             if (target is ArrayList list) return JoinAsString(list, prefix, infix, postfix);
-
-            return null;
+            
+            if (target is Dictionary<string, object>) return null; // can't concat objects in a meaningful way
+            
+            return $"{prefix}{target}{postfix}";
         }
 
         private static string JoinAsString(ArrayList list, string prefix, string infix, string postfix)

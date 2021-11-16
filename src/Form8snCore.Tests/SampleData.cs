@@ -63,7 +63,7 @@
                 {
                     Stock = new
                     {
-                        ID = "Stock GBR",
+                        ID = "Stock 1",
                         Name = "StockName Stock GBR",
                         Type = new
                         {
@@ -114,7 +114,7 @@
                 {
                     Stock = new
                     {
-                        ID = "Stock GBR",
+                        ID = "Stock 2",
                         Name = "StockName Stock GBR",
                         Type = new
                         {
@@ -165,7 +165,7 @@
                 {
                     Stock = new
                     {
-                        ID = "Stock GBR",
+                        ID = "Stock 3",
                         Name = "StockName Stock GBR",
                         Type = new
                         {
@@ -216,7 +216,7 @@
                 {
                     Stock = new
                     {
-                        ID = "Stock GBR",
+                        ID = "Stock 4",
                         Name = "StockName Stock GBR",
                         Type = new
                         {
@@ -267,7 +267,7 @@
                 {
                     Stock = new
                     {
-                        ID = "Stock GBR",
+                        ID = "Stock 5",
                         Name = "StockName Stock GBR",
                         Type = new
                         {
@@ -318,7 +318,7 @@
                 {
                     Stock = new
                     {
-                        ID = "Stock GBR",
+                        ID = "Stock 6",
                         Name = "StockName Stock GBR",
                         Type = new
                         {

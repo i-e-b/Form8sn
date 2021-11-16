@@ -29,5 +29,19 @@ namespace Form8snCore.Tests
 
             return result;
         }
+        
+        public static List<string?> ToStringList(this IEnumerable? src)
+        {
+            var result = new List<string?>();
+            if (src is null) return result;
+            
+            var e = src.GetEnumerator();
+            while (e.MoveNext())
+            {
+                result.Add(e.Current?.ToString());
+            }
+
+            return result;
+        }
     }
 }
