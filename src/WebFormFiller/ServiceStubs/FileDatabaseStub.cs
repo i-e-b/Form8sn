@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Form8snCore;
 using Form8snCore.FileFormats;
 using SkinnyJson;
 
@@ -14,7 +13,7 @@ namespace WebFormFiller.ServiceStubs
     /// This class should be replaced with calls to your database or other storage solution.
     /// This stub doesn't even try to be efficient.
     /// </summary>
-    public class FileDatabaseStub : IFileSource
+    public class FileDatabaseStub : IFileDatabaseStub
     {
         public const string StorageDirectory = @"C:\Temp\WebFormFiller";
         private static readonly HttpClient _client = new HttpClient();
@@ -40,8 +39,12 @@ namespace WebFormFiller.ServiceStubs
             try
             {
                 using var src = Sync.Run(() => _client.GetStreamAsync(targetUrl));
+                if (src is null) return null;
+                
                 var ms = new MemoryStream();
+                // ReSharper disable once AccessToDisposedClosure
                 Sync.Run(()=>src.CopyToAsync(ms));
+                
                 ms.Seek(0, SeekOrigin.Begin);
                 return ms;
             }
@@ -54,7 +57,7 @@ namespace WebFormFiller.ServiceStubs
         /// <summary>
         /// List all the document template projects available
         /// </summary>
-        public static IDictionary<int, string> ListDocumentTemplates()
+        public IDictionary<int, string> ListDocumentTemplates()
         {
             if (!Directory.Exists(StorageDirectory)) { Directory.CreateDirectory(StorageDirectory); }
             
@@ -76,7 +79,7 @@ namespace WebFormFiller.ServiceStubs
         /// If id is provided, this acts as Update.
         /// If is is null, this is an Insert
         /// </summary>
-        public static int SaveDocumentTemplate(TemplateProject file, int? id)
+        public int SaveDocumentTemplate(TemplateProject file, int? id)
         {
             if (!Directory.Exists(StorageDirectory)) { Directory.CreateDirectory(StorageDirectory); }
             
@@ -95,7 +98,7 @@ namespace WebFormFiller.ServiceStubs
         /// Store a file for later recovery using the [GET]Load(name) endpoint.
         /// In your implementation, you might want to supply files from a CDN, S3, or similar. 
         /// </summary>
-        public static void Store(string name, Stream stream)
+        public void Store(string name, Stream stream)
         {
             if (!Directory.Exists(StorageDirectory)) { Directory.CreateDirectory(StorageDirectory); }
 
@@ -108,7 +111,7 @@ namespace WebFormFiller.ServiceStubs
         /// <summary>
         /// Read a document template file by ID
         /// </summary>
-        public static TemplateProject GetDocumentById(int docId)
+        public TemplateProject GetDocumentById(int docId)
         {
             if (!Directory.Exists(StorageDirectory)) { Directory.CreateDirectory(StorageDirectory); }
             
@@ -127,13 +130,13 @@ namespace WebFormFiller.ServiceStubs
         /// Where items are repeated, enough examples should be given to trigger splits and repeats
         /// in normal documents.
         /// </summary>
-        public static object GetSampleData()
+        public object GetSampleData()
         {
             return Json.Defrost(File.ReadAllText(@"C:\Temp\SampleData.json")); 
         }
 
         #region Support methods (your app doesn't need to supply these)
-        private static int IdFromFileName(string name, out string restOfName)
+        private int IdFromFileName(string name, out string restOfName)
         {
             restOfName = "";
             if (string.IsNullOrEmpty(name)) return 0;
@@ -146,7 +149,7 @@ namespace WebFormFiller.ServiceStubs
             return result;
         }
 
-        private static int GetNextId()
+        private int GetNextId()
         {
             var usedIds =ListDocumentTemplates().Keys.ToList();
             if (usedIds.Count < 1) return 1;

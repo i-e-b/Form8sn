@@ -8,6 +8,9 @@ using Form8snCore.FileFormats;
 
 namespace Form8snCore.DataExtraction
 {
+    /// <summary>
+    /// Decodes mapping types and parameters, and applies them to a data/project pair
+    /// </summary>
     public static class MappingActions
     {
         /// <summary>

@@ -6,6 +6,9 @@ using Form8snCore.Rendering;
 
 namespace Form8snCore.DataExtraction
 {
+    /// <summary>
+    /// This is a helper that wraps a template and some data to drive the rendering process
+    /// </summary>
     public class DataMapper
     {
         private readonly TemplateProject _project;

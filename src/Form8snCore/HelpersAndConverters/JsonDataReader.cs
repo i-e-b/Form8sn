@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Form8snCore.FileFormats;
 using Form8snCore.DataExtraction;
 using Form8snCore.Rendering;
+using SkinnyJson;
 
 namespace Form8snCore.HelpersAndConverters
 {
@@ -28,16 +29,28 @@ namespace Form8snCore.HelpersAndConverters
             bool markMultiplesSelectable)
         {
             var result = new List<DataNode>();
+         
+            var data = Standardise(sampleData);
             
-            AddSampleData(result, sampleData, markMultiplesSelectable);
-            AddDataFilters(result, index, sampleData, markMultiplesSelectable);
-            if (repeaterPath != null) AddRepeaterPath(result, index, sampleData, repeaterPath, markMultiplesSelectable);
-            if (pageIndex != null) AddPageDataFilters(result, index, sampleData, pageIndex, markMultiplesSelectable);
+            AddSampleData(result, data, markMultiplesSelectable);
+            AddDataFilters(result, index, data, markMultiplesSelectable);
+            if (repeaterPath != null) AddRepeaterPath(result, index, data, repeaterPath, markMultiplesSelectable);
+            if (pageIndex != null) AddPageDataFilters(result, index, data, pageIndex, markMultiplesSelectable);
             AddPageNumbers(result, repeaterPath);
             
             SelectPath(result, previous); // Expand and highlight previous selection
             
             return result;
+        }
+        
+        /// <summary>
+        /// Make sure the incoming data is a hierarchy of dictionaries and arrays
+        /// </summary>
+        public static object Standardise(object data)
+        {
+            if (data is Dictionary<string, object>) return data;
+            if (data is ArrayList) return data;
+            return Json.Defrost(Json.Freeze(data));
         }
 
         /// <summary>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Form8snCore.FileFormats;
+using Form8snCore.HelpersAndConverters;
 using Form8snCore.Rendering;
 using SkinnyJson;
 
@@ -22,18 +23,8 @@ namespace Form8snCore
         /// <returns>Result information, with any error messages and timings</returns>
         public static RenderResultInfo ToStream(IFileSource fileSource, object data, TemplateProject document, Stream target)
         {
-            var standardisedData = Standardise(data);
+            var standardisedData = JsonDataReader.Standardise(data);
             return new RenderProject(fileSource).ToStream(target, standardisedData, document);
-        }
-
-        /// <summary>
-        /// Make sure the incoming data is a hierarchy of dictionaries and arrays
-        /// </summary>
-        private static object Standardise(object data)
-        {
-            if (data is Dictionary<string, object>) return data;
-            if (data is ArrayList) return data;
-            return Json.Defrost(Json.Freeze(data));
         }
     }
 }

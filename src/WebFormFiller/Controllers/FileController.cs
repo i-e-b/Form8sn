@@ -7,8 +7,18 @@ using WebFormFiller.ServiceStubs;
 
 namespace WebFormFiller.Controllers
 {
+    /// <summary>
+    /// Provides access to files for the boxEditor.js code
+    /// </summary>
     public class FileController : Controller
     {
+        private readonly IFileDatabaseStub _fileDatabase;
+
+        public FileController()
+        {
+            _fileDatabase = new FileDatabaseStub(); // replace with your own implementation
+        }
+        
         /// <summary>
         /// Reads a file out of storage. In your implementation, you might want to
         /// supply files from a CDN, S3, or similar. 
@@ -16,15 +26,10 @@ namespace WebFormFiller.Controllers
         [HttpGet]
         public IActionResult Load(string? name)
         {
-            if (!Directory.Exists(FileDatabaseStub.StorageDirectory))
-            {
-                Directory.CreateDirectory(FileDatabaseStub.StorageDirectory);
-            }
-
-            if (string.IsNullOrWhiteSpace(name)) throw new Exception("File name is required");
-
-            var bytes = System.IO.File.ReadAllBytes(Path.Combine(FileDatabaseStub.StorageDirectory, name));
-            return File(bytes, "application/pdf")!;
+            if (string.IsNullOrWhiteSpace(name)) return BadRequest("File name is required")!;
+            var stream = _fileDatabase.Load(name);
+            
+            return File(stream, "application/pdf")!;
         }
 
         /// <summary>
@@ -33,12 +38,11 @@ namespace WebFormFiller.Controllers
         [HttpGet]
         public IActionResult GenerateSamplePdf(int docId)
         {
-            var document = FileDatabaseStub.GetDocumentById(docId);
-            var sampleData = FileDatabaseStub.GetSampleData();
+            var document = _fileDatabase.GetDocumentById(docId);
+            var sampleData = _fileDatabase.GetSampleData();
             var ms = new MemoryStream();
-            var fileSource = new FileDatabaseStub();
 
-            var info = RenderPdf.ToStream(fileSource, sampleData, document, ms);
+            var info = RenderPdf.ToStream(_fileDatabase, sampleData, document, ms);
             Console.WriteLine($"Render success: {info.Success}; Overall time: {info.OverallTime}; Time loading artefacts: {info.LoadingTime}; Message: {(info.ErrorMessage ?? "<none>")}.");
             return File(ms, "application/pdf")!;
         }

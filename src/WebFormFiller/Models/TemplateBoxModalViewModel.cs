@@ -116,7 +116,7 @@ namespace WebFormFiller.Models
             
             // Now copy across the regular values
             theBox.Alignment = TextAlign;
-            theBox.BoxOrder = ParseIntOrDefault(ProcessingOrder, theBox.BoxOrder);
+            theBox.BoxOrder = ParseIntOrDefault(ProcessingOrder, null);
             theBox.MappingPath = string.IsNullOrWhiteSpace(DataPath) ? null : DataPath?.Split('.');
             theBox.WrapText = WrapText;
             theBox.ShrinkToFit = ShrinkToFit;

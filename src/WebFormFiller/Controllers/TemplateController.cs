@@ -9,8 +9,15 @@ using WebFormFiller.ServiceStubs;
 
 namespace WebFormFiller.Controllers
 {
-    public class HomeController : Controller
+    public class TemplateController : Controller
     {
+        private readonly IFileDatabaseStub _fileDatabase;
+
+        public TemplateController()
+        {
+            _fileDatabase = new FileDatabaseStub(); // replace with your own implementation
+        }
+        
         /// <summary>
         /// List existing document template projects with edit links.
         /// Show a link to create a new project
@@ -19,7 +26,7 @@ namespace WebFormFiller.Controllers
         public IActionResult Index()
         {
             return View(new TemplateListViewModel{
-                Templates = FileDatabaseStub.ListDocumentTemplates()
+                Templates = _fileDatabase.ListDocumentTemplates()
             })!;
         }
 
@@ -47,11 +54,11 @@ namespace WebFormFiller.Controllers
             
             ms.Seek(0, SeekOrigin.Begin);
             var fileName = model.Title + "_" + Guid.NewGuid() + ".pdf";
-            FileDatabaseStub.Store(fileName, ms);
+            _fileDatabase.Store(fileName, ms);
             ms.Seek(0, SeekOrigin.Begin);
             
             var template = ImportToProject.FromPdf(ms, fileName, model.Title);
-            var id = FileDatabaseStub.SaveDocumentTemplate(template, null);
+            var id = _fileDatabase.SaveDocumentTemplate(template, null);
 
 
             return RedirectToAction(nameof(BoxEditor), new{docId = id})!;
@@ -65,7 +72,7 @@ namespace WebFormFiller.Controllers
         [HttpGet]
         public IActionResult BoxEditor([FromQuery]int docId)
         {
-            var document = FileDatabaseStub.GetDocumentById(docId);
+            var document = _fileDatabase.GetDocumentById(docId);
             
             var model = new TemplateEditViewModel{
                 Document = document,
@@ -73,8 +80,8 @@ namespace WebFormFiller.Controllers
                 BasePdfFile = document.BasePdfFile!,
                 
                 FileLoadUrl = Url!.Action("Load","File")!,
-                ProjectLoadUrl = Url!.Action("ReadProject", "Home")!,
-                ProjectStoreUrl = Url!.Action("WriteProject","Home")!,
+                ProjectLoadUrl = Url!.Action("ReadProject", "Template")!,
+                ProjectStoreUrl = Url!.Action("WriteProject","Template")!,
                 
                 BoxMoveUrl = Url!.Action("MoveBox", "EditModals")!,
                 AddFilterUrl = Url!.Action("AddFilter","EditModals")!,
@@ -97,7 +104,7 @@ namespace WebFormFiller.Controllers
         [HttpGet]
         public IActionResult ReadProject([FromQuery]int docId)
         {
-            var document = FileDatabaseStub.GetDocumentById(docId);
+            var document = _fileDatabase.GetDocumentById(docId);
             return Content(SkinnyJson.Json.Freeze(document), "application/json")!;
         }
 
@@ -117,10 +124,10 @@ namespace WebFormFiller.Controllers
             ms.Seek(0, SeekOrigin.Begin);
             var document = SkinnyJson.Json.Defrost<TemplateProject>(ms);
             
-            var original = FileDatabaseStub.GetDocumentById(docId);
+            var original = _fileDatabase.GetDocumentById(docId);
             if (document.Version < (original.Version ?? 0)) return BadRequest("Out of Order")!;
             
-            FileDatabaseStub.SaveDocumentTemplate(document, docId);
+            _fileDatabase.SaveDocumentTemplate(document, docId);
             return Content("OK")!;
         }
 
@@ -132,7 +139,7 @@ namespace WebFormFiller.Controllers
         [HttpPost]
         public IActionResult StoreProject([FromBody]TemplateProject project, [FromQuery]int? docId)
         {
-            var newId = FileDatabaseStub.SaveDocumentTemplate(project, docId);
+            var newId = _fileDatabase.SaveDocumentTemplate(project, docId);
             return Json(new{id = newId})!;
         }
     }

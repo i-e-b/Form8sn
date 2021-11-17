@@ -7,8 +7,20 @@ using WebFormFiller.ServiceStubs;
 
 namespace WebFormFiller.Controllers
 {
+    /// <summary>
+    /// Controller for handling async data populating edit modals, and storing the
+    /// data returned from modals, and storing the results of interactions on the
+    /// box layout page.
+    /// </summary>
     public class EditModalsController : Controller
     {
+        private readonly IFileDatabaseStub _fileDatabase;
+
+        public EditModalsController()
+        {
+            _fileDatabase = new FileDatabaseStub(); // replace with your own implementation
+        }
+        
         /// <summary>
         /// View and select the data available from the sample data set for a specific document template file.
         /// If a page index is given, page-specific options may be provided.
@@ -22,8 +34,8 @@ namespace WebFormFiller.Controllers
         public IActionResult DataPicker([FromQuery] int docId, [FromQuery] int? pageIndex,
             [FromQuery] string? oldPath, [FromQuery] string target, [FromQuery] bool multiplesCanBePicked)
         {
-            var sampleData = FileDatabaseStub.GetSampleData();
-            var project = FileDatabaseStub.GetDocumentById(docId);
+            var sampleData = _fileDatabase.GetSampleData();
+            var project = _fileDatabase.GetDocumentById(docId);
 
             string[]? repeat = null;
             if (pageIndex is not null)
@@ -59,7 +71,7 @@ namespace WebFormFiller.Controllers
         {
             if (width <= 0 ||height <= 0)return BadRequest("Box Dimensions")!;
             
-            var document = FileDatabaseStub.GetDocumentById(docId);
+            var document = _fileDatabase.GetDocumentById(docId);
             if (document.Version is not null && document.Version > docVersion) return BadRequest("Document Version")!;
             if (pageIndex < 0 || pageIndex >= document.Pages.Count) return BadRequest("Page Index")!;
             
@@ -72,7 +84,7 @@ namespace WebFormFiller.Controllers
             theBox.Left = left;
             theBox.Top = top;
             
-            FileDatabaseStub.SaveDocumentTemplate(document, docId);
+            _fileDatabase.SaveDocumentTemplate(document, docId);
             return Content("OK")!;
         }
 
@@ -83,7 +95,7 @@ namespace WebFormFiller.Controllers
         [HttpGet]
         public IActionResult TemplateBox(int docId, [FromQuery] int pageIndex, [FromQuery] string boxKey)
         {
-            var project = FileDatabaseStub.GetDocumentById(docId);
+            var project = _fileDatabase.GetDocumentById(docId);
 
             var model = TemplateBoxModalViewModel.From(project, docId, pageIndex, boxKey);
 
@@ -97,14 +109,14 @@ namespace WebFormFiller.Controllers
         public IActionResult TemplateBox([FromForm] TemplateBoxModalViewModel model)
         {
             // Check against existing version
-            var existing = FileDatabaseStub.GetDocumentById(model.DocumentId);
+            var existing = _fileDatabase.GetDocumentById(model.DocumentId);
             if (existing.Version is not null && model.Version < existing.Version) return Content("OLD")!;
 
             // Copy new values across
             model.CopyTo(existing);
 
             // Write back to store
-            FileDatabaseStub.SaveDocumentTemplate(existing, model.DocumentId);
+            _fileDatabase.SaveDocumentTemplate(existing, model.DocumentId);
             return Content("OK")!;
         }
 
@@ -117,7 +129,7 @@ namespace WebFormFiller.Controllers
         [HttpGet]
         public IActionResult FilterEditor(int docId, [FromQuery] int? pageIndex, [FromQuery] string filterKey)
         {
-            var project = FileDatabaseStub.GetDocumentById(docId);
+            var project = _fileDatabase.GetDocumentById(docId);
             
             var filterSet = project.PickFilterSet(pageIndex);
             if (filterSet is null) return BadRequest()!;
@@ -136,7 +148,7 @@ namespace WebFormFiller.Controllers
         [HttpPost]
         public IActionResult FilterEditor([FromForm]FilterEditViewModel model)
         {
-            var existing = FileDatabaseStub.GetDocumentById(model.DocumentId);
+            var existing = _fileDatabase.GetDocumentById(model.DocumentId);
             
             var filterSet = existing.PickFilterSet(model.PageIndex);
             if (filterSet is null) return BadRequest()!;
@@ -147,7 +159,7 @@ namespace WebFormFiller.Controllers
             model.CopyTo(existing);
 
             // Write back to store
-            FileDatabaseStub.SaveDocumentTemplate(existing, model.DocumentId);
+            _fileDatabase.SaveDocumentTemplate(existing, model.DocumentId);
             return Content("OK")!;
         }
 
@@ -157,7 +169,7 @@ namespace WebFormFiller.Controllers
         [HttpGet]
         public IActionResult EditDocumentDetails(int docId)
         {
-            var project = FileDatabaseStub.GetDocumentById(docId);
+            var project = _fileDatabase.GetDocumentById(docId);
             
             var model = DocumentSettingsViewModel.From(project, docId);
             
@@ -171,14 +183,14 @@ namespace WebFormFiller.Controllers
         public IActionResult EditDocumentDetails([FromForm]DocumentSettingsViewModel model)
         {
             // Check against existing version
-            var existing = FileDatabaseStub.GetDocumentById(model.DocumentId);
+            var existing = _fileDatabase.GetDocumentById(model.DocumentId);
             if (existing.Version is not null && model.Version < existing.Version) return Content("OLD")!;
             
             // Copy new values across
             model.CopyTo(existing);
             
             // Write back to store
-            FileDatabaseStub.SaveDocumentTemplate(existing, model.DocumentId);
+            _fileDatabase.SaveDocumentTemplate(existing, model.DocumentId);
             return Content("OK")!;
         }
 
@@ -188,7 +200,7 @@ namespace WebFormFiller.Controllers
         [HttpGet]
         public IActionResult EditPageDetails(int docId, int pageIndex)
         {
-            var project = FileDatabaseStub.GetDocumentById(docId);
+            var project = _fileDatabase.GetDocumentById(docId);
             
             var model = PageSettingsViewModel.From(project, docId, pageIndex);
             
@@ -202,14 +214,14 @@ namespace WebFormFiller.Controllers
         public IActionResult EditPageDetails([FromForm]PageSettingsViewModel model)
         {
             // Check against existing version
-            var existing = FileDatabaseStub.GetDocumentById(model.DocumentId);
+            var existing = _fileDatabase.GetDocumentById(model.DocumentId);
             if (existing.Version is not null && model.Version < existing.Version) return Content("OLD")!;
             
             // Copy new values across
             model.CopyTo(existing);
             
             // Write back to store
-            FileDatabaseStub.SaveDocumentTemplate(existing, model.DocumentId);
+            _fileDatabase.SaveDocumentTemplate(existing, model.DocumentId);
             return Content("OK")!;
         }
 
@@ -221,7 +233,7 @@ namespace WebFormFiller.Controllers
         [HttpGet]
         public IActionResult AddFilter(int docId, int? pageIdx)
         {
-            var project = FileDatabaseStub.GetDocumentById(docId);
+            var project = _fileDatabase.GetDocumentById(docId);
 
             var filterSet = project.PickFilterSet(pageIdx);
             if (filterSet is null) return BadRequest()!;
@@ -232,7 +244,7 @@ namespace WebFormFiller.Controllers
                 if (!filterSet.ContainsKey(name))
                 {
                     filterSet.Add(name, new MappingInfo());
-                    FileDatabaseStub.SaveDocumentTemplate(project, docId);
+                    _fileDatabase.SaveDocumentTemplate(project, docId);
                     return Ok(name)!;
                 }
             }
@@ -246,14 +258,14 @@ namespace WebFormFiller.Controllers
         public IActionResult DeleteFilter(int docId, string? name, int? pageIdx)
         {
             if (string.IsNullOrWhiteSpace(name)) return BadRequest()!;
-            var project = FileDatabaseStub.GetDocumentById(docId);
+            var project = _fileDatabase.GetDocumentById(docId);
             
             var filterSet = project.PickFilterSet(pageIdx);
             if (filterSet is null) return BadRequest()!;
             
             if (filterSet.ContainsKey(name)) filterSet.Remove(name);
             
-            FileDatabaseStub.SaveDocumentTemplate(project, docId);
+            _fileDatabase.SaveDocumentTemplate(project, docId);
             return Ok()!;
         }
 
@@ -263,7 +275,7 @@ namespace WebFormFiller.Controllers
         [HttpGet]
         public IActionResult DisplayFormat(int docId, [FromQuery]int pageIndex, [FromQuery]string boxKey)
         {
-            var project = FileDatabaseStub.GetDocumentById(docId);
+            var project = _fileDatabase.GetDocumentById(docId);
             
             var model = DisplayFormatViewModel.From(project, docId, pageIndex, boxKey);
             
