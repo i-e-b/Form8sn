@@ -41,8 +41,8 @@ namespace WebFormFiller.Models
         public string? FormatFilterType { get; set; }
         
         #region Parameter values
-        // these must be named the same as parameters in Form8snCore/FileFormats/DisplayFormatType.cs
         
+        // these must be named the same as parameters in Form8snCore/FileFormats/DisplayFormatType.cs
         public string? FormatString { get; set; }
         public string? DecimalPlaces { get; set; }
         public string? DecimalSeparator { get; set; }
@@ -74,17 +74,33 @@ namespace WebFormFiller.Models
                 
                 // Editable values
                 DisplayFormat = theBox.DisplayFormat,
-                FormatFilterType = theBox.DisplayFormat?.Type.ToString()
+                FormatFilterType = theBox.DisplayFormat?.Type.ToString(),
+                
+                FormatString = ReadParam(theBox.DisplayFormat?.FormatParameters, nameof(DateDisplayParams.FormatString)),
+                
+                DecimalPlaces = ReadParam(theBox.DisplayFormat?.FormatParameters, nameof(FractionalDisplayParams.DecimalPlaces))
+                             ?? ReadParam(theBox.DisplayFormat?.FormatParameters, nameof(NumberDisplayParams.DecimalPlaces)),
+                
+                Postfix = ReadParam(theBox.DisplayFormat?.FormatParameters, nameof(NumberDisplayParams.Postfix)),
+                Prefix = ReadParam(theBox.DisplayFormat?.FormatParameters, nameof(NumberDisplayParams.Prefix)),
+                DecimalSeparator = ReadParam(theBox.DisplayFormat?.FormatParameters, nameof(NumberDisplayParams.DecimalSeparator)),
+                ThousandsSeparator = ReadParam(theBox.DisplayFormat?.FormatParameters, nameof(NumberDisplayParams.ThousandsSeparator))
             };
             return model;
         }
 
-        
 
         private static SelectListItem SelectorItemForEnum(EnumOption e)
         {
             if (string.IsNullOrWhiteSpace(e.Description)) return new SelectListItem(e.Name, e.Name);
             return new SelectListItem(e.Name + " - " + e.Description, e.Name);
+        }
+        
+        private static string? ReadParam(Dictionary<string, string>? paramSet, string name)
+        {
+            if (paramSet is null) return null;
+            if (paramSet.ContainsKey(name)) return paramSet[name];
+            return null;
         }
     }
 }

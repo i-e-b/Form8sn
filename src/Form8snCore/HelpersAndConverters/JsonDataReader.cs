@@ -170,7 +170,6 @@ namespace Form8snCore.HelpersAndConverters
             dataNodes.AddRange(nodes.ToArray());
         }
         
-        // BUG: this might not be working if not enough data to repeat. Check with unit test.
         private static void AddRepeaterPath(ICollection<DataNode> dataNodes, TemplateProject index, object sampleData, string[] repeaterPath, bool markMultiple)
         {
             const string root = "repeater";

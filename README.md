@@ -32,6 +32,7 @@ Components
 * **TestApp** - Console app scratch space
 * **PdfSharp.Charting** - Currently unused.
 * **Form8snCore** - File formats and filtering to produce PDFs from project files
+* **WebFormFiller** - .Net MVC website and JS app for editing Form8sn projects
 
 To-do:
 ------
@@ -42,8 +43,8 @@ To-do:
   * [x] JPEG reading and writing ( `Portable.Drawing.Imaging.ImageFormats.JpegReader.Load` )
   * [x] Font reading & metrics ( `PdfSharp.Drawing.XFontSource.GetOrCreateFromFile` )
   * [x] Remove defunct platform specific calls in PDFsharp.
-* [ ] Handle PDFs as input
-* [ ] Decode PDF forms so we can use existing 'boxes'
+* [x] Handle PDFs as input
+* [x] Decode PDF forms so we can use existing 'boxes'
 * [ ] Embed Form8sn instructions in PDF files and handle those? *(not important)*
-* [ ] Web-based form editor?
+* [x] Web-based form editor?
 * [ ] Full suite of tests
