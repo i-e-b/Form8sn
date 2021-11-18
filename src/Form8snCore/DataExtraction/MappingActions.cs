@@ -480,6 +480,10 @@ namespace Form8snCore.DataExtraction
             {
                 return GetPageInfoData(pkg);
             }
+            else if (root == "!") // special "raw data" mode
+            {
+                return string.Join(".", path.Skip(1)).Trim();
+            }
             else if (path[0] != "") throw new Exception($"Unexpected root marker: {path[0]}");
 
             var sb = new StringBuilder();

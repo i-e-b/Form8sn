@@ -230,6 +230,18 @@ namespace Form8snCore.Tests.Helpers
                             ShrinkToFit = false,
                             BoxFontSize = null
                         }
+                    },
+                    {
+                        "BoxWithDirectData", new TemplateBox
+                        {
+                            Alignment = TextAlignment.MidlineCentre,
+                            Left = 10, Top = 250,
+                            Height = 25, Width = 150,
+                            IsRequired = false,
+                            MappingPath = new[] { "!", "This is some data", " And it should go straight in", "" },
+                            WrapText = true,
+                            ShrinkToFit = false
+                        }
                     }
                 };
             }

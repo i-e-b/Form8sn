@@ -25,6 +25,20 @@ namespace Form8snCore.Tests
         }
         
         [Test]
+        public void special_path_for_direct_data()
+        {
+            var totals = new Dictionary<string, decimal>();
+            
+            var subject = new DataMapper(SampleProjectFiles.BasicFile, SampleData.Standard);
+
+            var box = SampleProjectFiles.Basic_Page_Boxes["BoxWithDirectData"];
+            
+            var result = subject.TryFindBoxData(box, 0, totals);
+            
+            Assert.That(result, Is.EqualTo("This is some data. And it should go straight in."), "data did not map as expected");
+        }
+        
+        [Test]
         public void finding_document_filter_data_for_a_page_box()
         {
             var totals = new Dictionary<string, decimal>();
