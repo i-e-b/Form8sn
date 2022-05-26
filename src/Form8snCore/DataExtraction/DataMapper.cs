@@ -105,6 +105,18 @@ namespace Form8snCore.DataExtraction
                 type = DocumentBoxType.EmbedJpegImage;
                 return true;
             }
+            
+            if (box.DisplayFormat?.Type == DisplayFormatType.ColorBox)
+            {
+                type = DocumentBoxType.ColorBox;
+                return true;
+            }
+            
+            if (box.DisplayFormat?.Type == DisplayFormatType.QrCode)
+            {
+                type = DocumentBoxType.QrCode;
+                return true;
+            }
 
             var filter = box.MappingPath[0];
             if (filter != "P") return false;

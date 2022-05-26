@@ -17,6 +17,8 @@ namespace Form8snCore.DataExtraction
             {
                 case DisplayFormatType.None:
                 case DisplayFormatType.RenderImage:
+                case DisplayFormatType.ColorBox:
+                case DisplayFormatType.QrCode:
                     return str;
 
                 case DisplayFormatType.DateFormat:

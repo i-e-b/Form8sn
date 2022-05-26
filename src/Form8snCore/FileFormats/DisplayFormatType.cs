@@ -26,7 +26,15 @@ namespace Form8snCore.FileFormats
         
         [Description("Data URL to a JPEG image")]
         [UsesType(typeof(EmptyDisplayParams))]
-        RenderImage
+        RenderImage,
+        
+        [Description("Fill box with a CSS colour. Does not redact data from PDF file")]
+        [UsesType(typeof(EmptyDisplayParams))]
+        ColorBox,
+        
+        [Description("Render a QR code of the data")]
+        [UsesType(typeof(EmptyDisplayParams))]
+        QrCode,
     }
 
 

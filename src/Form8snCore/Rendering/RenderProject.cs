@@ -8,6 +8,7 @@ using Containers;
 using Containers.Types;
 using Form8snCore.DataExtraction;
 using Form8snCore.FileFormats;
+using Form8snCore.HelpersAndConverters;
 using PdfSharp;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
@@ -464,29 +465,20 @@ namespace Form8snCore.Rendering
             var boxHeight = box.Definition.Height * fy;
             var space = new XRect(box.Definition.Left * fx, box.Definition.Top * fy, boxWidth, boxHeight);
             
-            // Handle the special case of embedding an image
-            if (box.BoxType == DocumentBoxType.EmbedJpegImage)
+            // Handle the super-special cases
+            switch (box.BoxType)
             {
-                if (string.IsNullOrWhiteSpace(box.RenderContent!)) return Result.Success(); // empty data is considered OK
-                try
-                {
-                    _loadingTimer.Start();
-                    var jpegStream = _files.LoadUrl(box.RenderContent);
-                    if (jpegStream is null) return Result.Success(); // Embedded images are always considered optional
-                    var img = XImage.FromStream(jpegStream);
-                    gfx.DrawImage(img, space);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-                    // Nothing. Embedded images are always considered optional
-                }
-                finally
-                {
-                    _loadingTimer.Stop();
-                }
-
-                return Result.Success();
+                case DocumentBoxType.EmbedJpegImage:
+                    EmbedJpegImage(gfx, box, space);
+                    return Result.Success();
+                
+                case DocumentBoxType.ColorBox:
+                    DrawColorBox(gfx, box, space);
+                    return Result.Success();
+                
+                case DocumentBoxType.QrCode:
+                    DrawQrCode(gfx, box, space);
+                    return Result.Success();
             }
 
             // Read data, or pick a special type
@@ -510,6 +502,60 @@ namespace Form8snCore.Rendering
 
             RenderTextInBox(font, gfx, box.Definition, fx, fy, str, space, align);
             return Result.Success();
+        }
+
+        /// <summary>
+        /// Try to interpret the box content as a RGB color string, and
+        /// fill the box with that color. If interpretation fails, then
+        /// quietly do nothing
+        /// </summary>
+        private static void DrawColorBox(XGraphics gfx, DocumentBox box, XRect space)
+        {
+            var colorStr = box.RenderContent ?? "";
+            var result = CssColorParser.ParseCssColor(colorStr);
+            
+            var brush = new XSolidBrush(XColor.FromArgb(result[0], result[1], result[2], result[3]));
+            gfx.DrawRectangle(brush, space);
+        }
+        
+        /// <summary>
+        /// Fill the box with a QR code based on the box's content.
+        /// This is always black-and-white, and always overwrites the
+        /// PDF underneath (including quiet space)
+        /// </summary>
+        private void DrawQrCode(XGraphics gfx, DocumentBox box, XRect space)
+        {
+            // TODO: implement
+            var brush = new XSolidBrush(XColor.FromArgb(128, 255, 255, 10));
+            gfx.DrawRectangle(brush, space);
+        }
+
+        /// <summary>
+        /// Try to load an image from a URL.
+        /// If successful, draw the image into the box.
+        /// If failure, fill the box with black
+        /// </summary>
+        private void EmbedJpegImage(XGraphics gfx, DocumentBox box, XRect space)
+        {
+            if (string.IsNullOrWhiteSpace(box.RenderContent!)) return;
+
+            try
+            {
+                _loadingTimer.Start();
+                var jpegStream = _files.LoadUrl(box.RenderContent);
+                if (jpegStream is null) return; // Embedded images are always considered optional
+                var img = XImage.FromStream(jpegStream);
+                gfx.DrawImage(img, space);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                // Nothing. Embedded images are always considered optional
+            }
+            finally
+            {
+                _loadingTimer.Stop();
+            }
         }
 
         private void RenderTextInBox(XFont font, XGraphics gfx, TemplateBox box, double fx, double fy, string str, XRect space, XStringFormat align)
