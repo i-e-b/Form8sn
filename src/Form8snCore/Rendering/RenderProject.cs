@@ -525,9 +525,34 @@ namespace Form8snCore.Rendering
         /// </summary>
         private void DrawQrCode(XGraphics gfx, DocumentBox box, XRect space)
         {
-            // TODO: implement
-            var brush = new XSolidBrush(XColor.FromArgb(128, 255, 255, 10));
-            gfx.DrawRectangle(brush, space);
+            var matrix = QrEncoder.EncodeString(box.RenderContent ?? "");
+            
+            var black = new XSolidBrush(XColor.FromArgb(255, 0, 0, 0));
+            var white = new XSolidBrush(XColor.FromArgb(255, 255, 255, 255));
+            
+            // Should now subdivide the space rect by the matrix dimensions, and call DrawRectangle a bunch.
+            // We also should have all but the bottom & right edges slightly over-sized to prevent black-to-black
+            // edge problems.
+            var width = matrix.GetLength(0);
+            var height = matrix.GetLength(1);
+
+
+            var modSize = Math.Min(space.Width / width, space.Height / height);
+            var bleedSize = modSize * 1.01; // draw boxes slightly oversize
+
+            var dx = space.X;
+            var dy = space.Y;
+            
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    var px = dx + (x * modSize);
+                    var py = dy + (y * modSize);
+                    var color = matrix[x,y] ? black : white;
+                    gfx.DrawRectangle(color, new XRect(px, py, bleedSize, bleedSize));
+                }
+            }
         }
 
         /// <summary>
