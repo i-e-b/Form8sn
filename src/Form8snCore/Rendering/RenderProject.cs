@@ -525,7 +525,7 @@ namespace Form8snCore.Rendering
         /// </summary>
         private void DrawQrCode(XGraphics gfx, DocumentBox box, XRect space)
         {
-            var encoder = new QrEncoder();
+            var encoder = new QrEncoder{ErrorCorrectionLevel = ErrorCorrection.Q};
             var matrix = encoder.Encode(box.RenderContent ?? "");
             
             var black = new XSolidBrush(XColor.FromArgb(255, 0, 0, 0));
