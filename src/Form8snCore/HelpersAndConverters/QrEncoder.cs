@@ -219,9 +219,9 @@ public class QrEncoder
     public QrEncoder()
     {
         // We don't use any of these, but they keep the null access static analysis happy.
-        _dataSegArray = new []{Array.Empty<byte>()};
-        _encodingSegMode = Array.Empty<EncodingMode>();
-        _codewordsArray = Array.Empty<byte>();
+        _dataSegArray = new byte[][]{};
+        _encodingSegMode = new EncodingMode[0];
+        _codewordsArray = new byte[0];
         _baseMatrix = new byte[0,0];
         _maskMatrix = new byte[0,0];
         _resultMatrix = new byte[0,0];
@@ -1302,8 +1302,8 @@ public class QrEncoder
     // alignment symbols position as function of dimension
     private static readonly byte[][] _lookupAlignmentPositionArray =
     {
-        Array.Empty<byte>(),
-        Array.Empty<byte>(),
+        new byte[0],
+        new byte[0],
         new byte[] { 6, 18 },
         new byte[] { 6, 22 },
         new byte[] { 6, 26 },

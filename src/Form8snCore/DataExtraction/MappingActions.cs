@@ -123,7 +123,7 @@ namespace Form8snCore.DataExtraction
             if (pkg.Data == null || pkg.SourcePath == null || pkg.SourcePath.Length < 1) return null;
             var param = pkg.Params;
 
-            object? GetMappedData(string s) => string.IsNullOrWhiteSpace(s) ? null : GetDataAtPath(pkg.NewPath(s.Split('.') ?? Array.Empty<string>()));
+            object? GetMappedData(string s) => string.IsNullOrWhiteSpace(s) ? null : GetDataAtPath(pkg.NewPath(s.Split('.') ?? new string[0]));
 
             // Get the params.
             // Get the data
@@ -494,7 +494,7 @@ namespace Form8snCore.DataExtraction
 
                 sb.Append(".");
                 sb.Append(name);
-                if (name.StartsWith('[') && name.EndsWith(']'))
+                if (name.StartsWith("[") && name.EndsWith("]"))
                 {
                     // array reference.
                     if (!(target is ArrayList list)) return $"Invalid path: expected list, but was not at {sb}";
@@ -614,7 +614,7 @@ namespace Form8snCore.DataExtraction
             {
                 var name = remainingPath.Dequeue();
 
-                if (name.StartsWith('[') && name.EndsWith(']'))
+                if (name.StartsWith("[") && name.EndsWith("]"))
                 {
                     // array reference.
                     if (remainingPath.Count < 1) yield break; // didn't find a valid item
@@ -673,7 +673,7 @@ namespace Form8snCore.DataExtraction
 
         private static string JoinPathWithoutArrayIndexes(string[] sourcePath)
         {
-            return string.Join(".", sourcePath.Where(s=> !s.StartsWith('[') && !s.EndsWith(']')));
+            return string.Join(".", sourcePath.Where(s=> !s.StartsWith("[") && !s.EndsWith("]")));
         }
 
         public static string[]? FindSourcePath(string filterName, Dictionary<string,MappingInfo> indexDataFilters)

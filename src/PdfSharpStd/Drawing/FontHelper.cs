@@ -32,26 +32,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 #if CORE || GDI
-using System.Drawing;
 using GdiFontFamily = Portable.Drawing.FontFamily;
 using GdiFont = Portable.Drawing.Font;
 using GdiFontStyle = Portable.Drawing.FontStyle;
-#endif
-#if WPF
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Markup;
-using WpfFontStyle = System.Windows.FontStyle;
-using WpfFontWeight = System.Windows.FontWeight;
-using WpfBrush = System.Windows.Media.Brush;
-using WpfFontFamily = System.Windows.Media.FontFamily;
-using WpfTypeface = System.Windows.Media.Typeface;
-using WpfGlyphTypeface = System.Windows.Media.GlyphTypeface;
-#endif
-#if NETFX_CORE
-using Windows.UI.Text;
-using Windows.UI.Xaml.Media;
 #endif
 using PdfSharp.Fonts;
 using PdfSharp.Fonts.OpenType;

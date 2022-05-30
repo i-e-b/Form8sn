@@ -49,7 +49,7 @@ namespace Portable.Drawing.Toolkit.Fonts
         public static GlyphPoint[] NormaliseContour(IReadOnlyList<GlyphPoint> contour, bool closeForm, double resolution)
         {
             var len = contour.Count;
-            if (len < 2) return Array.Empty<GlyphPoint>();
+            if (len < 2) return new GlyphPoint[0];
             var final = new List<GlyphPoint>(len * 4);
             var offs = len - 1;
 

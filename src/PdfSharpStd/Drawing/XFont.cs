@@ -34,19 +34,9 @@ using System.Diagnostics;
 using System.Globalization;
 using System.ComponentModel;
 #if CORE || GDI
-using System.Drawing;
 using GdiFontFamily = Portable.Drawing.FontFamily;
 using GdiFont = Portable.Drawing.Font;
 using GdiFontStyle = Portable.Drawing.FontStyle;
-#endif
-#if WPF
-using System.Windows.Markup;
-using WpfFontFamily = System.Windows.Media.FontFamily;
-using WpfTypeface = System.Windows.Media.Typeface;
-using WpfGlyphTypeface = System.Windows.Media.GlyphTypeface;
-#endif
-#if UWP
-using UwpFontFamily = Windows.UI.Xaml.Media.FontFamily;
 #endif
 using PdfSharp.Fonts;
 using PdfSharp.Fonts.OpenType;

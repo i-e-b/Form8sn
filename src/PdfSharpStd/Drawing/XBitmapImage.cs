@@ -27,36 +27,8 @@
 // DEALINGS IN THE SOFTWARE.
 #endregion
 
-#if CORE
-#endif
-
 using Portable.Drawing;
-#if CORE_WITH_GDI
-using System;
-using System.Drawing;
 using PdfSharp.Internal;
-
-#elif GDI
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using PdfSharp.Internal;
-
-#endif
-#if WPF
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-#if !GDI
-using PdfSharp.Internal;
-#endif
-
-#endif
-#if NETFX_CORE
-using Windows.UI.Xaml.Media.Imaging;
-using PdfSharp.Internal;
-
-#endif
 
 // WPFHACK
 #pragma warning disable 0169

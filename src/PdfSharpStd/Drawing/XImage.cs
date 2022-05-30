@@ -31,22 +31,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using PdfSharp.Pdf;
-#if CORE
-using System.Drawing;
-#endif
-#if GDI
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-#endif
-#if WPF
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-#endif
-#if NETFX_CORE || UWP
-using Windows.UI.Xaml.Media.Imaging;
-#endif
 using PdfSharp.Drawing.Internal;
 using PdfSharp.Internal;
 using PdfSharp.Pdf.IO;
@@ -1062,7 +1046,7 @@ namespace PdfSharp.Drawing
 #endif
 
 #if CORE_WITH_GDI || GDI
-        internal Image _gdiImage;
+        internal Portable.Drawing.Image _gdiImage;
 #endif
 
         /// <summary>

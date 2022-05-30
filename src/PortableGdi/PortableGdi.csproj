@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
         <RootNamespace>Portable.Drawing</RootNamespace>
         <Nullable>enable</Nullable>
         <LangVersion>9</LangVersion>
@@ -14,6 +13,7 @@
         <PackageProjectUrl>https://github.com/i-e-b/Form8sn/tree/main/src/PortableGdi</PackageProjectUrl>
         <RepositoryUrl>https://github.com/i-e-b/Form8sn</RepositoryUrl>
         <PackageReleaseNotes>Initial NuGet pre-releas</PackageReleaseNotes>
+        <TargetFrameworks>net45;net472;netstandard2.0</TargetFrameworks>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

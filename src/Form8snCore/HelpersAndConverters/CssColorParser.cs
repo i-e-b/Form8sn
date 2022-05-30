@@ -188,9 +188,9 @@ namespace Form8snCore.HelpersAndConverters
         private static int ParseCssInt(string str)
         {
             // check for percentage
-            if (str[^1] == '%')
+            if (str[str.Length - 1] == '%')
             {
-                var num = str[..^2];
+                var num = str.Substring(0, str.Length - 2);
                 if (!double.TryParse(num, out var d)) return 0;
                 return ClampCssByte(d / 100 * 255);
             }
@@ -205,9 +205,9 @@ namespace Form8snCore.HelpersAndConverters
         private static int ParseCssFloat(string str)
         {
             // check for percentage
-            if (str[^1] == '%')
+            if (str[str.Length -1] == '%')
             {
-                var num = str[..^2];
+                var num = str.Substring(0, str.Length - 2);
                 if (!double.TryParse(num, out var d)) return 0;
                 return ClampCssByte(d / 100.0 * 255.0);
             }
@@ -285,7 +285,7 @@ namespace Form8snCore.HelpersAndConverters
             if (op == -1 || ep + 1 != str.Length) return result; // not something we understand
             
             var colorTypeName = str.Substring(0, op);
-            var args = str.Substring(op + 1, ep - (op + 1)).Split(',') ?? Array.Empty<string>();
+            var args = str.Substring(op + 1, ep - (op + 1)).Split(',');
             switch (colorTypeName)
             {
                 case "rgba":
