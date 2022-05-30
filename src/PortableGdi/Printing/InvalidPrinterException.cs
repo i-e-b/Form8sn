@@ -23,8 +23,8 @@ using System;
 
 namespace Portable.Drawing.Printing
 {
-	[Serializable]
-    public class InvalidPrinterException : SystemException
+	
+    public class InvalidPrinterException : Exception
     {
         // Internal state.
         private PrinterSettings settings;

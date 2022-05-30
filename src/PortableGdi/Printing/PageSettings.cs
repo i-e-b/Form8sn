@@ -28,7 +28,7 @@ namespace Portable.Drawing.Printing
 #if !ECMA_COMPAT
 [ComVisible(false)]
 #endif
-public class PageSettings : ICloneable
+public class PageSettings
 {
 	// Internal state.
 	private PrinterSettings printerSettings;

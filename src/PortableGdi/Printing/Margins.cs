@@ -27,7 +27,7 @@ namespace Portable.Drawing.Printing
 #if CONFIG_COMPONENT_MODEL
 [TypeConverter(typeof(MarginsConverter))]
 #endif
-public class Margins : ICloneable
+public class Margins
 {
 	// Internal state.
 	private int left;

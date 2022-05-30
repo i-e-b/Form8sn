@@ -21,18 +21,19 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Portable.Drawing.Text
 {
     public abstract class FontCollection : IDisposable
     {
         // Internal state.
-        private readonly ArrayList _families;
+        private readonly List<FontFamily> _families;
 
         // Constructor.
         internal FontCollection()
         {
-            _families = new ArrayList();
+            _families = new List<FontFamily>();
         }
 
         // Destructor.
@@ -59,7 +60,7 @@ namespace Portable.Drawing.Text
         }
 
         // Get the font families.
-        public FontFamily[] Families => (FontFamily[]) (_families.ToArray(typeof(FontFamily)));
+        public FontFamily[] Families => (FontFamily[]) (_families.ToArray());
     }; // class FontCollection
 
 }; // namespace System.Drawing.Text

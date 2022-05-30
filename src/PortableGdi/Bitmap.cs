@@ -37,7 +37,7 @@ namespace Portable.Drawing
 
 	};
 
-[Serializable]
+
 [ComVisible(true)]
 public sealed class Bitmap : Image
 {

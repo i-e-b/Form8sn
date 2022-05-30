@@ -26,7 +26,7 @@ using Portable.Drawing.Toolkit;
 
 namespace Portable.Drawing.Imaging.ImageFormats
 {
-    public class PortableImage : MarshalByRefObject, ICloneable, IToolkitImage
+    public class PortableImage : IToolkitImage
     {
         // Internal state.
         internal PixelFormat pixelFormat;

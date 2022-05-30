@@ -27,11 +27,11 @@ using Portable.Drawing.Imaging.ImageFormats;
 namespace Portable.Drawing
 {
 #if !ECMA_COMPAT
-    [Serializable]
+    
     [ComVisible(true)]
 #endif
     public abstract class Image
-        : MarshalByRefObject, ICloneable, IDisposable
+        : IDisposable
 #if CONFIG_SERIALIZATION
 	, ISerializable
 #endif

@@ -25,7 +25,7 @@ namespace Portable.Drawing
 {
 
 #if !ECMA_COMPAT
-[Serializable]
+
 #endif
 public struct RectangleF
 {

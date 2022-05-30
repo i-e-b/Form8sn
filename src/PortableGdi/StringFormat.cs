@@ -24,7 +24,7 @@ using Portable.Drawing.Text;
 namespace Portable.Drawing
 {
 	public sealed class StringFormat
-	: MarshalByRefObject, ICloneable, IDisposable
+	: IDisposable
 {
 	// Internal state.
 	internal CharacterRange[] ranges;

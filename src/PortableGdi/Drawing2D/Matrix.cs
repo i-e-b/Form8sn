@@ -30,7 +30,7 @@ namespace Portable.Drawing.Drawing2D
     }; // enum MatrixOrder
 
 
-    public sealed class Matrix : MarshalByRefObject, IDisposable
+    public sealed class Matrix : IDisposable
     {
         // Internal state.
         private float m11, m12, m21, m22;

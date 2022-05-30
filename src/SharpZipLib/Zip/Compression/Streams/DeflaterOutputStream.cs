@@ -493,40 +493,6 @@ namespace SharpZipLib.Zip.Compression.Streams
             throw new NotSupportedException("DeflaterOutputStream Read not supported");
         }
 
-#if !NETFX_CORE && !UWP && !DNC10
-		/// <summary>
-		/// Asynchronous reads are not supported a NotSupportedException is always thrown
-		/// </summary>
-		/// <param name="buffer">The buffer to read into.</param>
-		/// <param name="offset">The offset to start storing data at.</param>
-		/// <param name="count">The number of bytes to read</param>
-		/// <param name="callback">The async callback to use.</param>
-		/// <param name="state">The state to use.</param>
-		/// <returns>Returns an <see cref="IAsyncResult"/></returns>
-		/// <exception cref="NotSupportedException">Any access</exception>
-		public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
-		{
-			throw new NotSupportedException("DeflaterOutputStream BeginRead not currently supported");
-		}
-#endif
-
-#if !NETFX_CORE && !UWP && !DNC10
-        /// <summary>
-		/// Asynchronous writes arent supported, a NotSupportedException is always thrown
-		/// </summary>
-		/// <param name="buffer">The buffer to write.</param>
-		/// <param name="offset">The offset to begin writing at.</param>
-		/// <param name="count">The number of bytes to write.</param>
-		/// <param name="callback">The <see cref="AsyncCallback"/> to use.</param>
-		/// <param name="state">The state object.</param>
-		/// <returns>Returns an IAsyncResult.</returns>
-		/// <exception cref="NotSupportedException">Any access</exception>
-		public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
-		{
-			throw new NotSupportedException("BeginWrite is not supported");
-		}
-#endif
-
         /// <summary>
         /// Flushes the stream by calling <see cref="DeflaterOutputStream.Flush">Flush</see> on the deflater and then
         /// on the underlying stream.  This ensures that all bytes are flushed.
@@ -538,36 +504,7 @@ namespace SharpZipLib.Zip.Compression.Streams
             baseOutputStream_.Flush();
         }
 
-#if !NETFX_CORE && !UWP && !DNC10
-		/// <summary>
-		/// Calls <see cref="Finish"/> and closes the underlying
-		/// stream when <see cref="IsStreamOwner"></see> is true.
-		/// </summary>
-		public override void Close()
-		{
-			if ( !isClosed_ ) {
-				isClosed_ = true;
 
-				try {
-					Finish();
-#if true//NETCF_1_0
-                    keys =null;
-#else
-					if ( cryptoTransform_ != null ) {
-						GetAuthCodeIfAES();
-						cryptoTransform_.Dispose();
-						cryptoTransform_ = null;
-					}
-#endif
-				}
-				finally {
-					if( isStreamOwner_ ) {
-						baseOutputStream_.Close();
-					}
-				}
-			}
-		}
-#else
         public void Close()
         {
             if (!isClosed_)
@@ -597,7 +534,6 @@ namespace SharpZipLib.Zip.Compression.Streams
                 }
             }
         }
-#endif
 
 
         private void GetAuthCodeIfAES()

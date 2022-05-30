@@ -1,7 +1,7 @@
 ﻿@model WebFormFiller.Models.FilterEditViewModel
 @{ 
     Layout = null;
-    var onPage = Model!.PageIndex >= 0 ? "true" : "false";
+    var hidePageDetails = Model!.PageIndex >= 0 ? "false" : "true";
 }
 @* ReSharper disable AssignNullToNotNullAttribute *@
 @* ReSharper disable PossibleNullReferenceException *@
@@ -30,7 +30,7 @@
     @* SOURCE DATA *@
     <div class="form-group">
         <label class="form-label" asp-for="@Model.SourcePath">Data Path</label>
-        <button id="DataPathPickBtn" type="button" onclick="showDataPickerModal('SourcePath', true, @onPage)">Pick Data</button>
+        <button id="DataPathPickBtn" type="button" onclick="showDataPickerModal('SourcePath', true, @hidePageDetails)">Pick Data</button>
         <input class="form-input" type="text" asp-for="@Model.SourcePath" value="@Model.SourcePath">
     </div>
     
@@ -133,13 +133,13 @@
     @* SAME *@
     <div class="form-group data-filter-detail display-IfElse">
         <label class="form-label" asp-for="@Model.IfElseMapSame">Data to output if Value and input data are the same</label>
-        <button id="IfElseMapSamePickBtn" type="button" onclick="showDataPickerModal('IfElseMapSame', true, @onPage)">Pick Data</button>
+        <button id="IfElseMapSamePickBtn" type="button" onclick="showDataPickerModal('IfElseMapSame', true, @hidePageDetails)">Pick Data</button>
         <input class="form-input format-param-value" type="text" asp-for="@Model.IfElseMapSame" value="@Model.IfElseMapSame">
     </div>
     @* DIFFERENT *@
     <div class="form-group data-filter-detail display-IfElse">
         <label class="form-label" asp-for="@Model.IfElseMapDifferent">Data to output if Value and input data are different</label>
-        <button id="IfElseMapDifferentPickBtn" type="button" onclick="showDataPickerModal('IfElseMapDifferent', true, @onPage)">Pick Data</button>
+        <button id="IfElseMapDifferentPickBtn" type="button" onclick="showDataPickerModal('IfElseMapDifferent', true, @hidePageDetails)">Pick Data</button>
         <input class="form-input format-param-value" type="text" asp-for="@Model.IfElseMapDifferent" value="@Model.IfElseMapDifferent">
     </div>
     
@@ -153,7 +153,7 @@
     @* EXTRA DATA *@
     <div class="form-group data-filter-detail display-Join">
         <label class="form-label" asp-for="@Model.JoinExtraData">Extra data to add to the end</label>
-        <button id="JoinExtraDataPickBtn" type="button" onclick="showDataPickerModal('JoinExtraData', true, @onPage)">Pick Data</button>
+        <button id="JoinExtraDataPickBtn" type="button" onclick="showDataPickerModal('JoinExtraData', true, @hidePageDetails)">Pick Data</button>
         <input class="form-input format-param-value" type="text" asp-for="@Model.JoinExtraData" value="@Model.JoinExtraData">
     </div>
     

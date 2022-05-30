@@ -24,7 +24,7 @@ using Portable.Drawing.Toolkit;
 
 namespace Portable.Drawing
 {
-	public sealed class FontFamily : MarshalByRefObject, IDisposable
+	public sealed class FontFamily : IDisposable
 {
 	// Internal state.
 	private readonly GenericFontFamilies _genericFamily;

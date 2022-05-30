@@ -46,27 +46,10 @@ namespace SharpZipLib
     /// </summary>
     /// <remarks>NOTE: Not all exceptions thrown will be derived from this class.
     /// A variety of other exceptions are possible for example <see cref="ArgumentNullException"></see></remarks>
-#if !NETCF_1_0 && !NETCF_2_0 && !DNC10
-    [Serializable]
-#endif
     internal class SharpZipBaseException :
-#if NETFX_CORE || DNC10
         Exception
-#else
-        ApplicationException
-#endif
     {
-#if false//!NETCF_1_0 && !NETCF_2_0
-		/// <summary>
-		/// Deserialization constructor 
-		/// </summary>
-		/// <param name="info"><see cref="System.Runtime.Serialization.SerializationInfo"/> for this constructor</param>
-		/// <param name="context"><see cref="StreamingContext"/> for this constructor</param>
-		protected SharpZipBaseException(SerializationInfo info, StreamingContext context )
-			: base( info, context )
-		{
-		}
-#endif
+
 
         /// <summary>
         /// Initializes a new instance of the SharpZipBaseException class.

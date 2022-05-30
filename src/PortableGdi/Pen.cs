@@ -42,7 +42,7 @@ public enum DashStyle
 	Custom		= 5
 };
 
-public sealed class Pen : MarshalByRefObject, ICloneable, IDisposable
+public sealed class Pen : IDisposable
 {
 	// Internal state.
 	private Brush brush;

@@ -25,7 +25,7 @@ using Portable.Drawing.Toolkit;
 
 namespace Portable.Drawing
 {
-[Serializable]
+
 [ComVisible(true)]
 public struct Color
 {

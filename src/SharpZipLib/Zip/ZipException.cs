@@ -48,7 +48,7 @@ namespace SharpZipLib.Zip
     /// Represents exception conditions specific to Zip archive handling
     /// </summary>
 #if false//!NETCF_1_0 && !NETCF_2_0
-	[Serializable]
+	
 #endif
     internal class ZipException : SharpZipBaseException
     {

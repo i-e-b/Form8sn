@@ -24,7 +24,7 @@ using System.Runtime.InteropServices;
 namespace Portable.Drawing
 {
 #if !ECMA_COMPAT
-    [Serializable]
+    
     [ComVisible(true)]
 #endif
     public struct PointF

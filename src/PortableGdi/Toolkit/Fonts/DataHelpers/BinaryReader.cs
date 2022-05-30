@@ -10,7 +10,7 @@ namespace Portable.Drawing.Toolkit.Fonts
     /// Byte reader for TTF / OpenType files
     /// </summary>
     public class BinaryReader : IDisposable {
-        private readonly FileStream _dataStream;
+        private readonly Stream _dataStream;
         private readonly Stack<long> _offsets = new Stack<long>();
         private readonly StreamAsByteArray _data;
         
@@ -21,7 +21,7 @@ namespace Portable.Drawing.Toolkit.Fonts
         /// </summary>
         public BinaryReader(string? filename)
         {
-            if (filename == null || !File.Exists(filename)) throw new Exception("Could not read font file");
+            if (filename == null || !System.IO.File.Exists(filename)) throw new Exception("Could not read font file");
             
             _dataStream = File.OpenRead(filename);
             

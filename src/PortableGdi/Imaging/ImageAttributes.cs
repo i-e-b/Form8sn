@@ -24,7 +24,7 @@ using Portable.Drawing.Drawing2D;
 
 namespace Portable.Drawing.Imaging
 {
-	public sealed class ImageAttributes : ICloneable, IDisposable
+	public sealed class ImageAttributes : IDisposable
 {
 	public enum ColorAdjustType
 	{
@@ -38,7 +38,7 @@ namespace Portable.Drawing.Imaging
 
 	}; 
 	// Attribute information for a particular ColorAdjustType value.
-	private sealed class AttributeInfo : ICloneable
+	private sealed class AttributeInfo
 	{
 		// Accessible state.
 		public AttributeInfo next;

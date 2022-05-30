@@ -21,17 +21,18 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Portable.Drawing.Drawing2D
 {
 	// class TODOAttribute
 
 
-public sealed class GraphicsPath : MarshalByRefObject, ICloneable, IDisposable
+public sealed class GraphicsPath : IDisposable
 {
 	// Internal state.
-	private ArrayList  pathFigures  = new ArrayList(50);
-	private ArrayList  stringObjs   = new ArrayList(50);
+	private List<object>  pathFigures  = new List<object>(50);
+	private List<object>  stringObjs   = new List<object>(50);
 	private PathFigure actualFigure = null; 
 
 	private bool needPenBrush;
@@ -822,13 +823,13 @@ public sealed class GraphicsPath : MarshalByRefObject, ICloneable, IDisposable
 				}
 			}
 			
-	private class PathFigure : ICloneable
+	private class PathFigure
 	{
-		public ArrayList pathObjs;
+		public List<object> pathObjs;
 		
 		public PathFigure() 
 		{
-			pathObjs = new ArrayList();
+			pathObjs = new List<object>();
 		}
 		
 		public object Clone() {

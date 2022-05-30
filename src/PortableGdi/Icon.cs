@@ -28,9 +28,9 @@ using Portable.Drawing.Toolkit;
 
 namespace Portable.Drawing
 {
-[Serializable]
+
 [ComVisible(false)]
-public sealed class Icon : MarshalByRefObject, ICloneable, IDisposable
+public sealed class Icon : IDisposable
 {
 	// Internal state.
 	private PortableImage image;
@@ -48,19 +48,7 @@ public sealed class Icon : MarshalByRefObject, ICloneable, IDisposable
 				Load(stream);
 				SelectFrame(width, height);
 			}
-	public Icon(string filename)
-			{
-				FileStream stream = new FileStream
-					(filename, FileMode.Open, FileAccess.Read);
-				try
-				{
-					Load(stream);
-				}
-				finally
-				{
-					stream.Close();
-				}
-			}
+
 	public Icon(Icon original, Size size)
 			: this(original, size.Width, size.Height) {}
 	public Icon(Icon original, int width, int height)
@@ -82,7 +70,7 @@ public sealed class Icon : MarshalByRefObject, ICloneable, IDisposable
 				}
 				finally
 				{
-					stream.Close();
+					stream.Dispose();
 				}
 			}
 	private Icon(Icon cloneFrom)

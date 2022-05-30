@@ -29,9 +29,9 @@ namespace Portable.Drawing
     // enum GraphicsUnit
 
 
-    [Serializable]
+    
     [ComVisible(true)]
-    public sealed class Font : MarshalByRefObject, ICloneable, IDisposable
+    public sealed class Font : IDisposable
     {
         // Internal state.
         private IToolkit? _toolkit;

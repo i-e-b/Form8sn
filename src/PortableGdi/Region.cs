@@ -92,7 +92,7 @@ using Portable.Drawing.Drawing2D;
 namespace Portable.Drawing
 {
 [ComVisible(false)]
-public sealed class Region : MarshalByRefObject, IDisposable
+public sealed class Region : IDisposable
 {
 	// Internal byte representation of the region
 	private RegionData rgnData;

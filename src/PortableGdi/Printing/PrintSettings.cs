@@ -44,22 +44,20 @@ public enum PrintRange
 };
 
 #if !ECMA_COMPAT
-[Serializable]
+
 [ComVisible(false)]
 #endif
-public class PrinterSettings : ICloneable
+public class PrinterSettings
 {
 	// Internal state.
 	private bool collate;
 	private short copies;
-	[NonSerialized]
 	private PageSettings defaultPageSettings;
 	private Duplex duplex;
 	private int fromPage;
 	private int landscapeAngle;
 	private int maximumPage;
 	private int minimumPage;
-	[NonSerialized]
 	private string printerName;
 	private PrintRange printRange;
 	private bool printToFile;
@@ -376,15 +374,15 @@ public class PrinterSettings : ICloneable
 			}
 	public IntPtr GetHdevmode(PageSettings pageSettings)
 			{
-				throw new Win32Exception
-					(0, "NotSupp_CannotGetDevMode");
+				throw new Exception
+					("NotSupp_CannotGetDevMode");
 			}
 
 	// Get the Win32-specific DEVNAMES information for these printer settings.
 	public IntPtr GetHdevnames()
 			{
-				throw new Win32Exception
-					(0, "NotSupp_CannotGetDevNames");
+				throw new Exception
+					("NotSupp_CannotGetDevNames");
 			}
 
 	// Set the DEVMODE information from a Win32-specific structure.

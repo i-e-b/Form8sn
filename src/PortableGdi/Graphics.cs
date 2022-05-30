@@ -41,7 +41,7 @@ namespace Portable.Drawing
     }
 
     [ComVisible(false)]
-    public sealed class Graphics : MarshalByRefObject, IDisposable
+    public sealed class Graphics : IDisposable
     {
         // Internal state.
         private IToolkitGraphics? _graphics;
@@ -4198,14 +4198,14 @@ namespace Portable.Drawing
 
         // Delegate that is used to handle abort callbacks on "DrawImage".
 #if !ECMA_COMPAT
-        [Serializable]
+        
         [ComVisible(false)]
 #endif
         public delegate bool DrawImageAbort(IntPtr callbackdata);
 
         // Delegate that is used to enumerate metafile contents.
 #if !ECMA_COMPAT
-        [Serializable]
+        
         [ComVisible(false)]
 #endif
         public delegate bool EnumerateMetafileProc
@@ -4404,7 +4404,7 @@ namespace Portable.Drawing
         {
             // Validate the parameter.
             if (points == null) throw new ArgumentNullException(nameof(points));
-            if (points.Length < minPoints) return Array.Empty<Point>();
+            if (points.Length < minPoints) return new Point[0];
 
             // Convert the "points" array.
             Point[] newPoints = new Point [points.Length];

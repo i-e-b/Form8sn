@@ -23,7 +23,7 @@ using System.Runtime.InteropServices;
 
 namespace Portable.Drawing
 {
-[Serializable]
+
 [ComVisible(true)]
 public struct Size
 {

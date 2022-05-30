@@ -72,7 +72,7 @@ public enum SmoothingMode
 	AntiAlias	= 4
 };
 
-public sealed class GraphicsContainer : MarshalByRefObject
+public sealed class GraphicsContainer 
 {
 	// Internal state.
 	private Graphics graphics;

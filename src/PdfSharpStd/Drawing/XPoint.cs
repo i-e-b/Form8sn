@@ -63,7 +63,7 @@ namespace Edf.Drawing
     /// in a two-dimensional plane.
     /// </summary>
     [DebuggerDisplay("{DebuggerDisplay}")]
-    [Serializable]
+    
     [StructLayout(LayoutKind.Sequential)]  // TypeConverter(typeof(PointConverter)), ValueSerializer(typeof(PointValueSerializer))]
     public struct XPoint : IFormattable
     {

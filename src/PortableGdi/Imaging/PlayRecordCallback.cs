@@ -25,7 +25,7 @@ namespace Portable.Drawing.Imaging
 {
 
 #if !ECMA_COMPAT
-    [Serializable]
+    
 #endif
     public delegate void PlayRecordCallback(EmfPlusRecordType recordType,
         int flags, int dataSize,

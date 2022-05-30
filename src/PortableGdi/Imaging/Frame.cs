@@ -26,7 +26,7 @@ using Portable.Drawing.Imaging.ImageFormats;
 
 namespace Portable.Drawing.Imaging
 {
-    public class Frame : MarshalByRefObject, IDisposable, IBitmapProxy
+    public class Frame : IDisposable, IBitmapProxy
     {
         // Internal state.
         private PortableImage image;

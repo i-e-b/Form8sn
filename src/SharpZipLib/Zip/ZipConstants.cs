@@ -467,30 +467,10 @@ namespace SharpZipLib.Zip
         public const int ENDSIG = 'P' | ('K' << 8) | (5 << 16) | (6 << 24);
         #endregion
 
-#if true//NETCF_1_0 || NETCF_2_0
         // This isn't so great but is better than nothing.
         // Trying to work out an appropriate OEM code page would be good.
         // 850 is a good default for English speakers particularly in Europe.
-#if SILVERLIGHT || NETFX_CORE || UWP || DNC10
-        // TODO Do we need this for PDFsharp? If so, make it work.
         static int defaultCodePage = 65001;
-#else
-        static int defaultCodePage = CultureInfo.CurrentCulture.TextInfo.ANSICodePage;
-#endif
-#else
-	    /// <remarks>
-	    /// Get OEM codepage from NetFX, which parses the NLP file with culture info table etc etc.
-	    /// But sometimes it yields the special value of 1 which is nicknamed <c>CodePageNoOEM</c> in <see cref="Encoding"/> sources (might also mean <c>CP_OEMCP</c>, but Encoding puts it so).
-	    /// This was observed on Ukranian and Hindu systems.
-	    /// Given this value, <see cref="Encoding.GetEncoding(int)"/> throws an <see cref="ArgumentException"/>.
-	    /// So replace it with some fallback, e.g. 437 which is the default codepage in a console in a default Windows installation.
-	    /// </remarks>
-	    static int defaultCodePage =
-            // these values cause ArgumentException in subsequent calls to Encoding::GetEncoding()
-            ((Thread.CurrentThread.CurrentCulture.TextInfo.OEMCodePage == 1) || (Thread.CurrentThread.CurrentCulture.TextInfo.OEMCodePage == 2) || (Thread.CurrentThread.CurrentCulture.TextInfo.OEMCodePage == 3) || (Thread.CurrentThread.CurrentCulture.TextInfo.OEMCodePage == 42))
-            ? 437 // The default OEM encoding in a console in a default Windows installation, as a fallback.
-	        : Thread.CurrentThread.CurrentCulture.TextInfo.OEMCodePage;  
-#endif
 
         /// <summary>
         /// Default encoding used for string conversion.  0 gives the default system OEM code page.
@@ -536,11 +516,7 @@ namespace SharpZipLib.Zip
                 return string.Empty;
             }
 
-#if SILVERLIGHT || NETFX_CORE
             return Encoding.GetEncoding("utf-8").GetString(data, 0, count);
-#else
-            return Encoding.GetEncoding(DefaultCodePage).GetString(data, 0, count);
-#endif
         }
 
         /// <summary>
@@ -630,11 +606,7 @@ namespace SharpZipLib.Zip
                 return new byte[0];
             }
 
-#if SILVERLIGHT || NETFX_CORE
             return Encoding.GetEncoding("utf-8").GetBytes(str);
-#else
-            return Encoding.GetEncoding(DefaultCodePage).GetBytes(str);
-#endif
         }
 
         /// <summary>

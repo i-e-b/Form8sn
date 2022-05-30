@@ -46,7 +46,7 @@ public enum MetafileFrameUnit
 };
 
 #if !ECMA_COMPAT
-[Serializable]
+
 [ComVisible(false)]
 #endif
 public sealed class Metafile : Image

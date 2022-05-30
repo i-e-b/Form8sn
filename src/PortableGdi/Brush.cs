@@ -36,7 +36,7 @@ namespace Portable.Drawing
     }
 
 
-    public abstract class Brush : MarshalByRefObject, ICloneable, IDisposable
+    public abstract class Brush : IDisposable
     {
         // Internal state.
         internal IToolkit? Toolkit;

@@ -51,7 +51,7 @@ namespace Portable.Drawing.Drawing2D
 		Triangle	= 3
 	};
 
-public class CustomLineCap : MarshalByRefObject, ICloneable, IDisposable
+public class CustomLineCap : IDisposable
 {
 	// Internal state.
 	private GraphicsPath fillPath;
