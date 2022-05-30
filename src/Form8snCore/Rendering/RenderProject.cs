@@ -525,7 +525,8 @@ namespace Form8snCore.Rendering
         /// </summary>
         private void DrawQrCode(XGraphics gfx, DocumentBox box, XRect space)
         {
-            var matrix = QrEncoder.EncodeString(box.RenderContent ?? "");
+            var encoder = new QrEncoder();
+            var matrix = encoder.Encode(box.RenderContent ?? "");
             
             var black = new XSolidBrush(XColor.FromArgb(255, 0, 0, 0));
             var white = new XSolidBrush(XColor.FromArgb(255, 255, 255, 255));
@@ -549,7 +550,7 @@ namespace Form8snCore.Rendering
                 {
                     var px = dx + (x * modSize);
                     var py = dy + (y * modSize);
-                    var color = matrix[x,y] ? black : white;
+                    var color = matrix[y,x] ? black : white; // fun fact: if you get the X & Y the wrong way around, the QR will look perfect, but not scan at all.
                     gfx.DrawRectangle(color, new XRect(px, py, bleedSize, bleedSize));
                 }
             }
