@@ -2,8 +2,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfSharp.Charting", "PdfSharp.Charting\PdfSharp.Charting.csproj", "{6F98A822-41B0-4C7A-85A6-E95C1D3E88EF}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.csproj", "{2A6CE173-0CC7-4FB1-AB1D-36A24338723D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_Info", "_Info", "{263B94BB-2B33-4F44-A1CE-105A83EA8B3B}"
@@ -47,22 +45,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6F98A822-41B0-4C7A-85A6-E95C1D3E88EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6F98A822-41B0-4C7A-85A6-E95C1D3E88EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6F98A822-41B0-4C7A-85A6-E95C1D3E88EF}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{6F98A822-41B0-4C7A-85A6-E95C1D3E88EF}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{6F98A822-41B0-4C7A-85A6-E95C1D3E88EF}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{6F98A822-41B0-4C7A-85A6-E95C1D3E88EF}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{6F98A822-41B0-4C7A-85A6-E95C1D3E88EF}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{6F98A822-41B0-4C7A-85A6-E95C1D3E88EF}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{6F98A822-41B0-4C7A-85A6-E95C1D3E88EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6F98A822-41B0-4C7A-85A6-E95C1D3E88EF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6F98A822-41B0-4C7A-85A6-E95C1D3E88EF}.Release|ARM.ActiveCfg = Release|Any CPU
-		{6F98A822-41B0-4C7A-85A6-E95C1D3E88EF}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{6F98A822-41B0-4C7A-85A6-E95C1D3E88EF}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{6F98A822-41B0-4C7A-85A6-E95C1D3E88EF}.Release|Win32.ActiveCfg = Release|Any CPU
-		{6F98A822-41B0-4C7A-85A6-E95C1D3E88EF}.Release|x64.ActiveCfg = Release|Any CPU
-		{6F98A822-41B0-4C7A-85A6-E95C1D3E88EF}.Release|x86.ActiveCfg = Release|Any CPU
 		{2A6CE173-0CC7-4FB1-AB1D-36A24338723D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2A6CE173-0CC7-4FB1-AB1D-36A24338723D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2A6CE173-0CC7-4FB1-AB1D-36A24338723D}.Debug|ARM.ActiveCfg = Debug|Any CPU

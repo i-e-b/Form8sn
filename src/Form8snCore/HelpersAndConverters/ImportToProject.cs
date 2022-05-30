@@ -147,7 +147,7 @@ namespace Form8snCore.HelpersAndConverters
                 
                 BoxOrder = null, DependsOn = null,
                 DisplayFormat = null,
-                MappingPath = Array.Empty<string>(),
+                MappingPath = new string[0],
                 WrapText = false, ShrinkToFit = true,
                 BoxFontSize = null
             });

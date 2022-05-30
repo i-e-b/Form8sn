@@ -120,7 +120,7 @@ namespace Form8snCore.HelpersAndConverters
             if (!(_idString is null)) return _idString;
             var sb = new StringBuilder();
             
-            var bits = DataPath.Split(Strings.Separator) ?? Array.Empty<string>();
+            var bits = DataPath.Split(Strings.Separator) ?? new string[0];
             if (bits.Length < 1) { _idString = Name; return _idString; }
             
             sb.Append(Root);

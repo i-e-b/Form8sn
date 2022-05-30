@@ -384,7 +384,9 @@ namespace Form8snCore.Rendering
 
                 if (background.ExistingPage.Orientation == PageOrientation.Landscape)
                 {
-                    (page.Width, page.Height) = (page.Height, page.Width);
+                    var tmp = page.Width;
+                    page.Width = page.Height;
+                    page.Height = tmp;
                 }
             }
 
