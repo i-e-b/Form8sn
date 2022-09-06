@@ -15,7 +15,7 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
         private readonly IBufferWriter<byte> _writer;
         private readonly int _minimumBufferSize;
         private Span<byte> _buffer;
-        private int _bufferConsunmed;
+        private int _bufferConsumed;
 
         private ulong _register; // left-justified bit buffer
         private bool _bitMode;
@@ -30,7 +30,7 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
         {
             _writer = writer;
             _buffer = default;
-            _bufferConsunmed = default;
+            _bufferConsumed = default;
             _register = default;
             _bitMode = default;
             _bitsInRegister = default;
@@ -94,11 +94,11 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
         {
             Debug.Assert(!(_writer is null));
 
-            if (_bufferConsunmed != 0)
+            if (_bufferConsumed != 0)
             {
-                _writer!.Advance(_bufferConsunmed);
+                _writer!.Advance(_bufferConsumed);
             }
-            _bufferConsunmed = 0;
+            _bufferConsumed = 0;
         }
 
         private void FlushRegister()
@@ -116,13 +116,13 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
                     _buffer[1] = 0;
                     _buffer[0] = 0xff;
                     _buffer = _buffer.Slice(2);
-                    _bufferConsunmed += 2;
+                    _bufferConsumed += 2;
                 }
                 else
                 {
                     _buffer[0] = b;
                     _buffer = _buffer.Slice(1);
-                    _bufferConsunmed++;
+                    _bufferConsumed++;
                 }
             }
         }
@@ -187,7 +187,7 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
                 throw new ArgumentOutOfRangeException(nameof(length));
             }
             _buffer = _buffer.Slice(length);
-            _bufferConsunmed += length;
+            _bufferConsumed += length;
         }
 
         /// <summary>
@@ -241,7 +241,7 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
                     segment.Slice(0, count).CopyTo(_buffer);
                     segment = segment.Slice(count);
                     _buffer = _buffer.Slice(count);
-                    _bufferConsunmed += count;
+                    _bufferConsumed += count;
                 }
             }
 
@@ -265,7 +265,7 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
                 bytes.Slice(0, count).CopyTo(_buffer);
                 bytes = bytes.Slice(count);
                 _buffer = _buffer.Slice(count);
-                _bufferConsunmed += count;
+                _bufferConsumed += count;
             }
         }
 
@@ -286,7 +286,7 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
             buffer[1] = (byte)marker;
             buffer[0] = 0xff;
             _buffer = buffer.Slice(2);
-            _bufferConsunmed += 2;
+            _bufferConsumed += 2;
         }
 
         /// <summary>
@@ -304,7 +304,7 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 
             BinaryPrimitives.WriteUInt16BigEndian(_buffer, (ushort)(length + 2));
             _buffer = _buffer.Slice(2);
-            _bufferConsunmed += 2;
+            _bufferConsumed += 2;
         }
 
     }

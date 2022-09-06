@@ -132,7 +132,7 @@ namespace WebFormFiller.ServiceStubs
         /// </summary>
         public object GetSampleData()
         {
-            return Json.Defrost(File.ReadAllText(@"C:\Temp\SampleData.json")); 
+            return Json.Defrost(File.ReadAllText(@"C:\Temp\SampleData.json"));
         }
 
         #region Support methods (your app doesn't need to supply these)

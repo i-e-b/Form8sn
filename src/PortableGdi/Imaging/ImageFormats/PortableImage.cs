@@ -307,8 +307,6 @@ namespace Portable.Drawing.Imaging.ImageFormats
             else if (magic[0] == (byte) 0xFF && magic[1] == (byte) 0xD8)
             {
                 // JPEG or EXIF image.
-                //JpegReader.Load(stream, this, magic, 4);
-                // TODO: implement JPEG reading
                 stream.Seek(0, SeekOrigin.Begin);
                 JpegReaderHelper.Load(stream, this);
             }
@@ -401,7 +399,7 @@ namespace Portable.Drawing.Imaging.ImageFormats
             else if (format == Jpeg)
             {
                 // JPEG image.
-                //JpegWriter.Save(stream, this);
+                //JpegReaderHelper.Save(stream, this);
                 // TODO: implement portable jpeg
                 throw new NotImplementedException("PORTABLE JPEG IS NOT YET IMPLEMENTED");
             }

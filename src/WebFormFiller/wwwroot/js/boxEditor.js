@@ -723,6 +723,36 @@ function hitTestBoxes(page, mx, my) {
             }
         }
     }
+    
+    // As a last-ditch, try to select a box near to the click
+    const offset = 5;
+    for (let name in page.Boxes) {
+        let def = page.Boxes[name];
+        let {Width, Top, Height, Left} = def;
+        Width *= xScale;
+        Top *= yScale;
+        Left *= xScale;
+        Height *= yScale;
+
+        if (mx >= Left-offset && my >= Top-offset) {
+            if (mx - Left <= Width+offset && my - Top <= Height+offset) {
+                // Did we hit the already selected box?
+                if (activeBox.key === name) { // allow re-sizing of degenerate boxes
+                    mouse.xControl = 'right';
+                    mouse.yControl = 'bottom';
+                    return 'size';
+                }
+
+                // otherwise, select this new one
+                activeBox.key = name;
+                activeBox.top = Top;
+                activeBox.left = Left;
+                activeBox.right = Left + Width;
+                activeBox.bottom = Top + Height;
+                return 'select';
+            }
+        }
+    }
 
     // Missed everything, de-select any currently selected box
     clearActiveBox();
@@ -736,6 +766,19 @@ function drawSingleBox(def, name, xs, ys, validMapping) {
         return;
     }
     if (name === activeBox.key) return; // this box is selected. Don't render it here.
+    
+    // Extract information
+    const {Width, Top, Height, Left, DisplayFormat} = def;
+    
+    if (DisplayFormat && (DisplayFormat.Type === "RenderImage")){
+        // TODO: try to load an example image and render in the box
+
+        boxCtx.fillStyle = "#000";
+        boxCtx.font = '14px sans-serif';
+        boxCtx.textBaseline = 'top';
+        boxCtx.fillText("MAPPED TO IMAGE", 0|(Left * xs) + 5, 0|(Top * xs) + 20);
+    }
+    
 
     if (validMapping) {
         boxCtx.fillStyle = "rgba(80, 100, 200, 0.3)";
@@ -748,7 +791,6 @@ function drawSingleBox(def, name, xs, ys, validMapping) {
     }
 
     // Draw box in place over PDF
-    const {Width, Top, Height, Left} = def;
     boxCtx.fillRect(Left * xs, Top * ys, Width * xs, Height * ys);
     boxCtx.strokeRect(Left * xs, Top * ys, Width * xs, Height * ys);
 
@@ -756,14 +798,17 @@ function drawSingleBox(def, name, xs, ys, validMapping) {
     boxCtx.fillStyle = "#000";
     boxCtx.font = '14px sans-serif';
     boxCtx.textBaseline = 'top';
-    boxCtx.fillText(name, Left * xs + 5, Top * xs + 5);
+    boxCtx.fillText(name, 0|(Left * xs) + 5, 0|(Top * xs) + 5);
 }
+
 function drawActiveBox() {
     let width = activeBox.right - activeBox.left;
     let height = activeBox.bottom - activeBox.top;
     if (width < 1 || height < 1) return; // box is zero sized
     if (activeBox.key === null) return; // no box is active
 
+    // TODO: Render image if there is one mapped?
+    
     boxCtx.fillStyle = "rgba(255, 190, 80, 0.3)";
     boxCtx.strokeStyle = "#FA0";
     boxCtx.lineWidth = 3;
@@ -789,7 +834,7 @@ function drawActiveBox() {
     boxCtx.fillStyle = "#000";
     boxCtx.font = '14px sans-serif';
     boxCtx.textBaseline = 'top';
-    boxCtx.fillText(activeBox.key, activeBox.left + 5, activeBox.top + 5);
+    boxCtx.fillText(activeBox.key, 0|activeBox.left + 5, 0|activeBox.top + 5);
 }
 function middleOfBox(box, xs, ys){
     const {Width, Top, Height, Left} = box;
@@ -899,7 +944,7 @@ boxCanvas.addEventListener('mousedown', function (e) {
     // * Hit the body of the active box -> move
     // * Hit the body of a non-active box -> select
     // * Hit no box -> either start new box, or do nothing (depending on mode)
-
+    
     let page = projectFile.Pages[pageNum - 1];
     mouse.mode = hitTestBoxes(page, mx, my);
     updateEditButton();
@@ -963,12 +1008,22 @@ boxCanvas.addEventListener('mousemove', function (e) {
         activeBox.right += dx;
         activeBox.bottom += dy;
     } else if (mouse.mode === 'size' || mouse.mode === 'create') {
-        // resize the active box
+        // free resize the active box
         activeBox[mouse.xControl] = mouse.x;
         activeBox[mouse.yControl] = mouse.y;
+        
         // make sure the box is not invalid (we're measuring in screen-space here, zooming in will still let you place tiny boxes)
         if (activeBox.right + 5 < activeBox.left) activeBox.right = activeBox.left + 5;
         if (activeBox.bottom + 5 < activeBox.top) activeBox.bottom = activeBox.top + 5;
+        
+        if (e.altKey){ // force square
+            let h = activeBox.bottom - activeBox.top;
+            let w = activeBox.right - activeBox.left;
+            let m = (h+w)/2;
+            activeBox.right = activeBox.left + m;
+            activeBox.bottom = activeBox.top + m;
+        }
+        //console.log(e.ctrlKey+"|"+e.altKey);
     }
 
     if (mouse.buttons !== 0) {

@@ -953,25 +953,8 @@ namespace PdfSharp.Pdf.Advanced
             bool segmentedColorMask = false;
 
             MemoryStream memory = new MemoryStream();
-#if CORE_WITH_GDI
             _image._gdiImage.Save(memory, ImageFormat.Bmp);
-#endif
-#if GDI
-            _image._gdiImage.Save(memory, ImageFormat.Bmp);
-#endif
-#if WPF
-#if !SILVERLIGHT
-            BmpBitmapEncoder encoder = new BmpBitmapEncoder();
-            //if (!_image._path.StartsWith("*"))
-            //    encoder.Frames.Add(BitmapFrame.Create(new Uri(_image._path), BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad));
-            //else
-            encoder.Frames.Add(BitmapFrame.Create(_image._wpfImage));
-            encoder.Save(memory);
-#else
-            // AGHACK
-            GetType();
-#endif
-#endif
+
             // THHO4THHO Use ImageImporterBMP here to avoid redundant code.
 
             int streamLength = (int)memory.Length;
@@ -981,11 +964,8 @@ namespace PdfSharp.Pdf.Advanced
                 byte[] imageBits = new byte[streamLength];
                 memory.Seek(0, SeekOrigin.Begin);
                 memory.Read(imageBits, 0, streamLength);
-#if !UWP
                 memory.Close();
-#else
-                memory.Dispose();
-#endif
+
 
                 int height = _image.PixelHeight;
                 int width = _image.PixelWidth;
@@ -993,22 +973,13 @@ namespace PdfSharp.Pdf.Advanced
                 if (ReadWord(imageBits, 0) != 0x4d42 || // "BM"
                   ReadDWord(imageBits, 2) != streamLength ||
                   ReadDWord(imageBits, 14) != 40 || // sizeof BITMAPINFOHEADER
-#if WPF
-                    // TODOWPF: bug with height and width??? With which files???
+
                   ReadDWord(imageBits, 18) != width ||
                   ReadDWord(imageBits, 22) != height)
-#else
-                  ReadDWord(imageBits, 18) != width ||
-                  ReadDWord(imageBits, 22) != height)
-#endif
                 {
                     throw new NotImplementedException("ReadIndexedMemoryBitmap: unsupported format");
                 }
-#if WPF
-                // TODOWPF: bug with height and width
-                width = ReadDWord(imageBits, 18);
-                height = ReadDWord(imageBits, 22);
-#endif
+
                 int fileBits = ReadWord(imageBits, 28);
                 if (fileBits != bits)
                 {
@@ -1026,14 +997,20 @@ namespace PdfSharp.Pdf.Advanced
                 int bytesFileOffset = ReadDWord(imageBits, 10);
                 const int bytesColorPaletteOffset = 0x36; // GDI+ always returns Windows bitmaps: sizeof BITMAPFILEHEADER + sizeof BITMAPINFOHEADER
                 int paletteColors = ReadDWord(imageBits, 46);
-                if ((bytesFileOffset - bytesColorPaletteOffset) / 4 != paletteColors)
+                
+                bool isGray = bits == 8 && (paletteColors == 256 || paletteColors == 0);
+                var channelSizes = (bytesFileOffset - bytesColorPaletteOffset) / 4;
+                if (paletteColors == 0 && channelSizes > 0)
                 {
-                    throw new NotImplementedException("ReadIndexedMemoryBitmap: unsupported format #3");
+                    isGray = true; // ???
+                }
+                else if (channelSizes != paletteColors)
+                {
+                    throw new NotImplementedException($"ReadIndexedMemoryBitmap: unsupported format. Channels indicate {channelSizes} colors, but palette defines {paletteColors}.");
                 }
 
                 MonochromeMask mask = new MonochromeMask(width, height);
 
-                bool isGray = bits == 8 && (paletteColors == 256 || paletteColors == 0);
                 int isBitonal = 0; // 0: false; >0: true; <0: true (inverted).
                 byte[] paletteData = new byte[3 * paletteColors];
                 for (int color = 0; color < paletteColors; ++color)

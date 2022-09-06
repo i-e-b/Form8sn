@@ -29,7 +29,35 @@ namespace WebFormFiller.Controllers
             if (string.IsNullOrWhiteSpace(name)) return BadRequest("File name is required")!;
             var stream = _fileDatabase.Load(name);
             
-            return File(stream, "application/pdf")!;
+            return File(stream, GuessContentType(name))!;
+        }
+
+        private static string GuessContentType(string name)
+        {
+            var extension = Path.GetExtension(name).ToLowerInvariant();
+            switch (extension)
+            {
+                case ".png":
+                    return "image/png";
+                
+                case ".jpg":
+                case ".jpeg":
+                    return "image/jpeg";
+                
+                case ".pdf":
+                    return "application/pdf";
+                
+                case ".txt":
+                    return "text/plain";
+                
+                case ".json":
+                    return "application/json";
+                
+                default:
+                    Console.WriteLine($"Unknown '{extension}'");
+                    return "application/octet-stream";
+            }
+
         }
 
         /// <summary>

@@ -12,6 +12,9 @@
     </tr>
     </thead>
     <tbody>
+    @if(Model.Warnings != ""){
+        <h1>@Model.Warnings</h1>
+    }
 @*
   Note - For anything that's not expanded, we need to set an expansion id,
   and set class=hidden; We also want a toggle button with the on-click to expand it.

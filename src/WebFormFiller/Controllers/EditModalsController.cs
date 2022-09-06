@@ -34,31 +34,39 @@ namespace WebFormFiller.Controllers
         public IActionResult DataPicker([FromQuery] int docId, [FromQuery] int? pageIndex,
             [FromQuery] string? oldPath, [FromQuery] string target, [FromQuery] bool multiplesCanBePicked)
         {
-            var sampleData = _fileDatabase.GetSampleData();
-            var project = _fileDatabase.GetDocumentById(docId);
-
-            string[]? repeat = null;
-            if (pageIndex is not null)
+            try
             {
-                var page = project.Pages[pageIndex.Value];
-                if (page.RepeatMode.Repeats) repeat = page.RepeatMode.DataPath;
+                var sampleData = _fileDatabase.GetSampleData();
+                var project = _fileDatabase.GetDocumentById(docId);
+
+                string[]? repeat = null;
+                if (pageIndex is not null)
+                {
+                    var page = project.Pages[pageIndex.Value];
+                    if (page.RepeatMode.Repeats) repeat = page.RepeatMode.DataPath;
+                }
+
+                var prev = Array.Empty<string>();
+                if (!string.IsNullOrWhiteSpace(oldPath))
+                {
+                    prev = oldPath.Split('.');
+                }
+
+                var tree = JsonDataReader.BuildDataSourcePicker(project, sampleData, prev, repeat, pageIndex, multiplesCanBePicked);
+                var list = JsonDataReader.FlattenTree(tree);
+
+                var model = new DataSourceViewModel
+                {
+                    Nodes = list, Target = target
+                };
+
+                return PartialView("DataPathPicker", model)!;
             }
-
-            var prev = Array.Empty<string>();
-            if (!string.IsNullOrWhiteSpace(oldPath))
+            catch (Exception ex)
             {
-                prev = oldPath.Split('.');
+                Console.WriteLine(ex);
+                return PartialView("DataPathPicker", new DataSourceViewModel( warnings : "Could not load: "+ex.Message))!;
             }
-
-            var tree = JsonDataReader.BuildDataSourcePicker(project, sampleData, prev, repeat, pageIndex, multiplesCanBePicked);
-            var list = JsonDataReader.FlattenTree(tree);
-
-            var model = new DataSourceViewModel
-            {
-                Nodes = list, Target = target
-            };
-
-            return PartialView("DataPathPicker", model)!;
         }
         
         /// <summary>
