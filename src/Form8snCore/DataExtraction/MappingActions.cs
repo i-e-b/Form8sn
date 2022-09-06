@@ -471,7 +471,7 @@ namespace Form8snCore.DataExtraction
             }
             else if (root == "D") // Page repeat
             {
-                if (pkg.RepeaterData == null) throw new Exception("Was asked for repeat page data, but none was supplied");
+                if (pkg.RepeaterData == null) return null; //throw new Exception("Was asked for repeat page data, but none was supplied");
                 if (path.Length < 2) return null;
                 data = pkg.RepeaterData;
                 pathSkip = 1; // root 'D'
