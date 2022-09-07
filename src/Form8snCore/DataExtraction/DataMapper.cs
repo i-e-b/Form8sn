@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Form8snCore.FileFormats;
 using Form8snCore.Rendering;
 
@@ -141,5 +142,17 @@ namespace Form8snCore.DataExtraction
             return filters;
         }
 
+        /// <summary>
+        /// Set the mapper's current repeat data set for
+        /// a page, plus the index through the repeat set.
+        /// <p></p>
+        /// If no data matches, the repeat data will set to
+        /// an empty object.
+        /// </summary>
+        public void SetRepeatDataByIndex(TemplatePage page, int repeatItemIndex)
+        {
+            var repeatData = GetRepeatData(page.RepeatMode.DataPath).FirstOrDefault() ?? new{};
+            SetRepeater(repeatData, page.RepeatMode.DataPath);
+        }
     }
 }

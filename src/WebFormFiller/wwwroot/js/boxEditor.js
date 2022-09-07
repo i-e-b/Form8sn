@@ -538,7 +538,7 @@ function captureDataPickerResult(path, targetId){
     
     closeDataPathPicker();
 }
-function showDataPickerModal(target, allowMultiple, noPage) {
+function showDataPickerModal(target, allowMultiple, onPage) {
     if (!dataPickerPartialUrl) {console.error('dataPickerPartialUrl was not bound');return;}
     
     let targetId = target || 'DataPath';
@@ -553,7 +553,7 @@ function showDataPickerModal(target, allowMultiple, noPage) {
     
     let url = `${dataPickerPartialUrl}&oldPath=${pathReq}&target=${targetId}`;
     if (allowMultiple) url += "&multiplesCanBePicked=true";
-    if (!noPage) url += `&pageIndex=${pageIdx}`;
+    if (onPage) url += `&pageIndex=${pageIdx}`;
 
     loadPartialToModal(url, 'EditTemplateBox_DataMap_Content', function () {
         modal.classList.add("active");

@@ -91,8 +91,9 @@ namespace WebFormFiller.Controllers
                 var box = page.Boxes[boxKey];
                 
                 var subject = new DataMapper(project, sampleData);
-            
-                var result = subject.TryFindBoxData(box, 0, new Dictionary<string, decimal>());
+                subject.SetRepeatDataByIndex(page, 0);
+
+                var result = subject.TryFindBoxData(box, pageIndex.Value, new Dictionary<string, decimal>());
                 
                 return Content(result ?? " ")!;
             }
