@@ -79,5 +79,9 @@ namespace WebFormFiller.Models
         /// </summary>
         public string FileLoadUrl { get; set; } = "";
 
+        /// <summary>
+        /// URL for requesting sample data to display in a box during editing
+        /// </summary>
+        public string BoxSampleUrl { get; set; } = "";
     }
 }

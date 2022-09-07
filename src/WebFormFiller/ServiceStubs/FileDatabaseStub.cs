@@ -39,7 +39,6 @@ namespace WebFormFiller.ServiceStubs
             try
             {
                 using var src = Sync.Run(() => _client.GetStreamAsync(targetUrl));
-                if (src is null) return null;
                 
                 var ms = new MemoryStream();
                 // ReSharper disable once AccessToDisposedClosure
@@ -117,7 +116,7 @@ namespace WebFormFiller.ServiceStubs
             
             var files = Directory.EnumerateFiles(StorageDirectory, docId+"_*.json", SearchOption.TopDirectoryOnly).ToList();
             if (files.Count > 1) throw new Exception("Ambiguous file");
-            if (files.Count < 1) throw new Exception("File not found");
+            if (files.Count < 1) throw new Exception("File not found: docId="+docId);
             
             return Json.Defrost<TemplateProject>(File.ReadAllText(files[0]));
         }

@@ -144,13 +144,16 @@
 <script>
 const pdfWorkerSource = "@(Url!.Content("~/js/pdf.worker.js")!)"; // Snapshot from https://mozilla.github.io/pdf.js/build/pdf.worker.js
 
+// Load/store urls
 const basePdfSourceUrl = "@(Model.FileLoadUrl)?name=@(Model!.BasePdfFile)"; // PDF file from project
 const projectJsonLoadUrl = "@(Model.ProjectLoadUrl)?docId=@(Model.DocumentId)"; // call-back to read template project file
 const projectJsonStoreUrl = "@(Model.ProjectStoreUrl)?docId=@(Model.DocumentId)"; // call-back to write template project file
 const boxMoveUrl = "@(Model.BoxMoveUrl)?docId=@(Model.DocumentId)"; // call-back to save new box position and size
+const boxSampleUrl = "@(Model.BoxSampleUrl)?docId=@(Model.DocumentId)"; // call-back to get sample data for a box
 const addFilterUrl = "@(Model.AddFilterUrl)?docId=@(Model.DocumentId)"; // call-back to add a new filter (can be page or document)
 const deleteFilterUrl = "@(Model.DeleteFilterUrl)?docId=@(Model.DocumentId)"; // call-back to add a new filter (can be page or document)
 
+// Partial views
 const boxEditPartialUrl = "@(Model.BoxEditPartialUrl)?docId=@(Model.DocumentId)"; // call-back to load editor HTML for a specific template box
 const dataPickerPartialUrl = "@(Model.DataPathPartialUrl)?docId=@(Model.DocumentId)"; // call-back to load editor HTML for a data path
 const displayFormatPartialUrl = "@(Model.DisplayFormatPartialUrl)?docId=@(Model.DocumentId)"; // call-back to load editor HTML for a template box's display format
@@ -207,6 +210,7 @@ function closeModal(id) {
                     Either right-click, or hold the <kbd>Shift</kbd> key and click, then drag on the PDF page to add a new template box.
                     Click any template box to select it. Once selected, you can press the Edit button to change data bindings and display settings.
                     Drag the middle of a selected box to move it. Drag the small corner buttons to resize a box.
+                    Hold the <kbd>Alt</kbd> key while resizing to force square.
                 </p>
                 Boxes are color coded:
                 <dl>

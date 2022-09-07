@@ -83,6 +83,7 @@ namespace WebFormFiller.Controllers
                 ProjectLoadUrl = Url!.Action("ReadProject", "Template")!,
                 ProjectStoreUrl = Url!.Action("WriteProject","Template")!,
                 
+                BoxSampleUrl = Url!.Action("BoxSampleData", "EditModals")!,
                 BoxMoveUrl = Url!.Action("MoveBox", "EditModals")!,
                 AddFilterUrl = Url!.Action("AddFilter","EditModals")!,
                 DeleteFilterUrl = Url!.Action("DeleteFilter","EditModals")!,

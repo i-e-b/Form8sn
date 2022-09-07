@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using Form8snCore.DataExtraction;
 using Form8snCore.FileFormats;
 using Form8snCore.HelpersAndConverters;
 using Microsoft.AspNetCore.Mvc;
@@ -68,7 +70,38 @@ namespace WebFormFiller.Controllers
                 return PartialView("DataPathPicker", new DataSourceViewModel( warnings : "Could not load: "+ex.Message))!;
             }
         }
-        
+
+        /// <summary>
+        /// Return sample data to display in the box editor screen.
+        /// This can return empty if there is no suitable sample data.
+        /// This can return synthetic data if that makes sense.
+        /// </summary>
+        [HttpGet]
+        public IActionResult BoxSampleData([FromQuery] int docId, [FromQuery] int? docVersion,
+            [FromQuery] int? pageIndex, [FromQuery] string? boxKey)
+        {
+            try
+            {
+                if (pageIndex is null || boxKey is null) return Content(" ")!;
+                var sampleData = _fileDatabase.GetSampleData();
+                var project = _fileDatabase.GetDocumentById(docId);
+                
+                var page = project.Pages[pageIndex.Value];
+                var box = page.Boxes[boxKey];
+                
+                var subject = new DataMapper(project, sampleData);
+            
+                var result = subject.TryFindBoxData(box, 0, new Dictionary<string, decimal>());
+                
+                return Content(result ?? " ")!;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return Content(" ")!; // not critical, so we can return empty
+            }
+        }
+
         /// <summary>
         /// Update the size and location of a single template page box.
         /// This does nothing if the docVersion provided is less than the one stored.

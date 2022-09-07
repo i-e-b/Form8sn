@@ -1,4 +1,6 @@
-﻿"use strict";
+﻿// noinspection JSUnresolvedVariable
+
+"use strict";
 /*
 
 NOTE:
@@ -19,7 +21,9 @@ When embedding on a page, you must define these variables BEFORE importing this 
  
  * pdfWorkerSource         -- URL of the file at ~/js/pdf.worker.js
  * boxMoveUrl              -- URL used to send back box movements & resizes
+ * boxSampleUrl            -- URL used to get example data for rendering during edit
 
+    see BoxEditor.cshtml
  */
 
 // Event bindings
@@ -48,7 +52,6 @@ let pdfDoc         = null,                                  // the PDF loaded in
 const zoomRatio    = 1.2;                                   // how much we scale during zoom in/out
 
 // Box rendering bits
-const outerContainer = document.getElementById("container");  // HTML <div> that holds the PDF and Box canvas
 const boxCanvas      = document.getElementById("box-render"); // HTML canvas for box drawing and mouse events (goes over the PDF canvas)
 const boxCtx         = boxCanvas.getContext("2d");            // draw context for boxes
 
@@ -63,9 +66,6 @@ function renderPage(num) {
         const viewport = page.getViewport({scale: scale});
         pdfCanvas.height = viewport.height;
         pdfCanvas.width = viewport.width;
-
-        boxCanvas.height = viewport.height;
-        boxCanvas.width = viewport.width;
 
         // Render PDF page into canvas context
         const renderContext = {
@@ -83,6 +83,9 @@ function renderPage(num) {
                 pageNumPending = null;
             } else {
                 // page rendering has settled, we can trigger box draw
+                boxCanvas.height = viewport.height;
+                boxCanvas.width = viewport.width;
+                
                 renderBoxes();
             }
         });
@@ -237,6 +240,40 @@ function closeBoxEditModal() {
 
     let deadContent = document.getElementById('EditTemplateBox_BoxInfo_Content');
     if (deadContent) deadContent.innerHTML = "";
+}
+function reloadSampleData(pageIdx, boxKey, boxObject){
+    // make an async request to load sample data for a box
+    // this loads directly into the supplied object, then
+    // triggers a re-draw.
+
+    if (!boxObject) return;
+    if (!boxKey) {console.log("lost box key!"); return;}
+    if (!boxSampleUrl || boxSampleUrl === "") return; // ignore if no callback
+    
+    let url = `${boxSampleUrl}&docVersion=${projectFile.Version}&pageIndex=${pageIdx}&boxKey=${boxKey}`;
+    serverCallback(url, 'GET', function (evt, xhr) {
+        boxObject.sampleData = xhr.responseText;
+        if (boxObject.sampleData) {
+            renderBoxes();
+            //queueRenderPage(pageIdx+1);
+        }
+    }, function (evt) {
+        console.dir(evt);
+    })
+}
+function tryLoadSampleImage(pageIdx, boxKey, boxObject){
+    console.log(`try load: ${pageIdx}, ${boxKey}, ${JSON.stringify(boxObject)}`);
+    if (!boxObject) return;
+    if (!boxObject.sampleData) return;
+    
+    boxObject.sampleImage = new Image();
+    boxObject.sampleImage.onload = function () {
+        console.log("sample image loaded");
+        renderBoxes();
+        //queueRenderPage(pageIdx+1);
+    };
+    boxObject.sampleImage.src = boxObject.sampleData;
+    console.log(`trying to load image ${boxObject.sampleData}`);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// Doc info
@@ -760,25 +797,41 @@ function hitTestBoxes(page, mx, my) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// BOX PAINTING
+function drawBoxPreview(def, name, Width, Top, Height, Left, DisplayFormat){
+    if (!def.sampleData){
+        reloadSampleData(pageNum - 1, name, def);
+        return;
+    }
+    
+    if (DisplayFormat && (DisplayFormat.Type === "RenderImage")){
+        if (def.sampleImage){
+            let oldAlpha = boxCtx.globalAlpha;
+            boxCtx.globalAlpha = 0.25;
+            boxCtx.drawImage(def.sampleImage, Left, Top, Width, Height);
+            boxCtx.globalAlpha = oldAlpha;
+            return;
+        } else {
+            tryLoadSampleImage(pageNum - 1, name, def);
+            // fall-through to text rendering while image loads
+        }
+    }
+
+    boxCtx.fillStyle = "rgba(0,0,0,0.56)";
+    boxCtx.font = '14px sans-serif';
+    boxCtx.textBaseline = 'top';
+    boxCtx.fillText(def.sampleData, Left + 5, Top + 20, Width-10);
+}
 function drawSingleBox(def, name, xs, ys, validMapping) {
     if (!def) {
         console.error("Invalid box def: " + JSON.stringify(def));
         return;
     }
-    if (name === activeBox.key) return; // this box is selected. Don't render it here.
+    if (name === activeBox.key) return; // this box is selected and will be drawn in drawActiveBox(). Don't render it here.
     
     // Extract information
     const {Width, Top, Height, Left, DisplayFormat} = def;
-    
-    if (DisplayFormat && (DisplayFormat.Type === "RenderImage")){
-        // TODO: try to load an example image and render in the box
 
-        boxCtx.fillStyle = "#000";
-        boxCtx.font = '14px sans-serif';
-        boxCtx.textBaseline = 'top';
-        boxCtx.fillText("MAPPED TO IMAGE", 0|(Left * xs) + 5, 0|(Top * xs) + 20);
-    }
-    
+    drawBoxPreview(def,name,Width * xs, Top * xs, Height * xs, Left * xs, DisplayFormat)
 
     if (validMapping) {
         boxCtx.fillStyle = "rgba(80, 100, 200, 0.3)";
@@ -807,7 +860,13 @@ function drawActiveBox() {
     if (width < 1 || height < 1) return; // box is zero sized
     if (activeBox.key === null) return; // no box is active
 
-    // TODO: Render image if there is one mapped?
+    try {
+        let pageDef = projectFile.Pages[pageNum - 1];
+        let boxDef = pageDef.Boxes[activeBox.key];
+        drawBoxPreview(boxDef, activeBox.key, width, activeBox.top, height, activeBox.left, boxDef.DisplayFormat);
+    } catch (err){
+        console.log(err);
+    }
     
     boxCtx.fillStyle = "rgba(255, 190, 80, 0.3)";
     boxCtx.strokeStyle = "#FA0";
