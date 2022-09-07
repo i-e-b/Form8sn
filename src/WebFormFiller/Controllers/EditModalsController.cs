@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using Form8snCore.DataExtraction;
 using Form8snCore.FileFormats;
 using Form8snCore.HelpersAndConverters;
@@ -38,7 +39,7 @@ namespace WebFormFiller.Controllers
         {
             try
             {
-                var sampleData = _fileDatabase.GetSampleData();
+                var sampleData = _fileDatabase.GetSampleData(docId);
                 var project = _fileDatabase.GetDocumentById(docId);
 
                 string[]? repeat = null;
@@ -83,7 +84,7 @@ namespace WebFormFiller.Controllers
             try
             {
                 if (pageIndex is null || boxKey is null) return Content(" ")!;
-                var sampleData = _fileDatabase.GetSampleData();
+                var sampleData = _fileDatabase.GetSampleData(docId);
                 var project = _fileDatabase.GetDocumentById(docId);
                 
                 var page = project.Pages[pageIndex.Value];
@@ -230,8 +231,19 @@ namespace WebFormFiller.Controllers
             // Copy new values across
             model.CopyTo(existing);
             
+            // If we have a new sample file, store it
+            if (!string.IsNullOrEmpty(model.FileUpload))
+            {
+                var originalName = Path.GetFileNameWithoutExtension(model.FileUploadName ?? "sample").Safe();
+                var storeName = $"{model.DocumentId}sm_{originalName}.json";
+                
+                _fileDatabase.Store(storeName, model.FileUpload.ToStream());
+                existing.SampleFileName = storeName;
+            }
+            
             // Write back to store
             _fileDatabase.SaveDocumentTemplate(existing, model.DocumentId);
+            
             return Content("OK")!;
         }
 

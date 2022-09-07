@@ -46,7 +46,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="SkinnyJson" Version="2.1.1" />
+      <PackageReference Include="SkinnyJson" Version="2.2.3" />
       <PackageReference Include="Sync" Version="1.0.2" />
     </ItemGroup>
 

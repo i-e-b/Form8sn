@@ -38,6 +38,6 @@ namespace WebFormFiller.ServiceStubs
         /// Where items are repeated, enough examples should be given to trigger splits and repeats
         /// in normal documents.
         /// </summary>
-        object GetSampleData();
+        object GetSampleData(int docId);
     }
 }

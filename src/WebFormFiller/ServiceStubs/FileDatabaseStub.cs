@@ -16,7 +16,7 @@ namespace WebFormFiller.ServiceStubs
     public class FileDatabaseStub : IFileDatabaseStub
     {
         public const string StorageDirectory = @"C:\Temp\WebFormFiller";
-        private static readonly HttpClient _client = new HttpClient();
+        private static readonly HttpClient _client = new();
 
         
         /// <summary>
@@ -129,9 +129,15 @@ namespace WebFormFiller.ServiceStubs
         /// Where items are repeated, enough examples should be given to trigger splits and repeats
         /// in normal documents.
         /// </summary>
-        public object GetSampleData()
+        public object GetSampleData(int docId)
         {
-            return Json.Defrost(File.ReadAllText(@"C:\Temp\SampleData.json"));
+            if (!Directory.Exists(StorageDirectory)) { Directory.CreateDirectory(StorageDirectory); }
+            
+            var files = Directory.EnumerateFiles(StorageDirectory, docId+"sm_*.json", SearchOption.TopDirectoryOnly).ToList();
+            if (files.Count > 1) throw new Exception("Ambiguous file");
+            if (files.Count < 1) return Json.Defrost(File.ReadAllText(@"C:\Temp\SampleData.json")); // If nothing found, fall back to a global default
+            
+            return Json.Defrost(File.ReadAllText(files[0]));
         }
 
         #region Support methods (your app doesn't need to supply these)

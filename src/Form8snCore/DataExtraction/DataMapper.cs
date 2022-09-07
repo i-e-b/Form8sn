@@ -57,8 +57,7 @@ namespace Form8snCore.DataExtraction
             var outp = new List<object>();
             if (dataPath == null) return outp;
             
-            var list = MappingActions.ApplyFilter(MappingType.None, _emptyParams, dataPath, null, _project.DataFilters, _data, null, null) 
-                as ArrayList;
+            var list = MappingActions.ApplyFilter(MappingType.None, _emptyParams, dataPath, null, _project.DataFilters, _data, null, null) as IList;
             if (list == null) return outp;
 
             foreach (var item in list)

@@ -49,7 +49,7 @@ namespace Form8snCore.HelpersAndConverters
         public static object Standardise(object data)
         {
             if (data is Dictionary<string, object>) return data;
-            if (data is ArrayList) return data;
+            if (data is IList) return data;
             return Json.Defrost(Json.Freeze(data));
         }
 
@@ -174,8 +174,8 @@ namespace Form8snCore.HelpersAndConverters
         {
             const string root = "repeater";
             // Get a "sample" from the data.
-            // If it's an ArrayList, take the first item and make nodes from it.
-            // If it's not an ArrayList, just make nodes from it
+            // If it's an IList, take the first item and make nodes from it.
+            // If it's not an IList, just make nodes from it
             // Either way, add under "Page Repeat Data" tagged:'D'
             var pageNode = new DataNode{
                 Root = root,
@@ -197,8 +197,8 @@ namespace Form8snCore.HelpersAndConverters
                 null
             );
             
-            // sample should be an ArrayList.
-            if (sample is ArrayList list && list.Count > 0)
+            // sample should be an IList.
+            if (sample is IList list && list.Count > 0)
             {
                 switch (list[0])
                 {
@@ -207,7 +207,7 @@ namespace Form8snCore.HelpersAndConverters
                         pageNode.Nodes.Add(new DataNode {Text = "Invalid result", ForeColor = ColorRed, BackColor = ColorPink});
                         break;
                     // each page has multiple rows
-                    case ArrayList page1:
+                    case IList page1:
                     {
                         var sampleNodes = ReadObjectRecursive(page1, "D", "XXX", root, 0, markMultiple).ToArray();
                         if (sampleNodes.Length < 1)
@@ -281,7 +281,7 @@ namespace Form8snCore.HelpersAndConverters
                 null,
                 null
             );
-            if (repeatData is ArrayList list) repeatData = list[0];
+            if (repeatData is IList list) repeatData = list[0];
             
             var filters = new DataNode {Text = "Page Filters", Root=root, Name = "P", DataPath = Strings.FilterMarker, ForeColor = ColorGrey, CanBePicked = false, Depth = 0, Expanded = true};
             foreach (var filter in thePage.PageDataFilters)
@@ -357,6 +357,7 @@ namespace Form8snCore.HelpersAndConverters
         {
             var name = string.IsNullOrWhiteSpace(path) ? "" : node;
             var outp = new List<DataNode>();
+            
             if (o is Dictionary<string, object> dict)
             {
                 var collection = new List<DataNode>();
@@ -375,7 +376,7 @@ namespace Form8snCore.HelpersAndConverters
                     ForeColor = ColorGrey
                 });
             }
-            else if (o is ArrayList array)
+            else if (o is IList array)
             {
                 var collection = new List<DataNode>();
                 for (var index = 0; index < array.Count; index++)

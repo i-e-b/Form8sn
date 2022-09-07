@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using Form8snCore.FileFormats;
+using Form8snCore.HelpersAndConverters;
 
 namespace Form8snCore.DataExtraction
 {
@@ -14,7 +15,7 @@ namespace Form8snCore.DataExtraction
     public static class MappingActions
     {
         /// <summary>
-        /// returns one of ArrayList, string, int, Dictionary&lt;string,object>; For the dict, 'object' must also be one of these.
+        /// returns one of IList, string, int, Dictionary&lt;string,object>; For the dict, 'object' must also be one of these.
         /// </summary>
         /// <param name="type">Filter to apply</param>
         /// <param name="parameters">parameters for this filter</param>
@@ -51,7 +52,7 @@ namespace Form8snCore.DataExtraction
             if (runningTotals != null)
             {
                 if ((value is decimal d) ||
-                    (value != null && decimal.TryParse(value.ToString(), out d)))
+                    (value != null && decimal.TryParse(value.ToString()!, out d)))
                 {
                     // Both the literal path, and the original (in case we are repeating a page)
                     AddRunningTotal(runningTotals, sourcePath, originalPath, d);
@@ -181,7 +182,7 @@ namespace Form8snCore.DataExtraction
             if (target == null) return 0;
             
             if (target is string str) return str.Length;
-            if (target is ArrayList list) return list.Count;
+            if (target is IList list) return list.Count;
             
             return 0;
         }
@@ -233,7 +234,7 @@ namespace Form8snCore.DataExtraction
         private static object? FormatAllValuesAsDates(FilterState pkg)
         {
             var allValues = FindAllOnPath(pkg);
-            var outp = new ArrayList();
+            var outp = new List<object>();
             var param = pkg.Params;
 
             var key = nameof(DateDisplayParams.FormatString);
@@ -282,14 +283,14 @@ namespace Form8snCore.DataExtraction
 
             if (target is string str) return $"{prefix}{str}{postfix}";
 
-            if (target is ArrayList list) return JoinAsString(list, prefix, infix, postfix);
+            if (target is IList list) return JoinAsString(list, prefix, infix, postfix);
             
             if (target is Dictionary<string, object>) return null; // can't concat objects in a meaningful way
             
             return $"{prefix}{target}{postfix}";
         }
 
-        private static string JoinAsString(ArrayList list, string prefix, string infix, string postfix)
+        private static string JoinAsString(IList list, string prefix, string infix, string postfix)
         {
             var sb = new StringBuilder(prefix);
 
@@ -324,7 +325,7 @@ namespace Form8snCore.DataExtraction
 
             if (target is string str) return SkipTakeFromString(str, 0, count);
 
-            if (target is ArrayList list) return SkipTakeFromArray(list, 0, count);
+            if (target is IList list) return SkipTakeFromArray(list, 0, count);
 
             return null;
         }
@@ -347,7 +348,7 @@ namespace Form8snCore.DataExtraction
 
             if (target is string str) return SkipTakeFromString(str, count, int.MaxValue);
 
-            if (target is ArrayList list) return SkipTakeFromArray(list, count, int.MaxValue);
+            if (target is IList list) return SkipTakeFromArray(list, count, int.MaxValue);
 
             return null;
         }
@@ -369,7 +370,7 @@ namespace Form8snCore.DataExtraction
 
             if (target == null) return null;
 
-            if (target is ArrayList list) return RepackArray(list, count);
+            if (target is IList list) return RepackArray(list, count);
 
             if (target is string str) return RepackString(str, count);
 
@@ -382,11 +383,11 @@ namespace Form8snCore.DataExtraction
             return string.Join(" ", SplitOnWhiteSpace(str).Skip(skip).Take(take));
         }
 
-        private static object? SkipTakeFromArray(ArrayList list, int skip, int take)
+        private static object? SkipTakeFromArray(IList list, int skip, int take)
         {
             if (take < 1) return null;
             if (take == 1 && list.Count > skip) return list[skip]; // if we're asking for 'first', don't make a 1-long list
-            return new ArrayList(list.ToArray().Skip(skip).Take(take).ToArray());
+            return new List<object?>(list.AsObjectList().Skip(skip).Take(take).ToArray());
         }
 
         private static List<string> SplitOnWhiteSpace(string str)
@@ -413,7 +414,7 @@ namespace Form8snCore.DataExtraction
         private static object RepackString(string str, int count)
         {
             if (str.Length <= count) return str;
-            var outp = new ArrayList();
+            var outp = new List<object>();
             var chars = str.ToArray();
 
             var sb = new StringBuilder();
@@ -431,18 +432,18 @@ namespace Form8snCore.DataExtraction
             return outp;
         }
 
-        private static object RepackArray(ArrayList list, int count)
+        private static object RepackArray(IList list, int count)
         {
-            var outp = new ArrayList();
+            var outp = new List<object>();
 
-            var subList = new ArrayList();
+            var subList = new List<object>();
             foreach (var item in list)
             {
                 subList.Add(item);
                 if (subList.Count < count) continue;
 
                 outp.Add(subList);
-                subList = new ArrayList();
+                subList = new List<object>();
             }
 
             if (subList.Count > 0) outp.Add(subList);
@@ -497,7 +498,7 @@ namespace Form8snCore.DataExtraction
                 if (name.StartsWith("[") && name.EndsWith("]"))
                 {
                     // array reference.
-                    if (!(target is ArrayList list)) return $"Invalid path: expected list, but was not at {sb}";
+                    if (!(target is IList list)) return $"Invalid path: expected list, but was not at {sb}";
                     if (!int.TryParse(name.Trim('[', ']'), out var idx)) return $"Invalid path: malformed index at {sb}";
                     if (idx < 0 || idx >= list.Count) return null;
 
@@ -505,6 +506,7 @@ namespace Form8snCore.DataExtraction
                 }
                 else
                 {
+                    if (target is IList) return $"Invalid path: expected object, got list at {sb}";
                     if (!(target is Dictionary<string, object> dict)) return $"Invalid path: expected object, but was not at {sb}";
                     if (dict.ContainsKey(name))
                     {
@@ -537,14 +539,14 @@ namespace Form8snCore.DataExtraction
             var basic = FindAllOnPath(pkg).ToArray();
             var value = basic.Distinct().ToArray();
             if (value.Length < 1) return null;
-            return new ArrayList(value);
+            return new List<object>(value);
         }
         
         private static object? ListOfAllValues(FilterState pkg)
         {
             var value = FindAllOnPath(pkg).ToArray();
             if (value.Length < 1) return null;
-            return new ArrayList(value);
+            return new List<object>(value);
         }
 
         private static object? SumOfAllOnPath(FilterState pkg)
@@ -592,7 +594,7 @@ namespace Form8snCore.DataExtraction
             var walk = FindPathRecursive(pkg.SourcePath.Skip(pathSkip), data);
             foreach (var value in walk)
             {
-                if (value is ArrayList list)
+                if (value is IList list)
                 {
                     foreach (var item in list)
                     {
@@ -618,7 +620,7 @@ namespace Form8snCore.DataExtraction
                 {
                     // array reference.
                     if (remainingPath.Count < 1) yield break; // didn't find a valid item
-                    if (!(target is ArrayList list)) yield break; // can't do it
+                    if (!(target is IList list)) yield break; // can't do it
 
                     // Ignore the actual index, and recurse over every actual item
                     var pathArray = remainingPath.ToArray();

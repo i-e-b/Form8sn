@@ -255,25 +255,20 @@ function reloadSampleData(pageIdx, boxKey, boxObject){
         boxObject.sampleData = xhr.responseText;
         if (boxObject.sampleData) {
             renderBoxes();
-            //queueRenderPage(pageIdx+1);
         }
     }, function (evt) {
         console.dir(evt);
     })
 }
 function tryLoadSampleImage(pageIdx, boxKey, boxObject){
-    console.log(`try load: ${pageIdx}, ${boxKey}, ${JSON.stringify(boxObject)}`);
     if (!boxObject) return;
     if (!boxObject.sampleData) return;
     
     boxObject.sampleImage = new Image();
     boxObject.sampleImage.onload = function () {
-        console.log("sample image loaded");
         renderBoxes();
-        //queueRenderPage(pageIdx+1);
     };
     boxObject.sampleImage.src = boxObject.sampleData;
-    console.log(`trying to load image ${boxObject.sampleData}`);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// Doc info
@@ -804,16 +799,24 @@ function drawBoxPreview(def, name, Width, Top, Height, Left, DisplayFormat){
     }
     
     if (DisplayFormat && (DisplayFormat.Type === "RenderImage")){
-        if (def.sampleImage){
-            let oldAlpha = boxCtx.globalAlpha;
-            boxCtx.globalAlpha = 0.25;
-            boxCtx.drawImage(def.sampleImage, Left, Top, Width, Height);
-            boxCtx.globalAlpha = oldAlpha;
-            return;
-        } else {
-            tryLoadSampleImage(pageNum - 1, name, def);
-            // fall-through to text rendering while image loads
+        let oldAlpha = boxCtx.globalAlpha;
+        try {
+            if (def.sampleImage) {
+                boxCtx.globalAlpha = 0.25;
+                boxCtx.drawImage(def.sampleImage, Left, Top, Width, Height);
+                boxCtx.globalAlpha = oldAlpha;
+                return;
+            } else {
+                tryLoadSampleImage(pageNum - 1, name, def);
+                // fall-through to text rendering while image loads
+            }
+        } catch (err) {
+            boxCtx.fillStyle = "#000";
+            boxCtx.font = '14px sans-serif';
+            boxCtx.textBaseline = 'top';
+            boxCtx.fillText("Fail: "+err, Left + 5, Top + 20, Width-10);
         }
+        boxCtx.globalAlpha = oldAlpha;
     }
 
     boxCtx.fillStyle = "rgba(0,0,0,0.56)";

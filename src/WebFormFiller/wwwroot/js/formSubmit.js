@@ -3,22 +3,32 @@
  * @param formEle the form to encode
  * @returns {string}
  */
-const serialize = function (formEle) {
+const serialize = async function (formEle) {
     // Get all fields
     const fields = [].slice.call(formEle.elements, 0);
 
-    return fields
-        .map(function (ele) {
+    let items = fields
+        .map(async function (ele) {
             const name = ele.name;
             const type = ele.type;
 
             // We ignore
             // - field that don't have a name
             // - disabled fields
-            // - file input types
             // - unselected checkbox/radio items
-            if (!name || ele.disabled || type === 'file' || (/(checkbox|radio)/.test(type) && !ele.checked)) {
+            if (!name || ele.disabled || (/(checkbox|radio)/.test(type) && !ele.checked)) {
                 return '';
+            }
+            
+            // For file inputs, we get the string contents, and add a {key}Name item.
+            // We only support a single file here
+            if (type === 'file'){
+                let file1 = ele.files[0];
+                if (file1) {
+                    console.log("File: " + JSON.stringify(ele.value));
+                    let fileText = await (file1.text());
+                    return `${encodeURIComponent(name)}Name=${encodeURIComponent(ele.value)}&${encodeURIComponent(name)}=${encodeURIComponent(fileText)}`;
+                } else return '';
             }
 
             // Multiple select
@@ -35,10 +45,11 @@ const serialize = function (formEle) {
 
             return `${encodeURIComponent(name)}=${encodeURIComponent(ele.value)}`;
         })
-        .filter(function (item) {
-            return item;
-        })
-        .join('&');
+        .filter(async function (item) {
+            return await item;
+        });
+
+    return (await Promise.all(items)).join('&');
 };
 
 /**
@@ -48,9 +59,10 @@ const serialize = function (formEle) {
  * @returns {Promise<string>}
  */
 const submit = function (formEle) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(async function (resolve, reject) {
         // Serialize form data
-        const params = serialize(formEle);
+        // noinspection ES6RedundantAwait
+        const params = await serialize(formEle);
 
         // Create new Ajax request
         const req = new XMLHttpRequest();

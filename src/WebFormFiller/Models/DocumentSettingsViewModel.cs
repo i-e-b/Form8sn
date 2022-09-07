@@ -14,10 +14,13 @@ namespace WebFormFiller.Models
         /// </summary>
         public static DocumentSettingsViewModel From(TemplateProject project, int docId)
         {
-            return new DocumentSettingsViewModel{
+            return new DocumentSettingsViewModel
+            {
                 DocumentId = docId,
                 Version = project.Version ?? 0,
                 Name = project.Name,
+                SampleDocumentName = project.SampleFileName ?? "<none>",
+
                 BaseFontSize = project.BaseFontSize?.ToString(),
                 FontFamily = project.FontName,
                 Notes = project.Notes,
@@ -25,7 +28,7 @@ namespace WebFormFiller.Models
                 KnownFontList = ListFontsOnServer(project.FontName)
             };
         }
-        
+
         /// <summary>
         /// Copy view model values into an existing index file (to perform an update)
         /// </summary>
@@ -43,23 +46,29 @@ namespace WebFormFiller.Models
         public string? BaseFontSize { get; set; }
         public string? FontFamily { get; set; }
         public string? Notes { get; set; }
+        public string? SampleDocumentName { get; set; }
         public IDictionary<string, MappingInfo> Filters { get; set; } = new Dictionary<string, MappingInfo>();
-        
-        
+
+        // To see how this is populated: WebFormFiller/wwwroot/js/formSubmit.js
+        public string? FileUpload { get; set; }
+        public string? FileUploadName { get; set; }
+
         #region Inner workings
+
         public IEnumerable<SelectListItem> KnownFontList { get; set; } = Array.Empty<SelectListItem>();
 
         private static IEnumerable<SelectListItem> ListFontsOnServer(string? selected)
         {
-            return PortableFont.ListKnownFonts().Select(name => new SelectListItem(name, name, name==selected));
+            return PortableFont.ListKnownFonts().Select(name => new SelectListItem(name, name, name == selected));
         }
 
         private static int? ParseOrNull(string? baseFontSize)
         {
             if (baseFontSize is null) return null;
-            if (!int.TryParse(baseFontSize , out var size)) return null;
+            if (!int.TryParse(baseFontSize, out var size)) return null;
             return size;
         }
+
         #endregion
     }
 }

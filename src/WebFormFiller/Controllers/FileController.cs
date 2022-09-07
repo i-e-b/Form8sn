@@ -66,7 +66,7 @@ namespace WebFormFiller.Controllers
         public IActionResult GenerateSamplePdf(int docId)
         {
             var document = _fileDatabase.GetDocumentById(docId);
-            var sampleData = _fileDatabase.GetSampleData();
+            var sampleData = _fileDatabase.GetSampleData(docId);
             var ms = new MemoryStream();
 
             var info = RenderPdf.ToStream(_fileDatabase, sampleData, document, ms);

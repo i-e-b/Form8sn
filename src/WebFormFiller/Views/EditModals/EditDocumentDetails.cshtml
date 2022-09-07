@@ -34,6 +34,12 @@
         <textarea class="form-input" asp-for="@Model.Notes">@Model.Notes</textarea>
     </div>
     
+    @* SAMPLE DOCUMENT *@
+    <div class="form-group">
+        <label class="form-label" asp-for="@Model.FileUpload">Sample document @Model.SampleDocumentName</label>
+        <input type="file" asp-for="@Model.FileUpload"/>
+    </div>
+    
     @* FILTERS LIST *@
     <h6>Document data filters</h6>
     <button id="addDocumentFilterButton" type="button" onclick="addNewDataFilter()">Add</button>

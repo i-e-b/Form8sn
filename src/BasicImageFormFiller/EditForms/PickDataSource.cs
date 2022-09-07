@@ -89,8 +89,8 @@ namespace BasicImageFormFiller.EditForms
         private void AddRepeaterPath(FileSystemProject project, object sampleData, string[] repeaterPath)
         {
             // Get a "sample" from the data.
-            // If it's an ArrayList, take the first item and make nodes from it.
-            // If it's not an ArrayList, just make nodes from it
+            // If it's an IList, take the first item and make nodes from it.
+            // If it's not an IList, just make nodes from it
             // Either way, add under "Page Repeat Data" tagged:'D'
             var pageNode = new TreeNode{
                 Name = "D",
@@ -111,14 +111,14 @@ namespace BasicImageFormFiller.EditForms
                 null
             );
             
-            // sample should be an ArrayList.
-            if (sample is ArrayList list && list.Count > 0)
+            // sample should be an IList.
+            if (sample is IList list && list.Count > 0)
             {
                 if (list[0] == null) // invalid list
                 {
                     pageNode.Nodes.Add(new TreeNode {Text = "Invalid result", ForeColor = Color.Red, BackColor = Color.Pink});
                 }
-                else if (list[0] is ArrayList page1) // each page has multiple rows
+                else if (list[0] is IList page1) // each page has multiple rows
                 {
                     var sampleNodes = ReadObjectRecursive(page1, "D", "XXX").ToArray();
                     if (sampleNodes.Length < 1)
@@ -181,7 +181,7 @@ namespace BasicImageFormFiller.EditForms
                 null,
                 null
             );
-            if (repeatData is ArrayList list) repeatData = list[0];
+            if (repeatData is IList list) repeatData = list[0];
             
             var filters = new TreeNode {Text = "Page Filters", Name = "P", Tag = Strings.FilterMarker, ForeColor = Color.DimGray};
             foreach (var filter in project.Pages[pageIndex].PageDataFilters)
@@ -290,7 +290,7 @@ namespace BasicImageFormFiller.EditForms
                     ForeColor = Color.DimGray,
                 });
             }
-            else if (o is ArrayList array)
+            else if (o is IList array)
             {
                 var collection = new List<TreeNode>();
                 for (var index = 0; index < array.Count; index++)
