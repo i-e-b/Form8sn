@@ -355,7 +355,8 @@ namespace Form8snCore.HelpersAndConverters
 
         private static List<DataNode> ReadObjectRecursive(object o, string path, string node, string root, int depth, bool markMultiple)
         {
-            var name = string.IsNullOrWhiteSpace(path) ? "" : node;
+            var name = string.IsNullOrWhiteSpace(path) ? "~" : node;
+            var dataPath = string.IsNullOrWhiteSpace(path) ? "~" : path;
             var outp = new List<DataNode>();
             
             if (o is Dictionary<string, object> dict)
@@ -371,7 +372,7 @@ namespace Form8snCore.HelpersAndConverters
                 {
                     Root = root,
                     Depth = depth,
-                    DataPath = path,
+                    DataPath = dataPath,
                     Name = name,
                     ForeColor = ColorGrey
                 });
@@ -405,7 +406,7 @@ namespace Form8snCore.HelpersAndConverters
                     CanBePicked = markMultiple,
                     Depth = depth,
                     IsRepeated = true,
-                    DataPath = path,
+                    DataPath = dataPath,
                     Name = name,
                     ForeColor = ColorPurple
                 });
@@ -416,7 +417,7 @@ namespace Form8snCore.HelpersAndConverters
                 {
                     Root = root,
                     Depth = depth,
-                    DataPath = path,
+                    DataPath = dataPath,
                     Name = name,
                     Text = node + " = " + o,
                     CanBePicked = true,

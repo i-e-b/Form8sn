@@ -477,13 +477,17 @@ namespace Form8snCore.DataExtraction
                 data = pkg.RepeaterData;
                 pathSkip = 1; // root 'D'
             }
-            else if (root == "P")
+            else if (root == "P") // Meta-data about page
             {
                 return GetPageInfoData(pkg);
             }
             else if (root == "!") // special "raw data" mode
             {
                 return string.Join(".", path.Skip(1)).Trim();
+            }
+            else if (root == "~") // marker for exactly the root item
+            {
+                
             }
             else if (path[0] != "") throw new Exception($"Unexpected root marker: {path[0]}");
 

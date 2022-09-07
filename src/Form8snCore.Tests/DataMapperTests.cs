@@ -4,6 +4,7 @@ using Form8snCore.FileFormats;
 using Form8snCore.Rendering;
 using Form8snCore.Tests.Helpers;
 using NUnit.Framework;
+#pragma warning disable CS8602
 
 namespace Form8snCore.Tests
 {
@@ -90,6 +91,21 @@ namespace Form8snCore.Tests
             
             Assert.That(result, Is.Not.Null, "data did not map");
             Assert.That(result.Count, Is.EqualTo(6), "data did not map as expected");
+        }
+        
+        [Test]
+        public void reading_page_repeat_data_with_root_array()
+        {
+            var subject = new DataMapper(SampleProjectFiles.BasicFile, SampleData.RootArray);
+            
+            var result = subject.GetRepeatData(new []{""});
+            
+            Assert.That(result, Is.Not.Null, "data did not map");
+            Assert.That(result.Count, Is.EqualTo(3), "data did not map as expected");
+            
+            var a = result[1] as IDictionary<string,object>;
+            Assert.That(a, Is.Not.Null, "object wrong type");
+            Assert.That(a["prefix"], Is.EqualTo("https://example.com/2"), "child object wrong value");
         }
 
         [Test]

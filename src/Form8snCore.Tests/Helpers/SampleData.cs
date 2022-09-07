@@ -3,6 +3,7 @@
     public class SampleData
     {
         public static object Standard => SkinnyJson.Json.Defrost(SkinnyJson.Json.Freeze(StandardSrc));
+        public static object RootArray => SkinnyJson.Json.Defrost(SkinnyJson.Json.Freeze(RootArraySrc));
         
         public static object StandardSrc => new
         {
@@ -402,6 +403,27 @@
                         Code = "GBR"
                     }
                 }
+            }
+        };
+        
+        public static object RootArraySrc => new object[]{
+            new{
+                prefix="https://example.com/1",
+                code="11",
+                Local="sample one local",
+                Region="sample one region"
+            },
+            new{
+                prefix="https://example.com/2",
+                code="222",
+                Local="sample two local",
+                Region="sample two region"
+            },
+            new{
+                prefix="https://example.com/3",
+                code="3333",
+                Local="sample three local",
+                Region="sample three region"
             }
         };
     }
