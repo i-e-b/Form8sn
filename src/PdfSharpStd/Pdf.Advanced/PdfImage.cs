@@ -96,141 +96,6 @@ namespace PdfSharp.Pdf.Advanced
 #endif
         }
 
-#if SILVERLIGHT
-        private void InitializeAg()
-        {
-            ReadTrueColorMemoryBitmapAg(3, 8, true);
-        }
-
-        private void ReadTrueColorMemoryBitmapAg(int components, int bits, bool hasAlpha)
-        {
-            int pdfVersion = Owner.Version;
-            MemoryStream memory = new MemoryStream();
-
-            WriteableBitmap bitmap = null;
-            if (_image._wpfImage is WriteableBitmap)
-                bitmap = (WriteableBitmap)_image._wpfImage;
-            else if (_image._wpfImage is BitmapImage)
-                bitmap = new WriteableBitmap(_image._wpfImage);
-
-            if (bitmap != null)
-            {
-                int height = _image.PixelHeight;
-                int width = _image.PixelWidth;
-
-                int logicalComponents = components;
-                if (components == 4)
-                    logicalComponents = 3;
-
-                byte[] imageData = new byte[components * width * height];
-
-                bool hasMask = false;
-                bool hasAlphaMask = false;
-                byte[] alphaMask = hasAlpha ? new byte[width * height] : null;
-                MonochromeMask mask = hasAlpha ? new MonochromeMask(width, height) : null;
-
-                int nOffsetRead = 0;
-                if (logicalComponents == 3)
-                {
-                    for (int y = 0; y < height; ++y)
-                    {
-                        int nOffsetWrite = 3 * y * width; // 3*(height - 1 - y)*width;
-                        int nOffsetWriteAlpha = 0;
-                        if (hasAlpha)
-                        {
-                            mask.StartLine(y);
-                            nOffsetWriteAlpha = y * width; // (height - 1 - y) * width;
-                        }
-
-                        for (int x = 0; x < width; ++x)
-                        {
-                            uint pixel = (uint)bitmap.Pixels[nOffsetRead];
-                            imageData[nOffsetWrite] = (byte)(pixel >> 16);
-                            imageData[nOffsetWrite + 1] = (byte)(pixel >> 8);
-                            imageData[nOffsetWrite + 2] = (byte)(pixel);
-                            if (hasAlpha)
-                            {
-                                byte pel = (byte)(pixel >> 24);
-                                mask.AddPel(pel);
-                                alphaMask[nOffsetWriteAlpha] = pel;
-                                if (!hasMask || !hasAlphaMask)
-                                {
-                                    if (pel != 255)
-                                    {
-                                        hasMask = true;
-                                        if (pel != 0)
-                                            hasAlphaMask = true;
-                                    }
-                                }
-                                ++nOffsetWriteAlpha;
-                            }
-                            //nOffsetRead += hasAlpha ? 4 : components;
-                            ++nOffsetRead;
-                            nOffsetWrite += 3;
-                        }
-                        //nOffsetRead = 4*((nOffsetRead + 3)/4); // Align to 32 bit boundary
-                    }
-                }
-                else if (components == 1)
-                {
-                    // Grayscale
-                    throw new NotImplementedException("Image format not supported (grayscales).");
-                }
-
-                FlateDecode fd = new FlateDecode();
-                if (hasMask)
-                {
-                    // monochrome mask is either sufficient or
-                    // provided for compatibility with older reader versions
-                    byte[] maskDataCompressed = fd.Encode(mask.MaskData, _document.Options.FlateEncodeMode);
-                    PdfDictionary pdfMask = new PdfDictionary(_document);
-                    pdfMask.Elements.SetName(Keys.Type, "/XObject");
-                    pdfMask.Elements.SetName(Keys.Subtype, "/Image");
-
-                    Owner._irefTable.Add(pdfMask);
-                    pdfMask.Stream = new PdfStream(maskDataCompressed, pdfMask);
-                    pdfMask.Elements[Keys.Length] = new PdfInteger(maskDataCompressed.Length);
-                    pdfMask.Elements[Keys.Filter] = new PdfName("/FlateDecode");
-                    pdfMask.Elements[Keys.Width] = new PdfInteger(width);
-                    pdfMask.Elements[Keys.Height] = new PdfInteger(height);
-                    pdfMask.Elements[Keys.BitsPerComponent] = new PdfInteger(1);
-                    pdfMask.Elements[Keys.ImageMask] = new PdfBoolean(true);
-                    Elements[Keys.Mask] = pdfMask.Reference;
-                }
-                if (hasMask && hasAlphaMask && pdfVersion >= 14)
-                {
-                    // The image provides an alpha mask (requires Arcrobat 5.0 or higher)
-                    byte[] alphaMaskCompressed = fd.Encode(alphaMask, _document.Options.FlateEncodeMode);
-                    PdfDictionary smask = new PdfDictionary(_document);
-                    smask.Elements.SetName(Keys.Type, "/XObject");
-                    smask.Elements.SetName(Keys.Subtype, "/Image");
-
-                    Owner._irefTable.Add(smask);
-                    smask.Stream = new PdfStream(alphaMaskCompressed, smask);
-                    smask.Elements[Keys.Length] = new PdfInteger(alphaMaskCompressed.Length);
-                    smask.Elements[Keys.Filter] = new PdfName("/FlateDecode");
-                    smask.Elements[Keys.Width] = new PdfInteger(width);
-                    smask.Elements[Keys.Height] = new PdfInteger(height);
-                    smask.Elements[Keys.BitsPerComponent] = new PdfInteger(8);
-                    smask.Elements[Keys.ColorSpace] = new PdfName("/DeviceGray");
-                    Elements[Keys.SMask] = smask.Reference;
-                }
-
-                byte[] imageDataCompressed = fd.Encode(imageData, _document.Options.FlateEncodeMode);
-
-                Stream = new PdfStream(imageDataCompressed, this);
-                Elements[Keys.Length] = new PdfInteger(imageDataCompressed.Length);
-                Elements[Keys.Filter] = new PdfName("/FlateDecode");
-                Elements[Keys.Width] = new PdfInteger(width);
-                Elements[Keys.Height] = new PdfInteger(height);
-                Elements[Keys.BitsPerComponent] = new PdfInteger(8);
-                // TODO: CMYK
-                Elements[Keys.ColorSpace] = new PdfName("/DeviceRGB");
-                if (_image.Interpolate)
-                    Elements[Keys.Interpolate] = PdfBoolean.True;
-            }
-        }
-#endif
 
         /// <summary>
         /// Gets the underlying XImage object.
@@ -750,6 +615,8 @@ namespace PdfSharp.Pdf.Advanced
         /// <param name="hasAlpha">true (ARGB), false (RGB)</param>
         private void ReadTrueColorMemoryBitmap(int components, int bits, bool hasAlpha)
         {
+            // TODO: this is very memory inefficient.
+            // If possible, make sure images used in templates are PRE converted to JPEG
 #if DEBUG_
             image.image.Save("$$$.bmp", ImageFormat.Bmp);
 #endif

@@ -21,7 +21,7 @@
     @* SOURCE DATA OPTIONS *@
     <div class="form-group">
         <label class="form-label" asp-for="@Model.DataPath">Data Path</label>
-        <button id="DataPathPickBtn" type="button" onclick="showDataPickerModal('DataPath', false, false)">Pick Data</button>
+        <button id="DataPathPickBtn" type="button" onclick="showDataPickerModal('DataPath', false, true)">Pick Data</button>
         <input class="form-input" type="text" asp-for="@Model.DataPath" value="@Model.DataPath">
         
         <label class="form-checkbox form-inline" asp-for="@Model.IsRequired">

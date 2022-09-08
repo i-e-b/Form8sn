@@ -50,10 +50,7 @@ namespace WebFormFiller.Controllers
                 }
 
                 var prev = Array.Empty<string>();
-                if (!string.IsNullOrWhiteSpace(oldPath))
-                {
-                    prev = oldPath.Split('.');
-                }
+                if (!string.IsNullOrWhiteSpace(oldPath)) prev = oldPath.Split('.');
 
                 var tree = JsonDataReader.BuildDataSourcePicker(project, sampleData, prev, repeat, pageIndex, multiplesCanBePicked);
                 var list = JsonDataReader.FlattenTree(tree);
@@ -121,11 +118,7 @@ namespace WebFormFiller.Controllers
             var thePage = document.Pages[pageIndex];
             if (!thePage.Boxes.ContainsKey(boxKey)) return BadRequest("Box Key")!;
             
-            var theBox = thePage.Boxes[boxKey];
-            theBox.Width = width;
-            theBox.Height = height;
-            theBox.Left = left;
-            theBox.Top = top;
+            thePage.Boxes[boxKey].SetSize(left, top, width, height);
             
             _fileDatabase.SaveDocumentTemplate(document, docId);
             return Content("OK")!;

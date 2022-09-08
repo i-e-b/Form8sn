@@ -1071,13 +1071,15 @@ boxCanvas.addEventListener('mousemove', function (e) {
         activeBox.bottom += dy;
     } else if (mouse.mode === 'size' || mouse.mode === 'create') {
         // free resize the active box
+        let oldX = activeBox[mouse.xControl];
+        let oldY = activeBox[mouse.yControl];
         activeBox[mouse.xControl] = mouse.x;
         activeBox[mouse.yControl] = mouse.y;
         
         // make sure the box is not invalid (we're measuring in screen-space here, zooming in will still let you place tiny boxes)
-        if (activeBox.right + 5 < activeBox.left) activeBox.right = activeBox.left + 5;
-        if (activeBox.bottom + 5 < activeBox.top) activeBox.bottom = activeBox.top + 5;
-        
+        if (activeBox.right - 5 < activeBox.left) activeBox[mouse.xControl] = oldX;
+        if (activeBox.bottom - 5 < activeBox.top) activeBox[mouse.yControl] = oldY;
+
         if (e.altKey){ // force square
             let h = activeBox.bottom - activeBox.top;
             let w = activeBox.right - activeBox.left;

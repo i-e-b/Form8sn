@@ -115,5 +115,16 @@ namespace Form8snCore.FileFormats
         /// Optional: order in which the box value should be calculated. This mainly affects running totals
         /// </summary>
         public int? BoxOrder { get; set; }
+
+        /// <summary>
+        /// Update the size and position of this box
+        /// </summary>
+        public void SetSize(double left, double top, double width, double height)
+        {
+            Left = left;
+            Top = top;
+            Width = width;
+            Height = height;
+        }
     }
 }

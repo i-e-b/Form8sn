@@ -261,13 +261,13 @@ namespace Form8snCore.Rendering
                     
                     // Follow the depends chain until we hit one that's either empty, missing, or we hit the end
                     var nextBox = box.Value;
-                    while (nextBox.Definition.DependsOn != null)
+                    while (nextBox?.Definition.DependsOn != null)
                     {
                         if (!page.DocumentBoxes.ContainsKey(nextBox.Definition.DependsOn)) { boxesToKill.Add(box.Key); break; } // has been early-culled
                         nextBox = page.DocumentBoxes[nextBox.Definition.DependsOn];
                         if (string.IsNullOrEmpty(nextBox?.RenderContent!)) { boxesToKill.Add(box.Key); break; } // dependent is empty
-                        if (string.IsNullOrEmpty(nextBox.Definition.DependsOn!)) break; // end of the chain, has a value
-                        if (nextBox.Definition.DependsOn == box.Key) { boxesToKill.Add(box.Key); break; } // loop in chain. Drop this box
+                        if (string.IsNullOrEmpty(nextBox?.Definition.DependsOn!)) break; // end of the chain, has a value
+                        if (nextBox?.Definition.DependsOn == box.Key) { boxesToKill.Add(box.Key); break; } // loop in chain. Drop this box
                     }
                 }
 
@@ -384,9 +384,7 @@ namespace Form8snCore.Rendering
 
                 if (background.ExistingPage.Orientation == PageOrientation.Landscape)
                 {
-                    var tmp = page.Width;
-                    page.Width = page.Height;
-                    page.Height = tmp;
+                    var tmp = page.Width; page.Width = page.Height; page.Height = tmp;
                 }
             }
 
