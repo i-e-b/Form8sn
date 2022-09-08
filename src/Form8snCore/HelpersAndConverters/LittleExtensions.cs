@@ -36,6 +36,7 @@ public static class LittleExtensions
         foreach (char c in str)
         {
             if (char.IsLetter(c) || char.IsDigit(c)) sb.Append(c);
+            else if (c == ' ' || c == '_' || c == '-') sb.Append('_');
         }
         return sb.ToString();
     }

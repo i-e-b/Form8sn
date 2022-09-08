@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 
 namespace WebFormFiller.Models
 {
@@ -8,5 +9,10 @@ namespace WebFormFiller.Models
         /// Document template ID => Name
         /// </summary>
         public IDictionary<int, string> Templates { get; set; } = new Dictionary<int, string>();
+
+        /// <summary>
+        /// List of image names that are stored for use in template boxes
+        /// </summary>
+        public IList<string> ImageStamps { get; set; } = new List<string>();
     }
 }

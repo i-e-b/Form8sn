@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Form8snCore.FileFormats;
 using Form8snCore.HelpersAndConverters;
 using Microsoft.AspNetCore.Mvc;
+using Portable.Drawing.Imaging;
 using WebFormFiller.Models;
 using WebFormFiller.ServiceStubs;
 
@@ -26,7 +27,8 @@ namespace WebFormFiller.Controllers
         public IActionResult Index()
         {
             return View(new TemplateListViewModel{
-                Templates = _fileDatabase.ListDocumentTemplates()
+                Templates = _fileDatabase.ListDocumentTemplates(),
+                ImageStamps = _fileDatabase.ListImageStamps()
             })!;
         }
 
@@ -59,7 +61,6 @@ namespace WebFormFiller.Controllers
             
             var template = ImportToProject.FromPdf(ms, fileName, model.Title);
             var id = _fileDatabase.SaveDocumentTemplate(template, null);
-
 
             return RedirectToAction(nameof(BoxEditor), new{docId = id})!;
         }
@@ -142,6 +143,54 @@ namespace WebFormFiller.Controllers
         {
             var newId = _fileDatabase.SaveDocumentTemplate(project, docId);
             return Json(new{id = newId})!;
+        }
+
+        /// <summary>
+        /// Show a page to accept an image upload, which will be
+        /// stored to use as a data source for template boxes.
+        /// </summary>
+        [HttpGet]
+        public IActionResult UploadNewImageStamp()
+        {
+            return View(new NewImageStampModel())!;
+        }
+
+        /// <summary>
+        /// Creates a new image stamp from the result of [GET]UploadNewImageStamp()
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> UploadNewImageStamp([FromForm] NewImageStampModel model)
+        {
+            if (model.Upload == null) { throw new Exception("No file!"); }
+            if (string.IsNullOrWhiteSpace(model.Name))
+                model.Name = Path.GetFileNameWithoutExtension(model.Upload.Name);
+            
+            var safeName = model.Name.Safe();
+            
+            // It's way more efficient to embed JPEGs into PDFs compared to 
+            // other formats, so we convert before storing.
+            
+            await using var stream = model.Upload.OpenReadStream();
+            
+            var image = Portable.Drawing.Image.FromStream(stream);
+            var ms = new MemoryStream();
+            image.Save(ms, ImageFormat.Jpeg);
+            
+            // TODO: IEB: Implement JPEG saving
+            // Portable.Drawing.Imaging.ImageFormats.PortableImage.Save(Stream stream, string format) in PortableImage.cs
+            
+            _fileDatabase.Store(safeName, ms);
+            
+            return RedirectToAction(nameof(Index))!;
+        }
+
+        /// <summary>
+        /// Delete an image stamp by name
+        /// </summary>
+        public IActionResult DeleteImageStamp([FromQuery] string? imageStampName)
+        {
+            _fileDatabase.DeleteStoredFile(imageStampName);
+            return RedirectToAction(nameof(Index))!;
         }
     }
 }

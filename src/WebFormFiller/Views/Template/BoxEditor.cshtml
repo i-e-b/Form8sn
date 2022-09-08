@@ -6,6 +6,14 @@
     var previewAction = Url!.Action("GenerateSamplePdf","File", new{docId = Model!.DocumentId})!;
 }
 
+@*
+        This page is the main view for editing a PDF template.
+        It shows each PDF page individually, and allows visual
+        editing of the template boxes for that page.  The edit
+        Modals are launched from this page and a full document
+        preview can be requested.  There is also a help modal.
+*@
+
 @* PAGE CONTROLS *@
 <div>
     <span>&nbsp;Page:&nbsp;<span id="page_num"></span>&nbsp;/&nbsp;<span id="page_count"></span>&nbsp;</span>

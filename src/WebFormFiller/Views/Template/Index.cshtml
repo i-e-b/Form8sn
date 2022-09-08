@@ -5,14 +5,45 @@
     Layout = "_Layout";
 }
 
-<div class="text-center">
-    Template editor
-</div>
-<a asp-action="StartNewTemplate">Upload new form</a><br/>
+@*
+        This page is the initial landing page. You should
+        usually integrate this feature with the app which
+        hosts the PDF template editing UI.  
+*@
 
+<h1>Template editor</h1>
+<a asp-action="StartNewTemplate" class="btn btn-primary">Create a new template</a>
+This will require a base PDF document that will be filled in.
+<br/>
+
+<h2>Existing templates</h2>
 <ul>
     @foreach (var item in Model!.Templates)
     {
-        <li><a asp-action="BoxEditor" asp-route-docId="@item.Key.ToString()">@item.Value</a></li>
+        <li>
+            <a asp-action="BoxEditor" asp-route-docId="@item.Key.ToString()" class="btn">Edit</a>
+            <a asp-action="BoxEditor" asp-route-docId="@item.Key.ToString()">@item.Value</a>
+        </li>
+    }
+</ul>
+
+<h1>Image stamps</h1>
+<a asp-action="UploadNewImageStamp" class="btn btn-primary">Upload a new image</a> <br/>
+
+<p>Images here can be inserted into template boxes using the data picker</p>
+<ul>
+    @foreach (var item in Model!.ImageStamps)
+    {
+        <li>
+            <div class="popover popover-right">
+              <button class="btn btn-sm">Delete</button>
+              <div class="popover-container">
+                <a asp-action="DeleteImageStamp" asp-route-docId="@item" class="btn btn-error">Delete</a>
+              </div>
+            </div>
+            
+            @item
+            
+        </li>
     }
 </ul>

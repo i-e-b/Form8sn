@@ -190,6 +190,7 @@ function deleteSelectedBox(){
     let pageDef = projectFile.Pages[pageNum - 1];
     delete pageDef.Boxes[activeBox.key];
     activeBox.key = null;
+    updateEditButton();
     
     storeAndReloadProjectFile(function(){
         closeBoxEditModal();

@@ -106,7 +106,20 @@ namespace WebFormFiller.ServiceStubs
             Sync.Run(() => stream.CopyToAsync(file));
             file.Flush(true);
         }
-        
+
+        /// <summary>
+        /// Delete a file previously saved with <see cref="Store"/>.
+        /// </summary>
+        public void DeleteStoredFile(string? fileName)
+        {
+            if (!Directory.Exists(StorageDirectory)) return;
+            if (fileName is null) return;
+            
+            var reduced = fileName.Trim('.','/',' ','\\');
+            var target = Path.Combine(StorageDirectory, reduced);
+            if (File.Exists(target)) File.Delete(target);
+        }
+
         /// <summary>
         /// Read a document template file by ID
         /// </summary>
@@ -140,6 +153,17 @@ namespace WebFormFiller.ServiceStubs
             return Json.Defrost(File.ReadAllText(files[0]));
         }
 
+        public IList<string> ListImageStamps()
+        {
+            if (!Directory.Exists(StorageDirectory)) { Directory.CreateDirectory(StorageDirectory); }
+            
+            var files = Directory.EnumerateFiles(StorageDirectory, "*.jpg", SearchOption.TopDirectoryOnly);
+            // ReSharper disable once ConstantNullCoalescingCondition
+            return files.Select(path => Path.GetFileNameWithoutExtension(path) ?? "")
+                .Where(it => !string.IsNullOrWhiteSpace(it))
+                .ToList();
+        }
+
         #region Support methods (your app doesn't need to supply these)
         private int IdFromFileName(string name, out string restOfName)
         {
@@ -156,7 +180,7 @@ namespace WebFormFiller.ServiceStubs
 
         private int GetNextId()
         {
-            var usedIds =ListDocumentTemplates().Keys.ToList();
+            var usedIds = ListDocumentTemplates().Keys.ToList();
             if (usedIds.Count < 1) return 1;
             return ListDocumentTemplates().Keys.Max() + 1; 
         }

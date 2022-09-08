@@ -26,6 +26,14 @@ namespace WebFormFiller.ServiceStubs
         void Store(string name, Stream stream);
 
         /// <summary>
+        /// <p>OPTIONAL</p>
+        /// Delete a file previously saved with <see cref="Store"/>.
+        /// <p></p>
+        /// If deleting files is not supported, take no action.
+        /// </summary>
+        void DeleteStoredFile(string? fileName);
+
+        /// <summary>
         /// Read a document template file by ID
         /// </summary>
         TemplateProject GetDocumentById(int docId);
@@ -39,5 +47,14 @@ namespace WebFormFiller.ServiceStubs
         /// in normal documents.
         /// </summary>
         object GetSampleData(int docId);
+
+        /// <summary>
+        /// <p>OPTIONAL</p>
+        /// List images that are available to use in template boxes via the data picker.
+        /// The names should work when passed to <see cref="IFileSource.Load"/>
+        /// <p></p>
+        /// If images stamps are not supported, return an empty list.
+        /// </summary>
+        IList<string> ListImageStamps();
     }
 }

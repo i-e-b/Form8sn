@@ -1,0 +1,22 @@
+﻿@model NewImageStampModel
+
+@{
+    ViewBag!.Title = "Upload new image stamp";
+    Layout = "_Layout";
+}
+
+@*
+        This page is shown once when creating a new template.
+        It has a form for capturing the template name and the
+        base PDF on which the output will be rendered.
+*@
+
+<h2>Create new template</h2>
+<form asp-action="UploadNewImageStamp" method="post" enctype="multipart/form-data">
+    <p>The name entered here will be used and the image stamp name in the data picker</p>
+    <label asp-for="@Model!.Name">Name:</label>
+    <input asp-for="@Model!.Name" type="text" value="@Model!.Name"/>
+    <input asp-for="@Model!.Upload" type="file"/>
+
+    <button type="submit">Create</button>
+</form>
