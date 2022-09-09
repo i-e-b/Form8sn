@@ -55,6 +55,7 @@ const zoomRatio    = 1.2;                                   // how much we scale
 // Box rendering bits
 const boxCanvas      = document.getElementById("box-render"); // HTML canvas for box drawing and mouse events (goes over the PDF canvas)
 const boxCtx         = boxCanvas.getContext("2d");            // draw context for boxes
+const previewImages  = {};                                                // name => image of loaded previews
 
 /**
  * Get page info from document, resize canvas accordingly, and render page.
@@ -252,6 +253,8 @@ function reloadSampleData(pageIdx, boxKey, boxObject){
     if (!boxKey) {console.log("lost box key!"); return;}
     if (!boxSampleUrl || boxSampleUrl === "") return; // ignore if no callback
     
+    boxObject.sampleData = "loading"; // prevent multiple calls
+    
     let url = `${boxSampleUrl}&docVersion=${projectFile.Version}&pageIndex=${pageIdx}&boxKey=${boxKey}`;
     serverCallback(url, 'GET', function (evt, xhr) {
         boxObject.sampleData = xhr.responseText;
@@ -268,17 +271,26 @@ function tryLoadSampleImage(pageIdx, boxKey, boxObject){
     
     
     let url = boxObject.sampleData;
-    if (boxObject.MappingPath[0] === "img"){
+    if (boxObject.MappingPath && boxObject.MappingPath[0] === "img"){
         if (!boxObject.MappingPath[1]) return; // invalid
             // build a custom url
         url = `${fileLoadUrl}${boxObject.MappingPath[1]}.jpg`;
     }
     
-    boxObject.sampleImage = new Image();
-    boxObject.sampleImage.onload = function () {
+    if (previewImages[url]){ // includes images still being loaded
+        boxObject.sampleImage = previewImages[url];
+        return;
+    }
+    
+    let img = new Image();
+    
+    boxObject.sampleImage = img;
+    previewImages[url] = img;
+
+    img.onload = function () {
         renderBoxes();
     };
-    boxObject.sampleImage.src = url;
+    img.src = url;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// Doc info
@@ -803,52 +815,59 @@ function hitTestBoxes(page, mx, my) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// BOX PAINTING
 function drawBoxPreview(def, name, Width, Top, Height, Left, DisplayFormat){
-    // Try to load the data if not already done.
-    // This should re-trigger box drawing if it
-    // is successful. Otherwise there is no box
-    // preview.
-    if (!def.sampleData){
-        reloadSampleData(pageNum - 1, name, def);
-        return;
-    }
-    
-    // Check for Image Stamp, and load from the 'fileLoadUrl'
-    if (def.MappingPath[0] === "img"){
-        if (! def.sampleImage) tryLoadSampleImage(pageNum - 1, name, def);
-        // fall-through to text rendering while image loads
-    }
-    
-    // Check to see if the box has a "RenderImage" formatter.
-    // If so,  first try to load the URL through the browser.
-    if (DisplayFormat && (DisplayFormat.Type === "RenderImage")){
-        tryLoadSampleImage(pageNum - 1, name, def);
-        // fall-through to text rendering while image loads
-    }
-
-    // If anything above has loaded an image to display,
-    // then show it with an alpha blend, behind the box.
-    let oldAlpha = boxCtx.globalAlpha;
     try {
-        if (def.sampleImage) {
-            boxCtx.globalAlpha = 0.25;
-            boxCtx.drawImage(def.sampleImage, Left, Top, Width, Height);
-            boxCtx.globalAlpha = oldAlpha;
+        if (!def.MappingPath) return; // probably a newly created box. Nothing to preview.
+        
+        // Try to load the data if not already done.
+        // This should re-trigger box drawing if it
+        // is successful. Otherwise there is no box
+        // preview.
+        if (!def.sampleData) {
+            reloadSampleData(pageNum - 1, name, def);
             return;
         }
-    } catch (err) {
-        boxCtx.fillStyle = "#000";
+
+        // Check for Image Stamp, and load from the 'fileLoadUrl'
+        if (def.MappingPath && def.MappingPath[0] === "img") {
+            if (!def.sampleImage) tryLoadSampleImage(pageNum - 1, name, def);
+            // fall-through to text rendering while image loads
+        }
+
+        // Check to see if the box has a "RenderImage" formatter.
+        // If so,  first try to load the URL through the browser.
+        if (DisplayFormat && (DisplayFormat.Type === "RenderImage")) {
+            tryLoadSampleImage(pageNum - 1, name, def);
+            // fall-through to text rendering while image loads
+        }
+
+        // If anything above has loaded an image to display,
+        // then show it with an alpha blend, behind the box.
+        let oldAlpha = boxCtx.globalAlpha;
+        try {
+            if (def.sampleImage) {
+                boxCtx.globalAlpha = 0.25;
+                boxCtx.drawImage(def.sampleImage, Left, Top, Width, Height);
+                boxCtx.globalAlpha = oldAlpha;
+                return;
+            }
+        } catch (err) {
+            boxCtx.fillStyle = "#000";
+            boxCtx.font = '14px sans-serif';
+            boxCtx.textBaseline = 'top';
+            boxCtx.fillText("Fail: " + err, Left + 5, Top + 20, Width - 10);
+        }
+        boxCtx.globalAlpha = oldAlpha;
+
+        // Either no special render, or it's not loaded yet;
+        // but we do have some text data, so we render that.
+        boxCtx.fillStyle = "rgba(0,0,0,0.56)";
         boxCtx.font = '14px sans-serif';
         boxCtx.textBaseline = 'top';
-        boxCtx.fillText("Fail: " + err, Left + 5, Top + 20, Width - 10);
+        boxCtx.fillText(def.sampleData, Left + 5, Top + 20, Width - 10);
+    } catch (prevErr){
+        console.log("error in box preview");
+        console.dir(prevErr);
     }
-    boxCtx.globalAlpha = oldAlpha;
-
-    // Either no special render, or it's not loaded yet;
-    // but we do have some text data, so we render that.
-    boxCtx.fillStyle = "rgba(0,0,0,0.56)";
-    boxCtx.font = '14px sans-serif';
-    boxCtx.textBaseline = 'top';
-    boxCtx.fillText(def.sampleData, Left + 5, Top + 20, Width-10);
 }
 function drawSingleBox(def, name, xs, ys, validMapping) {
     if (!def) {

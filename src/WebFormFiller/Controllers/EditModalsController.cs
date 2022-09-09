@@ -84,12 +84,14 @@ namespace WebFormFiller.Controllers
             try
             {
                 if (pageIndex is null || boxKey is null) return Content(" ")!;
-                var sampleData = _fileDatabase.GetSampleData(docId);
                 var project = _fileDatabase.GetDocumentById(docId);
                 
                 var page = project.Pages[pageIndex.Value];
+                
+                if (!page.Boxes.ContainsKey(boxKey)) return Content(" ")!; // happens when box is first drawn
                 var box = page.Boxes[boxKey];
                 
+                var sampleData = _fileDatabase.GetSampleData(docId);
                 var subject = new DataMapper(project, sampleData);
                 subject.SetRepeatDataByIndex(page, 0);
 

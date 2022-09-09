@@ -29,7 +29,7 @@ public class BoxDataWrapper
     /// </summary>
     public BoxDataWrapper(string? value)
     {
-        IsSpecial = true;
+        IsSpecial = false;
         StringValue = value;
     }
 
