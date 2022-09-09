@@ -14,9 +14,38 @@
 <h2>Create new template</h2>
 <form asp-action="UploadNewImageStamp" method="post" enctype="multipart/form-data">
     <p>The name entered here will be used and the image stamp name in the data picker</p>
+    <p>For best results, upload a JPEG formatted image.</p>
+    
+    <input asp-for="@Model!.Upload" id="Upload" type="file"/><br/>
     <label asp-for="@Model!.Name">Name:</label>
-    <input asp-for="@Model!.Name" type="text" value="@Model!.Name"/>
-    <input asp-for="@Model!.Upload" type="file"/>
+    <input asp-for="@Model!.Name" id="Name" type="text" value="@Model!.Name"/>
 
     <button type="submit">Create</button>
 </form>
+<script>
+function extractFilename(path) { // https://html.spec.whatwg.org/multipage/input.html#fakepath-srsly
+  if (path.substring(0,12) === "C:\\fakepath\\") return path.substring(12); // modern browser
+  
+  let x = path.lastIndexOf('/');
+  if (x >= 0) // Unix-based path
+    return path.substring(x+1);
+  
+  x = path.lastIndexOf('\\');
+  if (x >= 0) // Windows-based path
+    return path.substring(x+1);
+  
+  return path; // just the filename
+}
+function fileNameNoExtension(path){
+    path = extractFilename(path);
+    let end = path.lastIndexOf('.');
+    if (end > 0) return path.substring(0, end);
+    return path;
+}
+
+let fileElem = document.getElementById('Upload');
+let nameElem = document.getElementById('Name');
+fileElem.onchange = function(){
+    if (nameElem.value === '') nameElem.value = fileNameNoExtension(fileElem.value);
+};
+</script>

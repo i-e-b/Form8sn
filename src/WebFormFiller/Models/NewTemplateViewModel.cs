@@ -4,7 +4,7 @@ namespace WebFormFiller.Models
 {
     public class NewTemplateViewModel
     {
-        public string Title { get; set; } = "Untitled";
+        public string Title { get; set; } = "";
         public IFormFile? Upload { get; set; }
     }
 }

@@ -14,8 +14,36 @@
 <h2>Create new template</h2>
 <form asp-action="StartNewTemplate" method="post" enctype="multipart/form-data">
     <p>The name here will be stored inside generated PDFs as the document title. It can be changed later.</p>
-    <input asp-for="@Model!.Title" type="text" value="@Model!.Title"/>
-    <input asp-for="@Model!.Upload" type="file"/>
+    
+    <input asp-for="@Model!.Upload" id="Upload" type="file"/><br/>
+    <label asp-for="@Model!.Title">Name:</label>
+    <input asp-for="@Model!.Title" id="Title" type="text" value="@Model!.Title"/>
 
     <button type="submit">Create</button>
 </form>
+
+<script>
+function extractFilename(path) { // https://html.spec.whatwg.org/multipage/input.html#fakepath-srsly
+  if (path.substring(0,12) === "C:\\fakepath\\") return path.substring(12); // modern browser
+  
+  let x = path.lastIndexOf('/');
+  if (x >= 0) // Unix-based path
+    return path.substring(x+1);
+  
+  x = path.lastIndexOf('\\');
+  if (x >= 0) // Windows-based path
+    return path.substring(x+1);
+  
+  return path; // just the filename
+}
+function fileNameNoExtension(path){
+    path = extractFilename(path);
+    let end = path.lastIndexOf('.');
+    if (end > 0) return path.substring(0, end);
+    return path;
+}
+
+let fileElem = document.getElementById('Upload');
+let nameElem = document.getElementById('Title');
+fileElem.onchange = function(){if (nameElem.value === '') nameElem.value = fileNameNoExtension(fileElem.value);};
+</script>

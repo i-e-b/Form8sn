@@ -1027,19 +1027,23 @@ namespace Portable.Drawing.Imaging
             }
         }
 
-        public int BitsPerPixel
-        {
-            get { return Utils.FormatToBitCount(pixelFormat); }
-        }
-
-        public int BytesPerLine
-        {
-            get { return Utils.BytesPerLine(pixelFormat, width); }
-        }
-
         public override string ToString()
         {
             return "Frame [" + width + "," + height + "], " + pixelFormat;
+        }
+
+        /// <summary>
+        /// Get a span covering the image bytes for a row
+        /// </summary>
+        public ReadOnlySpan<byte> GetRowBytes(int row)
+        {
+            var rowBytes = stride;
+            var offset = rowBytes * row;
+            var end = offset + rowBytes;
+            if (end > data.Length) offset = data.Length - rowBytes;
+            
+            var span = (Span<byte>)data;
+            return span.Slice(offset, rowBytes);
         }
     };
 

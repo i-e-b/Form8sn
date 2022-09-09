@@ -2,6 +2,7 @@ Sadly, JPEG is a very complex **set** of different formats.
 This reader code is based on https://github.com/yigolden/JpegLibrary
 and uses the following license:
 
+```
 MIT License
 
 Copyright (c) 2019-2020 yigolden
@@ -23,3 +24,8 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+```
+
+There are some format and enum code from https://github.com/SixLabors/ImageSharp
+ImageSharp is probably a better match for most platform-neutral modern code, but
+does not support the old versions of .Net that PortableGdi includes.

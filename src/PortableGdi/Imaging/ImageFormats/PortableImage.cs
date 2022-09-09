@@ -308,7 +308,7 @@ namespace Portable.Drawing.Imaging.ImageFormats
             {
                 // JPEG or EXIF image.
                 stream.Seek(0, SeekOrigin.Begin);
-                JpegReaderHelper.Load(stream, this);
+                JpegHelper.ReadHeaders(stream, this);
             }
             else
             {
@@ -383,25 +383,20 @@ namespace Portable.Drawing.Imaging.ImageFormats
             }
             else if (format == Gif)
             {
-                // GIF image.  If the image is RGB, then we encode
-                // as a PNG instead and hope that the image viewer
-                // is smart enough to check the magic number before
-                // decoding the image.
+                // GIF image.
                 if (GifWriter.IsGifEncodable(this))
                 {
                     GifWriter.Save(stream, this);
                 }
                 else
                 {
-                    PngWriter.Save(stream, this);
+                    throw new Exception("Image can not be encoded as a GIF. Use indexed colors, or save as PNG");
                 }
             }
             else if (format == Jpeg)
             {
                 // JPEG image.
-                //JpegReaderHelper.Save(stream, this);
-                // TODO: implement portable jpeg
-                throw new NotImplementedException("PORTABLE JPEG IS NOT YET IMPLEMENTED");
+                JpegHelper.Write(this, stream);
             }
         }
 

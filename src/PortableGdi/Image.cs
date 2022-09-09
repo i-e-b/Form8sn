@@ -53,6 +53,12 @@ namespace Portable.Drawing
         internal PortableImage? dgImage;
         internal Toolkit.IToolkitImage? toolkitImage;
 
+        /// <summary>
+        /// File format this image was loaded from (if any)
+        /// See constants in <see cref="Portable.Drawing.Imaging.ImageFormats.PortableImage"/>
+        /// </summary>
+        public string? LoadFormat => dgImage?.LoadFormat;
+
         // Constructors.
         internal Image()
         {

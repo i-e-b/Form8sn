@@ -5,6 +5,7 @@ using Form8snCore.FileFormats;
 using Form8snCore.HelpersAndConverters;
 using Microsoft.AspNetCore.Mvc;
 using Portable.Drawing.Imaging;
+using Portable.Drawing.Imaging.ImageFormats;
 using WebFormFiller.Models;
 using WebFormFiller.ServiceStubs;
 
@@ -165,19 +166,26 @@ namespace WebFormFiller.Controllers
             if (string.IsNullOrWhiteSpace(model.Name))
                 model.Name = Path.GetFileNameWithoutExtension(model.Upload.Name);
             
-            var safeName = model.Name.Safe();
+            var safeName = model.Name.Safe() + ".jpg";
             
             // It's way more efficient to embed JPEGs into PDFs compared to 
             // other formats, so we convert before storing.
             
             await using var stream = model.Upload.OpenReadStream();
             
-            var image = Portable.Drawing.Image.FromStream(stream);
+            using var image = Portable.Drawing.Image.FromStream(stream);
+
+            if (image.LoadFormat == PortableImage.Jpeg) // no translation needed
+            {
+                stream.Seek(0, SeekOrigin.Begin);
+                _fileDatabase.Store(safeName, stream);
+                return RedirectToAction(nameof(Index))!;
+            }
+            
+
             var ms = new MemoryStream();
             image.Save(ms, ImageFormat.Jpeg);
-            
-            // TODO: IEB: Implement JPEG saving
-            // Portable.Drawing.Imaging.ImageFormats.PortableImage.Save(Stream stream, string format) in PortableImage.cs
+            ms.Seek(0, SeekOrigin.Begin);
             
             _fileDatabase.Store(safeName, ms);
             
