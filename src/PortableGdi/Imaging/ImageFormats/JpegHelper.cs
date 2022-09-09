@@ -47,7 +47,7 @@ namespace Portable.Drawing.Imaging.ImageFormats
         /// <summary>
         /// Write a portable image into a Jpeg file stream
         /// </summary>
-        public static void Write(PortableImage srcImage, Stream dstStream, byte quality = 95)
+        public static void Write(PortableImage srcImage, Stream dstStream, int quality = 95)
         {
             if (quality <= 0 || quality > 100) quality = 95;
             
@@ -87,11 +87,19 @@ namespace Portable.Drawing.Imaging.ImageFormats
             encoder.SetQuantizationTable(JpegStandardQuantizationTable.ScaleByQuality(JpegStandardQuantizationTable.GetLuminanceTable(JpegElementPrecision.Precision8Bit, 0), quality));
             encoder.SetQuantizationTable(JpegStandardQuantizationTable.ScaleByQuality(JpegStandardQuantizationTable.GetChrominanceTable(JpegElementPrecision.Precision8Bit, 1), quality));
 
+            /* BUG: Green/purple dots in each block
             encoder.SetHuffmanTable(true, 0, JpegStandardHuffmanEncodingTable.GetLuminanceDCTable());
             encoder.SetHuffmanTable(false, 0, JpegStandardHuffmanEncodingTable.GetLuminanceACTable());
             encoder.SetHuffmanTable(true, 1, JpegStandardHuffmanEncodingTable.GetChrominanceDCTable());
             encoder.SetHuffmanTable(false, 1, JpegStandardHuffmanEncodingTable.GetChrominanceACTable());
-
+            */
+            
+            // BUG: green at right edge of image
+            encoder.SetHuffmanTable(true, 0);
+            encoder.SetHuffmanTable(false, 0);
+            encoder.SetHuffmanTable(true, 1);
+            encoder.SetHuffmanTable(false, 1);
+            
             encoder.AddComponent(1, 0, 0, 0, 2, 2); // Y component
             encoder.AddComponent(2, 1, 1, 1, 1, 1); // Cb component
             encoder.AddComponent(3, 1, 1, 1, 1, 1); // Cr component

@@ -54,17 +54,17 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
         /// <returns>The cloned encoder.</returns>
         protected T CloneParameters<T>() where T : JpegEncoder, new()
         {
-            bool optimizeCoding = _huffmanTables.ContainsTableBuilder();
+            var optimizeCoding = _huffmanTables.ContainsTableBuilder();
             var cloned = new T()
             {
                 _minimumBufferSegmentSize = _minimumBufferSegmentSize,
                 _quantizationTables = _quantizationTables,
                 _huffmanTables = optimizeCoding ? _huffmanTables.DeepClone() : _huffmanTables
             };
-            List<JpegHuffmanEncodingComponent>? components = _encodeComponents;
+            var components = _encodeComponents;
             if (!(components is null))
             {
-                foreach (JpegHuffmanEncodingComponent item in components)
+                foreach (var item in components)
                 {
                     cloned.AddComponent((byte)item.ComponentIndex, item.QuantizationTable.Identifier, item.DcTableIdentifier, item.AcTableIdentifier, item.HorizontalSamplingFactor, item.VerticalSamplingFactor);
                 }
@@ -110,13 +110,13 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
                 throw new InvalidOperationException("Only baseline JPEG is supported.");
             }
 
-            List<JpegQuantizationTable>? tables = _quantizationTables;
+            var tables = _quantizationTables;
             if (tables is null)
             {
                 _quantizationTables = tables = new List<JpegQuantizationTable>(2);
             }
 
-            for (int i = 0; i < tables.Count; i++)
+            for (var i = 0; i < tables.Count; i++)
             {
                 if (tables[i].Identifier == table.Identifier)
                 {
@@ -153,7 +153,7 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
             {
                 return default;
             }
-            foreach (JpegQuantizationTable item in _quantizationTables)
+            foreach (var item in _quantizationTables)
             {
                 if (item.Identifier == identifier)
                 {
@@ -166,7 +166,7 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
         /// <summary>
         /// Add a component to encode.
         /// </summary>
-        /// <param name="componentIndex">The index of the componentIndex.</param>
+        /// <param name="componentIndex">The index of the component.</param>
         /// <param name="quantizationTableIdentifier">The identifier of the quantization table.</param>
         /// <param name="huffmanDcTableIdentifier">The identifier of the DC Huffman table.</param>
         /// <param name="huffmanAcTableIdentifier">The identifier of the AC Huffman table.</param>
@@ -183,12 +183,12 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
                 throw new ArgumentOutOfRangeException(nameof(verticalSubsampling), "Subsampling factor can only be 1, 2 or 4.");
             }
 
-            List<JpegHuffmanEncodingComponent>? components = _encodeComponents;
+            var components = _encodeComponents;
             if (components is null)
             {
                 _encodeComponents = components = new List<JpegHuffmanEncodingComponent>(4);
             }
-            foreach (JpegHuffmanEncodingComponent item in components)
+            foreach (var item in components)
             {
                 if (item.ComponentIndex == componentIndex)
                 {
@@ -196,12 +196,12 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
                 }
             }
 
-            JpegQuantizationTable quantizationTable = GetQuantizationTable(quantizationTableIdentifier);
+            var quantizationTable = GetQuantizationTable(quantizationTableIdentifier);
             if (quantizationTable.IsEmpty)
             {
                 throw new ArgumentException("Quantization table is not defined.", nameof(quantizationTableIdentifier));
             }
-            JpegHuffmanEncodingTable? dcTable = _huffmanTables.GetTable(true, huffmanDcTableIdentifier);
+            var dcTable = _huffmanTables.GetTable(true, huffmanDcTableIdentifier);
             JpegHuffmanEncodingTableBuilder? dcTableBuilder = null;
             if (dcTable is null)
             {
@@ -211,7 +211,7 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
                     throw new ArgumentException("Huffman table is not defined.", nameof(huffmanDcTableIdentifier));
                 }
             }
-            JpegHuffmanEncodingTable? acTable = _huffmanTables.GetTable(false, huffmanAcTableIdentifier);
+            var acTable = _huffmanTables.GetTable(false, huffmanAcTableIdentifier);
             JpegHuffmanEncodingTableBuilder? acTableBuilder = null;
             if (acTable is null)
             {
@@ -245,7 +245,7 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
         /// <returns>The JPEG writer.</returns>
         protected JpegWriter CreateJpegWriter()
         {
-            IBufferWriter<byte> output = _output ?? throw new InvalidOperationException("Output is not specified.");
+            var output = _output ?? throw new InvalidOperationException("Output is not specified.");
             return new JpegWriter(output, _minimumBufferSegmentSize);
         }
 
@@ -254,17 +254,17 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
         /// </summary>
         public virtual void Encode()
         {
-            bool optimizeCoding = _huffmanTables.ContainsTableBuilder();
+            var optimizeCoding = _huffmanTables.ContainsTableBuilder();
 
-            JpegWriter writer = CreateJpegWriter();
+            var writer = CreateJpegWriter();
 
             WriteStartOfImage(ref writer);
             WriteQuantizationTables(ref writer);
-            JpegFrameHeader frameHeader = WriteStartOfFrame(ref writer);
-            JpegBlockAllocator? allocator = optimizeCoding ? new JpegBlockAllocator(MemoryPool) : null;
+            var frameHeader = WriteStartOfFrame(ref writer);
+            var allocator = optimizeCoding ? new JpegBlockAllocator(MemoryPool) : null;
             try
             {
-                if (!(allocator is null))
+                if (allocator is not null)
                 {
                     allocator.Allocate(frameHeader);
                     TransformBlocks(allocator);
@@ -304,7 +304,7 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
         /// <param name="writer">The JPEG writer.</param>
         protected void WriteQuantizationTables(ref JpegWriter writer)
         {
-            List<JpegQuantizationTable>? quantizationTables = _quantizationTables;
+            var quantizationTables = _quantizationTables;
             if (quantizationTables is null)
             {
                 throw new InvalidOperationException();
@@ -314,17 +314,17 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
             writer.WriteMarker(JpegMarker.DefineQuantizationTable);
 
             ushort totalByteCount = 0;
-            foreach (JpegQuantizationTable table in quantizationTables)
+            foreach (var table in quantizationTables)
             {
                 totalByteCount += table.BytesRequired;
             }
 
             writer.WriteLength(totalByteCount);
 
-            foreach (JpegQuantizationTable table in quantizationTables)
+            foreach (var table in quantizationTables)
             {
-                Span<byte> buffer = writer.GetSpan(table.BytesRequired);
-                table.TryWrite(buffer, out int bytesWritten);
+                var buffer = writer.GetSpan(table.BytesRequired);
+                table.TryWrite(buffer, out var bytesWritten);
                 writer.Advance(bytesWritten);
             }
         }
@@ -341,7 +341,7 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
             }
 
             writer.WriteMarker(JpegMarker.DefineHuffmanTable);
-            ushort totalByteCoubt = _huffmanTables.GetTotalBytesRequired();
+            var totalByteCoubt = _huffmanTables.GetTotalBytesRequired();
             writer.WriteLength(totalByteCoubt);
             _huffmanTables.Write(ref writer);
         }
@@ -352,28 +352,28 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
         /// <param name="writer">The JPEG writer.</param>
         protected JpegFrameHeader WriteStartOfFrame(ref JpegWriter writer)
         {
-            JpegBlockInputReader? input = _input;
+            var input = _input;
             if (input is null)
             {
                 throw new InvalidOperationException("Input is not specified.");
             }
-            List<JpegHuffmanEncodingComponent>? encodeComponents = _encodeComponents;
+            var encodeComponents = _encodeComponents;
             if (encodeComponents is null || encodeComponents.Count == 0)
             {
                 throw new InvalidOperationException("No component is specified.");
             }
-            JpegFrameComponentSpecificationParameters[] components = new JpegFrameComponentSpecificationParameters[encodeComponents.Count];
-            for (int i = 0; i < encodeComponents.Count; i++)
+            var components = new JpegFrameComponentSpecificationParameters[encodeComponents.Count];
+            for (var i = 0; i < encodeComponents.Count; i++)
             {
-                JpegHuffmanEncodingComponent thisComponent = encodeComponents[i];
+                var thisComponent = encodeComponents[i];
                 components[i] = new JpegFrameComponentSpecificationParameters((byte)thisComponent.ComponentIndex, thisComponent.HorizontalSamplingFactor, thisComponent.VerticalSamplingFactor, thisComponent.QuantizationTable.Identifier);
             }
-            JpegFrameHeader frameHeader = new JpegFrameHeader(8, (ushort)input.Height, (ushort)input.Width, (byte)components.Length, components);
+            var frameHeader = new JpegFrameHeader(8, (ushort)input.Height, (ushort)input.Width, (byte)components.Length, components);
 
             writer.WriteMarker(JpegMarker.StartOfFrame0);
-            byte bytesCount = frameHeader.BytesRequired;
+            var bytesCount = frameHeader.BytesRequired;
             writer.WriteLength(bytesCount);
-            Span<byte> buffer = writer.GetSpan(bytesCount);
+            var buffer = writer.GetSpan(bytesCount);
             frameHeader.TryWrite(buffer, out _);
             writer.Advance(bytesCount);
 
@@ -386,23 +386,23 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
         /// <param name="writer">The JPEG writer.</param>
         protected void WriteStartOfScan(ref JpegWriter writer)
         {
-            List<JpegHuffmanEncodingComponent>? encodeComponents = _encodeComponents;
+            var encodeComponents = _encodeComponents;
             if (encodeComponents is null || encodeComponents.Count == 0)
             {
                 throw new InvalidOperationException("No component is specified.");
             }
-            JpegScanComponentSpecificationParameters[] components = new JpegScanComponentSpecificationParameters[encodeComponents.Count];
-            for (int i = 0; i < encodeComponents.Count; i++)
+            var components = new JpegScanComponentSpecificationParameters[encodeComponents.Count];
+            for (var i = 0; i < encodeComponents.Count; i++)
             {
-                JpegHuffmanEncodingComponent thisComponent = encodeComponents[i];
+                var thisComponent = encodeComponents[i];
                 components[i] = new JpegScanComponentSpecificationParameters((byte)thisComponent.ComponentIndex, thisComponent.DcTableIdentifier, thisComponent.AcTableIdentifier);
             }
             var scanHeader = new JpegScanHeader((byte)components.Length, components, 0, 63, 0, 0);
 
             writer.WriteMarker(JpegMarker.StartOfScan);
-            byte bytesCount = scanHeader.BytesRequired;
+            var bytesCount = scanHeader.BytesRequired;
             writer.WriteLength(bytesCount);
-            Span<byte> buffer = writer.GetSpan(bytesCount);
+            var buffer = writer.GetSpan(bytesCount);
             scanHeader.TryWrite(buffer, out _);
             writer.Advance(bytesCount);
         }
@@ -413,56 +413,57 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
         /// <param name="allocator">The coefficient allocator.</param>
         protected void TransformBlocks(JpegBlockAllocator allocator)
         {
-            JpegBlockInputReader inputReader = _input ?? throw new InvalidOperationException("Input is not specified.");
-            List<JpegHuffmanEncodingComponent>? components = _encodeComponents;
+            var inputReader = _input ?? throw new InvalidOperationException("Input is not specified.");
+            var components = _encodeComponents;
             if (components is null || components.Count == 0)
             {
                 throw new InvalidOperationException("No component is specified.");
             }
 
             // Compute maximum sampling factor and reset DC predictor
-            int maxHorizontalSampling = 1;
-            int maxVerticalSampling = 1;
-            foreach (JpegHuffmanEncodingComponent currentComponent in components)
+            var maxHorizontalSampling = 1;
+            var maxVerticalSampling = 1;
+            foreach (var currentComponent in components)
             {
                 currentComponent.DcPredictor = 0;
                 maxHorizontalSampling = Math.Max(maxHorizontalSampling, currentComponent.HorizontalSamplingFactor);
                 maxVerticalSampling = Math.Max(maxVerticalSampling, currentComponent.VerticalSamplingFactor);
             }
-            foreach (JpegHuffmanEncodingComponent currentComponent in components)
+            foreach (var currentComponent in components)
             {
                 currentComponent.HorizontalSubsamplingFactor = maxHorizontalSampling / currentComponent.HorizontalSamplingFactor;
                 currentComponent.VerticalSubsamplingFactor = maxVerticalSampling / currentComponent.VerticalSamplingFactor;
             }
 
-            int mcusPerLine = (inputReader.Width + 8 * maxHorizontalSampling - 1) / (8 * maxHorizontalSampling);
-            int mcusPerColumn = (inputReader.Height + 8 * maxVerticalSampling - 1) / (8 * maxVerticalSampling);
+            var mcusPerLine = (inputReader.Width + 8 * maxHorizontalSampling - 1) / (8 * maxHorizontalSampling);
+            var mcusPerColumn = (inputReader.Height + 8 * maxVerticalSampling - 1) / (8 * maxVerticalSampling);
             const int levelShift = 1 << (8 - 1);
 
             var inputFBuffer = new JpegBlock8x8F();
             var outputFBuffer = new JpegBlock8x8F();
             var tempFBuffer = new JpegBlock8x8F();
 
-            for (int rowMcu = 0; rowMcu < mcusPerColumn; rowMcu++)
+            for (var rowMcu = 0; rowMcu < mcusPerColumn; rowMcu++)
             {
-                for (int colMcu = 0; colMcu < mcusPerLine; colMcu++)
+                for (var colMcu = 0; colMcu < mcusPerLine; colMcu++)
                 {
-                    foreach (JpegHuffmanEncodingComponent component in components)
+                    foreach (var component in components)
                     {
-                        int index = component.ComponentIndex;
+                        //int index = component.ComponentIndex;
+                        var index = component.Index;
                         int h = component.HorizontalSamplingFactor;
                         int v = component.VerticalSamplingFactor;
-                        int hs = component.HorizontalSubsamplingFactor;
-                        int vs = component.VerticalSubsamplingFactor;
-                        int offsetX = colMcu * h;
-                        int offsetY = rowMcu * v;
+                        var hs = component.HorizontalSubsamplingFactor;
+                        var vs = component.VerticalSubsamplingFactor;
+                        var offsetX = colMcu * h;
+                        var offsetY = rowMcu * v;
 
-                        for (int y = 0; y < v; y++)
+                        for (var y = 0; y < v; y++)
                         {
-                            int blockOffsetY = offsetY + y;
-                            for (int x = 0; x < h; x++)
+                            var blockOffsetY = offsetY + y;
+                            for (var x = 0; x < h; x++)
                             {
-                                ref JpegBlock8x8 blockRef = ref allocator.GetBlockReference(index, offsetX + x, blockOffsetY);
+                                ref var blockRef = ref allocator.GetBlockReference(index, offsetX + x, blockOffsetY);
 
                                 // Read Block
                                 ReadBlock(inputReader, out blockRef, component.Index, (offsetX + x) * 8 * hs, blockOffsetY * 8 * vs, hs, vs);
@@ -490,43 +491,43 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
         /// <param name="optimal">Whether to use the optimal algorithm.</param>
         protected void BuildHuffmanTables(JpegFrameHeader frameHeader, JpegBlockAllocator allocator, bool optimal = false)
         {
-            List<JpegHuffmanEncodingComponent>? components = _encodeComponents;
+            var components = _encodeComponents;
             if (components is null || components.Count == 0)
             {
                 throw new InvalidOperationException("No component is specified.");
             }
 
             // Compute maximum sampling factor and reset DC predictor
-            int maxHorizontalSampling = 1;
-            int maxVerticalSampling = 1;
-            foreach (JpegHuffmanEncodingComponent currentComponent in components)
+            var maxHorizontalSampling = 1;
+            var maxVerticalSampling = 1;
+            foreach (var currentComponent in components)
             {
                 currentComponent.DcPredictor = 0;
                 maxHorizontalSampling = Math.Max(maxHorizontalSampling, currentComponent.HorizontalSamplingFactor);
                 maxVerticalSampling = Math.Max(maxVerticalSampling, currentComponent.VerticalSamplingFactor);
             }
 
-            int mcusPerLine = (frameHeader.SamplesPerLine + 8 * maxHorizontalSampling - 1) / (8 * maxHorizontalSampling);
-            int mcusPerColumn = (frameHeader.NumberOfLines + 8 * maxVerticalSampling - 1) / (8 * maxVerticalSampling);
+            var mcusPerLine = (frameHeader.SamplesPerLine + 8 * maxHorizontalSampling - 1) / (8 * maxHorizontalSampling);
+            var mcusPerColumn = (frameHeader.NumberOfLines + 8 * maxVerticalSampling - 1) / (8 * maxVerticalSampling);
 
-            for (int rowMcu = 0; rowMcu < mcusPerColumn; rowMcu++)
+            for (var rowMcu = 0; rowMcu < mcusPerColumn; rowMcu++)
             {
-                for (int colMcu = 0; colMcu < mcusPerLine; colMcu++)
+                for (var colMcu = 0; colMcu < mcusPerLine; colMcu++)
                 {
-                    foreach (JpegHuffmanEncodingComponent component in components)
+                    foreach (var component in components)
                     {
-                        int index = component.Index;
+                        var index = component.Index;
                         int h = component.HorizontalSamplingFactor;
                         int v = component.VerticalSamplingFactor;
-                        int offsetX = colMcu * h;
-                        int offsetY = rowMcu * v;
+                        var offsetX = colMcu * h;
+                        var offsetY = rowMcu * v;
 
-                        for (int y = 0; y < v; y++)
+                        for (var y = 0; y < v; y++)
                         {
-                            int blockOffsetY = offsetY + y;
-                            for (int x = 0; x < h; x++)
+                            var blockOffsetY = offsetY + y;
+                            for (var x = 0; x < h; x++)
                             {
-                                ref JpegBlock8x8 blockRef = ref allocator.GetBlockReference(index, offsetX + x, blockOffsetY);
+                                ref var blockRef = ref allocator.GetBlockReference(index, offsetX + x, blockOffsetY);
 
                                 GatherBlockStatistics(component, ref blockRef);
                             }
@@ -539,7 +540,7 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
             _huffmanTables.BuildTables(optimal);
 
             // Reset huffman table
-            foreach (JpegHuffmanEncodingComponent component in components)
+            foreach (var component in components)
             {
                 component.DcTable = _huffmanTables.GetTable(true, component.DcTableIdentifier);
                 component.AcTable = _huffmanTables.GetTable(false, component.AcTableIdentifier);
@@ -550,11 +551,11 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 
         private static void GatherBlockStatistics(JpegHuffmanEncodingComponent component, ref JpegBlock8x8 block)
         {
-            ref short blockRef = ref Unsafe.As<JpegBlock8x8, short>(ref block);
+            ref var blockRef = ref Unsafe.As<JpegBlock8x8, short>(ref block);
 
             // DC
             int blockValue = blockRef;
-            int t = blockValue - component.DcPredictor;
+            var t = blockValue - component.DcPredictor;
             component.DcPredictor = blockValue;
             if (!(component.DcTableBuilder is null))
             {
@@ -562,13 +563,13 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
             }
 
             // AC
-            JpegHuffmanEncodingTableBuilder? acTableBuilder = component.AcTableBuilder;
+            var acTableBuilder = component.AcTableBuilder;
             if (acTableBuilder is null)
             {
                 return;
             }
-            int runLength = 0;
-            for (int i = 1; i < 64; i++)
+            var runLength = 0;
+            for (var i = 1; i < 64; i++)
             {
                 t = Unsafe.Add(ref blockRef, i);
 
@@ -604,45 +605,45 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
         /// <param name="writer">The JPEG writer.</param>
         protected void WritePreparedScanData(JpegFrameHeader frameHeader, JpegBlockAllocator allocator, ref JpegWriter writer)
         {
-            List<JpegHuffmanEncodingComponent>? components = _encodeComponents;
+            var components = _encodeComponents;
             if (components is null || components.Count == 0)
             {
                 throw new InvalidOperationException("No component is specified.");
             }
 
             // Compute maximum sampling factor and reset DC predictor
-            int maxHorizontalSampling = 1;
-            int maxVerticalSampling = 1;
-            foreach (JpegHuffmanEncodingComponent currentComponent in components)
+            var maxHorizontalSampling = 1;
+            var maxVerticalSampling = 1;
+            foreach (var currentComponent in components)
             {
                 currentComponent.DcPredictor = 0;
                 maxHorizontalSampling = Math.Max(maxHorizontalSampling, currentComponent.HorizontalSamplingFactor);
                 maxVerticalSampling = Math.Max(maxVerticalSampling, currentComponent.VerticalSamplingFactor);
             }
 
-            int mcusPerLine = (frameHeader.SamplesPerLine + 8 * maxHorizontalSampling - 1) / (8 * maxHorizontalSampling);
-            int mcusPerColumn = (frameHeader.NumberOfLines + 8 * maxVerticalSampling - 1) / (8 * maxVerticalSampling);
+            var mcusPerLine = (frameHeader.SamplesPerLine + 8 * maxHorizontalSampling - 1) / (8 * maxHorizontalSampling);
+            var mcusPerColumn = (frameHeader.NumberOfLines + 8 * maxVerticalSampling - 1) / (8 * maxVerticalSampling);
 
             writer.EnterBitMode();
 
-            for (int rowMcu = 0; rowMcu < mcusPerColumn; rowMcu++)
+            for (var rowMcu = 0; rowMcu < mcusPerColumn; rowMcu++)
             {
-                for (int colMcu = 0; colMcu < mcusPerLine; colMcu++)
+                for (var colMcu = 0; colMcu < mcusPerLine; colMcu++)
                 {
-                    foreach (JpegHuffmanEncodingComponent component in components)
+                    foreach (var component in components)
                     {
-                        int index = component.Index;
+                        var index = component.Index;
                         int h = component.HorizontalSamplingFactor;
                         int v = component.VerticalSamplingFactor;
-                        int offsetX = colMcu * h;
-                        int offsetY = rowMcu * v;
+                        var offsetX = colMcu * h;
+                        var offsetY = rowMcu * v;
 
-                        for (int y = 0; y < v; y++)
+                        for (var y = 0; y < v; y++)
                         {
-                            int blockOffsetY = offsetY + y;
-                            for (int x = 0; x < h; x++)
+                            var blockOffsetY = offsetY + y;
+                            for (var x = 0; x < h; x++)
                             {
-                                ref JpegBlock8x8 blockRef = ref allocator.GetBlockReference(index, offsetX + x, blockOffsetY);
+                                ref var blockRef = ref allocator.GetBlockReference(index, offsetX + x, blockOffsetY);
 
                                 EncodeBlock(ref writer, component, ref blockRef);
                             }
@@ -661,31 +662,31 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
         /// <param name="writer">The JPEG writer.</param>
         protected void WriteScanData(ref JpegWriter writer)
         {
-            JpegBlockInputReader inputReader = _input ?? throw new InvalidOperationException("Input is not specified.");
-            List<JpegHuffmanEncodingComponent>? components = _encodeComponents;
+            var inputReader = _input ?? throw new InvalidOperationException("Input is not specified.");
+            var components = _encodeComponents;
             if (components is null || components.Count == 0)
             {
                 throw new InvalidOperationException("No component is specified.");
             }
 
             // Compute maximum sampling factor and reset DC predictor
-            int maxHorizontalSampling = 1;
-            int maxVerticalSampling = 1;
-            foreach (JpegHuffmanEncodingComponent currentComponent in components)
+            var maxHorizontalSampling = 1;
+            var maxVerticalSampling = 1;
+            foreach (var currentComponent in components)
             {
                 currentComponent.DcPredictor = 0;
                 maxHorizontalSampling = Math.Max(maxHorizontalSampling, currentComponent.HorizontalSamplingFactor);
                 maxVerticalSampling = Math.Max(maxVerticalSampling, currentComponent.VerticalSamplingFactor);
             }
-            foreach (JpegHuffmanEncodingComponent currentComponent in components)
+            foreach (var currentComponent in components)
             {
                 currentComponent.HorizontalSubsamplingFactor = maxHorizontalSampling / currentComponent.HorizontalSamplingFactor;
                 currentComponent.VerticalSubsamplingFactor = maxVerticalSampling / currentComponent.VerticalSamplingFactor;
             }
 
             // Prepare
-            int mcusPerLine = (inputReader.Width + 8 * maxHorizontalSampling - 1) / (8 * maxHorizontalSampling);
-            int mcusPerColumn = (inputReader.Height + 8 * maxVerticalSampling - 1) / (8 * maxVerticalSampling);
+            var mcusPerLine = (inputReader.Width + 8 * maxHorizontalSampling - 1) / (8 * maxHorizontalSampling);
+            var mcusPerColumn = (inputReader.Height + 8 * maxVerticalSampling - 1) / (8 * maxVerticalSampling);
 
             writer.EnterBitMode();
 
@@ -696,28 +697,28 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
             var tempFBuffer = new JpegBlock8x8F();
 
 
-            for (int rowMcu = 0; rowMcu < mcusPerColumn; rowMcu++)
+            for (var rowMcu = 0; rowMcu < mcusPerColumn; rowMcu++)
             {
-                int offsetY = rowMcu * maxVerticalSampling;
-                for (int colMcu = 0; colMcu < mcusPerLine; colMcu++)
+                var offsetY = rowMcu * maxVerticalSampling;
+                for (var colMcu = 0; colMcu < mcusPerLine; colMcu++)
                 {
-                    int offsetX = colMcu * maxHorizontalSampling;
+                    var offsetX = colMcu * maxHorizontalSampling;
 
                     // Scan an interleaved mcu... process components in order
-                    foreach (JpegHuffmanEncodingComponent component in components)
+                    foreach (var component in components)
                     {
                         int h = component.HorizontalSamplingFactor;
                         int v = component.VerticalSamplingFactor;
-                        int hs = component.HorizontalSubsamplingFactor;
-                        int vs = component.VerticalSubsamplingFactor;
+                        var hs = component.HorizontalSubsamplingFactor;
+                        var vs = component.VerticalSubsamplingFactor;
 
-                        for (int y = 0; y < v; y++)
+                        for (var y = 0; y < v; y++)
                         {
-                            int blockOffsetY = (offsetY + y) * 8;
-                            for (int x = 0; x < h; x++)
+                            var blockOffsetY = (offsetY + y) * 8;
+                            for (var x = 0; x < h; x++)
                             {
                                 // Read Block
-                                ReadBlock(inputReader, out JpegBlock8x8 inputBuffer, component.Index, (offsetX + x) * 8, blockOffsetY, hs, vs);
+                                ReadBlock(inputReader, out var inputBuffer, component.Index, (offsetX + x) * 8, blockOffsetY, hs, vs);
 
                                 // Level shift
                                 ShiftDataLevel(ref inputBuffer, ref inputFBuffer, levelShift);
@@ -742,7 +743,7 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 
         private static void ReadBlock(JpegBlockInputReader inputReader, out JpegBlock8x8 block, int componentIndex, int x, int y, int h, int v)
         {
-            ref short blockRef = ref Unsafe.As<JpegBlock8x8, short>(ref block);
+            ref var blockRef = ref Unsafe.As<JpegBlock8x8, short>(ref block);
 
             if (h == 1 && v == 1)
             {
@@ -757,16 +758,16 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
         {
             var temp = new JpegBlock8x8();
 
-            ref short tempRef = ref Unsafe.As<JpegBlock8x8, short>(ref temp);
+            ref var tempRef = ref Unsafe.As<JpegBlock8x8, short>(ref temp);
 
-            int hShift = JpegMathHelper.Log2((uint)horizontalSubsampling);
-            int vShift = JpegMathHelper.Log2((uint)verticalSubsampling);
-            int hBlockShift = 3 - hShift;
-            int vBlockShift = 3 - vShift;
+            var hShift = JpegMathHelper.Log2((uint)horizontalSubsampling);
+            var vShift = JpegMathHelper.Log2((uint)verticalSubsampling);
+            var hBlockShift = 3 - hShift;
+            var vBlockShift = 3 - vShift;
 
-            for (int v = 0; v < verticalSubsampling; v++)
+            for (var v = 0; v < verticalSubsampling; v++)
             {
-                for (int h = 0; h < horizontalSubsampling; h++)
+                for (var h = 0; h < horizontalSubsampling; h++)
                 {
                     inputReader.ReadBlock(ref tempRef, componentIndex, x + 8 * h, y + 8 * v);
 
@@ -774,11 +775,11 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
                 }
             }
 
-            int totalShift = hShift + vShift;
+            var totalShift = hShift + vShift;
             if (totalShift > 0)
             {
-                int delta = 1 << (totalShift - 1);
-                for (int i = 0; i < 64; i++)
+                var delta = 1 << (totalShift - 1);
+                for (var i = 0; i < 64; i++)
                 {
                     Unsafe.Add(ref blockRef, i) = (short)((Unsafe.Add(ref blockRef, i) + delta) >> totalShift);
                 }
@@ -787,11 +788,11 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 
         private static void CopySubsampleBlock(ref short sourceRef, ref short destinationRef, int blockOffsetX, int blockOffsetY, int hShift, int vShift)
         {
-            for (int y = 0; y < 8; y++)
+            for (var y = 0; y < 8; y++)
             {
-                ref short sourceRowRef = ref Unsafe.Add(ref sourceRef, y * 8);
-                ref short destinationRowRef = ref Unsafe.Add(ref destinationRef, (blockOffsetY + (y >> vShift)) * 8 + blockOffsetX);
-                for (int x = 0; x < 8; x++)
+                ref var sourceRowRef = ref Unsafe.Add(ref sourceRef, y * 8);
+                ref var destinationRowRef = ref Unsafe.Add(ref destinationRef, (blockOffsetY + (y >> vShift)) * 8 + blockOffsetX);
+                for (var x = 0; x < 8; x++)
                 {
                     Unsafe.Add(ref destinationRowRef, x >> hShift) += Unsafe.Add(ref sourceRowRef, x);
                 }
@@ -800,10 +801,10 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 
         private static void ShiftDataLevel(ref JpegBlock8x8 source, ref JpegBlock8x8F destination, int levelShift)
         {
-            ref short sourceRef = ref Unsafe.As<JpegBlock8x8, short>(ref source);
-            ref float destinationRef = ref Unsafe.As<JpegBlock8x8F, float>(ref destination);
+            ref var sourceRef = ref Unsafe.As<JpegBlock8x8, short>(ref source);
+            ref var destinationRef = ref Unsafe.As<JpegBlock8x8F, float>(ref destination);
 
-            for (int i = 0; i < 64; i++)
+            for (var i = 0; i < 64; i++)
             {
                 Unsafe.Add(ref destinationRef, i) = Unsafe.Add(ref sourceRef, i) - levelShift;
             }
@@ -813,35 +814,35 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
         {
             Debug.Assert(!quantizationTable.IsEmpty);
 
-            ref ushort elementRef = ref MemoryMarshal.GetReference(quantizationTable.Elements);
-            ref float sourceRef = ref Unsafe.As<JpegBlock8x8F, float>(ref input);
-            ref short destinationRef = ref Unsafe.As<JpegBlock8x8, short>(ref output);
+            ref var elementRef = ref MemoryMarshal.GetReference(quantizationTable.Elements);
+            ref var sourceRef = ref Unsafe.As<JpegBlock8x8F, float>(ref input);
+            ref var destinationRef = ref Unsafe.As<JpegBlock8x8, short>(ref output);
 
-            for (int i = 0; i < 64; i++)
+            for (var i = 0; i < 64; i++)
             {
-                float coefficient = Unsafe.Add(ref sourceRef, JpegZigZag.InternalBufferIndexToBlock(i));
-                ushort element = Unsafe.Add(ref elementRef, i);
+                var coefficient = Unsafe.Add(ref sourceRef, JpegZigZag.InternalBufferIndexToBlock(i));
+                var element = Unsafe.Add(ref elementRef, i);
                 Unsafe.Add(ref destinationRef, i) = JpegMathHelper.RoundToInt16(coefficient / element);
             }
         }
 
         private static void EncodeBlock(ref JpegWriter writer, JpegHuffmanEncodingComponent component, ref JpegBlock8x8 block)
         {
-            ref short blockRef = ref Unsafe.As<JpegBlock8x8, short>(ref block);
+            ref var blockRef = ref Unsafe.As<JpegBlock8x8, short>(ref block);
 
             Debug.Assert(!(component.DcTable is null));
             Debug.Assert(!(component.AcTable is null));
 
             // DC
             int blockValue = blockRef;
-            int t = blockValue - component.DcPredictor;
+            var t = blockValue - component.DcPredictor;
             component.DcPredictor = blockValue;
             EncodeRunLength(ref writer, component.DcTable!, 0, t);
 
             // AC
-            JpegHuffmanEncodingTable acTable = component.AcTable!;
-            int runLength = 0;
-            for (int i = 1; i < 64; i++)
+            var acTable = component.AcTable!;
+            var runLength = 0;
+            for (var i = 1; i < 64; i++)
             {
                 t = Unsafe.Add(ref blockRef, i);
 
@@ -871,7 +872,7 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 
         private static void GatherRunLengthCodeStatistics(JpegHuffmanEncodingTableBuilder tableBuilder, int zeroRunLength, int value)
         {
-            int a = value;
+            var a = value;
             if (a < 0)
             {
                 a = -value;
@@ -892,8 +893,8 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 
         private static void EncodeRunLength(ref JpegWriter writer, JpegHuffmanEncodingTable encodingTable, int zeroRunLength, int value)
         {
-            int a = value;
-            int b = value;
+            var a = value;
+            var b = value;
             if (a < 0)
             {
                 a = -value;
@@ -919,7 +920,7 @@ namespace Portable.Drawing.Imaging.ImageFormats.Jpeg
 
         private static void EncodeHuffmanSymbol(ref JpegWriter writer, JpegHuffmanEncodingTable encodingTable, int symbol)
         {
-            encodingTable.GetCode(symbol, out ushort code, out int codeLength);
+            encodingTable.GetCode(symbol, out var code, out var codeLength);
             writer.WriteBits(code, codeLength);
         }
 
