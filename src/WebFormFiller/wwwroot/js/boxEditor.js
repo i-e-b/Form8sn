@@ -6,7 +6,8 @@
 NOTE:
 
 When embedding on a page, you must define these variables BEFORE importing this script:
- * basePdfSourceUrl        -- URL from where the PDF can be loaded
+ * basePdfName             -- Name of base PDF. This is loaded from 'fileLoadUrl'
+ * fileLoadUrl             -- URL *prefix* from where we can load base PDFs and other 'local' data
  * projectJsonLoadUrl      -- URL from where we can load the JSON definition of the template project
  * projectJsonStoreUrl     -- URL to which we can post an updated JSON definition of the template project
  * addFilterUrl            -- URL to add a new filter
@@ -265,11 +266,19 @@ function tryLoadSampleImage(pageIdx, boxKey, boxObject){
     if (!boxObject) return;
     if (!boxObject.sampleData) return;
     
+    
+    let url = boxObject.sampleData;
+    if (boxObject.MappingPath[0] === "img"){
+        if (!boxObject.MappingPath[1]) return; // invalid
+            // build a custom url
+        url = `${fileLoadUrl}${boxObject.MappingPath[1]}.jpg`;
+    }
+    
     boxObject.sampleImage = new Image();
     boxObject.sampleImage.onload = function () {
         renderBoxes();
     };
-    boxObject.sampleImage.src = boxObject.sampleData;
+    boxObject.sampleImage.src = url;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// Doc info
@@ -794,32 +803,48 @@ function hitTestBoxes(page, mx, my) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// BOX PAINTING
 function drawBoxPreview(def, name, Width, Top, Height, Left, DisplayFormat){
+    // Try to load the data if not already done.
+    // This should re-trigger box drawing if it
+    // is successful. Otherwise there is no box
+    // preview.
     if (!def.sampleData){
         reloadSampleData(pageNum - 1, name, def);
         return;
     }
     
+    // Check for Image Stamp, and load from the 'fileLoadUrl'
+    if (def.MappingPath[0] === "img"){
+        if (! def.sampleImage) tryLoadSampleImage(pageNum - 1, name, def);
+        // fall-through to text rendering while image loads
+    }
+    
+    // Check to see if the box has a "RenderImage" formatter.
+    // If so,  first try to load the URL through the browser.
     if (DisplayFormat && (DisplayFormat.Type === "RenderImage")){
-        let oldAlpha = boxCtx.globalAlpha;
-        try {
-            if (def.sampleImage) {
-                boxCtx.globalAlpha = 0.25;
-                boxCtx.drawImage(def.sampleImage, Left, Top, Width, Height);
-                boxCtx.globalAlpha = oldAlpha;
-                return;
-            } else {
-                tryLoadSampleImage(pageNum - 1, name, def);
-                // fall-through to text rendering while image loads
-            }
-        } catch (err) {
-            boxCtx.fillStyle = "#000";
-            boxCtx.font = '14px sans-serif';
-            boxCtx.textBaseline = 'top';
-            boxCtx.fillText("Fail: "+err, Left + 5, Top + 20, Width-10);
-        }
-        boxCtx.globalAlpha = oldAlpha;
+        tryLoadSampleImage(pageNum - 1, name, def);
+        // fall-through to text rendering while image loads
     }
 
+    // If anything above has loaded an image to display,
+    // then show it with an alpha blend, behind the box.
+    let oldAlpha = boxCtx.globalAlpha;
+    try {
+        if (def.sampleImage) {
+            boxCtx.globalAlpha = 0.25;
+            boxCtx.drawImage(def.sampleImage, Left, Top, Width, Height);
+            boxCtx.globalAlpha = oldAlpha;
+            return;
+        }
+    } catch (err) {
+        boxCtx.fillStyle = "#000";
+        boxCtx.font = '14px sans-serif';
+        boxCtx.textBaseline = 'top';
+        boxCtx.fillText("Fail: " + err, Left + 5, Top + 20, Width - 10);
+    }
+    boxCtx.globalAlpha = oldAlpha;
+
+    // Either no special render, or it's not loaded yet;
+    // but we do have some text data, so we render that.
     boxCtx.fillStyle = "rgba(0,0,0,0.56)";
     boxCtx.font = '14px sans-serif';
     boxCtx.textBaseline = 'top';
@@ -1163,7 +1188,7 @@ function reloadProjectFile(next) {
 
 // Actually load the PDF (async then call our page render)
 // This requires a modern web browser that supports promises.
-pdfJsLib.getDocument(basePdfSourceUrl).promise.then(function (pdfDoc_) {
+pdfJsLib.getDocument(fileLoadUrl+''+basePdfName).promise.then(function (pdfDoc_) {
     pdfDoc = pdfDoc_;
     document.getElementById('page_count').textContent = pdfDoc.numPages;
 

@@ -1,8 +1,10 @@
-﻿using System;
-using PdfSharp.Drawing;
+﻿using PdfSharp.Drawing;
 
 namespace Form8snCore.Rendering.CustomRendering;
 
+/// <summary>
+/// Render locally stored JPEG images to the page
+/// </summary>
 internal class ImageStampRenderer:ICustomRenderedBox
 {
     private readonly string _fileName;
@@ -16,9 +18,8 @@ internal class ImageStampRenderer:ICustomRenderedBox
 
     public void RenderToPdf(IFileSource files, XGraphics gfx, DocumentBox box, XRect space)
     {
-        // TODO: load from files, draw.
-        var pen = new XPen(XColor.FromArgb(255,255,0,0), 3.0);
-        gfx.DrawLine(pen, space.TopLeft, space.BottomRight);
-        gfx.DrawLine(pen, space.TopRight, space.BottomLeft);
+        var jpegStream = files.Load(box.RenderContent?.StringValue+".jpg");
+        var img = XImage.FromStream(jpegStream);
+        gfx.DrawImage(img, space);
     }
 }

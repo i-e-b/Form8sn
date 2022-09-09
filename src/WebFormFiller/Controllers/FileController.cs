@@ -70,7 +70,7 @@ namespace WebFormFiller.Controllers
             var ms = new MemoryStream();
 
             var info = RenderPdf.ToStream(_fileDatabase, sampleData, document, ms);
-            Console.WriteLine($"Render success: {info.Success}; Overall time: {info.OverallTime}; Time loading artefacts: {info.LoadingTime}; Message: {(info.ErrorMessage ?? "<none>")}.");
+            Console.WriteLine($"Render success: {info.Success}; Overall time: {info.OverallTime}; Time loading artefacts: {info.LoadingTime}; Time in custom renderers: {info.CustomRenderTime}; Message: {(info.ErrorMessage ?? "<none>")}.");
             return File(ms, "application/pdf")!;
         }
     }

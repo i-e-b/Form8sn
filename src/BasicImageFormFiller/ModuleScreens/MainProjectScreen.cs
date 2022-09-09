@@ -236,7 +236,7 @@ namespace BasicImageFormFiller.ModuleScreens
 
                         if (result.Success)
                         {
-                            MessageBox.Show($"Render complete\r\n\r\nloading images: {result.LoadingTime}\r\ntotal time: {result.OverallTime}");
+                            MessageBox.Show($"Render complete\r\n\r\nloading images: {result.LoadingTime}\r\ncustom renderers: {result.CustomRenderTime}\r\ntotal time: {result.OverallTime}");
                         }
                         else
                         {

@@ -153,7 +153,8 @@
 const pdfWorkerSource = "@(Url!.Content("~/js/pdf.worker.js")!)"; // Snapshot from https://mozilla.github.io/pdf.js/build/pdf.worker.js
 
 // Load/store urls
-const basePdfSourceUrl = "@(Model.FileLoadUrl)?name=@(Model!.BasePdfFile)"; // PDF file from project
+const basePdfName = "@(Model!.BasePdfFile)"; // PDF file from project
+const fileLoadUrl = "@(Model.FileLoadUrl)?name="; // PDF file from project
 const projectJsonLoadUrl = "@(Model.ProjectLoadUrl)?docId=@(Model.DocumentId)"; // call-back to read template project file
 const projectJsonStoreUrl = "@(Model.ProjectStoreUrl)?docId=@(Model.DocumentId)"; // call-back to write template project file
 const boxMoveUrl = "@(Model.BoxMoveUrl)?docId=@(Model.DocumentId)"; // call-back to save new box position and size

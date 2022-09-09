@@ -9,5 +9,6 @@ namespace Form8snCore.Rendering
 
         public TimeSpan LoadingTime { get; set; }
         public TimeSpan OverallTime { get; set; }
+        public TimeSpan CustomRenderTime { get; set; }
     }
 }

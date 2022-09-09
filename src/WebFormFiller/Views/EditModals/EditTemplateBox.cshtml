@@ -4,6 +4,11 @@
 @* ReSharper disable AssignNullToNotNullAttribute *@
 @* ReSharper disable PossibleNullReferenceException *@
 
+@*
+        This page is the modal editor shown as a pop-up
+        when a user selects a template box and uses the
+        "Edit Box" button
+*@
 
 <form asp-action="TemplateBox" id="editTemplateBoxForm" method="post">
     <input type="hidden" asp-for="@Model.DocumentId" value="@Model.DocumentId"/>

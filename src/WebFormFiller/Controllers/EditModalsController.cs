@@ -96,11 +96,9 @@ namespace WebFormFiller.Controllers
                 var result = subject.TryFindBoxData(box, pageIndex.Value, new Dictionary<string, decimal>());
                 if (result is null) return Content("<no data>")!;
 
-                if (result.IsSpecial)
-                {
-                    // ???
-                    return Content($"{result.StringValue} (TODO: handle special data)")!;
-                }
+                // If it's a special type, send the text representation.
+                // The editor UI *might* render it specially.
+                if (result.IsSpecial) return Content(result.StringValue??"")!;
 
                 return Content(result.StringValue ?? " ")!;
             }

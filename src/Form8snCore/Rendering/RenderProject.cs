@@ -166,9 +166,10 @@ namespace Form8snCore.Rendering
         private const string FallbackFontFamily = "Courier New";
         private const XFontStyle BaseFontStyle = XFontStyle.Bold;
         
-        private readonly Stopwatch _loadingTimer = new Stopwatch();
-        private readonly Stopwatch _totalTimer = new Stopwatch();
-        private readonly Dictionary<int, XFont> _fontCache = new Dictionary<int, XFont>(); // per-size cache. Only uses one font.
+        private readonly Stopwatch _loadingTimer = new();
+        private readonly Stopwatch _totalTimer = new();
+        private readonly Stopwatch _customTimer = new();
+        private readonly Dictionary<int, XFont> _fontCache = new(); // per-size cache. Only uses one font.
         private string? _baseFontFamily;
         
         private readonly IFileSource _files;
@@ -179,6 +180,7 @@ namespace Form8snCore.Rendering
         /// </summary>
         private RenderResultInfo RenderToDocument(object data, TemplateProject project, out PdfDocument document){
             _loadingTimer.Reset();
+            _customTimer.Reset();
             _totalTimer.Restart();
 
             _loadingTimer.Start();
@@ -215,6 +217,7 @@ namespace Form8snCore.Rendering
 
             result.OverallTime = _totalTimer.Elapsed;
             result.LoadingTime = _loadingTimer.Elapsed;
+            result.CustomRenderTime = _customTimer.Elapsed;
 
             return result;
         }
@@ -476,6 +479,7 @@ namespace Form8snCore.Rendering
             var space = new XRect(box.Definition.Left * fx, box.Definition.Top * fy, boxWidth, boxHeight);
             
             // Handle the super-special cases
+            // TODO: replace these with custom renderers out of this already big class
             switch (box.BoxType)
             {
                 case DocumentBoxType.EmbedJpegImage:
@@ -491,7 +495,9 @@ namespace Form8snCore.Rendering
                     return Result.Success();
                 
                 case DocumentBoxType.CustomRenderer:
-                    box.RenderContent.RenderToPdf(_files, gfx, box, space);
+                    _customTimer.Start();
+                    box.RenderContent?.RenderToPdf(_files, gfx, box, space);
+                    _customTimer.Stop();
                     return Result.Success();
             }
 
