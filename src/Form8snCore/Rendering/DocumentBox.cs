@@ -1,3 +1,4 @@
+using Form8snCore.DataExtraction;
 using Form8snCore.FileFormats;
 
 namespace Form8snCore.Rendering
@@ -10,7 +11,7 @@ namespace Form8snCore.Rendering
         public DocumentBox(TemplateBox src, string? dataString)
         {
             Definition = src;
-            RenderContent = dataString;
+            RenderContent = new BoxDataWrapper(dataString);
         }
 
         public DocumentBox(TemplateBox src)
@@ -21,6 +22,6 @@ namespace Form8snCore.Rendering
 
         public DocumentBoxType BoxType { get; set; }
         public TemplateBox Definition { get; set; }
-        public string? RenderContent { get; set; }
+        public BoxDataWrapper? RenderContent { get; set; }
     }
 }

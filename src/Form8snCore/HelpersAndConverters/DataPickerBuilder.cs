@@ -9,10 +9,10 @@ using SkinnyJson;
 namespace Form8snCore.HelpersAndConverters
 {
     /// <summary>
-    /// JsonDataReader provides routines to read sample data into formats
+    /// Provides routines to read sample data into formats
     /// appropriate for UI display
     /// </summary>
-    public static class JsonDataReader
+    public static class DataPickerBuilder
     {
         /// <summary>
         /// Build the tree used to select source data for boxes and filters
@@ -42,7 +42,40 @@ namespace Form8snCore.HelpersAndConverters
             
             return result;
         }
-        
+
+        /// <summary>
+        /// Add an "Image Stamps" node to the data picker.
+        /// If the list is null or empty, the node group will
+        /// not be added
+        /// </summary>
+        public static List<DataNode> AddImageStamps(this List<DataNode> nodes, IEnumerable<string>? stampNames)
+        {
+            if (stampNames is null) return nodes;
+            
+            var stamps = new List<DataNode>();
+
+            int count = 0;
+            foreach (var name in stampNames)
+            {
+                if (string.IsNullOrEmpty(name)) continue;
+                
+                count++;
+                stamps.Add(new DataNode
+                {
+                    DataPath = "img."+name,
+                    Depth = 1,
+                    Name = name,
+                    Text = name,
+                    CanBePicked = true,
+                    IsRepeated = false
+                });
+            }
+            
+            if (count > 0) nodes.Add(new DataNode("Image Stamps", stamps));
+            
+            return nodes;
+        }
+
         /// <summary>
         /// Make sure the incoming data is a hierarchy of dictionaries and arrays
         /// </summary>
@@ -57,7 +90,7 @@ namespace Form8snCore.HelpersAndConverters
         /// Flatten a data tree into a depth-first list.
         /// This is used to display the hierarchy in table views
         /// </summary>
-        public static IEnumerable<DataNode> FlattenTree(List<DataNode> tree)
+        public static IEnumerable<DataNode> FlattenTree(this List<DataNode> tree)
         {
             var result = new List<DataNode>();
             FlattenListRecursive(result, tree);

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Form8snCore.FileFormats;
 using Form8snCore.Rendering;
+using Form8snCore.Rendering.CustomRendering;
 
 namespace Form8snCore.DataExtraction
 {
@@ -32,7 +33,7 @@ namespace Form8snCore.DataExtraction
         /// <param name="pageIndex">Page definition index</param>
         /// <param name="runningTotals"></param>
         /// <returns>String to render, or null if not applicable</returns>
-        public string? TryFindBoxData(TemplateBox box, int pageIndex, Dictionary<string, decimal> runningTotals)
+        public BoxDataWrapper? TryFindBoxData(TemplateBox box, int pageIndex, Dictionary<string, decimal> runningTotals)
         {
             try
             {
@@ -42,7 +43,11 @@ namespace Form8snCore.DataExtraction
 
                 var obj = MappingActions.ApplyFilter(MappingType.None, _emptyParams, box.MappingPath, _originalPath, filters, _data, _repeatData, runningTotals);
 
-                return obj?.ToString();
+                if (obj is ICustomRenderedBox special)
+                {
+                    return new BoxDataWrapper(special);
+                }
+                return obj is null ? null : new BoxDataWrapper(obj.ToString());
             }
             catch
             {
@@ -95,7 +100,7 @@ namespace Form8snCore.DataExtraction
         /// <summary>
         /// Returns true if this box requires special handling -- such as the page count to be known, or image embedding
         /// </summary>
-        public static bool IsSpecialValue(TemplateBox box, out DocumentBoxType type)
+        public static bool IsSpecialBoxType(TemplateBox box, out DocumentBoxType type)
         {
             type = DocumentBoxType.Normal;
             if (box.MappingPath == null || box.MappingPath.Length != 2) return false;
@@ -151,7 +156,7 @@ namespace Form8snCore.DataExtraction
         /// </summary>
         public void SetRepeatDataByIndex(TemplatePage page, int repeatItemIndex)
         {
-            var repeatData = GetRepeatData(page.RepeatMode.DataPath).FirstOrDefault() ?? new{};
+            var repeatData = GetRepeatData(page.RepeatMode.DataPath).Skip(repeatItemIndex).FirstOrDefault() ?? new{};
             SetRepeater(repeatData, page.RepeatMode.DataPath);
         }
     }

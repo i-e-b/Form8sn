@@ -15,6 +15,7 @@ namespace Form8snCore.Rendering
         // Super special rendering modes
         EmbedJpegImage,
         ColorBox,
-        QrCode
+        QrCode,
+        CustomRenderer
     }
 }

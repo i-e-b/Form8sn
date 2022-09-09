@@ -41,6 +41,7 @@ namespace WebFormFiller.Controllers
             {
                 var sampleData = _fileDatabase.GetSampleData(docId);
                 var project = _fileDatabase.GetDocumentById(docId);
+                var imageStamps = _fileDatabase.ListImageStamps();
 
                 string[]? repeat = null;
                 if (pageIndex is not null)
@@ -52,8 +53,10 @@ namespace WebFormFiller.Controllers
                 var prev = Array.Empty<string>();
                 if (!string.IsNullOrWhiteSpace(oldPath)) prev = oldPath.Split('.');
 
-                var tree = JsonDataReader.BuildDataSourcePicker(project, sampleData, prev, repeat, pageIndex, multiplesCanBePicked);
-                var list = JsonDataReader.FlattenTree(tree);
+                var list = DataPickerBuilder
+                    .BuildDataSourcePicker(project, sampleData, prev, repeat, pageIndex, multiplesCanBePicked)
+                    .AddImageStamps(imageStamps)
+                    .FlattenTree();
 
                 var model = new DataSourceViewModel
                 {
@@ -91,8 +94,15 @@ namespace WebFormFiller.Controllers
                 subject.SetRepeatDataByIndex(page, 0);
 
                 var result = subject.TryFindBoxData(box, pageIndex.Value, new Dictionary<string, decimal>());
-                
-                return Content(result ?? " ")!;
+                if (result is null) return Content("<no data>")!;
+
+                if (result.IsSpecial)
+                {
+                    // ???
+                    return Content($"{result.StringValue} (TODO: handle special data)")!;
+                }
+
+                return Content(result.StringValue ?? " ")!;
             }
             catch (Exception ex)
             {

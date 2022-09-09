@@ -15,7 +15,7 @@ namespace Form8snCore.Tests
             var lastPath = new string[] { };
             var p = Strings.Separator;
             
-            var nodes = JsonDataReader.BuildDataSourcePicker(SampleProjectFiles.BasicFile, SampleData.Standard, lastPath, null, 0, false);
+            var nodes = DataPickerBuilder.BuildDataSourcePicker(SampleProjectFiles.BasicFile, SampleData.Standard, lastPath, null, 0, false);
             
             Assert.That(nodes, Is.Not.Null, "Failed to extract picker data");
             
@@ -35,7 +35,7 @@ namespace Form8snCore.Tests
             
             
             // Should be able to flatten nodes
-            var flattened = JsonDataReader.FlattenTree(nodes).ToList();
+            var flattened = DataPickerBuilder.FlattenTree(nodes).ToList();
             
             // Nothing should be pre-selected as we gave a null path
             var selected = flattened.Where(n=>n.Selected).ToList();
@@ -52,7 +52,7 @@ namespace Form8snCore.Tests
             var lastPath = new string[] { };
             var p = Strings.Separator;
             
-            var nodes = JsonDataReader.BuildDataSourcePicker(SampleProjectFiles.BasicFile, SampleData.Standard, lastPath, null, 0, true);
+            var nodes = DataPickerBuilder.BuildDataSourcePicker(SampleProjectFiles.BasicFile, SampleData.Standard, lastPath, null, 0, true);
             
             Assert.That(nodes, Is.Not.Null, "Failed to extract picker data");
             
@@ -72,7 +72,7 @@ namespace Form8snCore.Tests
             
             
             // Should be able to flatten nodes
-            var flattened = JsonDataReader.FlattenTree(nodes).ToList();
+            var flattened = DataPickerBuilder.FlattenTree(nodes).ToList();
             
             // Nothing should be pre-selected as we gave a null path
             var selected = flattened.Where(n=>n.Selected).ToList();
@@ -88,7 +88,7 @@ namespace Form8snCore.Tests
         {
             var lastPath = new[] { "", "Claimant", "MailingAddress", "Country", "Code"};
             
-            var nodes = JsonDataReader.BuildDataSourcePicker(SampleProjectFiles.BasicFile, SampleData.Standard, lastPath, null, 0, true);
+            var nodes = DataPickerBuilder.BuildDataSourcePicker(SampleProjectFiles.BasicFile, SampleData.Standard, lastPath, null, 0, true);
             
             Assert.That(nodes, Is.Not.Null, "Failed to extract picker data");
             
@@ -112,7 +112,7 @@ namespace Form8snCore.Tests
             var lastPath = new string[] {};
             var repeatPath = new[] { "", "Reclaims"};
             
-            var nodes = JsonDataReader.BuildDataSourcePicker(SampleProjectFiles.BasicFile, SampleData.Standard, lastPath, repeatPath, 0, true);
+            var nodes = DataPickerBuilder.BuildDataSourcePicker(SampleProjectFiles.BasicFile, SampleData.Standard, lastPath, repeatPath, 0, true);
             
             Assert.That(nodes, Is.Not.Null, "Failed to extract picker data");
             
@@ -127,7 +127,7 @@ namespace Form8snCore.Tests
             var lastPath = new string[] {};
             var repeatPath = new[] { "#", "HugeGroup"};
             
-            var nodes = JsonDataReader.BuildDataSourcePicker(SampleProjectFiles.BasicFile, SampleData.Standard, lastPath, repeatPath, 0, true);
+            var nodes = DataPickerBuilder.BuildDataSourcePicker(SampleProjectFiles.BasicFile, SampleData.Standard, lastPath, repeatPath, 0, true);
             
             Assert.That(nodes, Is.Not.Null, "Failed to extract picker data");
             

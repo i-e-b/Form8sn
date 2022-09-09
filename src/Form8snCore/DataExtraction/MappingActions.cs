@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using Form8snCore.FileFormats;
 using Form8snCore.HelpersAndConverters;
+using Form8snCore.Rendering.CustomRendering;
 
 namespace Form8snCore.DataExtraction
 {
@@ -450,47 +451,64 @@ namespace Form8snCore.DataExtraction
 
             return outp;
         }
-        
+
+        /// <summary>
+        /// Translate a path into data.
+        /// This is the main place that paths are read.
+        /// Adding new prefixes goes here
+        /// </summary>
         private static object? GetDataAtPath(FilterState pkg)
         {
             var path = pkg.SourcePath;
             var data = pkg.Data;
             if (path == null || data == null) return null;
 
-            var root = path[0];
+            var root = path[0];// Empty root means plain data, otherwise, we expect a prefix on the path
             var pathSkip = 1;
+            
+            switch (root) 
+            {
+                case "": // normal path into data
+                case "~": // pick the root item
+                    // do nothing
+                    break;
+               
+                case "#": // Data filter
+                {
+                    if (path.Length < 2) return null;
+                    var newFilter = pkg.RedirectFilter(path[1]);
+                    if (newFilter == null) return null;
+                    data = ApplyFilterRecursive(newFilter);
+                    if (data == null) return null;
+                    pathSkip = 2; // root and filter name
+                    break;
+                }
+              
+                case "D": // Page repeat
+                    if (pkg.RepeaterData is null || path.Length < 2) throw new Exception("Was asked for repeat page data, but none was supplied");
+                    data = pkg.RepeaterData;
+                    pathSkip = 1; // root 'D'
+                    break;
 
-            // Empty root means plain data, otherwise, we expect '#', 'D', 'P'
-            if (root == "#") // Data filter
-            {
-                if (path.Length < 2) return null;
-                var newFilter = pkg.RedirectFilter(path[1]);
-                if (newFilter == null) return null;
-                data = ApplyFilterRecursive(newFilter);
-                if (data == null) return null;
-                pathSkip = 2; // root and filter name
-            }
-            else if (root == "D") // Page repeat
-            {
-                if (pkg.RepeaterData == null) return null; //throw new Exception("Was asked for repeat page data, but none was supplied");
-                if (path.Length < 2) return null;
-                data = pkg.RepeaterData;
-                pathSkip = 1; // root 'D'
-            }
-            else if (root == "P") // Meta-data about page
-            {
-                return GetPageInfoData(pkg);
-            }
-            else if (root == "!") // special "raw data" mode
-            {
-                return string.Join(".", path.Skip(1)).Trim();
-            }
-            else if (root == "~") // marker for exactly the root item
-            {
+                case "P": // Meta-data about page
+                    return GetPageInfoData(pkg);
                 
+                case "!": // special "raw data" mode
+                    return string.Join(".", path.Skip(1)).Trim();
+                
+                case "img": // an 'Image Stamp' by name.
+                    if (path.Length < 2) return null;
+                    return new ImageStampRenderer(path[1]);
+                
+                default:
+                    throw new Exception($"Unexpected root marker: {path[0]}");
             }
-            else if (path[0] != "") throw new Exception($"Unexpected root marker: {path[0]}");
 
+            return WalkPath(data, pathSkip, path);
+        }
+
+        private static object? WalkPath(object data, int pathSkip, string[] path)
+        {
             var sb = new StringBuilder();
             var target = data;
             for (int i = pathSkip; i < path.Length; i++)

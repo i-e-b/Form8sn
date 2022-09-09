@@ -117,7 +117,7 @@ namespace Form8snCore.Tests
                     Type = DisplayFormatType.RenderImage
                 }
             };
-            var result = DataMapper.IsSpecialValue(box, out var type);
+            var result = DataMapper.IsSpecialBoxType(box, out var type);
             Assert.That(result, Is.True, "did not trigger");
             Assert.That(type, Is.EqualTo(DocumentBoxType.EmbedJpegImage), "wrong special type");
         }
@@ -134,7 +134,7 @@ namespace Form8snCore.Tests
             var box = new TemplateBox{
                 MappingPath = new []{"P", name}
             };
-            var result = DataMapper.IsSpecialValue(box, out var type);
+            var result = DataMapper.IsSpecialBoxType(box, out var type);
             Assert.That(result, Is.True, "did not trigger");
             Assert.That(type.ToString(), Is.EqualTo(name), "wrong special type");
         }
@@ -146,7 +146,7 @@ namespace Form8snCore.Tests
             var box = new TemplateBox{
                 MappingPath = new []{"", "Anything"}
             };
-            var result = DataMapper.IsSpecialValue(box, out var type);
+            var result = DataMapper.IsSpecialBoxType(box, out var type);
             Assert.That(result, Is.False, "was marked as special, but should not have been");
             Assert.That(type, Is.EqualTo(DocumentBoxType.Normal), "wrong type");
         }

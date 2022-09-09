@@ -23,7 +23,7 @@ namespace Form8snCore
         /// <returns>Result information, with any error messages and timings</returns>
         public static RenderResultInfo ToStream(IFileSource fileSource, object data, TemplateProject document, Stream target)
         {
-            var standardisedData = JsonDataReader.Standardise(data);
+            var standardisedData = DataPickerBuilder.Standardise(data);
             return new RenderProject(fileSource).ToStream(target, standardisedData, document);
         }
     }

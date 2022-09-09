@@ -15,13 +15,6 @@ The general plan:
 The PDF generation phase should be as fast as possible. If we can, it should be a streaming process so we
 don't need to load the whole PDF template or output into memory.
 
-What is working now:
---------------------
-
-Inputs are JPEG images.
-Schema is implicit with a sample data file.
-Direct output of PDF is working, but the special file format is not present.
-
 Components
 ==========
 
@@ -48,3 +41,8 @@ To-do:
 * [ ] Embed Form8sn instructions in PDF files and handle those? *(not important)*
 * [x] Web-based form editor?
 * [ ] Full suite of tests
+
+Useful pointers
+---------------
+
+To add new prefixes, see `Form8snCore.DataExtraction.MappingActions.GetDataAtPath` and `Form8snCore.HelpersAndConverters.DataPickerBuilder`

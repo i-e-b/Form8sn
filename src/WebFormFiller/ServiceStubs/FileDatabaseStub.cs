@@ -116,7 +116,7 @@ namespace WebFormFiller.ServiceStubs
             if (fileName is null) return;
             
             var reduced = fileName.Trim('.','/',' ','\\');
-            var target = Path.Combine(StorageDirectory, reduced);
+            var target = Path.Combine(StorageDirectory, reduced) + ".jpg";
             if (File.Exists(target)) File.Delete(target);
         }
 

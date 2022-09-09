@@ -195,9 +195,9 @@ namespace WebFormFiller.Controllers
         /// <summary>
         /// Delete an image stamp by name
         /// </summary>
-        public IActionResult DeleteImageStamp([FromQuery] string? imageStampName)
+        public IActionResult DeleteImageStamp([FromQuery] string? name)
         {
-            _fileDatabase.DeleteStoredFile(imageStampName);
+            _fileDatabase.DeleteStoredFile(name);
             return RedirectToAction(nameof(Index))!;
         }
     }

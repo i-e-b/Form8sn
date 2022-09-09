@@ -265,7 +265,7 @@ namespace Form8snCore.Rendering
                     {
                         if (!page.DocumentBoxes.ContainsKey(nextBox.Definition.DependsOn)) { boxesToKill.Add(box.Key); break; } // has been early-culled
                         nextBox = page.DocumentBoxes[nextBox.Definition.DependsOn];
-                        if (string.IsNullOrEmpty(nextBox?.RenderContent!)) { boxesToKill.Add(box.Key); break; } // dependent is empty
+                        if (string.IsNullOrEmpty(nextBox?.RenderContent?.StringValue!)) { boxesToKill.Add(box.Key); break; } // dependent is empty
                         if (string.IsNullOrEmpty(nextBox?.Definition.DependsOn!)) break; // end of the chain, has a value
                         if (nextBox?.Definition.DependsOn == box.Key) { boxesToKill.Add(box.Key); break; } // loop in chain. Drop this box
                     }
@@ -310,26 +310,36 @@ namespace Form8snCore.Rendering
             try
             {
                 if (box.MappingPath is null) return Result.Failure<DocumentBox?>("Box has no mapping path"); 
-                var str = mapper.TryFindBoxData(box, pageIndex, runningTotals);
-                
-                if (DataMapper.IsSpecialValue(box, out var type))
-                {
-                    return Result.Success<DocumentBox?>(new DocumentBox(box) { BoxType = type, RenderContent = str});
-                }
+                var boxData = mapper.TryFindBoxData(box, pageIndex, runningTotals);
 
-                if (str == null)
+                // If no data, either ignore or fail.
+                if (boxData == null)
                 {
                     if (box.IsRequired) return Result.Failure<DocumentBox?>($"Required data was not found at [{string.Join(".",box.MappingPath)}]");
                     return Result.Success<DocumentBox?>(null); // empty data is considered OK
                 }
 
-                if (box.DisplayFormat != null)
+                // Handle fully custom boxes
+                if (boxData.IsSpecial)
                 {
-                    str = DisplayFormatter.ApplyFormat(box.DisplayFormat, str);
-                    if (str == null) return Result.Failure<DocumentBox?>($"Formatter failed: {box.DisplayFormat.Type} applied on {string.Join(".", box.MappingPath!)}");
+                    return Result.Success<DocumentBox?>(new DocumentBox(box) { BoxType = DocumentBoxType.CustomRenderer, RenderContent = boxData});
                 }
 
-                return Result.Success<DocumentBox?>(new DocumentBox(box, str));
+                // Handle special renderers
+                if (DataMapper.IsSpecialBoxType(box, out var type))
+                {
+                    return Result.Success<DocumentBox?>(new DocumentBox(box) { BoxType = type, RenderContent = boxData});
+                }
+                
+                // Not a weird box, just text.
+                var strResult = boxData.StringValue;
+                if (box.DisplayFormat != null)
+                {
+                    strResult = DisplayFormatter.ApplyFormat(box.DisplayFormat, boxData.StringValue);
+                    if (strResult == null) return Result.Failure<DocumentBox?>($"Formatter failed: {box.DisplayFormat.Type} applied on {string.Join(".", box.MappingPath!)}");
+                }
+
+                return Result.Success<DocumentBox?>(new DocumentBox(box, strResult));
             }
             catch (Exception ex)
             {
@@ -479,21 +489,25 @@ namespace Form8snCore.Rendering
                 case DocumentBoxType.QrCode:
                     DrawQrCode(gfx, box, space);
                     return Result.Success();
+                
+                case DocumentBoxType.CustomRenderer:
+                    box.RenderContent.RenderToPdf(_files, gfx, box, space);
+                    return Result.Success();
             }
 
-            // Read data, or pick a special type
+            // Read data, applying custom formatting if required 
             var str = box.BoxType switch
             {
-                DocumentBoxType.Normal => box.RenderContent,
-                
+                DocumentBoxType.Normal => box.RenderContent?.StringValue,
+
                 // For the special values, we might want to re-apply the display format
                 DocumentBoxType.PageGenerationDate => TryApplyDisplayFormat(box, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")),
                 DocumentBoxType.CurrentPageNumber => TryApplyDisplayFormat(box, (pageIndex + 1).ToString()),
                 DocumentBoxType.TotalPageCount => TryApplyDisplayFormat(box, pageTotal.ToString()),
                 DocumentBoxType.RepeatingPageNumber => TryApplyDisplayFormat(box, (pageToRender.RepeatIndex + 1).ToString()),
                 DocumentBoxType.RepeatingPageTotalCount => TryApplyDisplayFormat(box, pageToRender.RepeatCount.ToString()),
-                
-                _ =>  box.RenderContent
+
+                _ => box.RenderContent?.StringValue
             };
 
             if (str == null) return Result.Success(); // empty data is considered OK
@@ -511,7 +525,7 @@ namespace Form8snCore.Rendering
         /// </summary>
         private static void DrawColorBox(XGraphics gfx, DocumentBox box, XRect space)
         {
-            var colorStr = box.RenderContent ?? "";
+            var colorStr = box.RenderContent?.StringValue ?? "";
             var result = CssColorParser.ParseCssColor(colorStr);
             
             var brush = new XSolidBrush(XColor.FromArgb(result[0], result[1], result[2], result[3]));
@@ -526,7 +540,7 @@ namespace Form8snCore.Rendering
         private void DrawQrCode(XGraphics gfx, DocumentBox box, XRect space)
         {
             var encoder = new QrEncoder{ErrorCorrectionLevel = ErrorCorrection.Q};
-            var matrix = encoder.Encode(box.RenderContent ?? "");
+            var matrix = encoder.Encode(box.RenderContent?.StringValue ?? "");
             
             var black = new XSolidBrush(XColor.FromArgb(255, 0, 0, 0));
             var white = new XSolidBrush(XColor.FromArgb(255, 255, 255, 255));
@@ -563,12 +577,12 @@ namespace Form8snCore.Rendering
         /// </summary>
         private void EmbedJpegImage(XGraphics gfx, DocumentBox box, XRect space)
         {
-            if (string.IsNullOrWhiteSpace(box.RenderContent!)) return;
+            if (string.IsNullOrWhiteSpace(box.RenderContent?.StringValue!)) return;
 
             try
             {
                 _loadingTimer.Start();
-                var jpegStream = _files.LoadUrl(box.RenderContent);
+                var jpegStream = _files.LoadUrl(box.RenderContent?.StringValue);
                 if (jpegStream is null) return; // Embedded images are always considered optional
                 var img = XImage.FromStream(jpegStream);
                 gfx.DrawImage(img, space);
@@ -584,7 +598,8 @@ namespace Form8snCore.Rendering
             }
         }
 
-        private void RenderTextInBox(XFont font, XGraphics gfx, TemplateBox box, double fx, double fy, string str, XRect space, XStringFormat align)
+        private void RenderTextInBox(XFont font, XGraphics gfx, TemplateBox box, double fx, double fy,
+            string str, XRect space, XStringFormat align)
         {
             var boxLeft = box.Left * fx;
             var boxWidth = box.Width * fx;
