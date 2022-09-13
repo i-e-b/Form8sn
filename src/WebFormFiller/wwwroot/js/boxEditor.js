@@ -660,21 +660,24 @@ function tryUpdateActiveBox(sendChanges){
     req.open('GET', url);
     req.send();
 }
+function findSafeName(prefix){
+    let page = projectFile.Pages[pageNum-1];
+    let name;
+    for (let i = 1; i < 150; i++) {
+        name = `${prefix}_${i}`;
+        if (page.Boxes[name]) continue;
 
+        return name;
+    }
+
+    alert("Too many boxes with default names. Please rename some.");
+}
 function tryCreateNewBox(x, y){
     // try to find a safe new name for this box
     let page = projectFile.Pages[pageNum-1];
-    let name, found = false;
-    for (let i = 1; i < 150; i++) {
-        name = `Box_${i}`;
-        if (page.Boxes[name]) continue;
-        
-        found = true;
-        break;
-    }
+    let name = findSafeName("Box")
     
-    if (!found) {
-        alert("Too many boxes with default names. Please rename some.");
+    if (!name) {
         return;
     }
 
@@ -706,9 +709,32 @@ function tryCreateNewBox(x, y){
         DisplayFormat: null,
         BoxOrder: null
     }
-    
 }
-
+function duplicateBox(oldName, newName){
+    let page = projectFile.Pages[pageNum-1];
+    let old = page.Boxes[oldName];
+    if (!old) return;
+    if (!newName) return;
+    
+    // write the new box into the page definition
+    // this should get stored & re-read once the
+    // mouse is released, so the object aliasing
+    // should be ok.
+    page.Boxes[newName] =  {
+        WrapText: old.WrapText,
+        ShrinkToFit: old.ShrinkToFit,
+        BoxFontSize: old.BoxFontSize,
+        Alignment: old.Alignment,
+        DependsOn: old.DependsOn,
+        Top: old.Top,
+        Left: old.Left,
+        Width: old.Width,
+        Height: old.Height,
+        MappingPath: old.MappingPath,
+        DisplayFormat: old.DisplayFormat,
+        BoxOrder: old.BoxOrder
+    }
+}
 function selectActiveBox(name){
     let page = projectFile.Pages[pageNum - 1];
     
@@ -734,7 +760,6 @@ function selectActiveBox(name){
     activeBox.bottom = Top + Height;
     mouse.mode = 'select';
 }
-
 function hitTestBoxes(page, mx, my) {
     // first, test the selected box's control points
     if (activeBox.key !== null) {
@@ -1056,9 +1081,25 @@ boxCanvas.addEventListener('mousedown', function (e) {
     mouse.mode = hitTestBoxes(page, mx, my);
     updateEditButton();
     
-    if ((e.buttons === 2 || e.shiftKey) && mouse.mode === 'none') {
+    if ((e.buttons === 2 || e.shiftKey) && mouse.mode === 'none') { // create new box
         tryCreateNewBox(mx,my);
         mouse.mode = 'create';
+        
+    } else if (e.ctrlKey){ // duplicate on drag
+        console.log(`ctrl down, old box=${activeBox.key}`);
+        if (activeBox.key !== null){
+            // copy into new box
+            let newName = findSafeName(activeBox.key);
+            console.log(`new box name=${newName}`);
+            if (!newName) return;
+            duplicateBox(activeBox.key, newName);
+            
+            // switch selection to new box, and set to special move mode
+            // the 'duplicate' mode is used in the mouse-up listener. 
+            mouse.mode = 'duplicate';
+            activeBox.key = newName;
+            console.log('now in duplicate mode');
+        }
     }
     
     renderBoxes();
@@ -1068,7 +1109,7 @@ boxCanvas.addEventListener('mousedown', function (e) {
 boxCanvas.addEventListener('mouseup', function (e) {
     e.preventDefault();
 
-    if (mouse.mode === 'create'){
+    if (mouse.mode === 'create' || mouse.mode === 'duplicate'){
         tryUpdateActiveBox(false);
         storeAndReloadProjectFile(function(){ // we've added a new box, so update the entire project
             updateEditButton();
@@ -1106,7 +1147,7 @@ boxCanvas.addEventListener('mousemove', function (e) {
     //   Move should offset all values.
     if (mouse.mode === 'select') {
         return; // No action. The user has to release the mouse and click again to edit.
-    } else if (mouse.mode === 'move') {
+    } else if (mouse.mode === 'move' || mouse.mode === 'duplicate') {
         // Offset the active box
         let dx = mouse.x - last_mouse.x;
         let dy = mouse.y - last_mouse.y;
@@ -1132,7 +1173,6 @@ boxCanvas.addEventListener('mousemove', function (e) {
             activeBox.right = activeBox.left + m;
             activeBox.bottom = activeBox.top + m;
         }
-        //console.log(e.ctrlKey+"|"+e.altKey);
     }
 
     if (mouse.buttons !== 0) {

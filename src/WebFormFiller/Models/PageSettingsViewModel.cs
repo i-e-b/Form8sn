@@ -66,13 +66,5 @@ namespace WebFormFiller.Models
         public string? Name { get; set; } = "";
         public string? Notes { get; set; }
         public IDictionary<string, MappingInfo> Filters { get; set; } = new Dictionary<string, MappingInfo>();
-
-
-        private static int? ParseOrNull(string? baseFontSize)
-        {
-            if (baseFontSize is null) return null;
-            if (!int.TryParse(baseFontSize , out var size)) return null;
-            return size;
-        }
     }
 }
