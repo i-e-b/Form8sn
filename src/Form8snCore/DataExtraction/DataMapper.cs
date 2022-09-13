@@ -103,7 +103,7 @@ namespace Form8snCore.DataExtraction
         public static bool IsSpecialBoxType(TemplateBox box, out DocumentBoxType type)
         {
             type = DocumentBoxType.Normal;
-            if (box.MappingPath == null || box.MappingPath.Length != 2) return false;
+            if (box.MappingPath == null) return false;
 
             if (box.DisplayFormat?.Type == DisplayFormatType.RenderImage)
             {

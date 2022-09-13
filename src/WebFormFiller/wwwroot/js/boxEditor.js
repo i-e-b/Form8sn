@@ -535,7 +535,7 @@ function saveDisplayFormatChanges(){
     setValue('DisplayFormatDescription', description); // in EditTemplateBox.cshtml
     
     // Copy details from the modal into our selected box
-    // Don't save -- the out box details will do this, and keep the save/cancel semantics correct
+    // Don't save -- the outer box details will do this, and keep the save/cancel semantics correct
     box.DisplayFormat = newSettings;
     setValue('DisplayFormatJsonStruct', JSON.stringify(newSettings)) // in EditTemplateBox.cshtml
     
@@ -1086,11 +1086,9 @@ boxCanvas.addEventListener('mousedown', function (e) {
         mouse.mode = 'create';
         
     } else if (e.ctrlKey){ // duplicate on drag
-        console.log(`ctrl down, old box=${activeBox.key}`);
         if (activeBox.key !== null){
             // copy into new box
             let newName = findSafeName(activeBox.key);
-            console.log(`new box name=${newName}`);
             if (!newName) return;
             duplicateBox(activeBox.key, newName);
             
@@ -1098,7 +1096,6 @@ boxCanvas.addEventListener('mousedown', function (e) {
             // the 'duplicate' mode is used in the mouse-up listener. 
             mouse.mode = 'duplicate';
             activeBox.key = newName;
-            console.log('now in duplicate mode');
         }
     }
     
