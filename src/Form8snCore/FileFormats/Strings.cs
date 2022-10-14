@@ -2,7 +2,7 @@ namespace Form8snCore.FileFormats
 {
     public static class Strings
     {
-        public const char Separator = '\x1F';
+        public const char Separator = '.';
         public const string FilterMarker = "#";
         public const string PageDataMarker = "P";
         
