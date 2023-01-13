@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using NUnit.Framework;
+using Portable.Drawing.Imaging.ImageFormats;
 using Real = System.Drawing;
 using Port = Portable.Drawing;
 
@@ -106,6 +108,17 @@ namespace PortableGdiTests
             Console.WriteLine($"Portable GDI took {sw.ElapsedMilliseconds}ms");
             
             Console.WriteLine("Files generated. Compare output");
+        }
+
+        [Test]
+        public void can_read_jpeg_header_data()
+        {
+            using var fs = File.OpenRead("inputs/f3t.jpg");
+            
+            var img = new PortableImage();
+            JpegHelper.Read(fs, img);
+            
+            Console.WriteLine(img);
         }
     }
 }

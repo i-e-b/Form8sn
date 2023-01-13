@@ -46,33 +46,51 @@ namespace Portable.Drawing.Toolkit.Portable
 
         private static void EnsureFontCache()
         {
-            if (_fontCache.Count < 1)
+            if (_fontCache.Count >= 1) return;
+            
+            // Try the path where dotnet thinks the fonts should be
+            // and try some other locations, as the dotnet one is often just ~/.fonts on Linux
+            var possiblePaths = new []{
+                // Fonts stored alongside the exe
+                SelfLocation(),
+                // User fonts in Windows
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile, Environment.SpecialFolderOption.DoNotVerify), "AppData/Local/Microsoft/Windows/Fonts/"),
+                // Standard font directory according to dotnet (Windows & Linux)
+                Environment.GetFolderPath(Environment.SpecialFolder.Fonts, Environment.SpecialFolderOption.DoNotVerify),
+                // Common font locations in Linux
+                "/usr/share/fonts/",
+                "/usr/local/share/fonts",
+                "/usr/X11R6/lib/X11/fonts/"
+            };
+            foreach (var path in possiblePaths)
             {
-                // Try the path where dotnet thinks the fonts should be
-                // and try some other locations, as the dotnet one is often just ~/.fonts on Linux
-                var possiblePaths = new []{
-                    // Fonts stored alongside the exe
-                    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-                    // User fonts in Windows
-                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile, Environment.SpecialFolderOption.DoNotVerify), "AppData/Local/Microsoft/Windows/Fonts/"),
-                    // Standard font directory according to dotnet (Windows & Linux)
-                    Environment.GetFolderPath(Environment.SpecialFolder.Fonts, Environment.SpecialFolderOption.DoNotVerify),
-                    // Common font locations in Linux
-                    "/usr/share/fonts/",
-                    "/usr/local/share/fonts",
-                    "/usr/X11R6/lib/X11/fonts/"
-                };
-                foreach (var path in possiblePaths)
+                try
                 {
-                    try
-                    {
-                        ReadAvailableFonts(path);
-                    }
-                    catch
-                    {
-                        // ignore
-                    }
+                    ReadAvailableFonts(path);
                 }
+                catch
+                {
+                    // ignore
+                }
+            }
+        }
+
+        /// <summary>Try to find location of running app or service</summary>
+        private static string SelfLocation()
+        {
+            try
+            {
+                var b = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
+#if NET45
+                var a = "";
+#else
+                var a = AppContext.BaseDirectory ?? "";
+#endif
+                return string.IsNullOrWhiteSpace(b) ? a : b;
+            }
+            catch
+            {
+                return "";
             }
         }
 
@@ -89,6 +107,7 @@ namespace Portable.Drawing.Toolkit.Portable
 
         private static void ReadAvailableFonts(string basePath)
         {
+            if (string.IsNullOrWhiteSpace(basePath)) return;
             if (!Directory.Exists(basePath)) return;
             
             // Font file names usually bear little resemblance to the family and style names.
