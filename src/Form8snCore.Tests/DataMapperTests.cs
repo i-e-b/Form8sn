@@ -22,7 +22,7 @@ namespace Form8snCore.Tests
             
             var result = subject.TryFindBoxData(box, 0, totals);
             
-            Assert.That(result, Is.EqualTo("FirstName Surname"), "data did not map as expected");
+            Assert.That(result.StringValue, Is.EqualTo("FirstName Surname"), "data did not map as expected");
         }
         
         [Test]
@@ -36,7 +36,7 @@ namespace Form8snCore.Tests
             
             var result = subject.TryFindBoxData(box, 0, totals);
             
-            Assert.That(result, Is.EqualTo("This is some data. And it should go straight in."), "data did not map as expected");
+            Assert.That(result.StringValue, Is.EqualTo("This is some data. And it should go straight in."), "data did not map as expected");
         }
         
         [Test]
@@ -50,7 +50,7 @@ namespace Form8snCore.Tests
             
             var result = subject.TryFindBoxData(box, 0, totals);
             
-            Assert.That(result, Is.EqualTo("794.0790"), "data did not map as expected");
+            Assert.That(result.StringValue, Is.EqualTo("794.0790"), "data did not map as expected");
             Assert.That(totals["#.Doc Filter to be referenced"], Is.EqualTo(794.0790m), "mapped did not increment totals");
         }
         
@@ -65,7 +65,7 @@ namespace Form8snCore.Tests
             
             var result = subject.TryFindBoxData(box, 0, totals);
             
-            Assert.That(result, Is.EqualTo("794.0790-DefaultCompany"), "data did not map as expected");
+            Assert.That(result.StringValue, Is.EqualTo("794.0790-DefaultCompany"), "data did not map as expected");
         }
         
         [Test]

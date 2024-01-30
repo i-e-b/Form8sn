@@ -40,4 +40,9 @@ public class BoxDataWrapper
     {
         _customRendered?.RenderToPdf(files, gfx, box, space);
     }
+
+    public override string ToString()
+    {
+        return StringValue ?? (IsSpecial?"<special>":"");
+    }
 }

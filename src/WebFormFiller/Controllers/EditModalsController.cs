@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Form8snCore.DataExtraction;
 using Form8snCore.FileFormats;
 using Form8snCore.HelpersAndConverters;
@@ -243,6 +244,13 @@ namespace WebFormFiller.Controllers
                 
                 _fileDatabase.Store(storeName, model.FileUpload.ToStream());
                 existing.SampleFileName = storeName;
+                
+                // Clean up any old files
+                var oldFiles = _fileDatabase.GetSampleFiles(model.DocumentId).Where(name=>!name.EndsWith(storeName));
+                foreach (var oldFile in oldFiles)
+                {
+                    _fileDatabase.DeleteStoredFile(oldFile);
+                }
             }
             
             // Write back to store

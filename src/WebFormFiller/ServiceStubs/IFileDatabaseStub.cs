@@ -47,6 +47,11 @@ namespace WebFormFiller.ServiceStubs
         /// in normal documents.
         /// </summary>
         object GetSampleData(int docId);
+        
+        /// <summary>
+        /// Return a list of stored files that match the sample file pattern for this document
+        /// </summary>
+        IList<string> GetSampleFiles(int docId);
 
         /// <summary>
         /// <p>OPTIONAL</p>
@@ -56,5 +61,6 @@ namespace WebFormFiller.ServiceStubs
         /// If images stamps are not supported, return an empty list.
         /// </summary>
         IList<string> ListImageStamps();
+
     }
 }

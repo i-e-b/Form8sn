@@ -102,9 +102,10 @@ namespace WebFormFiller.ServiceStubs
             if (!Directory.Exists(StorageDirectory)) { Directory.CreateDirectory(StorageDirectory); }
 
             using var file = File.OpenWrite(Path.Combine(StorageDirectory, name));
-            // ReSharper disable once AccessToDisposedClosure
             Sync.Run(() => stream.CopyToAsync(file));
             file.Flush(true);
+            
+            // If there are any older sample files, remove them
         }
 
         /// <summary>
@@ -116,7 +117,11 @@ namespace WebFormFiller.ServiceStubs
             if (fileName is null) return;
             
             var reduced = fileName.Trim('.','/',' ','\\');
-            var target = Path.Combine(StorageDirectory, reduced) + ".jpg";
+            var target = Path.Combine(StorageDirectory, reduced);
+            
+            var extension = Path.GetExtension(target);
+            if (string.IsNullOrWhiteSpace(extension)) target += ".jpg";
+            
             if (File.Exists(target)) File.Delete(target);
         }
 
@@ -146,11 +151,19 @@ namespace WebFormFiller.ServiceStubs
         {
             if (!Directory.Exists(StorageDirectory)) { Directory.CreateDirectory(StorageDirectory); }
             
-            var files = Directory.EnumerateFiles(StorageDirectory, docId+"sm_*.json", SearchOption.TopDirectoryOnly).ToList();
+            var files = GetSampleFiles(docId);
             if (files.Count > 1) throw new Exception("Ambiguous file");
-            if (files.Count < 1) return Json.Defrost(File.ReadAllText(@"C:\Temp\SampleData.json")); // If nothing found, fall back to a global default
+            if (files.Count < 1) return Json.Defrost(File.ReadAllText(Path.Combine(StorageDirectory,"SampleData.json"))); // If nothing found, fall back to a global default
             
             return Json.Defrost(File.ReadAllText(files[0]));
+        }
+
+        /// <summary>
+        /// Return a list of stored files that match the sample file pattern for this document
+        /// </summary>
+        public IList<string> GetSampleFiles(int docId)
+        {
+            return Directory.EnumerateFiles(StorageDirectory, docId+"sm_*.json", SearchOption.TopDirectoryOnly).ToList(); 
         }
 
         public IList<string> ListImageStamps()
