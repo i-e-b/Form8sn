@@ -245,10 +245,10 @@ namespace PdfSharp.Pdf
             get { return ObjectID.GenerationNumber; }
         }
 
-        ///// <summary>
-        ///// Creates a deep copy of the specified value and its transitive closure and adds the
-        ///// new objects to the specified owner document.
-        ///// </summary>
+        /// <summary>
+        /// Creates a deep copy of the specified value and its transitive closure and adds the
+        /// new objects to the specified owner document.
+        /// </summary>
         /// <param name="owner">The document that owns the cloned objects.</param>
         /// <param name="externalObject">The root object to be cloned.</param>
         /// <returns>The clone of the root object</returns>

@@ -103,6 +103,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
     /// </summary>
     public sealed class XGraphics : IDisposable
     {
+        #region compat junk
 #if CORE
         // TODO: Implement better concept of a measure context.
 #endif
@@ -342,6 +343,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
             Initialize();
         }
 #endif
+        #endregion
 
         /// <summary>
         /// Initializes a new instance of the XGraphics class for drawing on a PDF page.
@@ -587,6 +589,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
 #endif
         }
 
+        #region compat junk
 #if GDI
         /// <summary>
         /// Creates a new instance of the XGraphics class from a System.Drawing.Graphics object.
@@ -654,6 +657,7 @@ namespace PdfSharp.Drawing  // #??? Clean up
             return new XGraphics(drawingSession, size, unit, XPageDirection.Downwards);
         }
 #endif
+#endregion
 
         /// <summary>
         /// Creates a new instance of the XGraphics class from a PdfSharp.Pdf.PdfPage object.

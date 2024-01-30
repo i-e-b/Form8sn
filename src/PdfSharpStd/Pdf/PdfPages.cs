@@ -484,6 +484,17 @@ namespace PdfSharp.Pdf
         }
 
         /// <summary>
+        /// Experimental: try to write a page as a graphical element into another page
+        /// </summary>
+        public void CopyPageOntoPage(PdfPage src, PdfPage dst)
+        {
+            if (src.Owner._openMode != PdfDocumentOpenMode.Import) throw new InvalidOperationException("A PDF document must be opened with PdfDocumentOpenMode.Import to import pages from it.");
+            
+            CloneElement(dst, src, PdfPage.Keys.Resources, true);
+            CloneElement(dst, src, PdfPage.Keys.Contents, true);
+        }
+
+        /// <summary>
         /// Helper function for ImportExternalPage.
         /// </summary>
         void CloneElement(PdfPage page, PdfPage importPage, string key, bool deepcopy)

@@ -211,6 +211,16 @@ namespace Edf.Drawing
         }
         double _y;
 
+        
+        /// <summary>
+        /// Move this point's X and Y independently, so that they are the maximum between this and extent. 
+        /// </summary>
+        public void ExtendTo(XPoint extent)
+        {
+            if (extent._x > _x) _x = extent._x;
+            if (extent._y > _y) _y = extent._y;
+        }
+        
 #if CORE
 #if UseGdiObjects
         /// <summary>
@@ -410,7 +420,7 @@ namespace Edf.Drawing
         /// </summary>
         // ReSharper disable UnusedMember.Local
         string DebuggerDisplay
-        // ReSharper restore UnusedMember.Local
+            // ReSharper restore UnusedMember.Local
         {
             get
             {

@@ -13,6 +13,7 @@ using PdfSharp;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
+using PdfSharp.Pdf.StreamDecode;
 using SkinnyJson;
 
 namespace Form8snCore.Rendering
@@ -36,12 +37,26 @@ namespace Form8snCore.Rendering
         /// <param name="project">Project file that defines the PDF to generate</param>
         public RenderResultInfo ToStream(Stream target, object data, TemplateProject project)
         {
-            var info = RenderToDocument(data, project, out var document);
-            document.Save(target);
-            document.Dispose();
-            
-            if (target.CanSeek) target.Seek(0, SeekOrigin.Begin);
-            return info;
+            try
+            {
+                var info = RenderToDocument(data, project, out var document);
+                document.Save(target);
+                document.Dispose();
+
+                if (target.CanSeek) target.Seek(0, SeekOrigin.Begin);
+                return info;
+            }
+            catch (Exception ex)
+            {
+                return new RenderResultInfo
+                {
+                    Success = false,
+                    ErrorMessage = ex.GetType().Name +": " + ex.Message,
+                    LoadingTime = TimeSpan.Zero,
+                    OverallTime = TimeSpan.Zero,
+                    CustomRenderTime = TimeSpan.Zero
+                };
+            }
         }
 
         /// <summary>
@@ -132,37 +147,6 @@ namespace Form8snCore.Rendering
         }
 
         
-        /// <summary>
-        /// Render prepared pages into a PDF document
-        /// </summary>
-        /// <param name="project">Project file to generate a document for</param>
-        /// <param name="document">Open and writable PDF file to add pages to</param>
-        /// <param name="pageList">A set of pages from PrepareAllPages()</param>
-        /// <param name="result">Rendering result, including any error messages</param>
-        /// <returns>True for success, false for failure</returns>
-        public bool RenderPagesToPdfDocument(TemplateProject project, PdfDocument document, List<DocumentPage> pageList, RenderResultInfo result)
-        {
-            for (var pageIndex = 0; pageIndex < pageList.Count; pageIndex++)
-            {
-                _loadingTimer.Start();
-                var page = pageList[pageIndex]!;
-                var pageDef = page.Definition;
-
-                using var background = LoadBackground(project, page.SourcePageIndex, pageDef);
-                var font = GetFont(pageDef.PageFontSize ?? project.BaseFontSize ?? 16);
-                _loadingTimer.Stop();
-
-                var pageResult = OutputPage(document, page, font, background, pageIndex, pageList.Count);
-                if (pageResult.IsFailure)
-                {
-                    result.ErrorMessage = pageResult.FailureMessage;
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        
         private const string FallbackFontFamily = "Courier New";
         private const XFontStyle BaseFontStyle = XFontStyle.Bold;
         
@@ -204,6 +188,7 @@ namespace Form8snCore.Rendering
             }
 
             // Next, go through the prepared page and render them to PDF
+            // TODO: if we are rendering to a 'roll', merge multiple source pages onto a larger PDF page
             var ok = RenderPagesToPdfDocument(project, document, pageList, result);
             if (!ok)
             {
@@ -221,6 +206,142 @@ namespace Form8snCore.Rendering
 
             return result;
         }
+        
+        
+        /// <summary>
+        /// Render prepared pages into a PDF document
+        /// </summary>
+        /// <param name="project">Project file to generate a document for</param>
+        /// <param name="document">Open and writable PDF file to add pages to</param>
+        /// <param name="pageList">A set of pages from PrepareAllPages()</param>
+        /// <param name="result">Rendering result, including any error messages</param>
+        /// <returns>True for success, false for failure</returns>
+        public bool RenderPagesToPdfDocument(TemplateProject project, PdfDocument document, List<DocumentPage> pageList, RenderResultInfo result)
+        {
+            for (var pageIndex = 0; pageIndex < pageList.Count; pageIndex++)
+            {
+                _loadingTimer.Start();
+                var page = pageList[pageIndex]!;
+                var pageDef = page.Definition;
+                // If dimensions are silly, reset to A4
+                if (pageDef.WidthMillimetres < 10 || pageDef.WidthMillimetres > 3000) pageDef.WidthMillimetres = 210;
+                if (pageDef.HeightMillimetres < 10 || pageDef.HeightMillimetres > 3000) pageDef.HeightMillimetres = 297;
+
+                using var background = LoadBackground(project, page.SourcePageIndex, pageDef);
+                var font = GetFont(pageDef.PageFontSize ?? project.BaseFontSize ?? 16);
+                _loadingTimer.Stop();
+
+                // TODO: make a page here, change `OutputPage` to inject into that page (with an offset position)
+                //       If we're in normal mode, we will make a new page per template page
+                //       If in 'roll' mode, only make a new page when we run out of space
+                
+                // If we have a source PDF, and we aren't trying to render a blank page, then import the page
+                var shouldCopyPdfPage = background.ExistingPage != null && pageDef.RenderBackground;
+                
+                // Set the PDF page size (in points under the hood)
+                
+                //var pdfPage = shouldCopyPdfPage ? document.AddPage(background.ExistingPage!) : document.AddPage(/*blank*/);
+                var pdfPage = document.AddPage(/*blank*/);
+                if (shouldCopyPdfPage)
+                {
+                    var src = background.ExistingPage!;
+                    //document.Pages.CopyPageOntoPage(src, pdfPage); // IEB: experimental!
+                    var instr = src.RecoverInstructions();
+                    using var gfx = XGraphics.FromPdfPage(pdfPage);
+                    instr.RenderToXGraphics(gfx);
+                }
+
+                pdfPage.Width = XUnit.FromMillimeter(pageDef.WidthMillimetres);
+                pdfPage.Height = XUnit.FromMillimeter(pageDef.HeightMillimetres);
+                
+                var pageResult = OutputOntoPage(pdfPage, page, font, background, pageIndex, pageList.Count);
+                if (pageResult.IsFailure)
+                {
+                    result.ErrorMessage = pageResult.FailureMessage;
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        /// <summary>
+        /// Render a prepared page into a PDF document.
+        /// Returns the maximum point rendered onto the page
+        /// </summary>
+        private Result<XPoint> OutputOntoPage(PdfPage page, DocumentPage pageToRender, XFont font, PageBacking background, int pageIndex, int pageTotal)
+        {
+            var pageDef = pageToRender.Definition;
+            var max = new XPoint(0,0);
+
+            var shouldCopyPdfPage = background.ExistingPage != null && pageDef.RenderBackground;
+            using var gfx = XGraphics.FromPdfPage(page);
+            
+            gfx.Save();
+            
+            // Match visual-rotations on page, but only if we're not merging.
+            if (pageDef.MergeToRoll == false && shouldCopyPdfPage && (background.ExistingPage?.Rotate??0) != 0)
+            {
+                var centre = new XPoint(0,0);
+                var visualRotate = background.ExistingPage!.Rotate % 360; // degrees, spec says it should be a multiple of 90.
+                var angle = 360.0 - visualRotate;
+                gfx.RotateAtTransform(angle, centre);
+                
+                switch (visualRotate)
+                {
+                    case 90:
+                        gfx.TranslateTransform(-page.Height.Point, 0);
+                        break;
+                    case 180:
+                        gfx.TranslateTransform(-page.Width.Point, -page.Height.Point);
+                        break;
+                    case 270:
+                        gfx.TranslateTransform(-page.Height.Point / 2.0, -page.Height.Point); // this one is a guess, as I don't have an example
+                        break;
+                    default:
+                        throw new Exception("Unhandled visual rotation case");
+                }
+
+                if (background.ExistingPage.Orientation == PageOrientation.Landscape)
+                {
+                    // ReSharper disable once SwapViaDeconstruction // not supported on net std 2.0
+                    var tmp = page.Height; page.Height = page.Width; page.Width = tmp;
+                }
+            }
+
+            // Draw background at full page size
+            _loadingTimer.Start();
+            if (pageDef.RenderBackground && background.BackgroundImage != null)
+            {
+                var width = new XUnit(pageDef.WidthMillimetres, XGraphicsUnit.Millimeter);
+                var height = new XUnit(pageDef.HeightMillimetres, XGraphicsUnit.Millimeter);
+                var destRect = new XRect(0, 0, width.Point, height.Point);
+                gfx.DrawImage(background.BackgroundImage, destRect);
+            }
+            _loadingTimer.Stop();
+
+            // Do default scaling
+            var fx = page.Width.Point / page.Width.Millimeter;
+            var fy = page.Height.Point / page.Height.Millimeter;
+            // If using an image, work out the bitmap -> page adjustment
+            if (background.BackgroundImage != null)
+            {
+                fx = page.Width.Point / background.BackgroundImage.PixelWidth;
+                fy = page.Height.Point / background.BackgroundImage.PixelHeight;
+            }
+
+            // Draw each box.
+            foreach (var boxDef in pageToRender.DocumentBoxes)
+            {
+                var result = RenderBox(font, boxDef, fx, fy, gfx, pageToRender, pageIndex, pageTotal);
+                if (result.IsFailure) return result;
+                max.ExtendTo(result.ResultData);
+            }
+            
+            gfx.Restore();
+
+            return Result.Success(max);
+        }
+        
 
         private PageBacking LoadBackground(TemplateProject project, int sourcePageIndex, TemplatePage pageDef)
         {
@@ -350,87 +471,6 @@ namespace Form8snCore.Rendering
             }
         }
 
-        /// <summary>
-        /// Render a prepared page into a PDF document
-        /// </summary>
-        private Result<Nothing> OutputPage(PdfDocument document, DocumentPage pageToRender, XFont font, PageBacking background, int pageIndex, int pageTotal)
-        {
-            var pageDef = pageToRender.Definition;
-            
-            // If we have a source PDF, and we aren't trying to render a blank page, then import the page
-            var shouldCopyPdfPage = background.ExistingPage != null && pageDef.RenderBackground;
-            var page = shouldCopyPdfPage ? document.AddPage(background.ExistingPage!) : document.AddPage(/*blank*/);
-            
-            // If dimensions are silly, reset to A4
-            if (pageDef.WidthMillimetres < 10 || pageDef.WidthMillimetres > 1000) pageDef.WidthMillimetres = 210;
-            if (pageDef.HeightMillimetres < 10 || pageDef.HeightMillimetres > 1000) pageDef.HeightMillimetres = 297;
-
-            // Set the PDF page size (in points under the hood)
-            page.Width = XUnit.FromMillimeter(pageDef.WidthMillimetres);
-            page.Height = XUnit.FromMillimeter(pageDef.HeightMillimetres);
-
-            using var gfx = XGraphics.FromPdfPage(page);
-            gfx.Save();
-            
-            if (shouldCopyPdfPage && background.ExistingPage!.Rotate != 0)
-            {
-                // Match visual-rotations on page
-                var centre = new XPoint(0,0);
-                var visualRotate = background.ExistingPage!.Rotate % 360; // degrees, spec says it should be a multiple of 90.
-                var angle = 360.0 - visualRotate;
-                gfx.RotateAtTransform(angle, centre);
-                
-                switch (visualRotate)
-                {
-                    case 90:
-                        gfx.TranslateTransform(-page.Height.Point, 0);
-                        break;
-                    case 180:
-                        gfx.TranslateTransform(-page.Width.Point, -page.Height.Point);
-                        break;
-                    case 270:
-                        gfx.TranslateTransform(-page.Height.Point / 2.0, -page.Height.Point); // this one is a guess, as I don't have an example
-                        break;
-                    default:
-                        throw new Exception("Unhandled visual rotation case");
-                }
-
-                if (background.ExistingPage.Orientation == PageOrientation.Landscape)
-                {
-                    var tmp = page.Width; page.Width = page.Height; page.Height = tmp;
-                }
-            }
-
-            // Draw background at full page size
-            _loadingTimer.Start();
-            if (pageDef.RenderBackground && background.BackgroundImage != null)
-            {
-                var destRect = new XRect(0, 0, (float) page.Width.Point, (float) page.Height.Point);
-                gfx.DrawImage(background.BackgroundImage, destRect);
-            }
-            _loadingTimer.Stop();
-
-            // Do default scaling
-            var fx = page.Width.Point / page.Width.Millimeter;
-            var fy = page.Height.Point / page.Height.Millimeter;
-            // If using an image, work out the bitmap -> page adjustment
-            if (background.BackgroundImage != null)
-            {
-                fx = page.Width.Point / background.BackgroundImage.PixelWidth;
-                fy = page.Height.Point / background.BackgroundImage.PixelHeight;
-            }
-
-            // Draw each box.
-            foreach (var boxDef in pageToRender.DocumentBoxes)
-            {
-                var result = RenderBox(font, boxDef, fx, fy, gfx, pageToRender, pageIndex, pageTotal);
-                if (result.IsFailure) return result;
-            }
-            
-            gfx.Restore();
-
-            return Result.Success();
-        }
 
         private static bool HasAValue(KeyValuePair<string, TemplateBox> boxDef)
         {
@@ -465,9 +505,10 @@ namespace Form8snCore.Rendering
         }
 
         /// <summary>
-        /// Draw the prepared box to a PDF page
+        /// Draw the prepared box to a PDF page.
+        /// Returns maximum x and y coords of the box.
         /// </summary>
-        private Result<Nothing> RenderBox(XFont baseFont, KeyValuePair<string, DocumentBox> boxDef, double fx, double fy, XGraphics gfx, DocumentPage pageToRender, int pageIndex, int pageTotal)
+        private Result<XPoint> RenderBox(XFont baseFont, KeyValuePair<string, DocumentBox> boxDef, double fx, double fy, XGraphics gfx, DocumentPage pageToRender, int pageIndex, int pageTotal)
         {
             var box = boxDef.Value!;
             var font = (box.Definition.BoxFontSize != null) ? GetFont(box.Definition.BoxFontSize.Value) : baseFont;
@@ -484,21 +525,21 @@ namespace Form8snCore.Rendering
             {
                 case DocumentBoxType.EmbedJpegImage:
                     EmbedJpegImage(gfx, box, space);
-                    return Result.Success();
+                    return Result.Success(space.BottomRight);
                 
                 case DocumentBoxType.ColorBox:
                     DrawColorBox(gfx, box, space);
-                    return Result.Success();
+                    return Result.Success(space.BottomRight);
                 
                 case DocumentBoxType.QrCode:
                     DrawQrCode(gfx, box, space);
-                    return Result.Success();
+                    return Result.Success(space.BottomRight);
                 
                 case DocumentBoxType.CustomRenderer:
                     _customTimer.Start();
                     box.RenderContent?.RenderToPdf(_files, gfx, box, space);
                     _customTimer.Stop();
-                    return Result.Success();
+                    return Result.Success(space.BottomRight);
             }
 
             // Read data, applying custom formatting if required 
@@ -516,12 +557,12 @@ namespace Form8snCore.Rendering
                 _ => box.RenderContent?.StringValue
             };
 
-            if (str == null) return Result.Success(); // empty data is considered OK
+            if (str == null) return Result.Success(space.BottomRight); // empty data is considered OK
 
             var align = MapAlignments(box.Definition);
 
             RenderTextInBox(font, gfx, box.Definition, fx, fy, str, space, align);
-            return Result.Success();
+            return Result.Success(space.BottomRight);
         }
 
         /// <summary>

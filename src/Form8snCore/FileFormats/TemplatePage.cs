@@ -12,9 +12,41 @@ namespace Form8snCore.FileFormats
             PageDataFilters = new Dictionary<string, MappingInfo>();
         }
 
+        /// <summary> Width of the page, in mm </summary>
         public double WidthMillimetres { get; set; }
+        /// <summary> Height of the page, in mm </summary>
         public double HeightMillimetres { get; set; }
+
+        /// <summary>
+        /// Repetitions of this template page should be merged onto larger 'roll' pages.
+        /// Roll page size must be defined, and be larger than the page size for this to work.
+        /// <p/>
+        /// This is mainly to support large-format sticker printing.
+        /// </summary>
+        public bool MergeToRoll { get; set; }
+
+        /// <summary>
+        /// Width of large-format page that individual copies of this page should be merged into.
+        /// Pages are merged width-first. This should be the roll width (the smaller dimension) if using a roll printer.
+        /// <p/>
+        /// Ignored unless <see cref="MergeToRoll"/> is set to <c>true</c>
+        /// </summary>
+        public double? RollWidthMillimeters { get; set; }
         
+        /// <summary>
+        /// Size of large-format page that individual copies of this page should be merged into
+        /// Pages are merged width-first. This should be the maximum roll length (the larger dimension) if using a roll printer.
+        /// <p/>.
+        /// Ignored unless <see cref="MergeToRoll"/> is set to <c>true</c>
+        /// </summary> 
+        public double? RollHeightMillimeters { get; set; }
+
+        /// <summary>
+        /// Minimum spacing between copies of the page on a roll.
+        /// Ignored unless <see cref="MergeToRoll"/> is set to <c>true</c>
+        /// </summary>
+        public double? RollMarginMillimeters { get; set; }
+
         /// <summary>
         /// Optional: override the base font size for this page
         /// </summary>
