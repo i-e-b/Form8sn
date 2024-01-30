@@ -39,7 +39,6 @@
         </label>
         <p>If true, the whole PDF will be output as normal. If false, the box values will be rendered on a blank page</p>
     </div>
-    
    
     @* REPEAT MODE *@
     <div class="form-group">
@@ -52,6 +51,31 @@
         <p>If a page repeats, a copy will be added to the output for each item in the data path you pick.
             If the selected data is empty or not present, no pages will be output.</p>
         <p>List items are marked with "(multiple)" in the data picker</p>
+    </div>
+    
+    @* MERGE-TO-ROLL SWITCH *@
+    <div class="form-group">
+        <label class="form-checkbox form-inline" asp-for="@Model.MergeToRoll">
+            <input type="checkbox" asp-for="@Model.MergeToRoll"><i class="form-icon"></i> Merge page repeats onto larger page
+        </label>
+        <p>For large-format printing. If true, all repeated instances of this page will be merged onto a larger page.
+        This has no effect if page is not repeated.</p>
+        <p>Merge-to-roll does not support rendering PDF backgrounds.</p>
+    </div>
+    
+    @* ROLL WIDTH & HEIGHT *@
+    <div class="form-group">
+        <p>Large-format roll size</p>
+        <label class="form-label form-inline" asp-for="@Model.RollWidthMillimetres">Width (mm)</label>
+        <input class="form-input form-inline" type="text" asp-for="@Model.RollWidthMillimetres" value="@Model.RollWidthMillimetres">
+        
+        <label class="form-label form-inline" asp-for="@Model.RollHeightMillimetres">Roll Length (mm)</label>
+        <input class="form-input form-inline" type="text" asp-for="@Model.RollHeightMillimetres" value="@Model.RollHeightMillimetres">
+        
+        <label class="form-label form-inline" asp-for="@Model.RollMarginMillimetres">Item Margin (mm)</label>
+        <input class="form-input form-inline" type="text" asp-for="@Model.RollMarginMillimetres" value="@Model.RollMarginMillimetres">
+        
+        <p>Common size: 1200mm wide, 2000mm length, 5mm margin</p>
     </div>
     
     @* NOTES *@

@@ -33,7 +33,7 @@ namespace Form8snCore.FileFormats
         /// <p/>
         /// Ignored unless <see cref="MergeToRoll"/> is set to <c>true</c>
         /// </summary>
-        public double? RollWidthMillimeters { get; set; }
+        public double? RollWidthMillimetres { get; set; }
         
         /// <summary>
         /// Size of large-format page that individual copies of this page should be merged into
@@ -41,13 +41,13 @@ namespace Form8snCore.FileFormats
         /// <p/>.
         /// Ignored unless <see cref="MergeToRoll"/> is set to <c>true</c>
         /// </summary> 
-        public double? RollHeightMillimeters { get; set; }
+        public double? RollHeightMillimetres { get; set; }
 
         /// <summary>
         /// Minimum spacing between copies of the page on a roll.
         /// Ignored unless <see cref="MergeToRoll"/> is set to <c>true</c>
         /// </summary>
-        public double? RollMarginMillimeters { get; set; }
+        public double? RollMarginMillimetres { get; set; }
 
         /// <summary>
         /// Optional: override the base font size for this page

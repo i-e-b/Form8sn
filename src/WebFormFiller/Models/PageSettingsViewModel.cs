@@ -27,6 +27,12 @@ namespace WebFormFiller.Models
                 
                 PageRepeats = thePage.RepeatMode.Repeats,
                 RepeatDataPath = string.Join('.', thePage.RepeatMode.DataPath??Array.Empty<string>()),
+                
+                MergeToRoll = thePage.MergeToRoll,
+                RollWidthMillimetres = thePage.RollWidthMillimetres ?? 0.0,
+                RollHeightMillimetres = thePage.RollHeightMillimetres ?? 0.0,
+                RollMarginMillimetres = thePage.RollMarginMillimetres ?? 0.0,
+                
                 Filters = thePage.PageDataFilters
             };
         }
@@ -41,12 +47,18 @@ namespace WebFormFiller.Models
             thePage.Name = Name ?? $"Page {PageIndex+1}";
             thePage.Notes = Notes ?? "";
             thePage.RenderBackground = RenderBackground;
+            
             thePage.PageFontSize = PageFontSize;
             thePage.WidthMillimetres = PageWidthMillimetres;
             thePage.HeightMillimetres = PageHeightMillimetres;
             
             thePage.RepeatMode.Repeats = PageRepeats;
             thePage.RepeatMode.DataPath = RepeatDataPath?.Split('.');
+            
+            thePage.MergeToRoll = MergeToRoll;
+            thePage.RollHeightMillimetres = RollHeightMillimetres;
+            thePage.RollWidthMillimetres = RollWidthMillimetres;
+            thePage.RollMarginMillimetres = RollMarginMillimetres;
         }
 
         public double PageHeightMillimetres { get; set; }
@@ -59,6 +71,11 @@ namespace WebFormFiller.Models
         public int? PageFontSize { get; set; }
 
         public bool RenderBackground { get; set; }
+        
+        public bool MergeToRoll { get; set; }
+        public double RollHeightMillimetres { get; set; }
+        public double RollWidthMillimetres { get; set; }
+        public double RollMarginMillimetres { get; set; }
 
         public int DocumentId { get; set; }
         public int PageIndex { get; set; }

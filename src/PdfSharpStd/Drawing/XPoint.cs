@@ -428,5 +428,10 @@ namespace Edf.Drawing
                 return String.Format(CultureInfo.InvariantCulture, "point=({0:" + format + "}, {1:" + format + "})", _x, _y);
             }
         }
+
+        /// <summary>
+        /// A new point at 0,0
+        /// </summary>
+        public static XPoint Zero => new(0,0);
     }
 }

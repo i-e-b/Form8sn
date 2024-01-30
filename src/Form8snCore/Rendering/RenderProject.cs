@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Containers;
-using Containers.Types;
 using Form8snCore.DataExtraction;
 using Form8snCore.FileFormats;
 using Form8snCore.HelpersAndConverters;
@@ -13,7 +12,6 @@ using PdfSharp;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
-using PdfSharp.Pdf.StreamDecode;
 using SkinnyJson;
 
 namespace Form8snCore.Rendering
@@ -218,7 +216,8 @@ namespace Form8snCore.Rendering
         /// <returns>True for success, false for failure</returns>
         public bool RenderPagesToPdfDocument(TemplateProject project, PdfDocument document, List<DocumentPage> pageList, RenderResultInfo result)
         {
-            for (var pageIndex = 0; pageIndex < pageList.Count; pageIndex++)
+            var totalPageCount = pageList.Count; // this is output pages, including individual repetitions of repeated template pages.
+            for (var pageIndex = 0; pageIndex < totalPageCount; pageIndex++)
             {
                 _loadingTimer.Start();
                 var page = pageList[pageIndex]!;
@@ -231,24 +230,58 @@ namespace Form8snCore.Rendering
                 var font = GetFont(pageDef.PageFontSize ?? project.BaseFontSize ?? 16);
                 _loadingTimer.Stop();
 
-                // TODO: make a page here, change `OutputPage` to inject into that page (with an offset position)
-                //       If we're in normal mode, we will make a new page per template page
-                //       If in 'roll' mode, only make a new page when we run out of space
-                
-                // If we have a source PDF, and we aren't trying to render a blank page, then import the page
-                var shouldCopyPdfPage = background.ExistingPage != null && pageDef.RenderBackground && !pageDef.MergeToRoll;
-                
-                var pdfPage = shouldCopyPdfPage ? document.AddPage(background.ExistingPage!) : document.AddPage(/*blank*/);
-
-                // Set the PDF page size (in points under the hood)
-                pdfPage.Width = XUnit.FromMillimeter(pageDef.WidthMillimetres);
-                pdfPage.Height = XUnit.FromMillimeter(pageDef.HeightMillimetres);
-                
-                var pageResult = OutputOntoPage(pdfPage, page, font, background, pageIndex, pageList.Count);
-                if (pageResult.IsFailure)
+                // If we're in normal mode, we will make a new page per template page
+                // If in 'roll' mode, only make a new page when we run out of space
+                if (pageDef.MergeToRoll)
                 {
-                    result.ErrorMessage = pageResult.FailureMessage;
-                    return false;
+                    var margin = XUnit.FromMillimeter(pageDef.RollMarginMillimetres??0.0);
+                    var offset = new XPoint(margin,margin);
+                    var pdfPage = document.AddPage( /*blank*/);
+
+                    // Set the PDF page size (in points under the hood)
+                    pdfPage.Width = XUnit.FromMillimeter(pageDef.RollWidthMillimetres??pageDef.WidthMillimetres);
+                    pdfPage.Height = XUnit.FromMillimeter(pageDef.RollHeightMillimetres??pageDef.HeightMillimetres);
+                    
+                    var subPageWidth = XUnit.FromMillimeter(pageDef.WidthMillimetres);
+                    var subPageHeight = XUnit.FromMillimeter(pageDef.HeightMillimetres);
+                    
+                    // Keep trying to add sub-pages
+                    for (int rollIndex = 0; rollIndex < page.RepeatCount; rollIndex++)
+                    {
+                        var pageResult = OutputOntoPage(pdfPage, page, offset, font, background, pageIndex, totalPageCount);
+                        if (pageResult.IsFailure)
+                        {
+                            result.ErrorMessage = pageResult.FailureMessage;
+                            return false;
+                        }
+                        pageIndex++;
+                        
+                        offset.X += subPageWidth + margin.Point;
+                        if (offset.X + subPageWidth > pdfPage.Width) // carriage return
+                        {
+                            offset.X = margin;
+                            offset.Y += subPageHeight + margin.Point;
+                        }
+                        
+                        if (offset.Y + subPageHeight > pdfPage.Height) break; // can't fit any more in
+                    }
+                }
+                else
+                {
+                    // If we have a source PDF, and we aren't trying to render a blank page, then import the page
+                    var shouldCopyPdfPage = background.ExistingPage != null && pageDef.RenderBackground;
+                    var pdfPage = shouldCopyPdfPage ? document.AddPage(background.ExistingPage!) : document.AddPage( /*blank*/);
+
+                    // Set the PDF page size (in points under the hood)
+                    pdfPage.Width = XUnit.FromMillimeter(pageDef.WidthMillimetres);
+                    pdfPage.Height = XUnit.FromMillimeter(pageDef.HeightMillimetres);
+
+                    var pageResult = OutputOntoPage(pdfPage, page, XPoint.Zero, font, background, pageIndex, pageList.Count);
+                    if (pageResult.IsFailure)
+                    {
+                        result.ErrorMessage = pageResult.FailureMessage;
+                        return false;
+                    }
                 }
             }
             return true;
@@ -256,12 +289,12 @@ namespace Form8snCore.Rendering
         
         /// <summary>
         /// Render a prepared page into a PDF document.
-        /// Returns the maximum point rendered onto the page
+        /// Returns the maximum point rendered onto the page (ignoring offset)
         /// </summary>
-        private Result<XPoint> OutputOntoPage(PdfPage page, DocumentPage pageToRender, XFont font, PageBacking background, int pageIndex, int pageTotal)
+        private Result<XPoint> OutputOntoPage(PdfPage page, DocumentPage pageToRender, XPoint offset, XFont font, PageBacking background, int pageIndex, int pageTotal)
         {
             var pageDef = pageToRender.Definition;
-            var max = new XPoint(0,0);
+            var max = new XPoint(offset.X, offset.Y);
 
             var shouldCopyPdfPage = background.ExistingPage != null && pageDef.RenderBackground && !pageDef.MergeToRoll;
             using var gfx = XGraphics.FromPdfPage(page);
@@ -304,7 +337,7 @@ namespace Form8snCore.Rendering
             {
                 var width = new XUnit(pageDef.WidthMillimetres, XGraphicsUnit.Millimeter);
                 var height = new XUnit(pageDef.HeightMillimetres, XGraphicsUnit.Millimeter);
-                var destRect = new XRect(0, 0, width.Point, height.Point);
+                var destRect = new XRect(offset.X, offset.Y, width.Point, height.Point);
                 gfx.DrawImage(background.BackgroundImage, destRect);
             }
             _loadingTimer.Stop();
@@ -318,6 +351,8 @@ namespace Form8snCore.Rendering
                 fx = page.Width.Point / background.BackgroundImage.PixelWidth;
                 fy = page.Height.Point / background.BackgroundImage.PixelHeight;
             }
+            
+            gfx.TranslateTransform(offset.X, offset.Y);
 
             // Draw each box.
             foreach (var boxDef in pageToRender.DocumentBoxes)
