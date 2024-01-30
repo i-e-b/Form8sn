@@ -236,21 +236,11 @@ namespace Form8snCore.Rendering
                 //       If in 'roll' mode, only make a new page when we run out of space
                 
                 // If we have a source PDF, and we aren't trying to render a blank page, then import the page
-                var shouldCopyPdfPage = background.ExistingPage != null && pageDef.RenderBackground;
+                var shouldCopyPdfPage = background.ExistingPage != null && pageDef.RenderBackground && !pageDef.MergeToRoll;
                 
-                // Set the PDF page size (in points under the hood)
-                
-                //var pdfPage = shouldCopyPdfPage ? document.AddPage(background.ExistingPage!) : document.AddPage(/*blank*/);
-                var pdfPage = document.AddPage(/*blank*/);
-                if (shouldCopyPdfPage)
-                {
-                    var src = background.ExistingPage!;
-                    //document.Pages.CopyPageOntoPage(src, pdfPage); // IEB: experimental!
-                    var instr = src.RecoverInstructions();
-                    using var gfx = XGraphics.FromPdfPage(pdfPage);
-                    instr.RenderToXGraphics(gfx);
-                }
+                var pdfPage = shouldCopyPdfPage ? document.AddPage(background.ExistingPage!) : document.AddPage(/*blank*/);
 
+                // Set the PDF page size (in points under the hood)
                 pdfPage.Width = XUnit.FromMillimeter(pageDef.WidthMillimetres);
                 pdfPage.Height = XUnit.FromMillimeter(pageDef.HeightMillimetres);
                 
@@ -273,7 +263,7 @@ namespace Form8snCore.Rendering
             var pageDef = pageToRender.Definition;
             var max = new XPoint(0,0);
 
-            var shouldCopyPdfPage = background.ExistingPage != null && pageDef.RenderBackground;
+            var shouldCopyPdfPage = background.ExistingPage != null && pageDef.RenderBackground && !pageDef.MergeToRoll;
             using var gfx = XGraphics.FromPdfPage(page);
             
             gfx.Save();

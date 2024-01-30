@@ -449,6 +449,7 @@ namespace PdfSharp.Pdf.StreamDecode
                         break;
                     case OpCodeName.Do:
                         Console.WriteLine($"DO: {op.Operands})");
+                        //_page.Document.ImageTable;
                         break;
                     case OpCodeName.DP:
                         break;

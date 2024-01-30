@@ -21,6 +21,8 @@ namespace Form8snCore.FileFormats
         /// Repetitions of this template page should be merged onto larger 'roll' pages.
         /// Roll page size must be defined, and be larger than the page size for this to work.
         /// <p/>
+        /// Merge-to-Roll pages don't support PDF background copying at present.
+        /// <p/>
         /// This is mainly to support large-format sticker printing.
         /// </summary>
         public bool MergeToRoll { get; set; }
