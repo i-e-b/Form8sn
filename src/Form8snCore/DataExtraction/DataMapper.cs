@@ -56,6 +56,28 @@ namespace Form8snCore.DataExtraction
         }
 
         /// <summary>
+        /// Try to resolve a data path to a mapping object.
+        /// Returns <c>null</c> if path could not be resolved.
+        /// <p/>
+        /// See <see cref="MappingActions.ApplyFilter"/>
+        /// </summary>
+        public object? TryResolvePath(string? path, int pageIndex)
+        {
+            try
+            {
+                if (path == null) return null;
+
+                var filters = JoinProjectAndPageFilters(pageIndex);
+                var pathParts = path.Split(Strings.Separator);
+                return MappingActions.ApplyFilter(MappingType.None, _emptyParams, pathParts, _originalPath, filters, _data, _repeatData, new Dictionary<string, decimal>());
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Get data for a repeating page. Will return empty list if there is no data
         /// </summary>
         public List<object> GetRepeatData(string[]? dataPath)

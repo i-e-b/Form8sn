@@ -39,6 +39,14 @@
         </label>
         <p>If true, the whole PDF will be output as normal. If false, the box values will be rendered on a blank page</p>
     </div>
+    
+    @* ADDITIONAL BACKGROUND *@
+    <div class="form-group">
+        <label class="form-label" asp-for="@Model.AdditionalBackgroundDataPath">Additional Background</label>
+        <button id="DataPathPickBtn" type="button" onclick="showDataPickerModal('AdditionalBackgroundDataPath', false, true)">Pick Data</button>
+        <input class="form-input" type="text" asp-for="@Model.AdditionalBackgroundDataPath" value="@(Model.AdditionalBackgroundDataPath??"")">
+        <p>Additional background image for page. This can be a URL or image stamp. It will be scaled to the page size.</p>
+    </div>
    
     @* REPEAT MODE *@
     <div class="form-group">

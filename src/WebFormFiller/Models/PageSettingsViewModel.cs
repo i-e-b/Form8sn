@@ -20,7 +20,10 @@ namespace WebFormFiller.Models
                 
                 Name = thePage.Name,
                 Notes = thePage.Notes,
+                
                 RenderBackground = thePage.RenderBackground,
+                AdditionalBackgroundDataPath = thePage.BackgroundImage,
+                
                 PageFontSize = thePage.PageFontSize,
                 PageWidthMillimetres = Math.Round(thePage.WidthMillimetres, 1),
                 PageHeightMillimetres = Math.Round(thePage.HeightMillimetres, 1),
@@ -46,7 +49,9 @@ namespace WebFormFiller.Models
             
             thePage.Name = Name ?? $"Page {PageIndex+1}";
             thePage.Notes = Notes ?? "";
+            
             thePage.RenderBackground = RenderBackground;
+            thePage.BackgroundImage = AdditionalBackgroundDataPath;
             
             thePage.PageFontSize = PageFontSize;
             thePage.WidthMillimetres = PageWidthMillimetres;
@@ -71,6 +76,7 @@ namespace WebFormFiller.Models
         public int? PageFontSize { get; set; }
 
         public bool RenderBackground { get; set; }
+        public string? AdditionalBackgroundDataPath { get; set; }
         
         public bool MergeToRoll { get; set; }
         public double RollHeightMillimetres { get; set; }

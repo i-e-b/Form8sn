@@ -578,6 +578,8 @@ namespace PdfSharp.Drawing
             if (!_disposed)
                 _disposed = true;
 
+            _stream?.Dispose();
+
 #if CORE || GDI || WPF
             //if (_importedImage != null)
             {
@@ -1057,7 +1059,7 @@ namespace PdfSharp.Drawing
         /// <summary>
         /// Contains a reference to the original stream if image was created from a stream.
         /// </summary>
-        internal Stream _stream;
+        internal Stream? _stream;
 
         /// <summary>
         /// Cache PdfImageTable.ImageSelector to speed up finding the right PdfImage

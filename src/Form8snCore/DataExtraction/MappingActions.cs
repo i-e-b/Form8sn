@@ -16,7 +16,7 @@ namespace Form8snCore.DataExtraction
     public static class MappingActions
     {
         /// <summary>
-        /// returns one of IList, string, int, Dictionary&lt;string,object>; For the dict, 'object' must also be one of these.
+        /// returns one of IList, string, int, Dictionary&lt;string,object&gt;; For the dict, 'object' must also be one of these.
         /// </summary>
         /// <param name="type">Filter to apply</param>
         /// <param name="parameters">parameters for this filter</param>

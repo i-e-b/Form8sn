@@ -8,6 +8,7 @@ using Containers;
 using Form8snCore.DataExtraction;
 using Form8snCore.FileFormats;
 using Form8snCore.HelpersAndConverters;
+using Form8snCore.Rendering.CustomRendering;
 using PdfSharp;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
@@ -186,7 +187,6 @@ namespace Form8snCore.Rendering
             }
 
             // Next, go through the prepared page and render them to PDF
-            // TODO: if we are rendering to a 'roll', merge multiple source pages onto a larger PDF page
             var ok = RenderPagesToPdfDocument(project, document, pageList, result);
             if (!ok)
             {
@@ -333,24 +333,25 @@ namespace Form8snCore.Rendering
 
             // Draw background at full page size
             _loadingTimer.Start();
-            if (pageDef.RenderBackground && background.BackgroundImage != null)
+            if (pageDef.RenderBackground && pageDef.BackgroundImage != null)
             {
-                var width = new XUnit(pageDef.WidthMillimetres, XGraphicsUnit.Millimeter);
-                var height = new XUnit(pageDef.HeightMillimetres, XGraphicsUnit.Millimeter);
-                var destRect = new XRect(offset.X, offset.Y, width.Point, height.Point);
-                gfx.DrawImage(background.BackgroundImage, destRect);
+                try
+                {
+                    var width = new XUnit(pageDef.WidthMillimetres, XGraphicsUnit.Millimeter);
+                    var height = new XUnit(pageDef.HeightMillimetres, XGraphicsUnit.Millimeter);
+                    var destRect = new XRect(offset.X, offset.Y, width.Point, height.Point);
+                    gfx.DrawImage(background.BackgroundImage, destRect);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to draw background image: {ex}");
+                }
             }
             _loadingTimer.Stop();
 
-            // Do default scaling
+            // Calculate scaling parameter
             var fx = page.Width.Point / page.Width.Millimeter;
             var fy = page.Height.Point / page.Height.Millimeter;
-            // If using an image, work out the bitmap -> page adjustment
-            if (background.BackgroundImage != null)
-            {
-                fx = page.Width.Point / background.BackgroundImage.PixelWidth;
-                fy = page.Height.Point / background.BackgroundImage.PixelHeight;
-            }
             
             gfx.TranslateTransform(offset.X, offset.Y);
 
@@ -384,7 +385,7 @@ namespace Form8snCore.Rendering
 
             if (!string.IsNullOrWhiteSpace(pageDef.BackgroundImage!))
             {
-                using var fileStream = _files.Load(project.BasePdfFile);
+                var fileStream = _files.Load(pageDef.BackgroundImage); // This might be a file reference, or a stamp that is resolved to a file
                 backing.BackgroundImage = XImage.FromStream(fileStream);
             }
             
@@ -439,7 +440,19 @@ namespace Form8snCore.Rendering
         private static Result<DocumentPage> PreparePage(TemplatePage pageDef, DataMapper mapper, Dictionary<string, decimal> runningTotals, int pageIndex)
         {
             var docPage = new DocumentPage(pageDef, pageIndex);
-            
+
+            if (pageDef.BackgroundImage is not null)
+            {
+                var result = mapper.TryResolvePath(pageDef.BackgroundImage!, pageIndex);
+                if (result is ImageStampRenderer stamp)
+                {
+                    pageDef.BackgroundImage = stamp.GetName() + ".jpg";
+                } else if (result is not null)
+                {
+                    pageDef.BackgroundImage = result.ToString();
+                }
+            }
+
             // Draw each box. We sort the boxes (currently by filter type) so running totals can work as expected
             foreach (var boxDef in pageDef.Boxes.Where(HasAValue).OrderBy(OrderBoxes))
             {
