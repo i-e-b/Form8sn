@@ -219,6 +219,7 @@ namespace Form8snCore.Rendering
             var totalPageCount = pageList.Count; // this is output pages, including individual repetitions of repeated template pages.
             for (var pageIndex = 0; pageIndex < totalPageCount; pageIndex++)
             {
+                if (pageIndex >= pageList.Count) break;
                 _loadingTimer.Start();
                 var page = pageList[pageIndex]!;
                 var pageDef = page.Definition;
@@ -248,6 +249,8 @@ namespace Form8snCore.Rendering
                     // Keep trying to add sub-pages
                     for (int rollIndex = 0; rollIndex < page.RepeatCount; rollIndex++)
                     {
+                        if (pageIndex >= pageList.Count) break;
+                        page = pageList[pageIndex]!; // get the page again, so we don't repeat the first one a bunch of times
                         var pageResult = OutputOntoPage(pdfPage, page, offset, font, background, pageIndex, totalPageCount);
                         if (pageResult.IsFailure)
                         {

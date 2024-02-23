@@ -104,8 +104,6 @@ namespace WebFormFiller.ServiceStubs
             using var file = File.OpenWrite(Path.Combine(StorageDirectory, name));
             Sync.Run(() => stream.CopyToAsync(file));
             file.Flush(true);
-            
-            // If there are any older sample files, remove them
         }
 
         /// <summary>
