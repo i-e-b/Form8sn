@@ -209,7 +209,7 @@ namespace Portable.Drawing.Toolkit.Portable
             if (_fontCache.ContainsKey(fallbackKey)) return _fontCache[fallbackKey]!;
             // TODO: pick a final fallback font when we build the cache
 
-            throw new Exception("Font file is not available");
+            throw new Exception($"Font file is not available: {prefKey} or {fallbackKey}");
         }
 
         public static byte[] ReadFontFileBytes(Font gdiFont)
