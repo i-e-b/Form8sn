@@ -18,7 +18,6 @@ namespace BasicImageFormFiller
 
         public FormEditorWindow()
         {
-            Json.DefaultParameters.EnableAnonymousTypes = true;
             InitializeComponent();
             
             _currentModule = new NoProjectLoadedScreen();

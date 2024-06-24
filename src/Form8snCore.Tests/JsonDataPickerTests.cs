@@ -86,8 +86,6 @@ namespace Form8snCore.Tests
         [Test(Description="When a path is pre selected, we should get a flag on the selected item and each node in the path should be expanded")]
         public void existing_selection_should_be_expanded()
         {
-            SkinnyJson.Json.DefaultParameters.EnableAnonymousTypes = true;
-            SkinnyJson.Json.DefaultParameters.IgnoreCaseOnDeserialize = true;
             var lastPath = new[] { "", "Claimant", "MailingAddress", "Country", "Code"};
             
             var nodes = DataPickerBuilder.BuildDataSourcePicker(SampleProjectFiles.BasicFile, SampleData.Standard, lastPath, null, 0, true);
